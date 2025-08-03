@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import Brandname from "@/public/Homeasset/Brandname.png";
+import Brandname from "@/public/Aboutusasset/Logo.png";
 import Brandimage from "@/public/Homeasset/Brandimage.png";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -85,11 +85,6 @@ export default function Navbar() {
       <div className="w-full border-b bg-white border-gray-300 px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center">
           <div className="flex items-center ">
-            <Image
-              src={Brandimage}
-              alt="Brandimage"
-              className="object-contain h-14 w-14"
-            />
             <Image
               src={Brandname}
               alt="Brandname"

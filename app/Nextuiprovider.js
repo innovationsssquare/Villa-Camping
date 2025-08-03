@@ -5,7 +5,6 @@ import { BottomNav } from "@/components/Navbarcomponents/Bootomnav";
 import { AppHeader } from "@/components/Navbarcomponents/Mobilenav";
 import { HeroUIProvider } from "@heroui/react";
 import { usePathname } from "next/navigation";
-import Joyride from "@/components/Homecomponets/joyride";
 import { useEffect, useState } from "react";
 
 export function NextuiProviderWrapper({ children }) {
@@ -21,7 +20,6 @@ export function NextuiProviderWrapper({ children }) {
     {pathname === "/Signin" ? null : (
       <AppHeader/>
       )}
-      <Joyride/>
       {children}
       {pathname === "/Signin" ? null : (
       <BottomNav/>

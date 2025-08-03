@@ -9,9 +9,10 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import Link from "next/link";
-import Banner1 from "@/public/Homeasset/Banner1.png";
-import Banner2 from "@/public/Homeasset/Banner2.png";
-import Banner3 from "@/public/Homeasset/Banner3.png";
+import Banner1 from "@/public/Aboutusasset/Villabanner.png";
+import Banner2 from "@/public/Aboutusasset/Campbanner.png";
+import Banner3 from "@/public/Aboutusasset/Cottagebanner.png";
+import Banner4 from "@/public/Aboutusasset/Hotelbanner.png";
 import Autoplay from "embla-carousel-autoplay"
 
 import { useEffect, useState } from "react";
@@ -85,6 +86,16 @@ export default function Hero() {
                 />
               </div>
             </CarouselItem>
+            <CarouselItem>
+              <div className="relative md:h-[400px] h-[250px]  w-full">
+                <Image
+                  src={Banner4}
+                  alt="Crafting materials"
+                  fill
+                  className="object-fill"
+                />
+              </div>
+            </CarouselItem>
           </CarouselContent>
 
           {/* Dot indicators for hero carousel */}
@@ -101,7 +112,6 @@ export default function Hero() {
             ))}
           </div>
         </Carousel>
-        <OfferCarousel/>
       </section>
 
    

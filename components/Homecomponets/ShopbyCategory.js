@@ -2,55 +2,43 @@ import React from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Image from "next/image"
 import Link from "next/link"
-import Threads from "@/public/Homeasset/Threads.png"
-import MesaureTaps from "@/public/Homeasset/MesaureTaps.png"
-import Fabrics from "@/public/Homeasset/Fabrics.png"
-import Sewingmachine from "@/public/Homeasset/Sewingmachine.png"
-import OtherEssentials from "@/public/Homeasset/OtherEssentials.png"
-import Fasteners from "@/public/Homeasset/Fasteners.png"
-import Pressing from "@/public/Homeasset/Pressing.png"
-import CuttingTools from "@/public/Homeasset/CuttingTools.png"
+import Threads from "@/public/Aboutusasset/Villa.png"
+import MesaureTaps from "@/public/Aboutusasset/Cottage.png"
+import Fabrics from "@/public/Aboutusasset/Hotel.png"
+import Sewingmachine from "@/public/Aboutusasset/Camp.png"
+import OtherEssentials from "@/public/Aboutusasset/Cab.png"
+import Fasteners from "@/public/Aboutusasset/Food.png"
 
 const ShopbyCategory = () => {
   const categories = [
     {
-      name: "Threads",
-      slug: "threads",
+      name: "Villa",
+      slug: "villa",
       image: Threads,
     },
     {
-      name: "Measuring Tools",
-      slug: "measuring-tools",
+      name: "Cottage",
+      slug: "cottage",
       image: MesaureTaps,
     },
     {
-      name: "Fabrics",
-      slug: "fabrics",
+      name: "Hotel",
+      slug: "hotel",
       image:Fabrics,
     },
     {
-      name: "Sewing Machine",
-      slug: "sewing-machine",
+      name: "Camp ",
+      slug: "camp",
       image: Sewingmachine,
     },
     {
-      name: "Cutting Tools",
-      slug: "Cutting-Tools",
-      image: CuttingTools,
-    },
-    {
-      name: "Pressing & Finishing",
-      slug: "Pressing-and-Finishing",
-      image: Pressing,
-    },
-    {
-      name: "Fasteners & Closures",
-      slug: "Fasteners-and-Closures",
+      name: "Cab",
+      slug: "Cab",
       image: Fasteners,
     },
     {
-      name: "Other Essentials",
-      slug: "Other-Essentials",
+      name: "Food",
+      slug: "Food",
       image:OtherEssentials,
     },
   ];
