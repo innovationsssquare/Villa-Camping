@@ -4,7 +4,7 @@ import { AuthProvider } from "@/lib/auth-provider";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 
 export const metadata = {
-  title: "BRINDAH",
+  title: "THE VILLA CAMP",
   description: "All your tailoring essential at one place!",
 };
 
