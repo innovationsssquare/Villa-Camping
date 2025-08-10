@@ -1,38 +1,26 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { GoogleAuthProvider, OAuthProvider, signInWithPopup } from "firebase/auth"
 import { auth } from "@/lib/firebase"
 import { useRouter } from "next/navigation"
 import Cookies from "js-cookie"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer"
-import { Separator } from "@/components/ui/separator"
 import { LogIn, Loader2 } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
 
-
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   const [googleLoading, setGoogleLoading] = useState(false)
-  const [appleLoading, setAppleLoading] = useState(false) 
- const [open, setOpen] = useState(autoOpen)
+  const [appleLoading, setAppleLoading] = useState(false)
+  const [open, setOpen] = useState(autoOpen)
   const router = useRouter()
   const isMobile = useIsMobile()
 
@@ -43,32 +31,29 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   }, [autoOpen])
 
   const handleOpenChange = (newOpen) => {
-    setOpen(newOpen)
-    onOpenChange?.(newOpen)
+    // Only allow closing if not autoOpen or if explicitly handled by successful login
+    if (!autoOpen || !newOpen) {
+      setOpen(newOpen)
+      onOpenChange?.(newOpen)
+    }
   }
 
   const handleLogin = async (providerType) => {
-      const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading
+    const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading
     setLoading(true)
     try {
       const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com")
-
       const result = await signInWithPopup(auth, provider)
       const idToken = await result.user.getIdToken()
-
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       })
-
       if (!res.ok) throw new Error("Login API failed")
-
       const data = await res.json()
-
       // Store token in cookies
       Cookies.set("token", data.token, { expires: 7 })
-
       // Close modal and redirect
       handleOpenChange(false)
       router.push("/")
@@ -80,7 +65,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   }
 
   const AuthContent = () => (
-    <div className="space-y-6">
+    <div className="space-y-6 border-0 border-none">
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
@@ -91,7 +76,6 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         </h2>
         <p className="text-gray-600">Sign in to your account to continue</p>
       </div>
-
       {/* Auth Buttons */}
       <div className="space-y-4">
         {/* Google Sign In */}
@@ -125,7 +109,6 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           )}
           {googleLoading ? "Signing in..." : "Continue with Google"}
         </Button>
-
         {/* Apple Sign In */}
         <Button
           onClick={() => handleLogin("apple")}
@@ -145,26 +128,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           )}
           {appleLoading ? "Signing in..." : "Continue with Apple"}
         </Button>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <Separator className="w-full" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-white px-2 text-gray-500">Or</span>
-          </div>
-        </div>
-
-        {/* Email option placeholder */}
-        <Button
-          variant="outline"
-          className="w-full h-12 border-dashed border-gray-300 text-gray-500 hover:border-gray-400 hover:text-gray-600 transition-all duration-200"
-          disabled
-        >
-          Continue with Email (Coming Soon)
-        </Button>
       </div>
-
       {/* Terms */}
       <p className="text-xs text-center text-gray-500">
         By signing in, you agree to our{" "}
@@ -193,27 +157,20 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
             </Button>
           </DrawerTrigger>
         )}
-
-        <DrawerContent className="max-w-md mx-auto bg-white">
-          <div className="mx-auto w-full max-w-sm">
-            {/* <DrawerHeader className="text-center">
-              <DrawerTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Welcome Back
-              </DrawerTitle>
-              <DrawerDescription className="text-gray-600">Sign in to your account to continue</DrawerDescription>
-            </DrawerHeader> */}
-
+        <DrawerContent
+          className="max-w-md mx-auto bg-white"
+          onEscapeKeyDown={(e) => e.preventDefault()}
+          onPointerDownOutside={(e) => e.preventDefault()}
+        >
+          <div className="mx-auto w-full max-w-sm border-0">
+            <DrawerHeader className="text-center hidden">
+              <DrawerTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent"></DrawerTitle>
+              <DrawerDescription className="text-gray-600"></DrawerDescription>
+            </DrawerHeader>
             <div className="p-6">
               <AuthContent />
             </div>
-
-            <DrawerFooter className="pt-2">
-              <DrawerClose asChild>
-                <Button variant="outline" className="w-full">
-                  Cancel
-                </Button>
-              </DrawerClose>
-            </DrawerFooter>
+            {/* Removed DrawerClose button to make it non-dismissible */}
           </div>
         </DrawerContent>
       </Drawer>
@@ -233,18 +190,11 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           </Button>
         </DialogTrigger>
       )}
-
-      <DialogContent className="sm:max-w-md bg-white">
-        {/* <DialogHeader className="text-center space-y-2">
-          <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
-            <LogIn className="h-6 w-6 text-white" />
-          </div>
-          <DialogTitle className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-            Welcome Back
-          </DialogTitle>
-          <DialogDescription className="text-gray-600">Sign in to your account to continue</DialogDescription>
-        </DialogHeader> */}
-
+      <DialogContent
+        className="sm:max-w-md bg-white"
+        onEscapeKeyDown={(e) => e.preventDefault()}
+        onPointerDownOutside={(e) => e.preventDefault()}
+      >
         <div className="p-6">
           <AuthContent />
         </div>

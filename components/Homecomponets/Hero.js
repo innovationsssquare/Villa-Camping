@@ -58,7 +58,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-[400px] h-[250px] w-full">
                 <Image
-                  src={Banner1}
+                  src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"}
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
                   fill
                   className="object-fill"
@@ -69,7 +69,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-[400px] h-[250px] w-full">
                 <Image
-                  src={Banner2}
+                  src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"}
                   alt="Sewing supplies"
                   fill
                   className="object-fill"

@@ -44,6 +44,6 @@ export function useScrollDirection() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [])
 
-  return { scrollDirection, isVisible }
+  return { scrollDirection, isVisible,setIsVisible }
 }
 

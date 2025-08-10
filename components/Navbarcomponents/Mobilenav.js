@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { IoMdPin } from "react-icons/io";
 import { HeaderTitle } from "./HeaderTitle";
 import { IoBag } from "react-icons/io5";
+import SearchStayPage from "../Searchdatescomponents/search-stay-page";
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -83,6 +84,7 @@ export function AppHeader() {
               placeholder="Search (Eg: Threads)"
               className="pl-9 rounded-md border-gray-300 h-10 text-sm"
             />
+            
           </div>
           {pathname.startsWith("/category/") && <FilterDrawer />}
         </div>
