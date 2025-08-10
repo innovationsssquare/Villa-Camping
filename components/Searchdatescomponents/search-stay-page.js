@@ -95,7 +95,7 @@ export default function SearchStayPage() {
       {/* Footer */}
       <footer className="p-4 text-center border-t border-gray-200">
         <p className="text-sm text-gray-600 mb-2">
-          Finding your ideal vacation spot should be easy, we're here to help!
+         {` Finding your ideal vacation spot should be easy, we're here to help!`}
         </p>
         <Button variant="ghost" className="text-blue-600 text-sm font-semibold">
           <Phone className="h-4 w-4 mr-2" />
