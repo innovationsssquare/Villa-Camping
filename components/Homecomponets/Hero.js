@@ -46,7 +46,7 @@ export default function Hero() {
   };
 
   return (
-    <main className="h-auto md:pt-44 pt-24 overflow-hidden">
+    <main className="h-auto  overflow-hidden">
       {/* Hero Carousel Section */}
       <section className="w-full relative">
         <Carousel    plugins={[
@@ -56,7 +56,7 @@ export default function Hero() {
       ]} className="w-full " setApi={setHeroApi}>
           <CarouselContent>
             <CarouselItem>
-              <div className="relative md:h-[400px] h-[250px] w-full">
+              <div className="relative md:h-screen h-[250px] w-full">
                 <Image
                   src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"}
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
@@ -67,7 +67,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-[400px] h-[250px] w-full">
+              <div className="relative md:h-screen h-[250px] w-full">
                 <Image
                   src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"}
                   alt="Sewing supplies"
@@ -77,7 +77,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-[400px] h-[250px]  w-full">
+              <div className="relative md:h-screen h-[250px]  w-full">
                 <Image
                   src={Banner3}
                   alt="Crafting materials"
@@ -87,7 +87,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-[400px] h-[250px]  w-full">
+              <div className="relative md:h-screen h-[250px]  w-full">
                 <Image
                   src={Banner4}
                   alt="Crafting materials"
