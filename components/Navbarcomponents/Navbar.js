@@ -19,7 +19,7 @@ export default function AirbnbNavbar() {
   const [checkOut, setCheckOut] = useState(null)
   const [guests, setGuests] = useState({
     adults: 1,
-    children: 0,
+    childrenn: 0,
     infants: 0,
     pets: 0,
   })
@@ -68,7 +68,7 @@ export default function AirbnbNavbar() {
   }
 
   const getTotalGuests = () => {
-    const total = guests.adults + guests.children
+    const total = guests.adults + guests.childrenn
     if (total === 1) return "1 guest"
     return `${total} guests`
   }
@@ -180,7 +180,7 @@ export default function AirbnbNavbar() {
                       'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
                   }}
                 >
-                  {guests.adults > 1 || guests.children > 0 ? getTotalGuests() : "Add guests"}
+                  {guests.adults > 1 || guests.childrenn > 0 ? getTotalGuests() : "Add guests"}
                 </span>
               </div>
               <div className="bg-red-500 rounded-full p-1.5 md:p-2 m-1 shadow-sm">
@@ -558,7 +558,7 @@ export default function AirbnbNavbar() {
               <div className={`absolute top-full mt-1 z-50 ${isMobile ? "right-0" : "right-0"}`}>
                 <GuestSelector
                   adults={guests.adults}
-                  children={guests.children}
+                  childrenn={guests.childrenn}
                   infants={guests.infants}
                   pets={guests.pets}
                   onGuestChange={handleGuestChange}

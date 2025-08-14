@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export function GuestSelector({
   adults,
-  children,
+  childrenn,
   infants,
   pets,
   onGuestChange,
@@ -73,7 +73,7 @@ export function GuestSelector({
       >
         <GuestRow title="Adults" description="Ages 13 or above" count={adults} type="adults" min={1} />
         <div className="border-t border-gray-200">
-          <GuestRow title="Children" description="Ages 2-12" count={children} type="children" />
+          <GuestRow title="Children" description="Ages 2-12" count={childrenn} type="childrenn" />
         </div>
         <div className="border-t border-gray-200">
           <GuestRow title="Infants" description="Under 2" count={infants} type="infants" max={5} />
