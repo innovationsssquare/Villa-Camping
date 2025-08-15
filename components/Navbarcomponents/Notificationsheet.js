@@ -190,11 +190,11 @@ export function NotificationSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative rounded-md border-gray-300 border">
+        <Button variant="outline" size="icon" className="relative rounded-md border-gray-300 border bg-[#FFFFFF4D]">
           <FaBell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-[#106C83] text-white border-2 border-white min-w-[1.25rem] h-5"
+              className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
               variant="default"
             >
               {unreadCount}
