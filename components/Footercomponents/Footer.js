@@ -2,15 +2,15 @@ import Link from "next/link"
 import Image from "next/image"
 import { ChevronDown, Circle } from "lucide-react"
 import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react"
-import Footerlogo from "@/public/Homeasset/Footerlogo.png"
+import Footerlogo from "@/public/Loginasset/Logo2.png"
 export default function Footer() {
   return (
-    <footer className="bg-[#106C83] text-white hidden md:block">
+    <footer className="bg-black/90 text-white hidden md:block">
       <div className="w-full mx-auto px-8 py-4">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-12">
           {/* About Brindah Column */}
           <div className="col-span-2">
-            <h3 className="text-xl font-bold mb-4">About Brindah</h3>
+            <h3 className="text-xl font-bold mb-4">The Camp Villa</h3>
             <p className="text-white leading-relaxed text-sm">
              {` Brindah helps tailoring businesses reduce waste and embrace sustainable practices. From providing premium
               tools and materials to handling fabric waste management, we enable you to focus on what you do best while
@@ -51,7 +51,7 @@ export default function Footer() {
           </div>
             <div className="mt-8 md:mt-0 flex flex-col items-center md:items-end col-span-2">
               <div className="mt-auto  relative mb-4">
-                <Image src={Footerlogo} alt="Brindah Logo" width={128} height={128} className="w-60 h-44" />
+                <Image src={Footerlogo} alt="Brindah Logo" width={128} height={128} className="h-40 w-40" />
               </div>
             </div>
         </div>
@@ -86,10 +86,7 @@ export default function Footer() {
           </div>
 
           {/* Language Selector */}
-          <div className="border border-white/30 rounded px-3 py-1 flex items-center">
-            <span className="text-sm">ENG</span>
-            <ChevronDown className="h-4 w-4 ml-1" />
-          </div>
+          
         </div>
       </div>
     </footer>

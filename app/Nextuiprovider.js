@@ -14,7 +14,7 @@ export function NextuiProviderWrapper({ children }) {
 
   return (
     <HeroUIProvider>
-    {pathname === "/Signin" ? null : (
+    {pathname === "/view-villa" ? null : (
         <Navbar />
       )}
     {pathname === "/Signin" ? null : (
