@@ -14,7 +14,7 @@ const router=useRouter()
   }
 
   return (
-    <div onClick={()=>router.push("/date-selection")} className="bg-[#FFFFFF4D] rounded-full border border-gray-200 shadow-sm p-1 flex items-center">
+    <div onClick={()=>router.push("/search-stay")} className="bg-[#FFFFFF4D] rounded-full border border-gray-200 shadow-sm p-1 flex items-center">
       {/* Check-in */}
       <div className="flex-1 px-4 py-2">
         <div className="text-xs font-medium text-gray-600 mb-1">Check in</div>

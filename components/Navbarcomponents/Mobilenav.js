@@ -13,6 +13,7 @@ import { IoMdPin } from "react-icons/io"
 import { HeaderTitle } from "./HeaderTitle"
 import { IoBag } from "react-icons/io5"
 import { BookingSearchBox } from "./booking-search-box"
+import SearchStayPage from "../Searchdatescomponents/search-stay-page"
 
 export function AppHeader() {
   const pathname = usePathname()

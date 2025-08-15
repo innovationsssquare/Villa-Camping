@@ -35,21 +35,14 @@ export default function SearchStayPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <ChevronLeft className="h-5 w-5 text-gray-800" />
           <h1 className="text-lg font-semibold text-gray-800">Search your Stay</h1>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
-          <span className="mr-2">1:33 AM</span>
-          {/* Placeholder for 5G and battery icons */}
-          <span className="font-bold">5G</span>
-          <div className="w-6 h-3 border border-gray-400 rounded-[2px] ml-1 relative">
-            <div className="absolute right-[1px] top-1/2 -translate-y-1/2 w-[2px] h-[6px] bg-gray-400 rounded-r-[1px]"></div>
-          </div>
-        </div>
+        
       </header>
 
       {/* Search Inputs */}
@@ -97,13 +90,13 @@ export default function SearchStayPage() {
         <p className="text-sm text-gray-600 mb-2">
          {` Finding your ideal vacation spot should be easy, we're here to help!`}
         </p>
-        <Button variant="ghost" className="text-blue-600 text-sm font-semibold">
+        <Button variant="ghost" className="text-black text-sm font-semibold">
           <Phone className="h-4 w-4 mr-2" />
           Request Callback
         </Button>
         <div className="text-center text-xs text-gray-500 mt-3">
           <span className="mr-1">🔒</span>
-          www.stayvista.com
+          www.thevillacamp.com
         </div>
       </footer>
 

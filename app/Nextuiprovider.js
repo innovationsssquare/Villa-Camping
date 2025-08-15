@@ -14,17 +14,17 @@ export function NextuiProviderWrapper({ children }) {
 
   return (
     <HeroUIProvider>
-    {pathname === "/view-villa" ? null : (
+    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" ?  null : (
         <Navbar />
       )}
-    {pathname === "/Signin" ? null : (
+    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" ? null : (
       <AppHeader/>
       )}
       {children}
-      {pathname === "/Signin" ? null : (
+      {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" ? null : (
       <BottomNav/>
       )}
-      {pathname === "/Signin" || pathname==="/seller" ? null : (
+      {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" ? null : (
       <Footer/>
       )}
     </HeroUIProvider>

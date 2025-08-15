@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils"
 export function SearchInputCard({ icon, label, value, badge, className, ...props }) {
   return (
     <div
-      className={cn("flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-white cursor-pointer", className)}
+      className={cn("flex items-center gap-3 p-4 border border-gray-200 rounded-lg bg-white cursor-pointer my-2", className)}
       {...props}
     >
       <div className="text-gray-500">{icon}</div>

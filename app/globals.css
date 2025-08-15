@@ -22,7 +22,7 @@ body::-webkit-scrollbar {
   }
 
   body::-webkit-scrollbar-thumb {
-    background-color : #106C83;
+    background-color : black;
     border-radius: 10px;
   }
 
@@ -161,5 +161,11 @@ body::-webkit-scrollbar {
       opacity: 1;
       transform: scale(1);
     }
+  }
+}
+
+@supports (padding: max(0px)) {
+  .safe-area-bottom {
+    padding-bottom: max(2rem, calc(2rem + env(safe-area-inset-bottom)));
   }
 }

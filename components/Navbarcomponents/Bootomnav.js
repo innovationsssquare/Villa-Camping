@@ -11,7 +11,8 @@ import { FaHeart } from "react-icons/fa";
 import { RiRecycleFill } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
-import { FaSyncAlt } from "react-icons/fa";
+import { BsFillChatSquareHeartFill  } from "react-icons/bs";
+import { FaPlay } from "react-icons/fa";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");
@@ -47,8 +48,8 @@ export function BottomNav() {
       setActiveTab("/");
     } else if (pathname === "/account") {
       setActiveTab("/account");
-    } else if (pathname === "/wishlist") {
-      setActiveTab("/wishlist");
+    } else if (pathname === "/shorts") {
+      setActiveTab("/shorts");
     } else if (pathname === "/eco-friendly") {
       setActiveTab("/eco-friendly");
     } else if (
@@ -77,13 +78,13 @@ export function BottomNav() {
       label: "category",
     },
     {
-      value: "/wishlist",
-      icon: <FaHeart className="h-5 w-5" />,
+      value: "/shorts",
+      icon: <FaPlay size={24} className="h-5 w-5" />,
       label: "Favorites",
     },
     {
       value: "/eco-friendly",
-      icon: <FaSyncAlt className="h-5 w-5" />,
+      icon: <BsFillChatSquareHeartFill  className="h-5 w-5" />,
       label: "Recycle",
     },
     {
@@ -106,7 +107,7 @@ export function BottomNav() {
         onValueChange={setActiveTab}
         className="w-full"
       >
-        <TabsList className="h-16 z-20 w-full border border-gray-300 rounded-full bg-white p-1 ">
+        <TabsList className="h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-2xl p-1 bg-[#FFFFFF4D]">
           {navItems.map((item) => (
             <TabsTrigger
               key={item.value}
@@ -126,11 +127,11 @@ export function BottomNav() {
                 className={cn(
                   "flex h-12    w-12 items-center justify-center rounded-full transition-colors duration-400",
                   activeTab === item.value
-                    ? "categorygradient text-[#106C83] shadow-none"
-                    : "text-gray-400"
+                    ? "bg-[#FFFFFF4D] backdrop-blur-2xl text-black shadow-none border border-gray-200"
+                    : "text-gray-500"
                 )}
               >
-                {item.icon}
+                <span>{item.icon}</span>
               </div>
               <span className="sr-only">{item.label}</span>
             </TabsTrigger>

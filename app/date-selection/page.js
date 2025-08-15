@@ -154,14 +154,7 @@ export default function DatePickerPage() {
           <ChevronLeft className="h-5 w-5 text-gray-800" />
           <h1 className="text-lg font-semibold text-gray-800">Select Check-In Date</h1>
         </div>
-        <div className="flex items-center text-sm text-gray-600">
-          <span className="mr-2">1:19 AM</span>
-          {/* Placeholder for 5G and battery icons */}
-          <span className="font-bold">5G</span>
-          <div className="w-6 h-3 border border-gray-400 rounded-[2px] ml-1 relative">
-            <div className="absolute right-[1px] top-1/2 -translate-y-1/2 w-[2px] h-[6px] bg-gray-400 rounded-r-[1px]"></div>
-          </div>
-        </div>
+       
       </header>
 
       {/* Holiday Cards Section */}
