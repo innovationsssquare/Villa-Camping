@@ -1,36 +1,37 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { useScrollDirection } from "@/hooks/use-scroll-direction"
-import { cn } from "@/lib/utils"
-import { FilterDrawer } from "../Productcomponets/filter-drawer"
-import { usePathname, useRouter } from "next/navigation"
-import { UserSidebar } from "./Sidebar"
-import { NotificationSheet } from "./Notificationsheet"
-import { Badge } from "@/components/ui/badge"
-import { IoMdPin } from "react-icons/io"
-import { HeaderTitle } from "./HeaderTitle"
-import { IoBag } from "react-icons/io5"
-import { BookingSearchBox } from "./booking-search-box"
-import SearchStayPage from "../Searchdatescomponents/search-stay-page"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { cn } from "@/lib/utils";
+import { FilterDrawer } from "../Productcomponets/filter-drawer";
+import { usePathname, useRouter } from "next/navigation";
+import { UserSidebar } from "./Sidebar";
+import { NotificationSheet } from "./Notificationsheet";
+import { Badge } from "@/components/ui/badge";
+import { IoMdPin } from "react-icons/io";
+import { HeaderTitle } from "./HeaderTitle";
+import { IoBag } from "react-icons/io5";
+import { BookingSearchBox } from "./booking-search-box";
+import SearchStayPage from "../Searchdatescomponents/search-stay-page";
+import UserLocationDisplay from "../Homecomponets/user-location-display";
 
 export function AppHeader() {
-  const pathname = usePathname()
-  const router = useRouter()
+  const pathname = usePathname();
+  const router = useRouter();
   const [open, setOpen] = useState({
     menu: false,
     notifications: false,
-  })
+  });
 
-  const cartItemCount = 3
-  const { isVisible } = useScrollDirection()
+  const cartItemCount = 3;
+  const { isVisible } = useScrollDirection();
 
   return (
     <header
       className={cn(
         "fixed top-0 left-0 right-0 w-full bg-[#FFFFFF4D] backdrop-blur-2xl rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden ",
-        isVisible ? "translate-y-0" : "-translate-y-12",
+        isVisible ? "translate-y-0" : "-translate-y-12"
       )}
     >
       <div className="flex items-center justify-between">
@@ -42,10 +43,7 @@ export function AppHeader() {
           pathname.startsWith("/category/") ? (
             <div>
               <div className="text-xs font-medium">Location</div>
-              <div className="flex items-center gap-1 text-sm font-semibold">
-                <span>Hyderabad, India</span>
-                <IoMdPin className="text-red-500" size={15} />
-              </div>
+              <UserLocationDisplay/>
             </div>
           ) : (
             <HeaderTitle />
@@ -83,5 +81,5 @@ export function AppHeader() {
         </div>
       )}
     </header>
-  )
+  );
 }

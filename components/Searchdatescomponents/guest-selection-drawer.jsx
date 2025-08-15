@@ -1,35 +1,46 @@
 "use client"
 
-import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
+import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer"
 import { X } from "lucide-react"
 import { CounterButton } from "./counter-button"
-
-
 
 export function GuestSelectionDrawer({ isOpen, onClose, initialGuests, onSave }) {
   const [adults, setAdults] = useState(initialGuests.adults)
   const [children, setChildren] = useState(initialGuests.children)
   const [infants, setInfants] = useState(initialGuests.infants)
   const [pets, setPets] = useState(initialGuests.pets)
-  const [rooms, setRooms] = useState(initialGuests.rooms)
+
+  useEffect(() => {
+    if (isOpen) {
+      setAdults(initialGuests.adults)
+      setChildren(initialGuests.children)
+      setInfants(initialGuests.infants)
+      setPets(initialGuests.pets)
+    }
+  }, [isOpen, initialGuests])
 
   const handleSave = () => {
-    onSave({ adults, children, infants, pets, rooms })
+    onSave({ adults, children, infants, pets })
     onClose()
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="fixed bottom-0 left-0 right-0 top-auto h-auto max-h-[90vh] rounded-t-2xl bg-white p-6 shadow-lg sm:max-w-md">
-        <DialogHeader className="flex flex-row items-center justify-between pb-4 border-b border-gray-200">
-          <DialogTitle className="text-xl font-bold">Total Guests</DialogTitle>
-          <Button variant="ghost" size="icon" onClick={onClose} className="rounded-full">
-            <X className="h-5 w-5" />
-          </Button>
-        </DialogHeader>
-        <div className="py-4 space-y-6">
+    <Drawer open={isOpen} onOpenChange={onClose}>
+      <DrawerContent className="max-h-[90vh]">
+        <DrawerHeader className="text-left">
+          <div className="flex items-center justify-between">
+            <DrawerTitle className="text-xl font-bold">Total Guests</DrawerTitle>
+            <DrawerClose asChild>
+              <Button variant="ghost" size="icon" className="rounded-full">
+                <X className="h-5 w-5" />
+              </Button>
+            </DrawerClose>
+          </div>
+        </DrawerHeader>
+
+        <div className="px-4 py-2 space-y-6">
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold">Adults</div>
@@ -37,11 +48,12 @@ export function GuestSelectionDrawer({ isOpen, onClose, initialGuests, onSave })
             </div>
             <CounterButton
               value={adults}
-              onDecrement={() => setAdults((prev) => Math.max(1, prev - 1))} // Minimum 1 adult
+              onDecrement={() => setAdults((prev) => Math.max(1, prev - 1))}
               onIncrement={() => setAdults((prev) => prev + 1)}
               min={1}
             />
           </div>
+
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold">Children</div>
@@ -53,6 +65,7 @@ export function GuestSelectionDrawer({ isOpen, onClose, initialGuests, onSave })
               onIncrement={() => setChildren((prev) => prev + 1)}
             />
           </div>
+
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold">Infants</div>
@@ -64,6 +77,7 @@ export function GuestSelectionDrawer({ isOpen, onClose, initialGuests, onSave })
               onIncrement={() => setInfants((prev) => prev + 1)}
             />
           </div>
+
           <div className="flex items-center justify-between">
             <div>
               <div className="font-semibold">Pets</div>
@@ -74,24 +88,14 @@ export function GuestSelectionDrawer({ isOpen, onClose, initialGuests, onSave })
               onIncrement={() => setPets((prev) => prev + 1)}
             />
           </div>
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="font-semibold">Rooms</div>
-            </div>
-            <CounterButton
-              value={rooms}
-              onDecrement={() => setRooms((prev) => Math.max(1, prev - 1))} // Minimum 1 room
-              onIncrement={() => setRooms((prev) => prev + 1)}
-              min={1}
-            />
-          </div>
         </div>
-        <div className="pt-4 border-t border-gray-200">
+
+        <DrawerFooter>
           <Button className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg" onClick={handleSave}>
             DONE
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DrawerFooter>
+      </DrawerContent>
+    </Drawer>
   )
 }

@@ -5,12 +5,13 @@ import { ChevronLeft } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { HolidayCard } from "@/components/Searchdatescomponents/holiday-card"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 export default function DatePickerPage() {
   const [selectedCheckInDate, setSelectedCheckInDate] = useState(null)
   const [selectedCheckOutDate, setSelectedCheckOutDate] = useState(null)
   const [currentMonth, setCurrentMonth] = useState(new Date()) // Start with current month
-
+const router=useRouter()
   useEffect(() => {
     // Ensure currentMonth is always set to the first day of its month
     setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1))
@@ -237,7 +238,7 @@ export default function DatePickerPage() {
             </div>
           </div>
         </div>
-        <Button className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg">NEXT</Button>
+        <Button onClick={()=>router.back()} className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg">NEXT</Button>
       </div>
     </div>
   )
