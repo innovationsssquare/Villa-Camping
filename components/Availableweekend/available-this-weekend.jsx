@@ -120,7 +120,7 @@ export function AvailableThisWeekend() {
   const [searchQuery, setSearchQuery] = useState("Manali");
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6">
+    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6 ">
       {/* Available This Weekend Section */}
       <div className="space-y-4">
         <h2 className="md:text-2xl font-semibold text-foreground">
@@ -164,8 +164,8 @@ export function AvailableThisWeekend() {
               </CarouselItem>
             ))}
           </CarouselContent>
-          <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" />
+          {/* <CarouselPrevious className="hidden md:flex -left-12" />
+          <CarouselNext className="hidden md:flex -right-12" /> */}
         </Carousel>
 
         {/* Standard Features Section (Mobile) */}
