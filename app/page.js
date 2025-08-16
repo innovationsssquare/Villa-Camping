@@ -1,3 +1,4 @@
+import { AvailableThisWeekend } from "@/components/Availableweekend/available-this-weekend";
 import BrindahInstagram from "@/components/Homecomponets/brindah-instagram";
 import Hero from "@/components/Homecomponets/Hero";
 import Newsletter from "@/components/Homecomponets/Newsletter";
@@ -13,12 +14,7 @@ export default function Home() {
     <main>
       <Hero />
       <ShopbyCategory />
-      <ProductListing />
-      <SustainableStitchingPage />
-      <TestimonialCarousel />
-      <Ourblogs />
-      <BrindahInstagram />
-      <Newsletter />
+     <AvailableThisWeekend/>
     </main>
   );
 }

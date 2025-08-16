@@ -17,11 +17,14 @@ import Autoplay from "embla-carousel-autoplay"
 
 import { useEffect, useState } from "react";
 import OfferCarousel from "./offer-carousel";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { cn } from "@/lib/utils";
 export default function Hero() {
   const [heroApi, setHeroApi] = useState();
   const [heroCurrentIndex, setHeroCurrentIndex] = useState(0);
   const [heroCount, setHeroCount] = useState(0);
   const [categoriesApi, setCategoriesApi] = useState();
+  const { isVisible } = useScrollDirection();
 
   useEffect(() => {
     if (!heroApi) return;
@@ -46,7 +49,7 @@ export default function Hero() {
   };
 
   return (
-    <main className="h-auto  overflow-hidden">
+    <main className={cn("h-auto  overflow-hidden",isVisible ? "translate-y-16" : "translate-y-16")}>
       {/* Hero Carousel Section */}
       <section className="w-full relative">
         <Carousel    plugins={[
@@ -56,7 +59,7 @@ export default function Hero() {
       ]} className="w-full " setApi={setHeroApi}>
           <CarouselContent>
             <CarouselItem>
-              <div className="relative md:h-screen h-[250px] w-full">
+              <div className="relative md:h-screen h-[350px] w-full">
                 <Image
                   src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"}
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
@@ -67,7 +70,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-screen h-[250px] w-full">
+              <div className="relative md:h-screen h-[350px] w-full">
                 <Image
                   src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"}
                   alt="Sewing supplies"
@@ -77,7 +80,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-screen h-[250px]  w-full">
+              <div className="relative md:h-screen h-[350px]  w-full">
                 <Image
                   src={Banner3}
                   alt="Crafting materials"
@@ -87,7 +90,7 @@ export default function Hero() {
               </div>
             </CarouselItem>
             <CarouselItem>
-              <div className="relative md:h-screen h-[250px]  w-full">
+              <div className="relative md:h-screen h-[350px]  w-full">
                 <Image
                   src={Banner4}
                   alt="Crafting materials"

@@ -5,7 +5,7 @@ import { Facebook, Instagram, Linkedin, Twitter, Youtube } from "lucide-react"
 import Footerlogo from "@/public/Loginasset/Logo2.png"
 export default function Footer() {
   return (
-    <footer className="bg-black/90 text-white hidden md:block">
+    <footer className="bg-black/90 text-white ">
       <div className="w-full mx-auto px-8 py-4">
         <div className="grid grid-cols-1 md:grid-cols-6 gap-12">
           {/* About Brindah Column */}
@@ -22,7 +22,7 @@ export default function Footer() {
           <div>
             <h3 className="text-xl font-bold mb-6">Quick Links</h3>
             <ul className="space-y-2">
-              {["Home", "About us", "Categories", "Eco - Friendly", "Contact Us", "Switch to Seller"].map((item) => (
+              {["Home", "About us", "Categories", "Contact Us"].map((item) => (
                 <li key={item} className="flex items-center">
                   <Circle className="h-2 w-2 mr-3 fill-white " />
                   <Link href="#" className="hover:underline text-sm">
@@ -82,7 +82,7 @@ export default function Footer() {
 
           {/* Copyright Text */}
           <div className="text-center text-sm mb-4 md:mb-0">
-            <p>© Copyrights 2025 Brindah. All Rights Reserved.</p>
+            <p>© Copyrights 2025 TheVillaCamp . All Rights Reserved.</p>
           </div>
 
           {/* Language Selector */}

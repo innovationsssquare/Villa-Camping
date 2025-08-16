@@ -1,13 +1,15 @@
+"use client"
 import React from "react";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import Image from "next/image"
 import Link from "next/link"
-import Threads from "@/public/Aboutusasset/Villa.png"
-import MesaureTaps from "@/public/Aboutusasset/Cottage.png"
-import Fabrics from "@/public/Aboutusasset/Hotel.png"
-import Sewingmachine from "@/public/Aboutusasset/Camp.png"
-import OtherEssentials from "@/public/Aboutusasset/Cab.png"
-import Fasteners from "@/public/Aboutusasset/Food.png"
+import Threads from "@/public/Productasset/Villaimg.png"
+import MesaureTaps from "@/public/Productasset/Cottageimg.png"
+import Fabrics from "@/public/Productasset/Hotelimg.png"
+import Sewingmachine from "@/public/Productasset/Campimg.png"
+import OtherEssentials from "@/public/Productasset/Capimg.png"
+import Fasteners from "@/public/Productasset/Foodimg.png"
+import { Button } from "@/components/ui/button";
 
 const ShopbyCategory = () => {
   const categories = [
@@ -44,10 +46,10 @@ const ShopbyCategory = () => {
   ];
 
   return (
-    <section className="w-full bg-gray-50 md:py-12 py-4 overflow-hidden">
+    <section className="w-full relative rounded-t-3xl   backdrop-blur-2xl filter  md:py-12 py-4 overflow-hidden">
       <div className=" mx-auto">
         <h2 className="md:mb-10 mb-4 text-center md:text-3xl font-medium text-gray-800">
-          Shop by Categories!
+          Explore by Categories!
         </h2>
 
         <Carousel
@@ -65,16 +67,16 @@ const ShopbyCategory = () => {
               >
                 <Link
                   href={`/category/${category.slug}`}
-                  className="group flex flex-col items-center"
+                  className="group flex flex-col items-center justify-center"
                 >
-                  <div className="relative mb-3 md:h-28 md:w-28 h-16 w-16 overflow-hidden rounded-full transition-all duration-300 group-hover:shadow-lg">
+                  <Button   className="rounded-md md:rounded-full border-1 border-white relative bg-gray-200 md:bg-gray-100 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-24 md:w-24 h-16  w-16   overflow-hidden transition-all duration-300 group-hover:shadow-lg">
                     <Image
                       src={category.image || "/placeholder.svg"}
                       alt={category.name}
-                      fill
-                      className="object-cover categorygradient"
+                      
+                      className="object-contain   "
                     />
-                  </div>
+                  </Button>
                   <span className="text-center md:text-sm text-xs font-medium text-gray-800">
                     {category.name}
                   </span>
