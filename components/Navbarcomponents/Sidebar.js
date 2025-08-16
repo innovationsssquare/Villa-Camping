@@ -19,12 +19,19 @@ import {
   PhoneCall
 } from "lucide-react"
 import { TiThMenu } from "react-icons/ti";
+import { FaUser } from "react-icons/fa";
+import { FaBook } from "react-icons/fa";
+import { IoSettings } from "react-icons/io5";
+import { IoShieldCheckmark } from "react-icons/io5";
+import { MdHelp } from "react-icons/md";
+import { FaPhoneAlt } from "react-icons/fa";
+import { IoLogOut } from "react-icons/io5";
 
 const navItems = [
   {
     title: "Profile Details",
     href: "/account",
-    icon: <User className="h-5 w-5" />,
+    icon: <FaUser className="h-5 w-5 text-black" />,
   },
   // {
   //   title: "About Us",
@@ -32,9 +39,9 @@ const navItems = [
   //   icon: <User className="h-5 w-5" />,
   // },
   {
-    title: "My Orders",
+    title: "My Booking",
     href: "/account/orders",
-    icon: <ShoppingBag className="h-5 w-5" />,
+    icon: <FaBook className="h-5 w-5 text-black" />,
 
   },
   // {
@@ -44,25 +51,25 @@ const navItems = [
   {
     title: "Settings",
     href: "/account/settings",
-    icon: <SettingsIcon className="h-5 w-5" />,
+    icon: <IoSettings className="h-5 w-5 text-black" />,
 
   },
   {
     title: "Privacy Policy",
     href: "/account/privacy-policy",
-    icon: <Shield className="h-5 w-5" />,
+    icon: <IoShieldCheckmark className="h-5 w-5 text-black" />,
 
   },
   {
     title: "Help & Support",
     href: "/account/support",
-    icon: <HelpCircle className="h-5 w-5" />,
+    icon: <MdHelp className="h-5 w-5 text-black" />,
 
   },
   {
     title: "Contact us",
     href: "/contact",
-    icon: <PhoneCall className="h-5 w-5" />,
+    icon: <FaPhoneAlt className="h-5 w-5 text-black" />,
 
   },
 ];
@@ -86,7 +93,7 @@ export function UserSidebar() {
             <span className="sr-only">Menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-[300px] p-0 border-none bg-[#F4F4F4]">
+        <SheetContent side="left" className="w-[300px] p-0 border-none bg-[#FFFFFF4D] backdrop-blur-2xl">
           <SidebarContent pathname={pathname} />
         </SheetContent>
       </Sheet>
@@ -103,7 +110,7 @@ export function UserSidebar() {
 
 function SidebarContent({ pathname }) {
   return (
-    <div className="flex flex-col items-center pt-8 pb-6 h-full bg-gray-50">
+    <div className="flex flex-col items-center pt-8 pb-6 h-full ">
       <div className="relative group">
         <Avatar
           className="w-24 h-24 border-2 border-white transition-transform group-hover:scale-105"
@@ -125,7 +132,7 @@ function SidebarContent({ pathname }) {
         </Button>
       </div>
 
-      <h2 className="text-xl font-semibold mt-5 mb-8">Anita Sharma</h2>
+      <h2 className="text-xl font-semibold mt-5 mb-8">Santosh Alimkar</h2>
 
       <nav className="w-full px-4 flex-1 ">
         <ul className="space-y-2 w-full divide-y divide-gray-200">
@@ -164,10 +171,10 @@ function SidebarContent({ pathname }) {
       <div className="w-full px-4 mt-auto">
         <Link
           href="/logout"
-          className="flex items-center justify-between px-4 py-3 text-red-500 hover:bg-gray-200 hover:translate-x-1 rounded-md transition-all duration-200"
+          className="flex items-center justify-between px-4 py-3 text-red-500 bg-[#FFFFFF4D] hover:translate-x-1 rounded-md transition-all duration-200"
         >
           <div className="flex items-center gap-3">
-            <LogOut className="h-5 w-5" />
+            <IoLogOut className="h-5 w-5" />
             <span>Log Out</span>
           </div>
           <ChevronRight className="h-5 w-5" />

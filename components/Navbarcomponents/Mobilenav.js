@@ -31,7 +31,7 @@ export function AppHeader() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 w-full bg-[#FFFFFF4D] backdrop-blur-2xl rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden ",
-        isVisible ? "translate-y-0" : "-translate-y-12"
+        isVisible ? "translate-y-0" : "-translate-y-16"
       )}
     >
       <div className="flex items-center justify-between">
