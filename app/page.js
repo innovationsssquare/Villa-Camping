@@ -7,6 +7,7 @@ import ProductListing from "@/components/Homecomponets/Product-list";
 import ShopbyCategory from "@/components/Homecomponets/ShopbyCategory";
 import SustainableStitchingPage from "@/components/Homecomponets/sustainable-stitching";
 import TestimonialCarousel from "@/components/Homecomponets/testimonial-carousel";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
 

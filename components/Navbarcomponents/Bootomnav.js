@@ -1,18 +1,14 @@
 "use client";
-
-import { Home, Gift, Heart, Recycle, User } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, Tab } from "@heroui/react";
 import { useEffect, useState } from "react";
 import { RiHome5Fill } from "react-icons/ri";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { IoGrid } from "react-icons/io5";
-import { FaHeart } from "react-icons/fa";
-import { RiRecycleFill } from "react-icons/ri";
 import { FaUser } from "react-icons/fa";
-import { usePathname, useRouter } from "next/navigation";
-import { BsFillChatSquareHeartFill  } from "react-icons/bs";
+import { BsFillChatSquareHeartFill } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
+import { usePathname, useRouter } from "next/navigation";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");
@@ -20,28 +16,6 @@ export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [activeitem, setactiveitem] = useState();
-
-  // useEffect(() => {
-  //   switch (pathname) {
-  //     case "/":
-  //       setActiveTab("/");
-  //       break;
-  //     case "/account":
-  //       setActiveTab("account");
-  //       break;
-  //     case "/category/all":
-  //       setActiveTab("category/all");
-  //       break;
-  //     case "/wishlist":
-  //       setActiveTab("wishlist");
-  //       break;
-  //     case "/eco-friendly":
-  //       setActiveTab("eco-friendly");
-  //       break;
-  //     default:
-  //       setActiveTab("/");
-  //   }
-  // }, [pathname]);
 
   useEffect(() => {
     if (pathname === "/") {
@@ -62,10 +36,6 @@ export function BottomNav() {
     }
   }, [pathname]);
 
-  // if (pathname.startsWith("/products/")) {
-  //   return null;
-  // }
-
   const navItems = [
     {
       value: "/",
@@ -84,7 +54,7 @@ export function BottomNav() {
     },
     {
       value: "/eco-friendly",
-      icon: <BsFillChatSquareHeartFill  className="h-5 w-5" />,
+      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
       label: "Recycle",
     },
     {
@@ -102,41 +72,46 @@ export function BottomNav() {
       )}
     >
       <Tabs
-        defaultValue="/"
-        value={activeTab}
-        onValueChange={setActiveTab}
+        selectedKey={activeTab}
+        onSelectionChange={setActiveTab}
         className="w-full"
+        classNames={{
+          tabList:
+            "h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-2xl p-1 bg-[#FFFFFF4D]",
+          tab: "flex h-14 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+          cursor: "rounded-full bg-[#FFFFFF4D] backdrop-blur-2xl ",
+        }}
       >
-        <TabsList className="h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-2xl p-1 bg-[#FFFFFF4D]">
-          {navItems.map((item) => (
-            <TabsTrigger
-              key={item.value}
-              value={item.value}
-              className={cn(
-                "flex  h-14  w-full flex-1 flex-col items-center justify-center  rounded-full data-[state=active]:bg-transparent",
-                "focus-visible:ring-0 focus-visible:ring-offset-0"
-              )}
-              onClick={() => {
-                setActiveTab(item.value);
-                if (pathname !== item.value) {
-                  router.push(item.value);
-                }
-              }}
-            >
+        {navItems.map((item) => (
+          <Tab
+            key={item.value}
+            title={
               <div
-                className={cn(
-                  "flex h-12    w-12 items-center justify-center rounded-full transition-colors duration-400",
-                  activeTab === item.value
-                    ? "bg-[#FFFFFF4D] backdrop-blur-2xl text-black shadow-none border border-gray-200"
-                    : "text-gray-500"
-                )}
+                className="w-full h-full flex flex-col items-center justify-center"
+                onClick={() => {
+                  setActiveTab(item.value);
+                  if (pathname !== item.value) {
+                    router.push(item.value);
+                  }
+                }}
               >
-                <span>{item.icon}</span>
+                <div
+                  className={cn(
+                    "flex   items-center justify-center rounded-full transition-colors duration-400",
+
+                    item.value === "/shorts" && activeTab !== item.value
+                      ? " border p-3 text-black "
+                      : ""
+                  )}
+                >
+                  <span>{item.icon}</span>
+                </div>
+
+                <span className="sr-only">{item.label}</span>
               </div>
-              <span className="sr-only">{item.label}</span>
-            </TabsTrigger>
-          ))}
-        </TabsList>
+            }
+          />
+        ))}
       </Tabs>
     </div>
   );

@@ -10,24 +10,25 @@ export default function OfferCarousel({ heroApi, heroCurrentIndex = 0, heroCount
 const router=useRouter()
 const carouselItems = [
   {
-    title: "Launch offer!",
-    description: "Premium cotton linings starting from ₹39",
-    cta: "Explore now ↗",
+    title: "Escape to Nature!",
+    description: "Book lakeside villas, cottages, and camps in Lonavala & Pawna",
+    cta: "Book your stay ↗",
     icon: disscount,
   },
   {
-   title: "Seamless Shopping!",
-    description: "Free delivery on all tailoring orders - no minimum value",
-    cta: "Shop now ↗",
+    title: "Limited-Time Deals!",
+    description: "Get exclusive discounts on weekend getaways",
+    cta: "Grab the offer ↗",
     icon: disscount,
   },
   {
-    title: "All essentials under one roof",
-    description: "Fabrics, threads, and tools — everything a tailor needs",
-    cta: "Browse now ↗",
+    title: "All-In-One Getaway Hub",
+    description: "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
+    cta: "Explore locations ↗",
     icon: disscount,
   },
 ];
+
 
 
  useEffect(() => {

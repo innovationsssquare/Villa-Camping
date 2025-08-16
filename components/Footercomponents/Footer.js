@@ -8,14 +8,14 @@ import Footerimg from "@/public/Productasset/Footerimg.jpg"
 
 export default function Footer() {
   return (
-    <Card as="footer" isFooterBlurred className="rounded-none border-none shadow-none md:h-[350px] hidden md:block relative">
+    <Card as="footer"  className="rounded-none border-none shadow-none md:h-[350px] hidden md:block relative ">
       <div
-        className="absolute inset-0  opacity-90"
-        style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1739126602267-d2ef91dfcf5c?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        className="absolute inset-0 bg-black opacity-90"
+        // style={{
+        //   backgroundImage: `url(${Footerimg.src})`,
+        //   backgroundSize: "cover",
+        //   backgroundPosition: "center",
+        // }}
       />
 
       <CardFooter className="absolute bg-black/40 bottom-0 top-0 z-10 border-t-1 border-white/20 w-full">
@@ -23,15 +23,15 @@ export default function Footer() {
           <div className="grid grid-cols-1 md:grid-cols-6 gap-12">
             {/* About Brindah Column */}
             <div className="col-span-2">
-              <h3 className="text-xl font-bold mb-4">The Camp Villa</h3>
-              <p className="text-black leading-relaxed text-sm">
+              <h3 className="text-xl font-bold mb-4 text-gray-400">The Camp Villa</h3>
+              <p className="text-gray-400 leading-relaxed text-sm">
                 {`Discover the perfect escape with Thevilla Camp, your one-stop destination for booking the best villas, campsites, cottages, and hotels across Lonavala, Malavli, Kamshet, and Pawna Lake. Whether you're planning a relaxing family vacation, a romantic weekend, or an adventurous trip with friends, we offer handpicked stays nestled in nature with modern comforts`}
               </p>
             </div>
 
             {/* Quick Links Column */}
-            <div>
-              <h3 className="text-xl font-bold mb-6">Quick Links</h3>
+            <div className="text-gray-400">
+              <h3 className="text-xl text-gray-400 font-bold mb-6">Quick Links</h3>
               <ul className="space-y-2">
                 {["Home", "About us", "Categories", "Contact Us"].map((item) => (
                   <li key={item} className="flex items-center">
@@ -45,7 +45,7 @@ export default function Footer() {
             </div>
 
             {/* Legal and Logo Column */}
-            <div className="flex flex-col justify-between">
+            <div className="flex flex-col justify-between text-gray-400">
               <div>
                 <h3 className="text-xl font-bold mb-6">Legal</h3>
                 <ul className="space-y-2">
@@ -74,25 +74,25 @@ export default function Footer() {
           </div>
 
           {/* Divider */}
-          <div className="border-t border-black my-4"></div>
+          <div className="border-t border-white my-4"></div>
 
           {/* Bottom Section */}
           <div className="flex flex-col md:flex-row justify-between items-center">
             {/* Social Media Icons */}
             <div className="flex space-x-4 mb-4 md:mb-0">
-              <Link href="#" className="bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+              <Link href="#" className="bg-white/30 p-2 rounded-md hover:bg-white/20 transition-colors">
                 <Instagram className="h-5 w-5" />
               </Link>
-              <Link href="#" className="bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+              <Link href="#" className="bg-white/30 p-2 rounded-md hover:bg-white/20 transition-colors">
                 <Facebook className="h-5 w-5" />
               </Link>
-              <Link href="#" className="bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+              <Link href="#" className="bg-white/30 p-2 rounded-md hover:bg-white/20 transition-colors">
                 <Linkedin className="h-5 w-5" />
               </Link>
-              <Link href="#" className="bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+              <Link href="#" className="bg-white/30 p-2 rounded-md hover:bg-white/20 transition-colors">
                 <Twitter className="h-5 w-5" />
               </Link>
-              <Link href="#" className="bg-white/10 p-2 rounded-md hover:bg-white/20 transition-colors">
+              <Link href="#" className="bg-white/30 p-2 rounded-md hover:bg-white/20 transition-colors">
                 <Youtube className="h-5 w-5" />
               </Link>
             </div>

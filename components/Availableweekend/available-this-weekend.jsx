@@ -123,12 +123,12 @@ export function AvailableThisWeekend() {
     <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6 ">
       {/* Available This Weekend Section */}
       <div className="space-y-4">
-        <h2 className="md:text-2xl font-semibold text-foreground">
+        <h2 className="md:text-4xl md:text-center font-medium text-foreground">
           Available This Weekend
         </h2>
 
         {/* Location Filter Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex md:justify-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {locations.map((location) => (
             <Button
               key={location}
@@ -136,10 +136,10 @@ export function AvailableThisWeekend() {
               size="sm"
               onClick={() => setSelectedLocation(location)}
               className={cn(
-                "whitespace-nowrap transition-all duration-200",
+                "whitespace-nowrap transition-all duration-200 cursor-pointer",
                 selectedLocation === location
-                  ? "bg-black text-primary-foreground"
-                  : "bg-background hover:bg-muted"
+                  ? "bg-black text-primary-foreground  hover:bg-black"
+                  : "border-1 border-white relative bg-gray-200"
               )}
             >
               {location}
