@@ -23,7 +23,7 @@ export function BookingSearchBox() {
       className={`
         bg-[#FFFFFF4D] rounded-full border border-gray-300 shadow-sm p-1 flex justify-center items-center
         transition-all duration-300 ease-in-out transform-gpu
-        ${isVisible ? "scale-100 opacity-100" : "scale-80 "}
+        ${isVisible ? "scale-100 opacity-100" : "scale-90 mt-1"}
       `}
     >
       {/* Check-in */}
