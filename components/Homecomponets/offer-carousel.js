@@ -1,33 +1,55 @@
 "use client"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { ChevronLeft, ChevronRight, Snowflake } from "lucide-react"
 import Image from "next/image"
 import disscount from "@/public/Homeasset/disscount.png"
+import { useRouter } from "next/navigation"
 
-export default function OfferCarousel() {
+export default function OfferCarousel({ heroApi, heroCurrentIndex = 0, heroCount = 0 }) {
   const [currentSlide, setCurrentSlide] = useState(0)
+const router=useRouter()
+const carouselItems = [
+  {
+    title: "Launch offer!",
+    description: "Premium cotton linings starting from ₹39",
+    cta: "Explore now ↗",
+    icon: disscount,
+  },
+  {
+   title: "Seamless Shopping!",
+    description: "Free delivery on all tailoring orders - no minimum value",
+    cta: "Shop now ↗",
+    icon: disscount,
+  },
+  {
+    title: "All essentials under one roof",
+    description: "Fabrics, threads, and tools — everything a tailor needs",
+    cta: "Browse now ↗",
+    icon: disscount,
+  },
+];
 
-  const carouselItems = [
-    {
-      title: "Christmas Offer!",
-      description: "Christmas Offer Alert! Get 30% OFF on every purchase!",
-      cta: "Explore now ↗",
-      icon: disscount,
-    },
-    {
-      title: "New Year Sale!",
-      description: "Start the year with amazing discounts on all products!",
-      cta: "Shop now ↗",
-      icon: disscount,
-    },
-  ]
+
+ useEffect(() => {
+    if (heroCurrentIndex !== undefined && heroCurrentIndex < carouselItems.length) {
+      setCurrentSlide(heroCurrentIndex)
+    }
+  }, [heroCurrentIndex, carouselItems.length])
 
   const nextSlide = () => {
-    setCurrentSlide((prev) => (prev === carouselItems.length - 1 ? 0 : prev + 1))
+    const nextIndex = currentSlide === carouselItems.length - 1 ? 0 : currentSlide + 1
+    setCurrentSlide(nextIndex)
+    if (heroApi && nextIndex < heroCount) {
+      heroApi.scrollTo(nextIndex)
+    }
   }
 
   const prevSlide = () => {
-    setCurrentSlide((prev) => (prev === 0 ? carouselItems.length - 1 : prev - 1))
+    const prevIndex = currentSlide === 0 ? carouselItems.length - 1 : currentSlide - 1
+    setCurrentSlide(prevIndex)
+    if (heroApi && prevIndex < heroCount) {
+      heroApi.scrollTo(prevIndex)
+    }
   }
 
   return (
@@ -38,7 +60,7 @@ export default function OfferCarousel() {
           <Image className="md:w-10 md:h-10 h-6 w-6 mr-4 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/>
           <h2 className="text-sm md:text-3xl font-bold ">{carouselItems[currentSlide].title}</h2>
           <p className="md:mb-4 mb-2 text-xs md:text-base">{carouselItems[currentSlide].description}</p>
-          <button className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg">
+          <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg">
             {carouselItems[currentSlide].cta}
           </button>
         </div>
@@ -47,7 +69,7 @@ export default function OfferCarousel() {
       {/* Navigation Buttons */}
       <button
         onClick={prevSlide}
-        className="absolute left-2 top-1/2 -translate-y-1/2 bg-[#106C83] hover:bg-[#106C83]/80 rounded p-2 text-white"
+        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black hover:bg-black/80 rounded p-2 text-white"
         aria-label="Previous slide"
       >
         <ChevronLeft className="md:h-5 md:w-5 h-2 w-2" />
@@ -55,7 +77,7 @@ export default function OfferCarousel() {
 
       <button
         onClick={nextSlide}
-        className="absolute right-2 top-1/2 -translate-y-1/2 bg-[#106C83] hover:bg-[#106C83]/80 rounded p-2 text-white"
+        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black hover:bg-black/80 rounded p-2 text-white"
         aria-label="Next slide"
       >
         <ChevronRight className="md:h-5 md:w-5 h-2 w-2" />

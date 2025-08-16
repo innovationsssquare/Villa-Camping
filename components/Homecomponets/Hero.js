@@ -13,7 +13,7 @@ import Banner1 from "@/public/Aboutusasset/Villabanner.png";
 import Banner2 from "@/public/Aboutusasset/Campbanner.png";
 import Banner3 from "@/public/Aboutusasset/Cottagebanner.png";
 import Banner4 from "@/public/Aboutusasset/Hotelbanner.png";
-import Autoplay from "embla-carousel-autoplay"
+import Autoplay from "embla-carousel-autoplay";
 
 import { useEffect, useState } from "react";
 import OfferCarousel from "./offer-carousel";
@@ -49,19 +49,30 @@ export default function Hero() {
   };
 
   return (
-    <main className={cn("h-auto  overflow-hidden",isVisible ? "translate-y-16" : "translate-y-16")}>
+    <main
+      className={cn(
+        "h-auto  overflow-hidden",
+        isVisible ? "translate-y-16" : "translate-y-16"
+      )}
+    >
       {/* Hero Carousel Section */}
       <section className="w-full relative">
-        <Carousel    plugins={[
-        Autoplay({
-          delay: 2000,
-        }),
-      ]} className="w-full " setApi={setHeroApi}>
+        <Carousel
+          plugins={[
+            Autoplay({
+              delay: 3000,
+            }),
+          ]}
+          className="w-full "
+          setApi={setHeroApi}
+        >
           <CarouselContent>
             <CarouselItem>
               <div className="relative md:h-screen h-[350px] w-full">
                 <Image
-                  src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"}
+                  src={
+                    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"
+                  }
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
                   fill
                   className="object-fill"
@@ -72,7 +83,9 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-screen h-[350px] w-full">
                 <Image
-                  src={"https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"}
+                  src={
+                    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"
+                  }
                   alt="Sewing supplies"
                   fill
                   className="object-fill"
@@ -108,17 +121,21 @@ export default function Hero() {
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`h-2 w-2 rounded-full transition-opacity ${
-                  index === heroCurrentIndex ? "bg-[#106C83]" : "bg-white opacity-50"
+                  index === heroCurrentIndex
+                    ? "bg-[#106C83]"
+                    : "bg-white opacity-50"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />
             ))}
           </div>
         </Carousel>
+        <OfferCarousel
+          heroApi={heroApi}
+          heroCurrentIndex={heroCurrentIndex}
+          heroCount={heroCount}
+        />
       </section>
-
-   
     </main>
   );
 }
-
