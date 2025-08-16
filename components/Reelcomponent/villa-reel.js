@@ -37,7 +37,7 @@ const villas = [
     reviews: 203,
     guests: 4,
     amenities: ["WiFi", "Gym", "Concierge"],
-    videoUrl: "/videos/city-villa.mp4",
+    videoUrl: "https://res.cloudinary.com/db60uwvhk/video/upload/v1755329753/villas/100cb757-f0e4-41dd-8cb5-04ac141be6f2_ooqqmx.mp4",
   },
   {
     id: "4",
