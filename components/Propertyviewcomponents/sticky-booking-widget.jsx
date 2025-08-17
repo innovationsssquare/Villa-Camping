@@ -66,9 +66,9 @@ export default function StickyBookingWidget() {
       case "sticky":
         return {
           position: "fixed",
-          top: "65px", // Just below the tabs (64px + 1px border)
-          right: "24px",
-          width: "320px",
+          top: "120px",
+          right: "0px",
+          width: "400px",
           zIndex: 30,
         }
       case "bottom":
@@ -91,7 +91,7 @@ export default function StickyBookingWidget() {
       <div ref={widgetRef} style={getWidgetStyles()} className="transition-all duration-500 ease-out transform">
         <Card
           className={`shadow-xl border-0 bg-white/95 backdrop-blur-sm transition-all duration-500 ease-out ${
-            stickyState === "sticky" ? "shadow-2xl transform scale-100 bg-white/98" : "shadow-lg transform scale-100"
+            stickyState === "sticky" ? "shadow-xl transform scale-100 bg-white/98" : "shadow-lg transform scale-100"
           }`}
         >
           <CardContent className="p-6">
@@ -253,7 +253,7 @@ export default function StickyBookingWidget() {
 
         {/* Sticky state indicator */}
         <div
-          className={`absolute -top-1 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500 ease-out ${
+          className={`absolute -top-1 left-0 right-0 h-0.5  rounded-full transition-all duration-500 ease-out ${
             stickyState === "sticky" ? "opacity-100 transform scale-x-100" : "opacity-0 transform scale-x-0"
           }`}
           style={{ transformOrigin: "center" }}

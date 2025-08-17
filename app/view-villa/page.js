@@ -1,3 +1,4 @@
+import PropertyDetails from "@/components/Propertyviewcomponents/property-details"
 import PropertyDetailsPage from "@/components/Propertyviewcomponents/property-details-page"
 
 export default function Home() {
@@ -10,7 +11,8 @@ export default function Home() {
         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
       }}
     >
-      <PropertyDetailsPage />
+      {/* <PropertyDetailsPage /> */}
+      <PropertyDetails/>
     </div>
   )
 }

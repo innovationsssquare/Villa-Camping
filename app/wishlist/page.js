@@ -6,11 +6,6 @@ import wishlist2 from "@/public/Homeasset/Wishlist2.png"
 const page = () => {
   return (
     <div>
-    <Aboutusheader
-        image1={wishlist}
-        image2={wishlist2}
-        title={"Wishlist"}
-      />
       <WishlistPage />
     </div>
   );

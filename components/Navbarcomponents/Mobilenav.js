@@ -46,7 +46,7 @@ export function AppHeader() {
               <UserLocationDisplay/>
             </div>
           ) : (
-            <HeaderTitle />
+            ""
           )}
         </div>
 

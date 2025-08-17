@@ -169,15 +169,11 @@ export default function StickyTabsNavigation({ onTabChange }) {
       ref={tabsRef}
       className={`bg-white border-b border-gray-200 transition-all duration-500 ease-out z-40 ${
         isSticky
-          ? "fixed top-0 left-0 right-0 shadow-xl backdrop-blur-md bg-white/95 transform translate-y-0"
+          ? "fixed top-16 left-0 right-0 shadow-sm backdrop-blur-md bg-white/95 transform translate-y-0"
           : "relative transform translate-y-0"
       }`}
-      style={{
-        fontFamily:
-          'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-      }}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           {/* Tabs with hidden scrollbar */}
           <div
@@ -205,13 +201,9 @@ export default function StickyTabsNavigation({ onTabChange }) {
                 onClick={() => scrollToSection(tab.id)}
                 className={`px-4 py-4 text-sm font-medium whitespace-nowrap transition-all duration-300 ease-out relative z-10 ${
                   activeTab === tab.id
-                    ? "text-blue-600 transform scale-105"
-                    : "text-gray-700 hover:text-blue-600 hover:transform hover:scale-102"
+                    ? "text-black transform scale-105"
+                    : "text-gray-700 hover:text-black hover:transform hover:scale-102"
                 }`}
-                style={{
-                  fontFamily:
-                    'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-                }}
               >
                 {tab.label}
               </button>
@@ -219,7 +211,7 @@ export default function StickyTabsNavigation({ onTabChange }) {
 
             {/* Smooth sliding indicator with better positioning */}
             <div
-              className="absolute bottom-0 h-0.5 bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-500 ease-out"
+              className="absolute bottom-0 h-0.5 bg-black transition-all duration-500 ease-out"
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
@@ -244,14 +236,14 @@ export default function StickyTabsNavigation({ onTabChange }) {
       </div>
 
       {/* Animated sticky indicator */}
-      <div
+      {/* <div
         className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out ${
           isSticky ? "opacity-100 transform scale-x-100" : "opacity-0 transform scale-x-0"
         }`}
         style={{
           transformOrigin: "center",
         }}
-      />
+      /> */}
 
       {/* Subtle glow effect when sticky */}
       <div
