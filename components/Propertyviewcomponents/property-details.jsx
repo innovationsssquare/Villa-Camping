@@ -67,7 +67,7 @@ export default function PropertyDetails() {
 
   return (
     <div
-      className="min-h-screen bg-gray-50"
+      className="min-h-screen bg-gray-50 hidden md:block"
       style={{
         fontFamily:
           'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',

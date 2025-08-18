@@ -38,29 +38,18 @@ export function PropertyCard({ property }) {
   useEffect(() => {
     if (
       !isMobile ||
-      !isAutoPlaying ||
       !property.images ||
       property.images.length <= 1
     ) {
       return;
     }
 
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prevIndex) => {
-        if (prevIndex >= property.images.length - 1) {
-          return 0; // Loop back to first image
-        }
-        return prevIndex + 1;
-      });
-    }, 3000); // Auto-play every 3 seconds
-
-    return () => clearInterval(interval);
-  }, [isMobile, isAutoPlaying, property.images]);
+   
+  }, [isMobile, property.images]);
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
     setTouchStart(e.targetTouches[0].clientX);
-    setIsAutoPlaying(false);
   };
 
   const handleTouchMove = (e) => {
@@ -81,36 +70,27 @@ export function PropertyCard({ property }) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
 
-    setTimeout(() => {
-      setIsAutoPlaying(true);
-    }, 5000);
   };
 
   const nextImage = () => {
     if (currentImageIndex < property.images.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   const prevImage = () => {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 5000);
+   
   };
 
   const goToImage = (index) => {
     setCurrentImageIndex(index);
-    setIsAutoPlaying(false);
-    setTimeout(() => setIsAutoPlaying(true), 5000);
   };
 
   useEffect(() => {
     setCurrentImageIndex(0);
-    setIsAutoPlaying(true);
   }, [property.id]);
 
   return (

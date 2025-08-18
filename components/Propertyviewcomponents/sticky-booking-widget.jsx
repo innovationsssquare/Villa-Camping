@@ -1,39 +1,54 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { CalendarIcon, Users, Home, ChevronDown, Star, Gift, Minus, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Calendar as CalendarComponent } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { format } from "date-fns"
-import confetti from "canvas-confetti"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import  { DateRange } from "react-day-picker"
-
-
-
-
+import { useState, useEffect, useRef } from "react";
+import {
+  CalendarIcon,
+  Users,
+  Home,
+  ChevronDown,
+  Star,
+  Gift,
+  Minus,
+  Plus,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { format } from "date-fns";
+import confetti from "canvas-confetti";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { DateRange } from "react-day-picker";
 
 export default function StickyBookingWidget() {
-  const [stickyState, setStickyState] = useState("normal")
-  const [dateRange, setDateRange] = useState()
-  const [guests, setGuests] = useState({ adults: 2, children: 0 })
-  const [rooms, setRooms] = useState(5)
-  const [couponCode, setCouponCode] = useState("")
-  const [appliedCoupon, setAppliedCoupon] = useState(null)
-  const [couponError, setCouponError] = useState("")
-  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false)
+  const [stickyState, setStickyState] = useState("normal");
+  const [dateRange, setDateRange] = useState();
+  const [guests, setGuests] = useState({ adults: 2, children: 0 });
+  const [rooms, setRooms] = useState(5);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState("");
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
-  const widgetRef = useRef(null)
-  const containerRef = useRef(null)
+  const widgetRef = useRef(null);
+  const containerRef = useRef(null);
 
   const availableCoupons = [
     {
-      code: "STAYVISTA",
+      code: "VILLACAMP10",
       title: "Book your dreamy getaway",
       description:
         "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
@@ -43,7 +58,7 @@ export default function StickyBookingWidget() {
       validUntil: "31 December 2025",
     },
     {
-      code: "VISTA2025",
+      code: "VILLACAMP102025",
       title: "Instant Discount",
       description:
         "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
@@ -53,7 +68,7 @@ export default function StickyBookingWidget() {
       validUntil: "31 December 2025",
     },
     {
-      code: "WEEKEND15",
+      code: "VILLACAMPWEEKEND15",
       title: "Weekend Special",
       description: "15% off on weekend bookings",
       discount: 15,
@@ -61,64 +76,78 @@ export default function StickyBookingWidget() {
       minAmount: 15000,
       validUntil: "31 December 2025",
     },
-  ]
+  ];
 
-  const basePrice = 52975
-  const totalPrice = basePrice * rooms
+  const basePrice = 52975;
+  const totalPrice = basePrice * rooms;
   const discountAmount = appliedCoupon
     ? appliedCoupon.type === "percentage"
       ? (totalPrice * appliedCoupon.discount) / 100
       : appliedCoupon.discount
-    : 0
-  const finalPrice = totalPrice - discountAmount
+    : 0;
+  const finalPrice = totalPrice - discountAmount;
 
   const applyCoupon = async (code) => {
-    setIsApplyingCoupon(true)
-    setCouponError("")
+    setIsApplyingCoupon(true);
+    setCouponError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    const coupon = availableCoupons.find((c) => c.code.toLowerCase() === code.toLowerCase())
+    const coupon = availableCoupons.find(
+      (c) => c.code.toLowerCase() === code.toLowerCase()
+    );
 
     if (!coupon) {
-      setCouponError("Invalid coupon code")
-      setIsApplyingCoupon(false)
-      return
+      setCouponError("Invalid coupon code");
+      setIsApplyingCoupon(false);
+      return;
     }
 
     if (coupon.minAmount && totalPrice < coupon.minAmount) {
-      setCouponError(`Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`)
-      setIsApplyingCoupon(false)
-      return
+      setCouponError(
+        `Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`
+      );
+      setIsApplyingCoupon(false);
+      return;
     }
 
-    setAppliedCoupon(coupon)
-    setCouponCode("")
-    setIsApplyingCoupon(false)
+    setAppliedCoupon(coupon);
+    setCouponCode("");
+    setIsApplyingCoupon(false);
 
     const couponInputElement =
-      document.querySelector("[data-coupon-input]") || document.querySelector("[data-main-coupon-input]")
-    let targetElement = { x: 0.5, y: 0.4 }
+      document.querySelector("[data-coupon-input]") ||
+      document.querySelector("[data-main-coupon-input]");
+    let targetElement = { x: 0.5, y: 0.4 };
 
     if (couponInputElement) {
-      const rect = couponInputElement.getBoundingClientRect()
+      const rect = couponInputElement.getBoundingClientRect();
       targetElement = {
         x: (rect.left + rect.width / 2) / window.innerWidth,
         y: (rect.top + rect.height / 2) / window.innerHeight,
-      }
+      };
     }
 
     confetti({
       particleCount: 120,
       spread: 80,
       origin: targetElement,
-      colors: ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57", "#ff9ff3", "#54a0ff", "#5f27cd"],
+      colors: [
+        "#ff6b6b",
+        "#4ecdc4",
+        "#45b7d1",
+        "#96ceb4",
+        "#feca57",
+        "#ff9ff3",
+        "#54a0ff",
+        "#5f27cd",
+      ],
       shapes: ["circle", "square"],
       scalar: 1.2,
       drift: 0,
       gravity: 0.8,
       ticks: 250,
-    })
+    });
 
     setTimeout(() => {
       confetti({
@@ -128,86 +157,99 @@ export default function StickyBookingWidget() {
         colors: ["#ff6b6b", "#4ecdc4", "#45b7d1", "#feca57", "#ff9ff3"],
         shapes: ["star"],
         scalar: 0.8,
-      })
-    }, 200)
-  }
+      });
+    }, 200);
+  };
 
   const removeCoupon = () => {
-    setAppliedCoupon(null)
-    setCouponError("")
-  }
+    setAppliedCoupon(null);
+    setCouponError("");
+  };
 
   const applyCouponFromSheet = (coupon) => {
-    setAppliedCoupon(coupon)
+    setAppliedCoupon(coupon);
 
     const sheetInputElement =
-      document.querySelector("[data-coupon-input] input") || document.querySelector("[data-sheet-content]")
-    let targetElement = { x: 0.8, y: 0.3 }
+      document.querySelector("[data-coupon-input] input") ||
+      document.querySelector("[data-sheet-content]");
+    let targetElement = { x: 0.8, y: 0.3 };
 
     if (sheetInputElement) {
-      const rect = sheetInputElement.getBoundingClientRect()
+      const rect = sheetInputElement.getBoundingClientRect();
       targetElement = {
         x: (rect.left + rect.width / 2) / window.innerWidth,
         y: (rect.top + rect.height / 2) / window.innerHeight,
-      }
+      };
     }
 
     confetti({
       particleCount: 100,
       spread: 70,
       origin: targetElement,
-      colors: ["#ff6b6b", "#4ecdc4", "#45b7d1", "#96ceb4", "#feca57", "#ff9ff3", "#54a0ff", "#5f27cd"],
+      colors: [
+        "#ff6b6b",
+        "#4ecdc4",
+        "#45b7d1",
+        "#96ceb4",
+        "#feca57",
+        "#ff9ff3",
+        "#54a0ff",
+        "#5f27cd",
+      ],
       shapes: ["circle", "square"],
       scalar: 1.0,
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     const handleScroll = () => {
-      if (!widgetRef.current || !containerRef.current) return
+      if (!widgetRef.current || !containerRef.current) return;
 
-      const widgetRect = widgetRef.current.getBoundingClientRect()
-      const containerRect = containerRef.current.getBoundingClientRect()
-      const footerElement = document.querySelector("footer") || document.querySelector("[data-footer]")
+      const widgetRect = widgetRef.current.getBoundingClientRect();
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const footerElement =
+        document.querySelector("footer") ||
+        document.querySelector("[data-footer]");
 
-      const scrollY = window.scrollY
-      const windowHeight = window.innerHeight
-      const widgetHeight = widgetRef.current.offsetHeight
+      const scrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const widgetHeight = widgetRef.current.offsetHeight;
 
-      const stickyStartPoint = 600
+      const stickyStartPoint = 600;
 
-      let footerTop = document.body.scrollHeight
+      let footerTop = document.body.scrollHeight;
       if (footerElement) {
-        footerTop = footerElement.getBoundingClientRect().top + scrollY
+        footerTop = footerElement.getBoundingClientRect().top + scrollY;
       }
 
-      const stickyWidgetBottom = scrollY + windowHeight - 24
-      const widgetWouldHitFooter = stickyWidgetBottom + widgetHeight > footerTop
+      const stickyWidgetBottom = scrollY + windowHeight - 24;
+      const widgetWouldHitFooter =
+        stickyWidgetBottom + widgetHeight > footerTop;
 
-      let newState
+      let newState;
       if (scrollY < stickyStartPoint) {
-        newState = "normal"
+        newState = "normal";
       } else if (widgetWouldHitFooter) {
-        newState = "bottom"
+        newState = "bottom";
       } else {
-        newState = "sticky"
+        newState = "sticky";
       }
 
       if (newState !== stickyState) {
-        setStickyState(newState)
+        setStickyState(newState);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    window.addEventListener("resize", handleScroll, { passive: true })
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
 
-    handleScroll()
+    handleScroll();
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-      window.removeEventListener("resize", handleScroll)
-    }
-  }, [stickyState])
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, [stickyState]);
 
   const getWidgetStyles = () => {
     switch (stickyState) {
@@ -218,62 +260,42 @@ export default function StickyBookingWidget() {
           right: "0px",
           width: "400px",
           zIndex: 30,
-        }
+        };
       case "bottom":
         return {
           position: "absolute",
           bottom: "0",
           right: "0",
           width: "100%",
-        }
+        };
       default:
         return {
           position: "relative",
           width: "100%",
-        }
+        };
     }
-  }
+  };
 
   return (
     <div ref={containerRef} className="relative">
-      <div ref={widgetRef} style={getWidgetStyles()} className="transition-all duration-500 ease-out transform">
+      <div
+        ref={widgetRef}
+        style={getWidgetStyles()}
+        className="transition-all duration-500 ease-out transform"
+      >
         <Card
           className={`shadow-xl border border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-500 ease-out ${
-            stickyState === "sticky" ? "shadow-none transform scale-100 bg-white/98" : "shadow-none transform scale-100"
+            stickyState === "sticky"
+              ? "shadow-none transform scale-100 bg-white/98"
+              : "shadow-none transform scale-100"
           }`}
         >
           <CardContent className="px-4">
-            {/* Pricing Header */}
-            <div className="flex items-center justify-between transition-all duration-300">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 line-through text-sm transition-all duration-300">₹58,750</span>
-                </div>
-                <div className="flex items-baseline space-x-1">
-                  <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalPrice.toLocaleString()}
-                  </span>
-                  <span className="text-gray-600 text-sm transition-all duration-300">(for {rooms} rooms)</span>
-                </div>
-                <span className="text-gray-500 text-xs transition-all duration-300">Per Night + Taxes</span>
-                {appliedCoupon && (
-                  <div className="text-green-600 text-xs font-medium">
-                    Saved ₹{discountAmount.toLocaleString()} with {appliedCoupon.code}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-1 text-sm transition-all duration-300">
-                <Star className="w-4 h-4 fill-current text-yellow-400 transition-all duration-300" />
-                <span className="font-medium text-black">4.8</span>
-                <span className="text-gray-500">/5</span>
-              </div>
-            </div>
-
             {/* Date Selection */}
-            <div className="mb-4">
+            <div className="mb-2">
               <Popover>
                 <PopoverTrigger asChild>
-                  <div className="border-2 border-gray-300 rounded-lg p-4 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
+                  <div className="border-2 border-gray-300 rounded-lg p-2 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
                     <label className="text-xs font-bold text-black uppercase block mb-2 transition-all duration-300">
                       Select Dates
                     </label>
@@ -283,7 +305,9 @@ export default function StickyBookingWidget() {
                         <div className="flex items-center space-x-2">
                           {dateRange?.from ? (
                             <>
-                              <span className="text-sm font-medium text-black">{format(dateRange.from, "MMM dd")}</span>
+                              <span className="text-sm font-medium text-black">
+                                {format(dateRange.from, "MMM dd")}
+                              </span>
                               {dateRange?.to && (
                                 <>
                                   <span className="text-gray-400">→</span>
@@ -294,7 +318,9 @@ export default function StickyBookingWidget() {
                               )}
                             </>
                           ) : (
-                            <span className="text-sm text-gray-500">Check-in → Check-out</span>
+                            <span className="text-sm text-gray-500">
+                              Check-in → Check-out
+                            </span>
                           )}
                         </div>
                       </div>
@@ -302,7 +328,10 @@ export default function StickyBookingWidget() {
                     </div>
                   </div>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0 bg-white border-2 border-gray-200" align="start">
+                <PopoverContent
+                  className="w-auto p-0 bg-white border-2 border-gray-200"
+                  align="start"
+                >
                   <CalendarComponent
                     mode="range"
                     selected={dateRange}
@@ -316,7 +345,7 @@ export default function StickyBookingWidget() {
             </div>
 
             {/* Guests and Rooms Selection */}
-            <div className="grid grid-cols-2 gap-3 mb-6">
+            <div className="grid grid-cols-1 gap-3 mb-6">
               <Popover>
                 <PopoverTrigger asChild>
                   <div className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
@@ -339,23 +368,37 @@ export default function StickyBookingWidget() {
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="font-bold text-black">Adults</Label>
-                        <p className="text-sm text-gray-600">Ages 13 or above</p>
+                        <p className="text-sm text-gray-600">
+                          Ages 13 or above
+                        </p>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setGuests((prev) => ({ ...prev, adults: Math.max(1, prev.adults - 1) }))}
+                          onClick={() =>
+                            setGuests((prev) => ({
+                              ...prev,
+                              adults: Math.max(1, prev.adults - 1),
+                            }))
+                          }
                           disabled={guests.adults <= 1}
                           className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-bold text-black">{guests.adults}</span>
+                        <span className="w-8 text-center font-bold text-black">
+                          {guests.adults}
+                        </span>
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setGuests((prev) => ({ ...prev, adults: prev.adults + 1 }))}
+                          onClick={() =>
+                            setGuests((prev) => ({
+                              ...prev,
+                              adults: prev.adults + 1,
+                            }))
+                          }
                           className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Plus className="w-4 h-4" />
@@ -371,71 +414,35 @@ export default function StickyBookingWidget() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setGuests((prev) => ({ ...prev, children: Math.max(0, prev.children - 1) }))}
+                          onClick={() =>
+                            setGuests((prev) => ({
+                              ...prev,
+                              children: Math.max(0, prev.children - 1),
+                            }))
+                          }
                           disabled={guests.children <= 0}
                           className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-bold text-black">{guests.children}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setGuests((prev) => ({ ...prev, children: prev.children + 1 }))}
-                          className="border-2 border-black hover:bg-black hover:text-white"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
-                    <label className="text-xs font-bold text-black uppercase block mb-1 transition-all duration-300">
-                      No. of Rooms
-                    </label>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Home className="w-4 h-4 text-black transition-all duration-300" />
-                        <span className="text-sm font-medium text-black transition-all duration-300">
-                          {rooms} Rooms
+                        <span className="w-8 text-center font-bold text-black">
+                          {guests.children}
                         </span>
-                      </div>
-                      <ChevronDown className="w-4 h-4 text-black transition-transform duration-300" />
-                    </div>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-60 bg-white border-2 border-gray-200">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <Label className="font-bold text-black">Rooms</Label>
-                      <div className="flex items-center space-x-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setRooms((prev) => Math.max(1, prev - 1))}
-                          disabled={rooms <= 1}
-                          className="border-2 border-black hover:bg-black hover:text-white"
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-                        <span className="w-8 text-center font-bold text-black">{rooms}</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setRooms((prev) => Math.min(5, prev + 1))}
-                          disabled={rooms >= 5}
+                          onClick={() =>
+                            setGuests((prev) => ({
+                              ...prev,
+                              children: prev.children + 1,
+                            }))
+                          }
                           className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
                       </div>
                     </div>
-                    <p className="text-sm text-gray-600">Maximum 5 rooms available</p>
                   </div>
                 </PopoverContent>
               </Popover>
@@ -453,14 +460,18 @@ export default function StickyBookingWidget() {
                       <span className="text-gray-900 font-bold text-sm">%</span>
                     </div>
                     <div>
-                      <div className="font-semibold text-sm text-white">VISTA2025</div>
-                      <div className="text-gray-300 text-sm">Apply to save upto ₹4,000</div>
+                      <div className="font-semibold text-sm text-white">
+                        VILLACAMP10
+                      </div>
+                      <div className="text-gray-300 text-sm">
+                        Apply to save upto ₹4,000
+                      </div>
                     </div>
                   </div>
                   <Button
                     size="sm"
                     className="bg-white hover:bg-gray-100 text-gray-900 font-semibold px-4 py-2"
-                    onClick={() => applyCoupon("VISTA2025")}
+                    onClick={() => applyCoupon("VILLACAMP10")}
                   >
                     Apply
                   </Button>
@@ -470,7 +481,11 @@ export default function StickyBookingWidget() {
               <div className="flex items-center justify-between mb-3">
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-black hover:text-gray-700 p-0 font-bold">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-black hover:text-gray-700 p-0 font-bold"
+                    >
                       <Gift className="w-4 h-4 mr-2" />
                       View more coupons →
                     </Button>
@@ -482,17 +497,21 @@ export default function StickyBookingWidget() {
                   >
                     <div className="flex flex-col h-full">
                       <SheetHeader className="border-b-2 border-gray-200 p-6 pb-4 bg-white">
-                        <SheetTitle className="text-2xl font-bold text-black">Coupons and Offers</SheetTitle>
+                        <SheetTitle className="text-2xl font-bold text-black">
+                          Coupons and Offers
+                        </SheetTitle>
                       </SheetHeader>
 
-                      <ScrollArea className="flex-1 px-6 bg-white">
+                      <ScrollArea className="flex-1 px-6 bg-white h-[80vh]">
                         <div className="py-6 space-y-6">
                           <div className="space-y-4" data-coupon-input>
                             <div className="relative">
                               <Input
                                 placeholder="Enter coupon code"
                                 value={couponCode}
-                                onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                onChange={(e) =>
+                                  setCouponCode(e.target.value.toUpperCase())
+                                }
                                 className="h-14 text-base border-2 border-gray-300 bg-white text-black rounded-xl focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm placeholder:text-gray-500"
                               />
                               <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
@@ -515,19 +534,25 @@ export default function StickyBookingWidget() {
                             </Button>
                             {couponError && (
                               <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3">
-                                <p className="text-sm text-red-600 font-medium">{couponError}</p>
+                                <p className="text-sm text-red-600 font-medium">
+                                  {couponError}
+                                </p>
                               </div>
                             )}
                           </div>
 
                           <div className="border-t-2 border-gray-200 pt-6">
                             <div className="flex items-center space-x-4 mb-6">
-                              <h3 className="text-lg font-bold text-black">Offers Available</h3>
+                              <h3 className="text-lg font-bold text-black">
+                                Offers Available
+                              </h3>
                               <div className="flex items-center space-x-3 text-sm">
                                 <span className="px-3 py-1 bg-gray-100 text-black rounded-full font-bold border-2 border-gray-200">
                                   Prime Discounts
                                 </span>
-                                <button className="text-gray-600 hover:text-black font-bold underline">T & C</button>
+                                <button className="text-gray-600 hover:text-black font-bold underline">
+                                  T & C
+                                </button>
                               </div>
                             </div>
 
@@ -541,11 +566,17 @@ export default function StickyBookingWidget() {
                                     <div className="flex items-start justify-between">
                                       <div className="flex items-center space-x-3">
                                         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-sm">%</span>
+                                          <span className="text-white font-bold text-sm">
+                                            %
+                                          </span>
                                         </div>
                                         <div>
-                                          <h4 className="font-bold text-black">{coupon.title}</h4>
-                                          <p className="text-sm text-gray-600">valid till: {coupon.validUntil}</p>
+                                          <h4 className="font-bold text-black">
+                                            {coupon.title}
+                                          </h4>
+                                          <p className="text-sm text-gray-600">
+                                            valid till: {coupon.validUntil}
+                                          </p>
                                         </div>
                                       </div>
                                       <div className="text-right">
@@ -563,7 +594,9 @@ export default function StickyBookingWidget() {
 
                                     <div className="flex items-center justify-between">
                                       <div className="bg-white border-2 border-dashed border-gray-400 px-4 py-2 rounded-lg">
-                                        <span className="font-mono text-sm font-bold text-black">{coupon.code}</span>
+                                        <span className="font-mono text-sm font-bold text-black">
+                                          {coupon.code}
+                                        </span>
                                       </div>
                                       <Button
                                         className={`px-6 py-2 rounded-lg font-bold transition-all duration-200 ${
@@ -571,13 +604,19 @@ export default function StickyBookingWidget() {
                                             ? "bg-gray-100 text-gray-500 border-2 border-gray-300"
                                             : "bg-black hover:bg-gray-800 text-white shadow-md hover:shadow-lg transform hover:scale-105"
                                         }`}
-                                        onClick={() => applyCouponFromSheet(coupon)}
-                                        disabled={appliedCoupon?.code === coupon.code}
+                                        onClick={() =>
+                                          applyCouponFromSheet(coupon)
+                                        }
+                                        disabled={
+                                          appliedCoupon?.code === coupon.code
+                                        }
                                       >
                                         {appliedCoupon?.code === coupon.code ? (
                                           <div className="flex items-center space-x-1">
                                             <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                              <span className="text-white text-xs">✓</span>
+                                              <span className="text-white text-xs">
+                                                ✓
+                                              </span>
                                             </div>
                                             <span>APPLIED</span>
                                           </div>
@@ -605,8 +644,12 @@ export default function StickyBookingWidget() {
                       <span className="text-gray-900 font-bold text-sm">%</span>
                     </div>
                     <div>
-                      <div className="font-semibold text-sm text-white">{appliedCoupon.code}</div>
-                      <div className="text-gray-300 text-sm">₹{discountAmount.toLocaleString()} Discount applied!</div>
+                      <div className="font-semibold text-sm text-white">
+                        {appliedCoupon.code}
+                      </div>
+                      <div className="text-gray-300 text-sm">
+                        ₹{discountAmount.toLocaleString()} Discount applied!
+                      </div>
                     </div>
                   </div>
                   <Button
@@ -622,19 +665,40 @@ export default function StickyBookingWidget() {
             </div>
 
             {/* Best Price Banner */}
-            <div className="bg-green-50 border-2 border-green-200 rounded-lg p-3 mb-4 transition-all duration-300 hover:bg-green-100 hover:shadow-sm">
-              <div className="text-center">
-                <div className="text-green-700 font-bold text-sm mb-1 transition-all duration-300">
-                  Select Dates for Best Price
+            <div className="flex items-center justify-between transition-all duration-300">
+              <div>
+                <div className="flex items-center space-x-2">
+                  <span className="text-gray-400 line-through text-sm transition-all duration-300">
+                    ₹58,750
+                  </span>
                 </div>
-                <div className="text-green-600 text-xs transition-all duration-300">
-                  Reserve to get exciting offer for this property!
+                <div className="flex items-baseline space-x-1">
+                  <span className="text-xl font-bold text-black transition-all duration-300">
+                    ₹{finalPrice.toLocaleString()}
+                  </span>
+                  <span className="text-gray-600 text-sm transition-all duration-300">
+                    (for {rooms} rooms)
+                  </span>
                 </div>
+                <span className="text-gray-500 text-xs transition-all duration-300">
+                  Per Night + Taxes
+                </span>
+                {appliedCoupon && (
+                  <div className="text-green-600 text-xs font-medium">
+                    Saved ₹{discountAmount.toLocaleString()} with{" "}
+                    {appliedCoupon.code}
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center space-x-1 text-sm transition-all duration-300">
+                <Star className="w-4 h-4 fill-current text-yellow-400 transition-all duration-300" />
+                <span className="font-medium text-black">4.8</span>
+                <span className="text-gray-500">/5</span>
               </div>
             </div>
 
             {/* Reserve Button */}
-            <Button className="w-full bg-black hover:bg-gray-800 text-white font-bold py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 text-lg">
+            <Button className="w-full mt-auto bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95">
               Reserve Now
             </Button>
           </CardContent>
@@ -643,11 +707,13 @@ export default function StickyBookingWidget() {
         {/* Sticky state indicator */}
         <div
           className={`absolute -top-1 left-0 right-0 h-0.5 rounded-full transition-all duration-500 ease-out ${
-            stickyState === "sticky" ? "opacity-100 transform scale-x-100" : "opacity-0 transform scale-x-0"
+            stickyState === "sticky"
+              ? "opacity-100 transform scale-x-100"
+              : "opacity-0 transform scale-x-0"
           }`}
           style={{ transformOrigin: "center" }}
         />
       </div>
     </div>
-  )
+  );
 }
