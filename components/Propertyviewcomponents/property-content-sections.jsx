@@ -336,7 +336,7 @@ export default function PropertyContentSections() {
       </section>
 
       {/* Meals Section */}
-      <section id="meals" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
+      {/* <section  className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
         <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Meals</h2>
         <Card className="transition-all duration-300 hover:shadow-lg">
           <CardContent className="p-6">
@@ -358,7 +358,7 @@ export default function PropertyContentSections() {
             </div>
           </CardContent>
         </Card>
-      </section>
+      </section> */}
 
       {/* Location Section */}
       <section id="location" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">

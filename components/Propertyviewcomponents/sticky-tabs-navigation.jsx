@@ -21,7 +21,6 @@ export default function StickyTabsNavigation({ onTabChange }) {
     { id: "spaces", label: "Spaces" },
     { id: "reviews", label: "Reviews" },
     { id: "amenities", label: "Amenities" },
-    { id: "meals", label: "Meals" },
     { id: "location", label: "Location" },
     { id: "experiences", label: "Experiences" },
     { id: "faqs", label: "FAQ's" },

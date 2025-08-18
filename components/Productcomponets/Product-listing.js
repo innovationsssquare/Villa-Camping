@@ -56,6 +56,7 @@ import {
   clearAllFilters,
 } from "@/Redux/Slices/propertyFilterSlice";
 import PropertyCardSkeleton from "../Availableweekend/property-card-skeleton";
+import { IoSearchCircle } from "react-icons/io5";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
   // TODO: Replace with actual API call
@@ -804,7 +805,7 @@ export default function PropertyFilterListing() {
   );
 
   return (
-    <div className="w-full mx-auto md:px-4 px-3 md:py-8 py-4 bg-gray-50 h-auto ">
+    <div className="w-full mx-auto px-0 md:px-4  md:py-8 py-4 bg-gray-50 h-auto ">
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg">
@@ -825,18 +826,18 @@ export default function PropertyFilterListing() {
           <FilterSidebar />
         </div>
 
-        <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full">
-          <div className="sticky top-16 z-40 bg-gray-50 py-4 mb-6 shrink-0 border-b border-gray-200">
-            <div className="flex md:hidden justify-between gap-2 items-center ">
-              <div className="relative w-full">
+        <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
+          <div className="sticky top-16 z-40 bg-white md:bg-white backdrop-blur-2xl py-4 mb-6 shrink-0 border-b border-gray-200 px-3 rounded-t-2xl md:rounded-none">
+            <div className="flex md:hidden justify-between gap-2 items-center  ">
+              <div className="relative w-full  h-10 rounded-full bg-[#FFFFFF4D] border-gray-300 text-gray-900 flex justify-start items-center">
+                <IoSearchCircle  className="absolute  h-10 w-10 text-black" />
                 <Input
                   type="text"
                   placeholder="Search properties..."
-                  className="w-full h-10 rounded-full bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10 pr-4 py-2 text-sm focus:border-black"
+                  className="w-full pl-10 h-10  border rounded-full  text-sm focus:border-gray-300"
                   value={searchQuery}
                   onChange={(e) => dispatch(setSearchQuery(e.target.value))}
                 />
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
               </div>
 
               <Drawer>
@@ -954,7 +955,7 @@ export default function PropertyFilterListing() {
 
           <div className="flex-1 overflow-hidden">
             <div className="h-auto mt-10 md:mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 ">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 px-3 md:px-0 bg-white">
                 {loading
                   ? Array.from({ length: 6 }).map((_, index) => (
                       <PropertyCardSkeleton key={`skeleton-${index}`} />

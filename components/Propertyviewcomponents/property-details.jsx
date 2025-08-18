@@ -23,6 +23,8 @@ import PropertyHeaderSection from "./property-header-section";
 import StickyTabsNavigation from "./sticky-tabs-navigation";
 import PropertyContentSections from "./property-content-sections";
 import StickyBookingWidget from "./sticky-booking-widget";
+import Logo  from "../../public/Loginasset/Logo2.png"
+import Image from "next/image";
 
 export default function PropertyDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -72,29 +74,22 @@ export default function PropertyDetails() {
       }}
     >
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
+      <header className="bg-[#FFFFFF4D] backdrop-blur-2xl border-b border-gray-200 sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-8">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">S</span>
+                <div className="flex items-center space-x-2">
+                  <Image
+                    src={Logo}
+                    alt="Thevillacamp"
+                    className="h-12 w-12 object-contain mt-2"
+                  />
+
+                  {/* <span className="text-black  font-bold text-xl hidden sm:block">Thevillacamp</span> */}
                 </div>
-                <span className="text-red-500 font-bold text-xl">
-                  StayVista
-                </span>
               </div>
-              <nav className="hidden md:flex space-x-8">
-                <a href="#" className="text-gray-700 hover:text-gray-900">
-                  Homes
-                </a>
-                <a href="#" className="text-gray-700 hover:text-gray-900">
-                  Experiences
-                </a>
-                <a href="#" className="text-gray-700 hover:text-gray-900">
-                  Online Experiences
-                </a>
-              </nav>
+             
             </div>
             <div className="flex items-center space-x-4">
               <Button variant="ghost" size="sm">
@@ -114,24 +109,19 @@ export default function PropertyDetails() {
 
         <PropertyHeaderSection />
 
- <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Content Sections */}
-          <div className="lg:col-span-2">
-            <PropertyContentSections/>
-          </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Content Sections */}
+            <div className="lg:col-span-2">
+              <PropertyContentSections />
+            </div>
 
-          {/* Sticky Booking Widget */}
-          <div className="lg:col-span-1 relative">
-            <StickyBookingWidget/>
+            {/* Sticky Booking Widget */}
+            <div className="lg:col-span-1 relative">
+              <StickyBookingWidget />
+            </div>
           </div>
         </div>
-      </div>
-
-
-
-
-
 
         {/* Property Header */}
         {/* <div className="mb-6">
