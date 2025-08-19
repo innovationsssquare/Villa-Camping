@@ -497,13 +497,13 @@ export default function StickyBookingWidget() {
                   >
                     <div className="flex flex-col h-full">
                       <SheetHeader className="border-b-2 border-gray-200 p-6 pb-4 bg-white">
-                        <SheetTitle className="text-2xl font-bold text-black">
+                        <SheetTitle className="text-lg font-bold text-black">
                           Coupons and Offers
                         </SheetTitle>
                       </SheetHeader>
 
                       <ScrollArea className="flex-1 px-6 bg-white h-[80vh]">
-                        <div className="py-6 space-y-6">
+                        <div className="py-3 space-y-6">
                           <div className="space-y-4" data-coupon-input>
                             <div className="relative">
                               <Input
@@ -512,14 +512,14 @@ export default function StickyBookingWidget() {
                                 onChange={(e) =>
                                   setCouponCode(e.target.value.toUpperCase())
                                 }
-                                className="h-14 text-base border-2 border-gray-300 bg-white text-black rounded-xl focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm placeholder:text-gray-500"
+                                className="h-12 text-base border-2 border-gray-300 bg-white text-black rounded-xl focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm placeholder:text-gray-500"
                               />
                               <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
                                 <Gift className="w-5 h-5 text-gray-400" />
                               </div>
                             </div>
                             <Button
-                              className="w-full bg-black hover:bg-gray-800 text-white h-14 text-base font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+                              className="w-full bg-black  text-white h-10 text-base font-bold rounded-xl  transition-all hover:bg-black"
                               onClick={() => applyCoupon(couponCode)}
                               disabled={!couponCode || isApplyingCoupon}
                             >
@@ -543,16 +543,14 @@ export default function StickyBookingWidget() {
 
                           <div className="border-t-2 border-gray-200 pt-6">
                             <div className="flex items-center space-x-4 mb-6">
-                              <h3 className="text-lg font-bold text-black">
+                              <h3 className="text-sm font-bold text-black">
                                 Offers Available
                               </h3>
                               <div className="flex items-center space-x-3 text-sm">
-                                <span className="px-3 py-1 bg-gray-100 text-black rounded-full font-bold border-2 border-gray-200">
+                                <span className="px-3  bg-gray-100 text-black rounded-full font-bold border-2 border-gray-200">
                                   Prime Discounts
                                 </span>
-                                <button className="text-gray-600 hover:text-black font-bold underline">
-                                  T & C
-                                </button>
+  
                               </div>
                             </div>
 
@@ -560,27 +558,27 @@ export default function StickyBookingWidget() {
                               {availableCoupons.map((coupon, index) => (
                                 <Card
                                   key={coupon.code}
-                                  className="p-6 border-2 border-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 bg-white"
+                                  className="p-6 border border-white bg-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 "
                                 >
-                                  <div className="space-y-4">
+                                  <div className="space-y-2">
                                     <div className="flex items-start justify-between">
-                                      <div className="flex items-center space-x-3">
+                                      <div className="flex items-center space-x-2">
                                         <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center flex-shrink-0">
                                           <span className="text-white font-bold text-sm">
                                             %
                                           </span>
                                         </div>
                                         <div>
-                                          <h4 className="font-bold text-black">
+                                          <h4 className="font-bold text-black text-sm">
                                             {coupon.title}
                                           </h4>
-                                          <p className="text-sm text-gray-600">
+                                          <p className="text-xs text-gray-600">
                                             valid till: {coupon.validUntil}
                                           </p>
                                         </div>
                                       </div>
                                       <div className="text-right">
-                                        <div className="text-lg font-bold text-black">
+                                        <div className="text-sm font-bold text-black">
                                           {coupon.type === "percentage"
                                             ? `${coupon.discount}% OFF`
                                             : `₹${coupon.discount} OFF`}
@@ -588,7 +586,7 @@ export default function StickyBookingWidget() {
                                       </div>
                                     </div>
 
-                                    <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                    <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
                                       {coupon.description}
                                     </p>
 

@@ -1,120 +1,134 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { X, ChevronLeft, ChevronRight, Share, Heart, ZoomIn, ZoomOut, RotateCcw } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Share,
+  Heart,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export default function ImageGalleryDialog({ isOpen, onClose, images, initialIndex = 0 }) {
-  const [currentIndex, setCurrentIndex] = useState(initialIndex)
-  const [zoomLevel, setZoomLevel] = useState(1)
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const [isLiked, setIsLiked] = useState(false)
+export default function ImageGalleryDialog({
+  isOpen,
+  onClose,
+  images,
+  initialIndex = 0,
+}) {
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
+  const [zoomLevel, setZoomLevel] = useState(1);
+  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [isLiked, setIsLiked] = useState(false);
 
   useEffect(() => {
-    setCurrentIndex(initialIndex)
-  }, [initialIndex])
+    setCurrentIndex(initialIndex);
+  }, [initialIndex]);
 
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = "hidden"
+      document.body.style.overflow = "hidden";
     } else {
-      document.body.style.overflow = "unset"
+      document.body.style.overflow = "unset";
     }
     return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [isOpen])
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const nextImage = () => {
-    setCurrentIndex((prev) => (prev + 1) % images.length)
-    resetZoom()
-  }
+    setCurrentIndex((prev) => (prev + 1) % images.length);
+    resetZoom();
+  };
 
   const prevImage = () => {
-    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length)
-    resetZoom()
-  }
+    setCurrentIndex((prev) => (prev - 1 + images.length) % images.length);
+    resetZoom();
+  };
 
   const resetZoom = () => {
-    setZoomLevel(1)
-    setZoomPosition({ x: 0, y: 0 })
-  }
+    setZoomLevel(1);
+    setZoomPosition({ x: 0, y: 0 });
+  };
 
   const handleZoomIn = () => {
-    setZoomLevel((prev) => Math.min(prev + 0.5, 3))
-  }
+    setZoomLevel((prev) => Math.min(prev + 0.5, 3));
+  };
 
   const handleZoomOut = () => {
-    const newZoom = Math.max(zoomLevel - 0.5, 1)
-    setZoomLevel(newZoom)
+    const newZoom = Math.max(zoomLevel - 0.5, 1);
+    setZoomLevel(newZoom);
     if (newZoom === 1) {
-      setZoomPosition({ x: 0, y: 0 })
+      setZoomPosition({ x: 0, y: 0 });
     }
-  }
+  };
 
   const handleMouseDown = (e) => {
     if (zoomLevel > 1) {
-      setIsDragging(true)
+      setIsDragging(true);
       setDragStart({
         x: e.clientX - zoomPosition.x,
         y: e.clientY - zoomPosition.y,
-      })
+      });
     }
-  }
+  };
 
   const handleMouseMove = (e) => {
     if (isDragging && zoomLevel > 1) {
-      const newX = e.clientX - dragStart.x
-      const newY = e.clientY - dragStart.y
+      const newX = e.clientX - dragStart.x;
+      const newY = e.clientY - dragStart.y;
 
-      const maxX = (zoomLevel - 1) * 300
-      const maxY = (zoomLevel - 1) * 200
+      const maxX = (zoomLevel - 1) * 300;
+      const maxY = (zoomLevel - 1) * 200;
 
       setZoomPosition({
         x: Math.max(-maxX, Math.min(maxX, newX)),
         y: Math.max(-maxY, Math.min(maxY, newY)),
-      })
+      });
     }
-  }
+  };
 
   const handleMouseUp = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleKeyDown = (e) => {
-    if (!isOpen) return
+    if (!isOpen) return;
 
     switch (e.key) {
       case "Escape":
-        onClose()
-        break
+        onClose();
+        break;
       case "ArrowLeft":
-        prevImage()
-        break
+        prevImage();
+        break;
       case "ArrowRight":
-        nextImage()
-        break
+        nextImage();
+        break;
       case "+":
       case "=":
-        handleZoomIn()
-        break
+        handleZoomIn();
+        break;
       case "-":
-        handleZoomOut()
-        break
+        handleZoomOut();
+        break;
       case "0":
-        resetZoom()
-        break
+        resetZoom();
+        break;
     }
-  }
+  };
 
   useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
-  }, [isOpen, currentIndex, zoomLevel])
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, currentIndex, zoomLevel]);
 
-  if (!isOpen) return null
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/95 backdrop-blur-sm">
@@ -169,14 +183,14 @@ export default function ImageGalleryDialog({ isOpen, onClose, images, initialInd
               </Button>
 
               {/* Action Buttons */}
-              <Button variant="ghost" size="icon" className="text-white hover:bg-white/20 rounded-full">
-                <Share className="w-5 h-5" />
-              </Button>
+
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsLiked(!isLiked)}
-                className={`rounded-full hover:bg-white/20 ${isLiked ? "text-red-500" : "text-white"}`}
+                className={`rounded-full hover:bg-white/20 ${
+                  isLiked ? "text-red-500" : "text-white"
+                }`}
               >
                 <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
               </Button>
@@ -197,9 +211,9 @@ export default function ImageGalleryDialog({ isOpen, onClose, images, initialInd
               onMouseLeave={handleMouseUp}
               onDoubleClick={() => {
                 if (zoomLevel === 1) {
-                  setZoomLevel(2)
+                  setZoomLevel(2);
                 } else {
-                  resetZoom()
+                  resetZoom();
                 }
               }}
             >
@@ -208,7 +222,9 @@ export default function ImageGalleryDialog({ isOpen, onClose, images, initialInd
                 alt={`Gallery image ${currentIndex + 1}`}
                 className="max-w-full max-h-[70vh] object-contain transition-transform duration-300 select-none"
                 style={{
-                  transform: `scale(${zoomLevel}) translate(${zoomPosition.x / zoomLevel}px, ${zoomPosition.y / zoomLevel}px)`,
+                  transform: `scale(${zoomLevel}) translate(${
+                    zoomPosition.x / zoomLevel
+                  }px, ${zoomPosition.y / zoomLevel}px)`,
                 }}
                 draggable={false}
               />
@@ -246,15 +262,15 @@ export default function ImageGalleryDialog({ isOpen, onClose, images, initialInd
         </div>
 
         {/* Thumbnail Strip */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
+        <div className="absolute bottom-12 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
           <div className="p-4 md:p-6">
             <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
               {images.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => {
-                    setCurrentIndex(index)
-                    resetZoom()
+                    setCurrentIndex(index);
+                    resetZoom();
                   }}
                   className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                     index === currentIndex
@@ -272,12 +288,14 @@ export default function ImageGalleryDialog({ isOpen, onClose, images, initialInd
             </div>
           </div>
         </div>
-
+        <Button onClick={onClose} className="w-11/12 flex justify-center items-center mx-auto md:hidden  h-10 text-lg text-black mb-2 font-semibold bg-white hover:bg-white border border-black">
+          Close
+        </Button>
         {/* Instructions */}
         <div className="absolute bottom-20 right-6 text-white/70 text-sm hidden md:block">
           <div>← → Navigate • Double-click to zoom • ESC to close</div>
         </div>
       </div>
     </div>
-  )
+  );
 }

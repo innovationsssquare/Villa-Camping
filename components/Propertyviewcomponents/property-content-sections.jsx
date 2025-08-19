@@ -1,37 +1,56 @@
-"use client"
+"use client";
 
-import { Star, Wifi, Car, Waves, Coffee, Mountain, UtensilsCrossed, MapPin, Phone } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import {
+  FaStar,
+  FaWifi,
+  FaCar,
+  FaWater,
+  FaCoffee,
+  FaMountain,
+  FaUtensils,
+  FaMapMarkerAlt,
+  FaHome,
+  FaBed,
+  FaLeaf,
+  FaHiking,
+  FaSun,
+} from "react-icons/fa";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import GoogleMap from "./google-map";
 
 export default function PropertyContentSections() {
   const amenities = [
-    { icon: Mountain, label: "Mountain View", available: true },
-    { icon: UtensilsCrossed, label: "Breakfast Included", available: true },
-    { icon: Wifi, label: "WiFi", available: true },
-    { icon: Waves, label: "Jacuzzi", available: true },
-    { icon: Coffee, label: "BBQ Grill", available: true },
-    { icon: Car, label: "Parking", available: true },
-  ]
+    { icon: FaMountain, label: "Mountain View", available: true },
+    { icon: FaUtensils, label: "Breakfast Included", available: true },
+    { icon: FaWifi, label: "WiFi", available: true },
+    { icon: FaWater, label: "Jacuzzi", available: true },
+    { icon: FaCoffee, label: "BBQ Grill", available: true },
+    { icon: FaCar, label: "Parking", available: true },
+  ];
 
   const experiences = [
     {
       title: "FULLY-SERVICED VILLAS",
-      image: "/placeholder.svg?height=200&width=300&text=Fully+Serviced+Villas",
+      image:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
     },
     {
-      title: "FOUR COURSE MEAL",
-      image: "/placeholder.svg?height=200&width=300&text=Four+Course+Meal",
+      title: "PARTY VIBE",
+      image:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
     },
     {
       title: "PREMIUM INTERIORS",
-      image: "/placeholder.svg?height=200&width=300&text=Premium+Interiors",
+      image:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
     },
     {
       title: "CURATED EXPERIENCES",
-      image: "/placeholder.svg?height=200&width=300&text=Curated+Experiences",
+      image:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
     },
-  ]
+  ];
 
   const reviews = [
     {
@@ -40,94 +59,47 @@ export default function PropertyContentSections() {
       date: "March 2024",
       comment:
         "Absolutely stunning property with breathtaking mountain views. The villa is spacious and well-maintained.",
-      avatar: "PS",
+      avatar:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
     },
     {
       name: "Rajesh Kumar",
       rating: 5,
       date: "February 2024",
-      comment: "Perfect for a family getaway. The amenities were excellent and the staff was very helpful.",
-      avatar: "RK",
+      comment:
+        "Perfect for a family getaway. The amenities were excellent and the staff was very helpful.",
+      avatar:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
     },
     {
       name: "Anita Patel",
       rating: 4,
       date: "January 2024",
-      comment: "Beautiful location and great facilities. Would definitely recommend for a peaceful retreat.",
-      avatar: "AP",
+      comment:
+        "Beautiful location and great facilities. Would definitely recommend for a peaceful retreat.",
+      avatar:
+        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
     },
-  ]
+  ];
 
   return (
-    <div
-      className="max-w-4xl space-y-12"
-      style={{
-        fontFamily:
-          'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-      }}
-    >
-      {/* Overview Section */}
-      <section id="overview" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <div className="prose max-w-none">
-          <p className="text-gray-700 leading-relaxed mb-4 transition-all duration-300">
-            Experience luxury and tranquility at Barkat Villa, a stunning property nestled in the picturesque hills of
-            Ramgarh, Nainital. This magnificent villa offers breathtaking mountain views and is perfect for families and
-            groups seeking an unforgettable getaway.
-          </p>
-          <p className="text-gray-700 leading-relaxed mb-6 transition-all duration-300">
-            The villa features spacious rooms, modern amenities, and beautiful outdoor spaces where you can relax and
-            enjoy the serene mountain atmosphere. With its prime location and exceptional facilities, Barkat Villa
-            promises a memorable stay in the heart of Uttarakhand.
-          </p>
-
-          {/* Amenities Preview */}
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
-            {amenities.map((amenity, index) => (
-              <div
-                key={index}
-                className="flex flex-col items-center text-center p-4 bg-gray-50 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md hover:transform hover:scale-105 cursor-pointer"
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mb-2 shadow-sm transition-all duration-300 hover:shadow-md">
-                  <amenity.icon className="w-6 h-6 text-gray-600 transition-all duration-300" />
-                </div>
-                <span className="text-sm font-medium text-gray-700 transition-all duration-300">{amenity.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <Button
-            variant="link"
-            className="text-blue-500 hover:text-blue-600 p-0 h-auto font-medium transition-all duration-300 hover:transform hover:scale-105"
-          >
-            +20 Amenities
-          </Button>
-
-          {/* Connect with Host */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-lg p-6 mt-8 transition-all duration-300 hover:bg-gray-100 hover:shadow-md">
-            <div className="flex items-center space-x-3">
-              <Phone className="w-5 h-5 text-gray-600 transition-all duration-300" />
-              <span className="font-medium text-gray-900 transition-all duration-300">Connect with Host</span>
-            </div>
-            <Button
-              variant="outline"
-              className="bg-white hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105"
-            >
-              Request Callback
-            </Button>
-          </div>
-        </div>
-      </section>
-
+    <div className="w-full space-y-12">
       {/* Highlights Section */}
-      <section id="highlights" className="scroll-mt-32 min-h-[600px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Property Highlights</h2>
+      <section
+        id="highlights"
+        className="scroll-mt-32 min-h-[300px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
+          Property Highlights
+        </h2>
 
         {/* The StayVista Experience */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
-            <div className="w-1 h-8 bg-red-500 mr-4 transition-all duration-300"></div>
-            <h3 className="text-xl font-bold text-gray-900 transition-all duration-300">The StayVista Experience</h3>
+            <div className="w-1 h-8 bg-black mr-4 transition-all duration-300"></div>
+            <h3 className="text-xl font-bold text-black transition-all duration-300">
+              The VillaCamp Experience
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -142,7 +114,7 @@ export default function PropertyContentSections() {
                   alt={experience.title}
                   className="w-full h-48 object-cover transition-all duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 group-hover:bg-black/50">
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 group-hover:bg-black/60">
                   <h4 className="text-white font-bold text-center px-4 transition-all duration-300 group-hover:transform group-hover:scale-105">
                     {experience.title}
                   </h4>
@@ -151,66 +123,42 @@ export default function PropertyContentSections() {
             ))}
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            {
-              icon: "🏔️",
-              title: "Stunning Mountain Views",
-              desc: "Wake up to breathtaking panoramic views of the Himalayan ranges from every room of the villa.",
-            },
-            {
-              icon: "🏡",
-              title: "Spacious Accommodation",
-              desc: "5 well-appointed rooms that can comfortably accommodate up to 15 guests.",
-            },
-            {
-              icon: "🍽️",
-              title: "Delicious Meals",
-              desc: "Enjoy authentic local cuisine and continental dishes prepared by our experienced chefs.",
-            },
-            {
-              icon: "🌿",
-              title: "Peaceful Location",
-              desc: "Located away from the hustle and bustle, perfect for a peaceful and rejuvenating retreat.",
-            },
-          ].map((item, index) => (
-            <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-3 transition-all duration-300">
-                  {item.icon} {item.title}
-                </h3>
-                <p className="text-gray-600 transition-all duration-300">{item.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </section>
 
       {/* Refund Policy Section */}
-      <section id="refund-policy" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Refund Policy</h2>
-        <Card className="transition-all duration-300 hover:shadow-lg">
+      <section
+        id="refund-policy"
+        className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
+          Refund Policy
+        </h2>
+        <Card className="border-gray-200 border transition-all duration-300">
           <CardContent className="p-6">
             <div className="space-y-4">
               <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-2 transition-all duration-300">Cancellation Policy</h3>
-                <ul className="space-y-2 text-gray-700">
-                  <li className="transition-all duration-300 hover:text-gray-900">
+                <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
+                  Cancellation Policy
+                </h3>
+                <ul className="space-y-2 text-gray-700 text-sm">
+                  <li className="transition-all duration-300 hover:text-black">
                     • Free cancellation up to 7 days before check-in
                   </li>
-                  <li className="transition-all duration-300 hover:text-gray-900">
+                  <li className="transition-all duration-300 hover:text-black">
                     • 50% refund for cancellations 3-7 days before check-in
                   </li>
-                  <li className="transition-all duration-300 hover:text-gray-900">
+                  <li className="transition-all duration-300 hover:text-black">
                     • No refund for cancellations within 3 days of check-in
                   </li>
                 </ul>
               </div>
               <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-2 transition-all duration-300">Modification Policy</h3>
-                <p className="text-gray-700 transition-all duration-300 hover:text-gray-900">
-                  Date changes are subject to availability and may incur additional charges based on rate differences.
+                <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
+                  Modification Policy
+                </h3>
+                <p className="text-gray-700 transition-all duration-300 hover:text-black text-sm">
+                  Date changes are subject to availability and may incur
+                  additional charges based on rate differences.
                 </p>
               </div>
             </div>
@@ -219,12 +167,24 @@ export default function PropertyContentSections() {
       </section>
 
       {/* Spaces Section */}
-      <section id="spaces" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Spaces</h2>
+      <section
+        id="spaces"
+        className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
+          Spaces
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-6 -m-6">
-            <h3 className="font-semibold text-lg mb-4 transition-all duration-300">Indoor Spaces</h3>
-            <ul className="space-y-2 text-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-gray-200 border border-white rounded-md flex items-center justify-center mr-3">
+                <FaBed className="w-4 h-4 text-black" />
+              </div>
+              <h3 className="font-semibold text-lg text-black transition-all duration-300">
+                Indoor Spaces
+              </h3>
+            </div>
+            <ul className="space-y-2 text-gray-700 text-sm">
               {[
                 "5 spacious bedrooms with mountain views",
                 "Large living room with comfortable seating",
@@ -234,7 +194,7 @@ export default function PropertyContentSections() {
               ].map((item, index) => (
                 <li
                   key={index}
-                  className="transition-all duration-300 hover:text-gray-900 hover:transform hover:translate-x-2"
+                  className="transition-all duration-300 hover:text-black hover:transform hover:translate-x-2"
                 >
                   • {item}
                 </li>
@@ -242,8 +202,15 @@ export default function PropertyContentSections() {
             </ul>
           </div>
           <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-6 -m-6">
-            <h3 className="font-semibold text-lg mb-4 transition-all duration-300">Outdoor Spaces</h3>
-            <ul className="space-y-2 text-gray-700">
+            <div className="flex items-center mb-4">
+              <div className="w-8 h-8 bg-gray-200 border border-white rounded-md flex items-center justify-center mr-3">
+                <FaLeaf className="w-4 h-4 text-black" />
+              </div>
+              <h3 className="font-semibold text-lg text-black transition-all duration-300">
+                Outdoor Spaces
+              </h3>
+            </div>
+            <ul className="space-y-2 text-gray-700 text-sm">
               {[
                 "Private garden with mountain views",
                 "Outdoor seating area",
@@ -253,7 +220,7 @@ export default function PropertyContentSections() {
               ].map((item, index) => (
                 <li
                   key={index}
-                  className="transition-all duration-300 hover:text-gray-900 hover:transform hover:translate-x-2"
+                  className="transition-all duration-300 hover:text-black hover:transform hover:translate-x-2"
                 >
                   • {item}
                 </li>
@@ -264,38 +231,58 @@ export default function PropertyContentSections() {
       </section>
 
       {/* Reviews Section */}
-      <section id="reviews" className="scroll-mt-32 min-h-[600px] transition-all duration-500 ease-out">
+      <section
+        id="reviews"
+        className="scroll-mt-32 min-h-[600px] transition-all duration-500 ease-out"
+      >
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 transition-all duration-300">Reviews</h2>
+          <h2 className="text-2xl font-bold text-black transition-all duration-300">
+            Reviews
+          </h2>
           <div className="flex items-center space-x-2 transition-all duration-300 hover:transform hover:scale-105">
-            <Star className="w-5 h-5 fill-current text-yellow-400 transition-all duration-300" />
-            <span className="text-xl font-semibold transition-all duration-300">4.8</span>
-            <span className="text-gray-500 transition-all duration-300">• 65 reviews</span>
+            <FaStar className="w-5 h-5 text-yellow-400 transition-all duration-300" />
+            <span className="text-xl font-semibold text-black transition-all duration-300">
+              4.8
+            </span>
+            <span className="text-gray-500 transition-all duration-300">
+              • 65 reviews
+            </span>
           </div>
         </div>
 
         <div className="space-y-6">
           {reviews.map((review, index) => (
-            <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:transform hover:scale-102">
-              <CardContent className="p-6">
+            <Card
+              key={index}
+              className="border-gray-200 border transition-all duration-300 "
+            >
+              <CardContent className="p-3">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-semibold transition-all duration-300 hover:bg-blue-600">
-                    {review.avatar}
-                  </div>
+                  <img
+                    src={review.avatar || "/placeholder.svg"}
+                    alt={review.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 transition-all duration-300 hover:border-gray-400"
+                  />
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-gray-900 transition-all duration-300">{review.name}</h4>
-                      <span className="text-sm text-gray-500 transition-all duration-300">{review.date}</span>
+                      <h4 className="font-semibold text-black transition-all duration-300">
+                        {review.name}
+                      </h4>
+                      <span className="text-sm text-gray-500 transition-all duration-300">
+                        {review.date}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-1 mb-3">
                       {[...Array(review.rating)].map((_, i) => (
-                        <Star
+                        <FaStar
                           key={i}
-                          className="w-4 h-4 fill-current text-yellow-400 transition-all duration-300 hover:scale-125"
+                          className="w-4 h-4 text-yellow-400 transition-all duration-300 hover:scale-125"
                         />
                       ))}
                     </div>
-                    <p className="text-gray-700 transition-all duration-300">{review.comment}</p>
+                    <p className="text-gray-700 transition-all text-sm duration-300">
+                      {review.comment}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -305,132 +292,120 @@ export default function PropertyContentSections() {
 
         <Button
           variant="outline"
-          className="mt-6 bg-transparent transition-all duration-300 hover:shadow-md hover:transform hover:scale-105"
+          className="mt-6 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105 bg-transparent"
         >
           Show all 65 reviews
         </Button>
       </section>
 
       {/* Amenities Section */}
-      <section id="amenities" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Amenities</h2>
+      <section
+        id="amenities"
+        className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-2xl font-bold text-black mb-3 transition-all duration-300">
+          Amenities
+        </h2>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
           {amenities.map((amenity, index) => (
             <div
               key={index}
-              className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md hover:transform hover:scale-105"
+              className="flex items-center space-x-3 p-4 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md hover:transform hover:scale-105"
             >
-              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center transition-all duration-300">
-                <amenity.icon className="w-4 h-4 text-green-600 transition-all duration-300" />
+              <div className="w-10 h-10 bg-gray-200 border border-white rounded-md flex items-center justify-center transition-all duration-300">
+                <amenity.icon className="w-5 h-5 text-black transition-all duration-300" />
               </div>
-              <span className="font-medium text-gray-900 transition-all duration-300">{amenity.label}</span>
+              <span className="font-medium text-sm text-black transition-all duration-300">
+                {amenity.label}
+              </span>
             </div>
           ))}
         </div>
         <Button
           variant="outline"
-          className="mt-6 bg-transparent transition-all duration-300 hover:shadow-md hover:transform hover:scale-105"
+          className="mt-6 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105 bg-transparent"
         >
-          <span className="text-blue-500">+20 Amenities</span>
+          <span className="text-gray-600">+20 Amenities</span>
         </Button>
       </section>
 
-      {/* Meals Section */}
-      {/* <section  className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Meals</h2>
-        <Card className="transition-all duration-300 hover:shadow-lg">
-          <CardContent className="p-6">
-            <div className="space-y-6">
-              <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-3 transition-all duration-300">Breakfast</h3>
-                <p className="text-gray-700 mb-2 transition-all duration-300">
-                  Start your day with a delicious breakfast featuring local and continental options.
-                </p>
-                <span className="text-green-600 font-medium transition-all duration-300">Included in stay</span>
-              </div>
-              <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-3 transition-all duration-300">Lunch & Dinner</h3>
-                <p className="text-gray-700 mb-2 transition-all duration-300">
-                  Enjoy authentic Kumaoni cuisine and popular Indian dishes prepared with fresh local ingredients.
-                </p>
-                <span className="text-blue-600 font-medium transition-all duration-300">Available on request</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section> */}
-
       {/* Location Section */}
-      <section id="location" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Location</h2>
-        <Card className="transition-all duration-300 hover:shadow-lg">
+      <section
+        id="location"
+        className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
+          Location
+        </h2>
+        <Card className="border-gray-200 transition-all duration-300 hover:shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-start space-x-4 mb-4">
-              <MapPin className="w-5 h-5 text-red-500 mt-1 transition-all duration-300 hover:scale-125" />
+              <div className="w-8 h-8 bg-gray-200 border border-white rounded-md flex items-center justify-center">
+                <FaMapMarkerAlt className="w-4 h-4 text-black transition-all duration-300" />
+              </div>
               <div>
-                <h3 className="font-semibold text-lg transition-all duration-300">Ramgarh, Nainital</h3>
-                <p className="text-gray-600 transition-all duration-300">Uttarakhand, India</p>
+                <h3 className="font-semibold text-lg text-black transition-all duration-300">
+                  Vastalya, Malawali
+                </h3>
+                <p className="text-gray-600 transition-all duration-300">
+                  Lonavala, Pune
+                </p>
               </div>
             </div>
-            <div className="bg-gray-200 rounded-lg h-64 mb-4 flex items-center justify-center transition-all duration-300 hover:bg-gray-300">
-              <span className="text-gray-500 transition-all duration-300">Interactive Map</span>
-            </div>
-            <p className="text-gray-700 transition-all duration-300">
-              Located in the serene hill station of Ramgarh, this villa offers easy access to local attractions while
-              maintaining privacy and tranquility. The property is approximately 20 km from Nainital city center.
+            <GoogleMap
+              center={{ lat: 18.7645, lng: 73.4084 }}
+              zoom={14}
+              className="w-full h-64 rounded-lg mb-4 border border-gray-300"
+            />
+            <p className="text-gray-700 text-sm transition-all duration-300">
+              Located in the serene hill station of Ramgarh, this villa offers
+              easy access to local attractions while maintaining privacy and
+              tranquility. The property is approximately 20 km from Nainital
+              city center.
             </p>
           </CardContent>
         </Card>
       </section>
 
-      {/* Experiences Section */}
-      <section id="experiences" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">Experiences</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {[
-            {
-              icon: "🥾",
-              title: "Nature Walks",
-              desc: "Explore the beautiful trails around Ramgarh with guided nature walks through apple orchards and pine forests.",
-            },
-            {
-              icon: "🌅",
-              title: "Sunrise Views",
-              desc: "Wake up early to witness spectacular sunrise views over the Himalayan peaks from the villa's terrace.",
-            },
-          ].map((item, index) => (
-            <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-3 transition-all duration-300">
-                  {item.icon} {item.title}
-                </h3>
-                <p className="text-gray-600 transition-all duration-300">{item.desc}</p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
-
       {/* FAQs Section */}
-      <section id="faqs" className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 transition-all duration-300">
+      <section
+        id="faqs"
+        className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out"
+      >
+        <h2 className="text-lg font-bold text-black mb-6 transition-all duration-300">
           Frequently Asked Questions
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-2">
           {[
-            { q: "What is the check-in and check-out time?", a: "Check-in: 2:00 PM | Check-out: 11:00 AM" },
-            { q: "Is parking available?", a: "Yes, free parking is available for multiple vehicles." },
-            { q: "Are pets allowed?", a: "Pets are allowed with prior approval and additional charges may apply." },
+            {
+              q: "What is the check-in and check-out time?",
+              a: "Check-in: 2:00 PM | Check-out: 11:00 AM",
+            },
+            {
+              q: "Is parking available?",
+              a: "Yes, free parking is available for multiple vehicles.",
+            },
+            {
+              q: "Are pets allowed?",
+              a: "Pets are allowed with prior approval and additional charges may apply.",
+            },
           ].map((faq, index) => (
-            <Card key={index} className="transition-all duration-300 hover:shadow-lg hover:transform hover:scale-102">
-              <CardContent className="p-6">
-                <h3 className="font-semibold text-lg mb-2 transition-all duration-300">{faq.q}</h3>
-                <p className="text-gray-700 transition-all duration-300">{faq.a}</p>
+            <Card
+              key={index}
+              className="border-gray-200 border transition-all duration-300"
+            >
+              <CardContent className="p-3">
+                <h3 className="font-semibold text-base mb-2 text-black transition-all duration-300">
+                  {faq.q}
+                </h3>
+                <p className="text-gray-700 text-sm transition-all duration-300">
+                  {faq.a}
+                </p>
               </CardContent>
             </Card>
           ))}
         </div>
       </section>
     </div>
-  )
+  );
 }

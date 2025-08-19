@@ -1,41 +1,37 @@
 "use client"
 
 import {
-  Star,
-  Users,
-  Home,
-  Bath,
-  ChefHat,
-  Mountain,
-  Utensils,
-  Wifi,
-  Waves,
-  Flame,
-  MapPin,
-  Award,
-  Info,
-  FileText,
-  Car,
-  Tv,
-  Wind,
-  Coffee,
-  Gamepad2,
-  Camera,
-  Music,
-  Dumbbell,
-  TreePine,
-  Sun,
-  Snowflake,
-  Shield,
-  Clock,
-  Phone,
-  Shirt,
-  MenuIcon as Restaurant,
-  Bed,
-  Sofa,
-  Refrigerator,
-  Microwave,
-} from "lucide-react"
+  FaStar,
+  FaUsers,
+  FaHome,
+  FaBath,
+  FaUtensils,
+  FaMountain,
+  FaWifi,
+  FaHotTub,
+  FaFire,
+  FaMapMarkerAlt,
+  FaAward,
+  FaInfoCircle,
+  FaCar,
+  FaTv,
+  FaSnowflake,
+  FaCoffee,
+  FaGamepad,
+  FaCamera,
+  FaMusic,
+  FaDumbbell,
+  FaTree,
+  FaSun,
+  FaShieldAlt,
+  FaClock,
+  FaPhone,
+  FaTshirt,
+  FaBed,
+  FaCouch,
+  FaBlender,
+  FaMicrochip,
+} from "react-icons/fa"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { useState } from "react"
@@ -44,49 +40,49 @@ export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false)
 
   const allAmenities = [
-    { icon: Mountain, label: "Mountain View" },
-    { icon: Utensils, label: "Breakfast Included" },
-    { icon: Wifi, label: "WiFi", hasIndicator: true },
-    { icon: Waves, label: "Jacuzzi", hasIndicator: true },
-    { icon: Flame, label: "BBQ Grill", hasIndicator: true },
-    { icon: Car, label: "Free Parking" },
-    { icon: Tv, label: "Smart TV" },
-    { icon: Wind, label: "Air Conditioning" },
-    { icon: Coffee, label: "Coffee Machine" },
-    { icon: Gamepad2, label: "Game Room" },
-    { icon: Camera, label: "Security Cameras" },
-    { icon: Music, label: "Sound System" },
-    { icon: Dumbbell, label: "Fitness Center" },
-    { icon: TreePine, label: "Garden View" },
-    { icon: Sun, label: "Terrace" },
-    { icon: Snowflake, label: "Heating" },
-    { icon: Shield, label: "Safe" },
-    { icon: Clock, label: "24/7 Support" },
-    { icon: Phone, label: "Phone" },
-    { icon: Shirt, label: "Laundry Service" },
-    { icon: Restaurant, label: "Kitchen" },
-    { icon: Bed, label: "Premium Bedding" },
-    { icon: Sofa, label: "Living Area" },
-    { icon: Refrigerator, label: "Refrigerator" },
-    { icon: Microwave, label: "Microwave" },
+    { icon: FaMountain, label: "Mountain View" },
+    { icon: FaUtensils, label: "Breakfast Included" },
+    { icon: FaWifi, label: "WiFi", hasIndicator: true },
+    { icon: FaHotTub, label: "Jacuzzi", hasIndicator: true },
+    { icon: FaFire, label: "BBQ Grill", hasIndicator: true },
+    { icon: FaCar, label: "Free Parking" },
+    { icon: FaTv, label: "Smart TV" },
+    { icon: FaSnowflake, label: "Air Conditioning" },
+    { icon: FaCoffee, label: "Coffee Machine" },
+    { icon: FaGamepad, label: "Game Room" },
+    { icon: FaCamera, label: "Security Cameras" },
+    { icon: FaMusic, label: "Sound System" },
+    { icon: FaDumbbell, label: "Fitness Center" },
+    { icon: FaTree, label: "Garden View" },
+    { icon: FaSun, label: "Terrace" },
+    { icon: FaSnowflake, label: "Heating" },
+    { icon: FaShieldAlt, label: "Safe" },
+    { icon: FaClock, label: "24/7 Support" },
+    { icon: FaPhone, label: "Phone" },
+    { icon: FaTshirt, label: "Laundry Service" },
+    { icon: FaUtensils, label: "Kitchen" },
+    { icon: FaBed, label: "Premium Bedding" },
+    { icon: FaCouch, label: "Living Area" },
+    { icon: FaBlender, label: "Refrigerator" },
+    { icon: FaMicrochip, label: "Microwave" },
   ]
 
   const displayedAmenities = showAllAmenities ? allAmenities : allAmenities.slice(0, 5)
   const remainingCount = allAmenities.length - 5
 
   return (
-    <div className="bg-white min-h-[400px] relative">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div id="overview" className="bg-white min-h-[400px] relative">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
           <div className="flex-1">
             {/* Property Title & Location */}
             <div className="mb-6">
               <h1 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-3 tracking-tight drop-shadow-lg">
-                Barkat Villa - Ramgarh
+                Vastalya Villa - Malawali
               </h1>
               <div className="flex items-center gap-2 text-gray-600">
-                <MapPin className="w-5 h-5 text-gray-600" />
-                <span className="text-sm font-medium drop-shadow">Nainital, Uttarakhand</span>
+                <FaMapMarkerAlt className="w-5 h-5 text-black" />
+                <span className="text-sm font-medium drop-shadow">Malawali, Lonavala</span>
               </div>
             </div>
 
@@ -94,19 +90,19 @@ export default function PropertyHeaderSection() {
             <div className="flex items-center gap-6 mb-8">
               <Badge
                 variant="secondary"
-                className="bg-white/20 backdrop-blur-sm text-white border-white/30 px-3 py-1.5"
+                className="bg-white/20 backdrop-blur-sm text-black border-white/30 px-3 py-1.5"
               >
-                <Award className="w-4 h-4 mr-1.5 text-white" />
+                <FaAward className="w-4 h-4 mr-1.5 text-black" />
                 Like a 5⭐ Hotel
               </Badge>
 
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
-                  <Star className="w-5 h-5 fill-amber-400 text-amber-400" />
-                  <span className="font-bold text-lg text-white drop-shadow">4.8</span>
-                  <span className="text-white/80">/5</span>
+                  <FaStar className="w-5 h-5 text-amber-400" />
+                  <span className="font-bold text-lg text-black drop-shadow">4.8</span>
+                  <span className="text-black/80">/5</span>
                 </div>
-                <Button variant="link" className="text-white hover:text-white/80 p-0 h-auto font-medium drop-shadow">
+                <Button variant="link" className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow">
                   65 Reviews
                 </Button>
               </div>
@@ -115,18 +111,18 @@ export default function PropertyHeaderSection() {
             {/* Property Details Grid */}
             <div className="flex flex-wrap items-center gap-3 mb-8">
               <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <Users className="w-4 h-4 mr-2 text-gray-600" />
+                <FaUsers className="w-4 h-4 mr-2 text-black" />
                 Up to 15 Guests
               </Badge>
               <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <Home className="w-4 h-4 mr-2 text-gray-600" />5 Rooms
-                <Info className="w-4 h-4 ml-2 text-blue-600" />
+                <FaHome className="w-4 h-4 mr-2 text-black" />5 Rooms
+                <FaInfoCircle className="w-4 h-4 ml-2 text-black" />
               </Badge>
               <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <Bath className="w-4 h-4 mr-2 text-gray-600" />5 Baths
+                <FaBath className="w-4 h-4 mr-2 text-black" />5 Baths
               </Badge>
               <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <ChefHat className="w-4 h-4 mr-2 text-gray-600" />
+                <FaUtensils className="w-4 h-4 mr-2 text-black" />
                 Meals Available
               </Badge>
             </div>
@@ -136,21 +132,21 @@ export default function PropertyHeaderSection() {
               <div className="flex items-center gap-3">
                 <span className="text-lg font-medium text-gray-900">Great for:</span>
                 <div className="flex items-center gap-2">
-                  <Mountain className="w-5 h-5 text-gray-600" />
+                  <FaMountain className="w-5 h-5 text-gray-600" />
                   <span className="text-gray-800 font-medium">Mountain Retreat</span>
                 </div>
               </div>
             </div>
 
             {/* Premium Amenities */}
-            <div className="flex flex-wrap items-center gap-3 w-1/2">
+            <div className="flex flex-wrap items-center gap-3 w-full">
               {displayedAmenities.map((amenity, index) => (
                 <Badge
                   key={index}
                   variant="outline"
-                  className="border-gray-200 text-gray-700 px-3 py-2 rounded-full bg-white hover:bg-gray-50"
+                  className="bg-gray-200 border-white text-black px-3 py-2 rounded-md hover:bg-gray-300"
                 >
-                  <amenity.icon className="w-4 h-4 mr-2 text-gray-600" />
+                  <amenity.icon className="w-4 h-4 mr-2 text-black" />
                   {amenity.label}
                   {amenity.hasIndicator && <span className="ml-1 w-2 h-2 bg-green-500 rounded-full"></span>}
                 </Badge>
@@ -165,12 +161,12 @@ export default function PropertyHeaderSection() {
             </div>
           </div>
 
-          {/* <div className="lg:w-80 flex-shrink-0">
-            <div className="bg-white border border-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:bg-white">
+          <div className="lg:w-80 flex-shrink-0">
+            <div className="border-white border bg-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:bg-white">
               <div className="text-center">
                 <div className="mb-2">
                   <span className="text-gray-500 line-through text-lg">₹58,750</span>
-                  <Badge variant="destructive" className="ml-2 text-xs bg-red-500 border-0">
+                  <Badge variant="destructive" className="ml-2 text-xs bg-black border-0">
                     Save 10%
                   </Badge>
                 </div>
@@ -203,7 +199,7 @@ export default function PropertyHeaderSection() {
                 </div>
               </div>
             </div>
-          </div> */}
+          </div>
         </div>
       </div>
     </div>
