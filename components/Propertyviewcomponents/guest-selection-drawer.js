@@ -32,11 +32,11 @@ export default function GuestSelectionDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={() => {}}>
-      <DrawerContent className="max-h-[80vh]">
-        <DrawerHeader className="flex items-center justify-between border-b pb-4">
+      <DrawerContent className="max-h-[80vh] w-full border-none">
+        <DrawerHeader className="flex flex-row items-center justify-between w-full ">
           <DrawerTitle className="text-lg font-semibold text-black">Total Guests</DrawerTitle>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-            <FaTimes className="w-4 h-4 text-gray-600" />
+          <button onClick={onClose} className="p-2 hover:bg-gray-100 bg-gray-300 rounded-md transition-colors">
+            <FaTimes className="w-4 h-4 text-black" />
           </button>
         </DrawerHeader>
 

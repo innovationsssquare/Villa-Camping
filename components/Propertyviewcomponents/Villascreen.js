@@ -333,7 +333,7 @@ export default function Villascreen() {
       <BookingDialog
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        propertyName="Sol & Sands"
+        propertyName="Vastalya Villa"
         price={55863}
         originalPrice={62000}
       />
