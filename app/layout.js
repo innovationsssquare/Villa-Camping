@@ -3,6 +3,7 @@ import "./globals.css";
 import { NextuiProviderWrapper } from "./Nextuiprovider";
 import { AuthProvider } from "@/lib/auth-provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import Script from "next/script";
 
 export const metadata = {
   title: "THE VILLA CAMP",
@@ -14,6 +15,14 @@ export default function RootLayout({ children }) {
   return (
     <Providers>
       <html lang="en" suppressHydrationWarning>
+<head>
+      <meta
+  name="viewport"
+  content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
+/>
+      </head>
+            <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+
         <body
           className={``}
           style={{

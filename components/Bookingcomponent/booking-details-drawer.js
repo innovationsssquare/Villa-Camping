@@ -9,7 +9,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { FaCheck, FaTimes } from "react-icons/fa"
 
 export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
-  const [bookingDetails, setBookingDetails] = useState<BookingDetails>({
+  const [bookingDetails, setBookingDetails] = useState({
     bookingFor: "myself",
     firstName: "",
     lastName: "",
@@ -71,8 +71,8 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
 
   return (
     <Drawer open={isOpen} onOpenChange={() => {}} shouldScaleBackground={false}>
-      <DrawerContent className="h-[90vh] bg-white">
-        <DrawerHeader className="flex items-center justify-between p-4 border-b">
+      <DrawerContent className="h-[90vh] bg-white border-none">
+        <DrawerHeader className="flex flex-row items-center justify-between px-2 ">
           <DrawerTitle className="text-lg font-semibold text-black">Verify your details</DrawerTitle>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 hover:bg-gray-100">
             <FaTimes className="h-4 w-4 text-gray-600" />
@@ -213,25 +213,14 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
               />
             </div>
           </div>
-
-          {/* GST Details */}
-          <div className="space-y-3">
-            <Label className="text-base font-medium text-black">Enter GST details (optional)</Label>
-            <Input
-              value={bookingDetails.gstDetails}
-              onChange={(e) => handleInputChange("gstDetails", e.target.value)}
-              className="bg-gray-100 border-0 text-black h-12"
-              placeholder="Enter GST number"
-            />
-          </div>
         </div>
 
         {/* Pay Now Button */}
-        <div className="p-4 border-t bg-white">
+        <div className="p-3 bg-white">
           <Button
             onClick={handlePayNow}
             disabled={!isFormValid()}
-            className="w-full h-12 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 text-base font-medium"
+            className="w-full  h-12 bg-black text-white hover:bg-gray-800 disabled:bg-gray-300 disabled:text-gray-500 text-base font-medium"
           >
             Pay Now
           </Button>

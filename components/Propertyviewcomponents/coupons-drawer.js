@@ -4,6 +4,7 @@ import  React from "react"
 import { useState } from "react"
 import { FaTimes, FaTicketAlt } from "react-icons/fa"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer"
+import { Button } from "@heroui/react"
 
 
 
@@ -12,7 +13,7 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
 
   const availableCoupons = [
     {
-      code: "STAYVISTA",
+      code: "THEVILLA",
       title: "Book your dreamy getaway",
       description:
         "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
@@ -21,7 +22,7 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
       validTill: "31 December 2025",
     },
     {
-      code: "VISTA2025",
+      code: "VILACAMP2025",
       title: "Get an instant 10% off",
       description:
         "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
@@ -54,8 +55,8 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[80vh]">
-        <DrawerHeader className="flex flex-row items-center justify-between p-4 border-b border-gray-100">
+      <DrawerContent className="max-h-[80vh] border-none">
+        <DrawerHeader className="flex flex-row items-center justify-between p-2 border-b border-gray-100">
           <DrawerTitle className="text-lg font-semibold text-black">Coupons and Offers</DrawerTitle>
           <DrawerClose asChild>
             <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
@@ -75,26 +76,25 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
               onChange={(e) => setCouponCode(e.target.value)}
               className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
             />
-            <button
-              onClick={handleManualApply}
+            <Button
+              onPress={handleManualApply}
               disabled={!couponCode.trim()}
-              className="w-full bg-black text-white py-3 rounded-lg font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
+              className="w-full bg-black text-white py-3 rounded-lg font-medium disabled:bg-black disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
             >
               APPLY
-            </button>
+            </Button>
           </div>
 
           {/* Available Offers */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium text-gray-600">Offers Available</h3>
-              <span className="text-xs text-blue-600">Prime Discounts</span>
               <span className="text-xs text-gray-400">T&C</span>
             </div>
 
             {/* Coupon Cards */}
             {availableCoupons.map((coupon) => (
-              <div key={coupon.code} className="border border-gray-200 rounded-lg p-4 space-y-3">
+              <div key={coupon.code} className="border border-white bg-gray-200 rounded-lg p-4 space-y-3">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <p className="text-xs text-gray-500 mb-1">valid till: {coupon.validTill}</p>
