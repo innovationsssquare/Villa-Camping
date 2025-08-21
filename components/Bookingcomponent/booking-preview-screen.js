@@ -370,8 +370,8 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         />
 
         <p className="text-sm text-gray-600">
-          Share your special requests with us and we'll do our best to
-          accommodate them!
+          {`Share your special requests with us and we'll do our best to
+          accommodate them!`}
         </p>
       </div>
     </div>

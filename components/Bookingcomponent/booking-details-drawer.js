@@ -82,7 +82,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
         <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Booking For Section */}
           <div className="space-y-3">
-            <Label className="text-base font-medium text-black">I'm booking for :</Label>
+            <Label className="text-base font-medium text-black">{`I'm booking for :`}</Label>
             <RadioGroup
               value={bookingDetails.bookingFor}
               onValueChange={(value) => handleInputChange("bookingFor", value)}
