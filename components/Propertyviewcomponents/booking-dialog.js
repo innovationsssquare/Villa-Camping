@@ -25,6 +25,8 @@ import CouponsDrawer from "./coupons-drawer";
 import GuestSelectionDrawer from "./guest-selection-drawer";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
+import { useLinkStatus } from 'next/link'
+import ButtonLoader from "../Loadercomponents/button-loader";
 
 export default function BookingDialog({
   isOpen,
@@ -56,6 +58,9 @@ export default function BookingDialog({
   const [checkInDate, setCheckInDate] = useState(new Date(2024, 7, 24)); // Aug 24, 2024
   const [checkOutDate, setCheckOutDate] = useState(new Date(2024, 7, 26)); // Aug 26, 2024
 const router=useRouter()
+  const { pending } = useLinkStatus()
+
+
   const totalGuests =
     guestCounts.adults + guestCounts.children + guestCounts.infants;
 
@@ -173,7 +178,7 @@ const router=useRouter()
             </div>
           </DrawerHeader>
 
-          <div className="p-2 space-y-6 overflow-y-auto flex-1">
+          <div className="p-2 space-y-2 overflow-y-auto flex-1">
             {showDatePicker ? (
               <div className="flex justify-center p-1">
                 <Calendar
@@ -266,6 +271,9 @@ const router=useRouter()
                     className="w-full border border-white rounded-lg p-3 bg-gray-300 hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center justify-between w-full">
+                      <span className="font-medium text-black">
+                       { guestCounts?.adults} Guest |  {guestCounts?.children} children
+                      </span>
                       <span className="font-semibold text-black">
                         {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
                       </span>
@@ -339,7 +347,7 @@ const router=useRouter()
                   onPress={handleBooking}
                   disabled={isLoading}
                 >
-                  {isLoading ? "Loading..." : "Book Now"}
+                  {isLoading ? <ButtonLoader/> : "Procced"}
                 </Button>
               </>
             )}
