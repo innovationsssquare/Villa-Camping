@@ -9,16 +9,9 @@ import ecoheader2 from "@/public/Homeasset/ecoheader2.png";
 const page = () => {
   return (
     <div>
-      <Aboutusheader
-        image1={ecoheader}
-        image2={ecoheader2}
-        title={"Eco-Friendly"}
-      />
+      
 
-      <EcoFriendlyProducts />
-      <ShopbyCategory />
-      <ProductListing />
-      <Newsletter />
+     
     </div>
   );
 };

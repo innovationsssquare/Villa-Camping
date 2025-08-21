@@ -8,9 +8,7 @@ import CheckoutPage from "@/components/Cartcomponets/Cart";
 const page = () => {
   return (
     <div>
-      <Aboutusheader image1={Mybag} image2={Mybag2} title={"My Bag"} />
-      <CheckoutPage/>
-      <Newsletter/>
+     
     </div>
   );
 };

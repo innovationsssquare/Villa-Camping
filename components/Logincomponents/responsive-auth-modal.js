@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/drawer"
 import { LogIn, Loader2 } from "lucide-react"
 import { useIsMobile } from "@/hooks/use-mobile"
+import Logoicon from "@/public/Productasset/Logoicon.png"
+import Image from "next/image"
 
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   const [googleLoading, setGoogleLoading] = useState(false)
@@ -69,10 +71,10 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
-          <LogIn className="h-6 w-6 text-white" />
+          <Image src={Logoicon} alt="Thevillacamp"/>
         </div>
         <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-          Welcome Back
+          Welcome !
         </h2>
         <p className="text-gray-600">Sign in to your account to continue</p>
       </div>
@@ -158,7 +160,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           </DrawerTrigger>
         )}
         <DrawerContent
-          className="max-w-md mx-auto bg-white"
+          className="max-w-md mx-auto bg-white border-none"
           onEscapeKeyDown={(e) => e.preventDefault()}
           onPointerDownOutside={(e) => e.preventDefault()}
         >
@@ -191,7 +193,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         </DialogTrigger>
       )}
       <DialogContent
-        className="sm:max-w-md bg-white"
+        className="sm:max-w-md bg-white border-none"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onPointerDownOutside={(e) => e.preventDefault()}
       >

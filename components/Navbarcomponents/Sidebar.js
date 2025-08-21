@@ -31,7 +31,7 @@ const navItems = [
   {
     title: "Profile Details",
     href: "/account",
-    icon: <FaUser className="h-5 w-5 text-black" />,
+    icon: <FaUser className="h-5 w-5" />,
   },
   // {
   //   title: "About Us",
@@ -41,7 +41,7 @@ const navItems = [
   {
     title: "My Booking",
     href: "/account/orders",
-    icon: <FaBook className="h-5 w-5 text-black" />,
+    icon: <FaBook className="h-5 w-5" />,
 
   },
   // {
@@ -51,25 +51,25 @@ const navItems = [
   {
     title: "Settings",
     href: "/account/settings",
-    icon: <IoSettings className="h-5 w-5 text-black" />,
+    icon: <IoSettings className="h-5 w-5 " />,
 
   },
   {
     title: "Privacy Policy",
     href: "/account/privacy-policy",
-    icon: <IoShieldCheckmark className="h-5 w-5 text-black" />,
+    icon: <IoShieldCheckmark className="h-5 w-5 " />,
 
   },
   {
     title: "Help & Support",
     href: "/account/support",
-    icon: <MdHelp className="h-5 w-5 text-black" />,
+    icon: <MdHelp className="h-5 w-5 " />,
 
   },
   {
     title: "Contact us",
     href: "/contact",
-    icon: <FaPhoneAlt className="h-5 w-5 text-black" />,
+    icon: <FaPhoneAlt className="h-5 w-5 " />,
 
   },
 ];
@@ -110,7 +110,7 @@ export function UserSidebar() {
 
 function SidebarContent({ pathname }) {
   return (
-    <div className="flex flex-col items-center pt-8 pb-6 h-full ">
+    <div className="flex flex-col items-center pt-8 pb-6 h-full bg-[#FFFFFF4D]">
       <div className="relative group">
         <Avatar
           className="w-24 h-24 border-2 border-white transition-transform group-hover:scale-105"
@@ -122,20 +122,13 @@ function SidebarContent({ pathname }) {
           />
           <AvatarFallback style={{ backgroundColor: "#F8D347" }}>AS</AvatarFallback>
         </Avatar>
-        <Button
-          variant="secondary"
-          size="icon"
-          className="absolute bottom-0 right-0 rounded-full bg-[#106C83] text-white hover:bg-teal-700 h-8 w-8 shadow-md transition-all duration-200 group-hover:scale-110"
-        >
-          <Pencil className="h-4 w-4" />
-          <span className="sr-only">Edit Profile</span>
-        </Button>
+       
       </div>
 
       <h2 className="text-xl font-semibold mt-5 mb-8">Santosh Alimkar</h2>
 
       <nav className="w-full px-4 flex-1 ">
-        <ul className="space-y-2 w-full divide-y divide-gray-200">
+        <ul className="space-y-2 w-full ">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
@@ -144,12 +137,12 @@ function SidebarContent({ pathname }) {
                   href={item.href}
                   className={cn(
                     "flex items-center justify-between px-4 py-3 rounded-md transition-all duration-200",
-                    isActive ? "bg-[#106C83] text-white shadow-md" : "hover:bg-gray-200 hover:translate-x-1",
+                    isActive ? "bg-black text-white shadow-md" : "hover:bg-gray-200 hover:translate-x-1",
                   )}
                 >
                   <div className="flex items-center gap-3">
                     <span
-                      className={cn("transition-transform duration-200", isActive ? "text-white" : "text-gray-500")}
+                      className={cn("transition-transform duration-200", isActive ? "text-white" : "text-black")}
                     >
                       {item.icon}
                     </span>

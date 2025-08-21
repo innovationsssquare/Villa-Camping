@@ -6,7 +6,7 @@ import wishlist2 from "@/public/Homeasset/Wishlist2.png"
 const page = () => {
   return (
     <div>
-      <WishlistPage />
+     wishlist
     </div>
   );
 };

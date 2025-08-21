@@ -59,8 +59,8 @@ const carouselItems = [
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white px-4 md:max-w-md max-w-xs flex flex-col items-center">
           <Image className="md:w-10 md:h-10 h-6 w-6 mr-4 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/>
-          <h2 className="text-sm md:text-3xl font-bold ">{carouselItems[currentSlide].title}</h2>
-          <p className="md:mb-4 mb-2 text-xs md:text-base">{carouselItems[currentSlide].description}</p>
+          <h1 className="text-sm md:text-3xl font-bold ">{carouselItems[currentSlide].title}</h1>
+          <h2 className="md:mb-4 mb-2 text-xs md:text-base">{carouselItems[currentSlide].description}</h2>
           <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg">
             {carouselItems[currentSlide].cta}
           </button>

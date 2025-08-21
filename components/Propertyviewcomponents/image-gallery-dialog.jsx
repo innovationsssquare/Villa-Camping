@@ -220,7 +220,7 @@ export default function ImageGalleryDialog({
               <img
                 src={images[currentIndex] || "/placeholder.svg"}
                 alt={`Gallery image ${currentIndex + 1}`}
-                className="max-w-full max-h-[70vh] object-contain transition-transform duration-300 select-none"
+                className="max-w-full md:max-h-[60vh] max-h-[70vh] object-contain transition-transform duration-300 select-none"
                 style={{
                   transform: `scale(${zoomLevel}) translate(${
                     zoomPosition.x / zoomLevel
@@ -262,7 +262,7 @@ export default function ImageGalleryDialog({
         </div>
 
         {/* Thumbnail Strip */}
-        <div className="absolute bottom-12 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
+        <div className="absolute  bottom-12 md:bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
           <div className="p-4 md:p-6">
             <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
               {images.map((image, index) => (
@@ -272,7 +272,7 @@ export default function ImageGalleryDialog({
                     setCurrentIndex(index);
                     resetZoom();
                   }}
-                  className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
+                  className={`flex-shrink-0 w-16 h-16 md:w-16 md:h-16 rounded-lg overflow-hidden border-2 transition-all duration-200 ${
                     index === currentIndex
                       ? "border-white shadow-lg scale-105"
                       : "border-transparent hover:border-white/50"
