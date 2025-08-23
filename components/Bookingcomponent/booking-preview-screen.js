@@ -94,10 +94,10 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   };
 
   const renderOverview = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Property Card */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex justify-between items-start mb-4">
+      <div className="bg-gray-200 rounded-lg border border-white p-4">
+        <div className="flex justify-between items-start mb-2">
           <div className="flex-1">
             <h2 className="text-xl font-semibold text-black mb-1">
               Vastalya Villa
@@ -121,10 +121,10 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       </div>
 
       {/* Trip Details */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-gray-200 rounded-lg border border-gray-200 p-4">
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-lg font-semibold text-black">Trip Details</h3>
-          <span className="bg-gray-300 text-black font-medium px-2 py-1 rounded text-sm">
+          <span className="bg-black text-white font-medium px-2 py-1 rounded text-sm">
             For 2 nights
           </span>
         </div>
@@ -133,7 +133,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           <div>
             <p className="text-gray-600 text-sm mb-1">Check-In</p>
             <div className="flex items-start gap-2">
-              <FaCalendarAlt className="text-gray-500 w-4 h-4 mt-2" />
+              <FaCalendarAlt className="text-black w-4 h-4 mt-2" />
               <div>
                 <p className="font-medium text-black">24 Aug 25</p>
                 <p className="text-xs text-gray-500">(From 02:00 PM)</p>
@@ -143,7 +143,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           <div>
             <p className="text-gray-600 text-sm mb-1">Check-Out</p>
             <div className="flex items-start gap-2">
-              <FaCalendarAlt className="text-gray-500 w-4 h-4 mt-2" />
+              <FaCalendarAlt className="text-black w-4 h-4 mt-2" />
               <div>
                 <p className="font-medium text-black">26 Aug 25</p>
                 <p className="text-xs text-gray-500">(Until 11:00 AM)</p>
@@ -156,20 +156,20 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           <div>
             <p className="text-gray-600 text-sm mb-1">Guests</p>
             <div className="flex items-center gap-2">
-              <FaUsers className="text-gray-500 w-4 h-4" />
+              <FaUsers className="text-black w-4 h-4" />
               <div>
                 <p className="font-medium text-black">2 Guests</p>
                 <p className="text-xs text-gray-500">(2 Adults )</p>
               </div>
             </div>
           </div>
-          <div>
+          {/* <div>
             <p className="text-gray-600 text-sm mb-1">No. of Rooms</p>
             <div className="flex items-center gap-2">
-              <FaBed className="text-gray-500 w-4 h-4" />
+              <FaBed className="text-black w-4 h-4" />
               <p className="font-medium text-black">1 Room</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
@@ -178,15 +178,15 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const renderPriceDetails = () => (
     <div className="space-y-6">
       {/* Price Details Card */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-gray-200 rounded-lg border border-white p-4">
         <h3 className="text-lg font-semibold text-black mb-4">Price details</h3>
 
         {/* Zero Convenience Fee */}
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4 flex items-center justify-between">
-          <p className="text-green-700 text-xs">
+        <div className="bg-[#FFFFFF4D] border border-white rounded-lg p-3 mb-4 flex items-center justify-between">
+          <p className="text-black text-xs">
             You pay zero convenience fees on your booking!
           </p>
-          <div className="bg-green-500 rounded-full p-1">
+          <div className="bg-black rounded-full p-1">
             <FaInfoCircle className="w-3 h-3 text-white" />
           </div>
         </div>
@@ -224,8 +224,8 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         </div>
 
         {appliedCoupon && (
-          <div className="bg-gray-50 rounded-lg p-3 mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="bg-[#FFFFFF4D] border-white border rounded-lg p-3 w-full  mb-4 flex items-center justify-between">
+            <div className="flex items-center  gap-3">
               <div className="bg-green-500 rounded-full p-2">
                 <FaPercent className="w-3 h-3 text-white" />
               </div>
@@ -279,17 +279,17 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   );
 
   const renderCancellationPolicy = () => (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* Cancellation Policy Card */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3">
+      <div className="bg-gray-200 rounded-lg border border-white p-3">
         <h3 className="text-lg font-semibold text-black mb-4">
           Booking & Cancellation policy
         </h3>
 
         {/* No Refund */}
         <div className="flex items-center gap-3 mb-4">
-          <div className="bg-red-100 rounded-full p-2">
-            <FaTimes className="w-4 h-4 text-red-500" />
+          <div className="bg-black rounded-full p-2">
+            <FaTimes className="w-4 h-4 text-red-400" />
           </div>
           <div>
             <p className="font-medium text-black">No Refund</p>
@@ -301,13 +301,13 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         <div className="grid grid-cols-2 gap-3 mb-4 w-full">
           <Button
             variant="secondary"
-            className="bg-blue-100 text-xs text-blue-700 hover:bg-blue-200"
+            className="bg-black text-xs text-white hover:bg-black"
           >
             Refund Policy
           </Button>
           <Button
             variant="secondary"
-            className="bg-blue-100 text-xs text-blue-700 hover:bg-blue-200"
+            className="bg-black text-xs text-white hover:bg-black"
           >
             Home Rules and Policy
           </Button>
@@ -320,7 +320,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             <span className="font-medium">Check-out time: 11:00 AM</span>
           </p>
           <div className="flex items-start gap-2">
-            <FaInfoCircle className="w-4 h-4 text-gray-400 mt-0.5" />
+            <FaInfoCircle className="w-6 h-6 text-black mt-0.5" />
             <p className="text-sm text-gray-600">
               Early check-in and late check-out is subject to availability (at
               an additional fee)
@@ -354,9 +354,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       </div>
 
       {/* Special Requests */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-gray-200 rounded-lg border border-white p-4">
         <div className="flex items-center gap-2 mb-3">
-          <FaGift className="w-5 h-5 text-orange-500" />
+          <FaGift className="w-5 h-5 text-black" />
           <h3 className="text-lg font-semibold text-black">
             Any special requests?
           </h3>
@@ -366,7 +366,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           placeholder="(Birthday, Anniversary, Family getaway etc.)"
           value={specialRequests}
           onChange={(e) => setSpecialRequests(e.target.value)}
-          className="mb-3 min-h-[120px] resize-none"
+          className="mb-3 min-h-[120px] resize-none bg-[#FFFFFF4D] border-white border"
         />
 
         <p className="text-sm text-gray-600">
@@ -378,17 +378,17 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 bg-gray-50 z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-[#FFFFFF4D] backdrop-blur-2xl z-50 overflow-hidden">
       <div className="flex flex-col h-full">
         {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-2 py-3">
+        <div className="border-b border-gray-200 px-2 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={currentStep === "overview" ? onClose : handleBack}
-                className="p-2"
+                className="p-2 bg-gray-200 border-white border"
               >
                 <FaArrowLeft className="w-4 h-4" />
               </Button>
@@ -401,18 +401,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button variant="ghost" size="sm" className="p-2">
-                <FaPhone className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="p-2 bg-black text-white rounded-full"
-              >
-                <FaUser className="w-4 h-4" />
-              </Button>
-            </div>
+           
           </div>
         </div>
 
@@ -424,9 +413,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="bg-white border-t border-gray-200">
+        <div className="bg-[#FFFFFF4D] backdrop-blur-2xl border-t border-gray-200">
           {/* Security Badge */}
-          <div className="bg-green-500 text-white px-2 py-2 flex items-center justify-center gap-2">
+          <div className="bg-gray-200 text-black px-2 py-2 flex items-center justify-center gap-2 ">
             <FaShieldAlt className="w-4 h-4" />
             <span className="text-sm font-medium">100% Secure payment</span>
             {/* <span className="text-sm">Trusted by 5Lakh+ guests</span> */}

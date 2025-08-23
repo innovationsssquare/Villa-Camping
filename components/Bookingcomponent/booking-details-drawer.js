@@ -71,8 +71,8 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
 
   return (
     <Drawer open={isOpen} onOpenChange={() => {}} shouldScaleBackground={false}>
-      <DrawerContent className="h-[90vh] bg-white border-none">
-        <DrawerHeader className="flex flex-row items-center justify-between px-2 ">
+      <DrawerContent className="h-[90vh] bg-gray-200 border-none">
+        <DrawerHeader className="flex flex-row items-center justify-between px-3 ">
           <DrawerTitle className="text-lg font-semibold text-black">Verify your details</DrawerTitle>
           <Button variant="ghost" size="sm" onClick={onClose} className="h-8 w-8 p-0 hover:bg-gray-100">
             <FaTimes className="h-4 w-4 text-gray-600" />
@@ -89,7 +89,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
               className="flex gap-6"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="myself" id="myself" className="border-2 border-blue-500 text-blue-500" />
+                <RadioGroupItem value="myself" id="myself" className="border-2 border-black text-black" />
                 <Label htmlFor="myself" className="text-base text-black cursor-pointer">
                   Myself
                 </Label>
@@ -114,7 +114,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 <Input
                   value={bookingDetails.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
-                  className="bg-gray-100 border-0 text-black pr-10 h-12"
+                  className="bg-[#FFFFFF4D] border-white border text-black pr-10 h-12"
                   placeholder="Enter first name"
                 />
                 {bookingDetails.firstName && (
@@ -138,7 +138,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 <Input
                   value={bookingDetails.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
-                  className="bg-gray-100 border-0 text-black pr-10 h-12"
+                  className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
                   placeholder="Enter last name"
                 />
                 {bookingDetails.lastName && (
@@ -162,7 +162,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 <Input
                   value={bookingDetails.mobileNumber}
                   onChange={(e) => handleInputChange("mobileNumber", e.target.value)}
-                  className="bg-gray-100 border-0 text-black pr-10 h-12"
+                  className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
                   placeholder="+91 Enter mobile number"
                 />
                 {bookingDetails.mobileNumber && (
@@ -186,7 +186,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 <Input
                   value={bookingDetails.emailId}
                   onChange={(e) => handleInputChange("emailId", e.target.value)}
-                  className="bg-gray-100 border-0 text-black pr-10 h-12"
+                  className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
                   placeholder="Enter email address"
                   type="email"
                 />
@@ -208,7 +208,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
               <Input
                 value={bookingDetails.residentialCity}
                 onChange={(e) => handleInputChange("residentialCity", e.target.value)}
-                className="bg-gray-100 border-0 text-black h-12"
+                className="bg-[#FFFFFF4D] border-white border h-12"
                 placeholder="Enter city"
               />
             </div>
@@ -216,7 +216,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
         </div>
 
         {/* Pay Now Button */}
-        <div className="p-3 bg-white">
+        <div className="p-3 bg-gray-50">
           <Button
             onClick={handlePayNow}
             disabled={!isFormValid()}
