@@ -38,14 +38,14 @@ export function PropertyCard({ property }) {
   useEffect(() => {
     if (
       !isMobile ||
-      !property.images ||
-      property.images.length <= 1
+      !property?.images ||
+      property?.images?.length <= 1
     ) {
       return;
     }
 
    
-  }, [isMobile, property.images]);
+  }, [isMobile, property?.images]);
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
@@ -63,7 +63,7 @@ export function PropertyCard({ property }) {
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe && currentImageIndex < property.images.length - 1) {
+    if (isLeftSwipe && currentImageIndex < property?.images?.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
     if (isRightSwipe && currentImageIndex > 0) {
@@ -73,7 +73,7 @@ export function PropertyCard({ property }) {
   };
 
   const nextImage = () => {
-    if (currentImageIndex < property.images.length - 1) {
+    if (currentImageIndex < property?.images?.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
   };
@@ -91,7 +91,7 @@ export function PropertyCard({ property }) {
 
   useEffect(() => {
     setCurrentImageIndex(0);
-  }, [property.id]);
+  }, [property?.id]);
 
   return (
     <Card
@@ -103,7 +103,7 @@ export function PropertyCard({ property }) {
         <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
           <span className="text-sm font-medium text-black">
-            {property.rating}
+            {property?.rating}
           </span>
         </div>
 
@@ -131,16 +131,16 @@ export function PropertyCard({ property }) {
       >
         <Image
           removeWrapper
-          alt={`${property.name} - Image ${currentImageIndex + 1}`}
+          alt={`${property?.name} - Image ${currentImageIndex + 1}`}
           className="z-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           src={
-            property.images?.[currentImageIndex] ||
-            property.image ||
+            property?.images?.[currentImageIndex] ||
+            property?.image ||
             "/placeholder.svg"
           }
         />
 
-        {property.images && property.images.length > 1 && (
+        {property?.images && property?.images?.length > 1 && (
           <>
             <Button
               isIconOnly
@@ -161,7 +161,7 @@ export function PropertyCard({ property }) {
               size="sm"
               className={cn(
                 "absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-                currentImageIndex === property.images.length - 1 &&
+                currentImageIndex === property?.images?.length - 1 &&
                   "opacity-0 pointer-events-none"
               )}
               onPress={nextImage}
@@ -171,9 +171,9 @@ export function PropertyCard({ property }) {
           </>
         )}
 
-        {property.images && property.images.length > 1 && (
+        {property?.images && property?.images?.length > 1 && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-1">
-            {property.images.map((_, index) => (
+            {property?.images.map((_, index) => (
               <Button
                 key={index}
                 isIconOnly
@@ -193,7 +193,7 @@ export function PropertyCard({ property }) {
       </div>
 
       {/* Best Rated Badge */}
-      {property.bestRated && (
+      {property?.bestRated && (
         <div className="absolute bottom-20 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1 z-10">
           <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
           Best Rated
@@ -204,39 +204,39 @@ export function PropertyCard({ property }) {
         <div className="flex flex-col gap-1 flex-grow">
           {/* Property Name */}
           <h3 className="text-white font-semibold text-lg leading-tight">
-            {property.name}
+            {property?.name}
           </h3>
 
           {/* Location */}
           <div className="flex items-center gap-1 text-white/80">
             <MapPin className="h-3 w-3" />
-            <span className="text-xs">{property.location}</span>
+            <span className="text-xs">{property?.location?.addressLine}</span>
           </div>
 
           {/* Property Details */}
           <div className="flex items-center gap-3 text-xs text-white/70">
             <div className="flex items-center gap-1">
               <Users className="h-3 w-3" />
-              <span>Upto {property.guests} Guests</span>
+              <span>Upto {property?.maxCapacity} Guests</span>
             </div>
             <div className="flex items-center gap-1">
               <Bed className="h-3 w-3" />
-              <span>{property.rooms} Rooms</span>
+              <span>{property?.rooms} Rooms</span>
             </div>
             <div className="flex items-center gap-1">
               <Bath className="h-3 w-3" />
-              <span>{property.baths} Baths</span>
+              <span>{property?.baths} Baths</span>
             </div>
           </div>
 
           {/* Pricing */}
           <div className="flex items-center gap-2 mt-1">
             <span className="text-lg font-bold text-white">
-              ₹{property.price.toLocaleString()}
+              ₹{property?.basePricePerNight?.toLocaleString()}
             </span>
-            {property.originalPrice && (
+            {property?.basePricePerNight && (
               <span className="text-xs text-white/60 line-through">
-                ₹{property.originalPrice.toLocaleString()}
+                ₹{property?.basePricePerNight?.toLocaleString()}
               </span>
             )}
           </div>

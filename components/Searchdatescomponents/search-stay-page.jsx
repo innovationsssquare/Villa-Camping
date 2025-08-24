@@ -1,49 +1,66 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import Link from "next/link"
-import { ChevronLeft, Calendar, Users, Home, Phone } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { SearchInputCard } from "./search-input-card"
-import { GuestSelectionDrawer } from "./guest-selection-drawer"
-import { CategorySelectionDrawer } from "./category-selection-drawer"
-import { RoomSelectionDrawer } from "./room-selection-drawer"
+import { useState, useMemo, useEffect } from "react";
+import Link from "next/link";
+import { ChevronLeft, Calendar, Users, Home, Phone } from "lucide-react";
+import { Button } from "@heroui/react";
+import { SearchInputCard } from "./search-input-card";
+import { GuestSelectionDrawer } from "./guest-selection-drawer";
+import { CategorySelectionDrawer } from "./category-selection-drawer";
+import { RoomSelectionDrawer } from "./room-selection-drawer";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
+import { setSelectedSubtype } from "@/Redux/Slices/bookingSlice";
+import moment from "moment";
+import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
+import ButtonLoader from "../Loadercomponents/button-loader";
+import { useRouter } from "next/navigation";
 
 export default function SearchStayPage() {
-  const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false)
-  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false)
-  const [isRoomDrawerOpen, setIsRoomDrawerOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState("villa")
+  const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const [isRoomDrawerOpen, setIsRoomDrawerOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+const router=useRouter()
+  const { categories } = useSelector((state) => state.category);
+  const {
+    selectedCategoryId,
+    selectedCategoryName,
+    selectedSubtype, // ✅ now from Redux
+    checkin,
+    checkout,
+    selectedGuest,
+  } = useSelector((state) => state.booking);
 
-  const [guests, setGuests] = useState({
-    adults: 2,
-    children: 0,
-    infants: 0,
-    pets: 0,
-  })
+  const dispatch = useDispatch();
 
-  const [roomSelection, setRoomSelection] = useState({
-    roomType: "3bhk",
-    quantity: 1,
-  })
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
 
+  // ✅ Guest summary directly from Redux
   const guestSummary = useMemo(() => {
-    const totalGuests = guests.adults + guests.children
-    const parts = []
+    const totalGuests = selectedGuest.adults + selectedGuest.childrenn; // 🔹 fix childrenn typo
+    const parts = [];
 
     if (totalGuests > 0) {
-      parts.push(`${totalGuests} Guest${totalGuests > 1 ? "s" : ""}`)
+      parts.push(`${totalGuests} Guest${totalGuests > 1 ? "s" : ""}`);
     }
-    if (guests.infants > 0) {
-      parts.push(`${guests.infants} Infant${guests.infants > 1 ? "s" : ""}`)
+    if (selectedGuest.infants > 0) {
+      parts.push(
+        `${selectedGuest.infants} Infant${selectedGuest.infants > 1 ? "s" : ""}`
+      );
     }
-    if (guests.pets > 0) {
-      parts.push(`${guests.pets} Pet${guests.pets > 1 ? "s" : ""}`)
+    if (selectedGuest.pets > 0) {
+      parts.push(
+        `${selectedGuest.pets} Pet${selectedGuest.pets > 1 ? "s" : ""}`
+      );
     }
 
-    return parts.length > 0 ? parts.join(", ") : "Add Guests"
-  }, [guests])
+    return parts.length > 0 ? parts.join(", ") : "Add Guests";
+  }, [selectedGuest]);
 
+  // ✅ Room summary
   const roomSummary = useMemo(() => {
     const roomTypeMap = {
       "2bhk": "2BHK",
@@ -61,45 +78,79 @@ export default function SearchStayPage() {
       "deluxe-room": "Deluxe Room",
       suite: "Suite",
       "presidential-suite": "Presidential Suite",
-    }
+    };
 
-    const roomName = roomTypeMap[roomSelection.roomType] || "Select Room"
-    return roomSelection.quantity > 1
-      ? `${roomSelection.quantity} ${roomName}s`
-      : `${roomSelection.quantity} ${roomName}`
-  }, [roomSelection])
+    const roomName = roomTypeMap[selectedSubtype?.type] || "Select Room";
 
+    return selectedSubtype?.quantity > 1
+      ? `${selectedSubtype.quantity} ${roomName}s`
+      : `${selectedSubtype?.quantity || 1} ${roomName}`;
+  }, [selectedSubtype]);
+
+  // ✅ Category display
   const categoryDisplay = useMemo(() => {
     const categoryMap = {
       cottage: { name: "Cottage", icon: "🏡" },
       camping: { name: "Camping", icon: "⛺" },
       villa: { name: "Villa", icon: "🏖️" },
       hotel: { name: "Hotel", icon: "🏨" },
-    }
-    return categoryMap[selectedCategory] || categoryMap.villa
-  }, [selectedCategory])
+    };
+    return (
+      categoryMap[selectedCategoryName?.toLowerCase()] || categoryMap.villa
+    );
+  }, [selectedCategoryName]);
 
-  const handleSaveGuests = (newGuests) => {
-    setGuests(newGuests)
-    setIsGuestDrawerOpen(false)
-  }
-
-  const handleSaveCategory = (category) => {
-    setSelectedCategory(category)
-    const defaultRooms = {
-      villa: { roomType: "3bhk", quantity: 1 },
-      camping: { roomType: "couple-tent", quantity: 1 },
-      cottage: { roomType: "couple-cottage", quantity: 1 },
-      hotel: { roomType: "standard-room", quantity: 1 },
-    }
-    setRoomSelection(defaultRooms[category] || defaultRooms.villa)
-    setIsCategoryDrawerOpen(false)
-  }
-
+  // ✅ Room save uses Redux
   const handleSaveRoom = (newRoom) => {
-    setRoomSelection(newRoom)
-    setIsRoomDrawerOpen(false)
-  }
+    dispatch(setSelectedSubtype(newRoom)); // expects { type, quantity }
+    setIsRoomDrawerOpen(false);
+  };
+
+  const nights = useMemo(() => {
+    const checkInDate = moment(checkin);
+    const checkOutDate = moment(checkout);
+    return checkOutDate.diff(checkInDate, "days");
+  }, [checkin, checkout]);
+
+  const handleSearch = async () => {
+    if (!selectedCategoryId || !selectedCategoryName) {
+      console.log("No category selected");
+      return;
+    }
+
+    setIsSearching(true);
+
+    try {
+      console.log("Search:", {
+        selectedCategoryId,
+        selectedCategoryName,
+        checkin,
+        checkout,
+        selectedGuest,
+      });
+
+      // Navigate to category page
+
+      // Dispatch async action to fetch properties
+      await dispatch(
+        fetchAllProperties({
+          categoryId: selectedCategoryId,
+          checkIn: checkin,
+          checkOut: checkout,
+          subtype: "",
+          page: 1,
+          limit: 20,
+        })
+      ).unwrap();
+
+      console.log("Search completed successfully");
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      router.push(`/category/${selectedCategoryName.toLowerCase()}`);
+      setIsSearching(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
@@ -107,7 +158,9 @@ export default function SearchStayPage() {
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <ChevronLeft className="h-5 w-5 text-gray-800" />
-          <h1 className="text-lg font-semibold text-gray-800">Search your Stay</h1>
+          <h1 className="text-lg font-semibold text-gray-800">
+            Search your Stay
+          </h1>
         </div>
       </header>
 
@@ -124,15 +177,10 @@ export default function SearchStayPage() {
           <SearchInputCard
             icon={<Calendar className="h-5 w-5" />}
             label="Check-in Date"
-            value="05 Apr Thu 2029"
-            badge="1 Night"
+            value={moment(checkin).format("DD MMM ddd YYYY")}
+            badge={`${nights} Night${nights > 1 ? "s" : ""}`}
             className="relative"
-          >
-            {/* <div className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-medium text-gray-800">
-              Check-Out Date
-              <div className="text-base font-bold">06 Apr Fri 2029</div>
-            </div> */}
-          </SearchInputCard>
+          />
         </Link>
 
         <SearchInputCard
@@ -142,18 +190,23 @@ export default function SearchStayPage() {
           onClick={() => setIsGuestDrawerOpen(true)}
         />
 
-        <SearchInputCard
+        {/* <SearchInputCard
           icon={<Home className="h-5 w-5" />}
           label="Room Selection"
           value={roomSummary}
           onClick={() => setIsRoomDrawerOpen(true)}
-        />
+        /> */}
 
-        <Button className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg mt-6">SEARCH STAYS</Button>
+        <Button
+          onPress={handleSearch}
+          className="w-full py-3 text-sm font-semibold bg-black text-white rounded-lg mt-6"
+        >
+          {isSearching ? <ButtonLoader /> : "SEARCH STAYS"}
+        </Button>
       </main>
 
       {/* Footer */}
-      <footer className="p-4 text-center border-t border-gray-200">
+      <footer className="p-4 text-center border-t border-gray-200 mb-12">
         <p className="text-sm text-gray-600 mb-2">
           Finding your ideal vacation spot should be easy, we're here to help!
         </p>
@@ -167,27 +220,24 @@ export default function SearchStayPage() {
         </div>
       </footer>
 
+      {/* ✅ Drawer components */}
       <GuestSelectionDrawer
         isOpen={isGuestDrawerOpen}
         onClose={() => setIsGuestDrawerOpen(false)}
-        initialGuests={guests}
-        onSave={handleSaveGuests}
       />
 
       <CategorySelectionDrawer
         isOpen={isCategoryDrawerOpen}
         onClose={() => setIsCategoryDrawerOpen(false)}
-        initialCategory={selectedCategory}
-        onSave={handleSaveCategory}
       />
 
-      <RoomSelectionDrawer
+      {/* <RoomSelectionDrawer
         isOpen={isRoomDrawerOpen}
         onClose={() => setIsRoomDrawerOpen(false)}
-        category={selectedCategory}
-        initialRoom={roomSelection.roomType}
+        category={selectedCategoryName}
+        initialRoom={selectedSubtype?.type}
         onSave={handleSaveRoom}
-      />
+      /> */}
     </div>
-  )
+  );
 }

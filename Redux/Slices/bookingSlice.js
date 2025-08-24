@@ -1,13 +1,19 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import moment from "moment-timezone";
+
+const timezone = "Asia/Kolkata";
+const today = moment().tz(timezone).startOf("day");
+const tomorrow = today.clone().add(1, "day");
 
 const initialState = {
   selectedCategoryId: null,
   selectedCategoryName: "",
-  checkin: null,
-  checkout: null,
+  selectedSubtype: { type: "", quantity: 1 },
+  checkin: today.format(),
+  checkout: tomorrow.format(),
   selectedGuest: {
     adults: 1,
-    children: 0,
+    childrenn: 0,
     infants: 0,
     pets: 0,
   },
@@ -23,6 +29,14 @@ const bookingSlice = createSlice({
     setSelectedCategoryname: (state, action) => {
       state.selectedCategoryName = action.payload;
     },
+
+    setSelectedSubtype: (state, action) => {
+      state.selectedSubtype = action.payload; // expects { type, quantity }
+    },
+    updateSubtypeQuantity: (state, action) => {
+      state.selectedSubtype.quantity = action.payload;
+    },
+
     setCheckin: (state, action) => {
       state.checkin = action.payload;
     },
@@ -48,7 +62,9 @@ export const {
   setSelectedGuest,
   updateGuestCount,
   resetBooking,
-  setSelectedCategoryname
+  setSelectedCategoryname,
+  setSelectedSubtype,
+  updateSubtypeQuantity,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

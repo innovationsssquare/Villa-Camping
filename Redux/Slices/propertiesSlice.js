@@ -23,7 +23,7 @@ export const fetchAllProperties = createAsyncThunk(
 const propertiesSlice = createSlice({
   name: "properties",
   initialState: {
-    loading: false,
+    dataloading: false,
     error: null,
     data: [],
     pagination:null
@@ -32,22 +32,22 @@ const propertiesSlice = createSlice({
     clearProperties: (state) => {
       state.data = [];
       state.error = null;
-      state.loading = false;
+      state.dataloading = false;
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(fetchAllProperties.pending, (state) => {
-        state.loading = true;
+        state.dataloading = true;
         state.error = null;
       })
       .addCase(fetchAllProperties.fulfilled, (state, action) => {
-        state.loading = false;
+        state.dataloading = false;
         state.data = action.payload?.data || []; 
         state.pagination = action.payload.pagination
       })
       .addCase(fetchAllProperties.rejected, (state, action) => {
-        state.loading = false;
+        state.dataloading = false;
         state.error = action.payload || "Something went wrong";
       });
   },

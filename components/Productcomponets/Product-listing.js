@@ -57,17 +57,9 @@ import {
 } from "@/Redux/Slices/propertyFilterSlice";
 import PropertyCardSkeleton from "../Availableweekend/property-card-skeleton";
 import { IoSearchCircle } from "react-icons/io5";
+import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
-  // TODO: Replace with actual API call
-  // const response = await fetch('/api/properties', {
-  //   method: 'POST',
-  //   headers: { 'Content-Type': 'application/json' },
-  //   body: JSON.stringify({ filters, page, limit })
-  // })
-  // return response.json()
-
-  // Mock implementation for now
   return {
     properties: [
       {
@@ -289,7 +281,6 @@ const fetchProperties = async (filters, page = 1, limit = 6) => {
 
 export default function PropertyFilterListing() {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
-
   const dispatch = useDispatch();
   const {
     selectedPriceRanges,
@@ -308,8 +299,25 @@ export default function PropertyFilterListing() {
     loading,
     showMobileFilters,
   } = useSelector((state) => state.propertyFilter);
+  const { selectedCategoryId, checkin, checkout, selectedGuest } = useSelector(
+    (state) => state.booking
+  );
+  const { dataloading, error, data, pagination } = useSelector(
+    (state) => state.properties
+  );
 
-  console.log(searchQuery);
+  useEffect(() => {
+    dispatch(
+      fetchAllProperties({
+        categoryId: selectedCategoryId,
+        checkIn: checkin,
+        checkOut: checkout,
+        subtype: "",
+        page: 1,
+        limit: 10,
+      })
+    );
+  }, [dispatch, selectedCategoryId, checkin, checkout]);
 
   const propertyTypesByCategory = {
     villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -827,10 +835,10 @@ export default function PropertyFilterListing() {
         </div>
 
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <div className="sticky top-16 z-40 bg-white md:bg-white backdrop-blur-2xl py-4 mb-6 shrink-0 border-b border-gray-200 px-3 rounded-t-2xl md:rounded-none">
+          <div className="sticky top-16 z-40 bg-gray-50 md:bg-white backdrop-blur-2xl  py-4 mb-6 shrink-0 border-b border-gray-200 px-3 rounded-t-2xl md:rounded-none">
             <div className="flex md:hidden justify-between gap-2 items-center  ">
               <div className="relative w-full  h-10 rounded-full bg-[#FFFFFF4D] border-gray-300 text-gray-900 flex justify-start items-center">
-                <IoSearchCircle  className="absolute  h-10 w-10 text-black" />
+                <IoSearchCircle className="absolute  h-10 w-10 text-black" />
                 <Input
                   type="text"
                   placeholder="Search properties..."
@@ -955,13 +963,13 @@ export default function PropertyFilterListing() {
 
           <div className="flex-1 overflow-hidden">
             <div className="h-auto mt-10 md:mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 px-3 md:px-0 bg-white">
-                {loading
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
+                {dataloading
                   ? Array.from({ length: 6 }).map((_, index) => (
                       <PropertyCardSkeleton key={`skeleton-${index}`} />
                     ))
-                  : filteredProperties.map((property) => (
-                      <PropertyCard key={property.id} property={property} />
+                  : data?.map((property) => (
+                      <PropertyCard key={property._id} property={property} />
                     ))}
               </div>
 

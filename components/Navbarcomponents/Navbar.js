@@ -7,10 +7,15 @@ import {
   Globe,
   Menu,
   User,
-  Home,
   Lightbulb,
   UtensilsCrossed,
+  Calendar,
+  Users,
 } from "lucide-react";
+import { FaHome } from "react-icons/fa";
+import { FaCalendarCheck } from "react-icons/fa";
+import { MdPeopleAlt } from "react-icons/md";
+
 import { Button } from "@/components/ui/button";
 import { DatePicker } from "./date-picker";
 import { GuestSelector } from "./guest-selector";
@@ -26,6 +31,9 @@ import {
 import Logo from "../../public/Loginasset/Logo2.png";
 import Image from "next/image";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
+import { useRouter } from "next/navigation";
+import ButtonLoader from "../Loadercomponents/button-loader";
+import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 
 export default function AirbnbNavbar() {
   const dispatch = useDispatch();
@@ -34,11 +42,16 @@ export default function AirbnbNavbar() {
   const [isMobile, setIsMobile] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const { isVisible, setIsVisible } = useScrollDirection();
-
+  const router = useRouter();
   const { categories } = useSelector((state) => state.category);
-  const { selectedCategoryId, checkin, checkout, selectedGuest ,selectedCategoryName} = useSelector(
-    (state) => state.booking
-  );
+  const {
+    selectedCategoryId,
+    checkin,
+    checkout,
+    selectedGuest,
+    selectedCategoryName,
+  } = useSelector((state) => state.booking);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Get selected category name for display
   const selectedCategory = categories?.find(
@@ -47,10 +60,17 @@ export default function AirbnbNavbar() {
 
   const dropdownRef = useRef(null);
 
-  console.log(selectedCategoryId);
   useEffect(() => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
+
+useEffect(() => {
+  if (categories.length > 0 && !selectedCategoryId) {
+    dispatch(setSelectedCategory(categories[0]._id));
+    dispatch(setSelectedCategoryname(categories[0].name));
+  }
+}, [ dispatch,selectedCategoryId,categories]);
+
 
   useEffect(() => {
     const checkMobile = () => {
@@ -97,7 +117,7 @@ export default function AirbnbNavbar() {
   };
 
   const getTotalGuests = () => {
-    const total = selectedGuest.adults + selectedGuest.children;
+    const total = selectedGuest.adults + selectedGuest.childrenn;
     if (total === 1) return "1 guest";
     return `${total} guests`;
   };
@@ -106,15 +126,45 @@ export default function AirbnbNavbar() {
     dispatch(updateGuestCount({ type, value }));
   };
 
-  const handleSearch = () => {
-    console.log("Search:", {
-      selectedCategoryId,
-      selectedCategory: selectedCategory?.name,
-      checkin,
-      checkout,
-      selectedGuest,
-    });
+  const handleSearch = async () => {
+    if (!selectedCategoryId || !selectedCategoryName) {
+      console.log("No category selected");
+      return;
+    }
+
+    setIsSearching(true);
     setActiveDropdown(null);
+
+    try {
+      console.log("Search:", {
+        selectedCategoryId,
+        selectedCategoryName,
+        checkin,
+        checkout,
+        selectedGuest,
+      });
+
+      // Navigate to category page
+      router.push(`/category/${selectedCategoryName.toLowerCase()}`);
+
+      // Dispatch async action to fetch properties
+      await dispatch(
+        fetchAllProperties({
+          categoryId: selectedCategoryId,
+          checkIn: checkin,
+          checkOut: checkout,
+          subtype: "",
+          page: 1,
+          limit: 20,
+        })
+      ).unwrap();
+
+      console.log("Search completed successfully");
+    } catch (error) {
+      console.error("Search failed:", error);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
@@ -158,13 +208,14 @@ export default function AirbnbNavbar() {
               }`}
             >
               <div className="flex items-center px-3 md:px-4 py-2">
-                <Home className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
+                <FaHome className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
                 <span className="text-xs md:text-sm font-medium text-gray-800">
                   {selectedCategoryName || "Any category"}
                 </span>
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
+                <FaCalendarCheck className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
                 <span className="text-xs md:text-sm font-medium text-gray-800">
                   {checkin && checkout
                     ? `${formatDate(checkin)} - ${formatDate(checkout)}`
@@ -173,6 +224,8 @@ export default function AirbnbNavbar() {
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
+                <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
+
                 <span className="text-xs md:text-sm text-gray-600">
                   {selectedGuest.adults > 1 || selectedGuest.children > 0
                     ? getTotalGuests()
@@ -213,7 +266,7 @@ export default function AirbnbNavbar() {
                 size="icon"
                 className="w-6 h-6 md:w-8 md:h-8"
               >
-                <User className="w-3 h-3 md:w-4 md:h-4" />
+                <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4" />
               </Button>
             </div>
           </div>
@@ -230,7 +283,7 @@ export default function AirbnbNavbar() {
           {/* Navigation tabs */}
           <div className="hidden md:flex items-center justify-center space-x-8 pb-2">
             <div className="flex items-center space-x-2 cursor-pointer border-b-2 border-gray-800 pb-3">
-              <Home className="w-4 h-4" />
+              <FaHome className="w-4 h-4" />
               <span className="text-sm font-medium">Homes</span>
             </div>
             <div className="flex items-center space-x-2 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-3 transition-colors">
@@ -252,7 +305,7 @@ export default function AirbnbNavbar() {
           {/* Mobile navigation tabs */}
           <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
             <div className="flex items-center space-x-1 cursor-pointer border-b-2 border-gray-800 pb-2">
-              <Home className="w-3 h-3" />
+              <FaHome className="w-3 h-3" />
               <span className="text-xs font-medium">Homes</span>
             </div>
             <div className="flex items-center space-x-1 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-2 transition-colors">
@@ -283,7 +336,8 @@ export default function AirbnbNavbar() {
                     }
                     className="flex-1 px-3 py-2 border-r border-gray-300 rounded-l-full hover:bg-gray-50 cursor-pointer transition-colors"
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-0.5">
+                    <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
+                      <FaHome className="w-3 h-3 mr-1" />
                       Category
                     </div>
                     <div className="text-xs text-gray-500 truncate">
@@ -325,7 +379,8 @@ export default function AirbnbNavbar() {
                       activeDropdown === "category" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                    <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
+                      <FaHome className="w-3 h-3 mr-1" />
                       Category
                     </div>
                     <div className="text-sm text-gray-700 truncate">
@@ -342,7 +397,8 @@ export default function AirbnbNavbar() {
                       activeDropdown === "checkin" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                    <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
+                      <FaCalendarCheck className="w-3 h-3 mr-1" />
                       Check in
                     </div>
                     <div className="text-sm text-gray-700">
@@ -359,7 +415,8 @@ export default function AirbnbNavbar() {
                       activeDropdown === "checkout" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                    <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
+                      <FaCalendarCheck className="w-3 h-3 mr-1" />
                       Check out
                     </div>
                     <div className="text-sm text-gray-700">
@@ -376,7 +433,8 @@ export default function AirbnbNavbar() {
                       activeDropdown === "guests" ? " rounded-r-none" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                    <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
+                      <MdPeopleAlt className="w-3 h-3 mr-1" />
                       Who
                     </div>
                     <div className="text-sm text-gray-700">
@@ -385,9 +443,19 @@ export default function AirbnbNavbar() {
                   </div>
                   <button
                     onClick={handleSearch}
-                    className="bg-black rounded-full p-3 m-1 cursor-pointer hover:bg-black transition-colors"
+                    className={
+                      isSearching
+                        ? `bg-black rounded-full  m-2 cursor-pointer hover:bg-black transition-colors`
+                        : `bg-black rounded-full p-2.5  m-2 cursor-pointer hover:bg-black transition-colors`
+                    }
                   >
-                    <Search className="w-5 h-5 text-white" />
+                    {isSearching ? (
+                      <div className="flex   justify-center items-center">
+                        <ButtonLoader />
+                      </div>
+                    ) : (
+                      <Search className="w-5 h-5  text-white" />
+                    )}
                   </button>
                 </>
               )}
@@ -401,7 +469,7 @@ export default function AirbnbNavbar() {
                 }`}
               >
                 <CategorySearch
-                  onCategorySelect={(categoryId,categoryName) => {
+                  onCategorySelect={(categoryId, categoryName) => {
                     dispatch(setSelectedCategory(categoryId));
                     dispatch(setSelectedCategoryname(categoryName));
                     setActiveDropdown(null);
@@ -456,7 +524,7 @@ export default function AirbnbNavbar() {
               >
                 <GuestSelector
                   adults={selectedGuest.adults}
-                  childrenn={selectedGuest.children}
+                  childrenn={selectedGuest.childrenn}
                   infants={selectedGuest.infants}
                   pets={selectedGuest.pets}
                   onGuestChange={handleGuestChange}

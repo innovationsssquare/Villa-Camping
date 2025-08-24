@@ -1,151 +1,182 @@
-"use client"
+"use client";
 
-import { useState, useMemo, useEffect } from "react"
-import { ChevronLeft } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { HolidayCard } from "@/components/Searchdatescomponents/holiday-card"
-import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useState, useMemo, useEffect } from "react";
+import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { setCheckin, setCheckout } from "@/Redux/Slices/bookingSlice";
 
 export default function DatePickerPage() {
-  const [selectedCheckInDate, setSelectedCheckInDate] = useState(null)
-  const [selectedCheckOutDate, setSelectedCheckOutDate] = useState(null)
-  const [currentMonth, setCurrentMonth] = useState(new Date()) // Start with current month
-const router=useRouter()
+  const router = useRouter();
+  const dispatch = useDispatch();
+
+  // ✅ get values from Redux
+  const { checkin, checkout } = useSelector((state) => state.booking);
+
+  // ✅ initialize local state from Redux
+  const [selectedCheckInDate, setSelectedCheckInDate] = useState(
+    checkin ? new Date(checkin) : null
+  );
+  const [selectedCheckOutDate, setSelectedCheckOutDate] = useState(
+    checkout ? new Date(checkout) : null
+  );
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
   useEffect(() => {
-    // Ensure currentMonth is always set to the first day of its month
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1))
-  }, [])
+    setCurrentMonth(
+      new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1)
+    );
+  }, []);
 
-  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+  const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate()
-  }
+  const getDaysInMonth = (year, month) =>
+    new Date(year, month + 1, 0).getDate();
 
-  const getFirstDayOfMonth = (year, month) => {
-    return new Date(year, month, 1).getDay() // 0 for Sunday, 1 for Monday, etc.
-  }
+  const getFirstDayOfMonth = (year, month) =>
+    new Date(year, month, 1).getDay();
 
   const handleDateClick = (date) => {
-    // Clear time components for accurate comparison
-    const clickedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+    const clickedDate = new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    );
 
     if (!selectedCheckInDate || (selectedCheckInDate && selectedCheckOutDate)) {
-      // If no check-in or both are selected, start a new selection
-      setSelectedCheckInDate(clickedDate)
-      setSelectedCheckOutDate(null)
+      setSelectedCheckInDate(clickedDate);
+      setSelectedCheckOutDate(null);
+      dispatch(setCheckin(clickedDate.toISOString())); // ✅ save in Redux
+      dispatch(setCheckout(null));
     } else if (selectedCheckInDate) {
-      // If check-in is selected, set check-out
       if (clickedDate.getTime() < selectedCheckInDate.getTime()) {
-        // If clicked date is before check-in, reset and set new check-in
-        setSelectedCheckInDate(clickedDate)
-        setSelectedCheckOutDate(null)
+        setSelectedCheckInDate(clickedDate);
+        setSelectedCheckOutDate(null);
+        dispatch(setCheckin(clickedDate.toISOString()));
+        dispatch(setCheckout(null));
       } else if (clickedDate.getTime() === selectedCheckInDate.getTime()) {
-        // If clicked date is same as check-in, deselect check-in
-        setSelectedCheckInDate(null)
-        setSelectedCheckOutDate(null)
+        setSelectedCheckInDate(null);
+        setSelectedCheckOutDate(null);
+        dispatch(setCheckin(null));
+        dispatch(setCheckout(null));
       } else {
-        setSelectedCheckOutDate(clickedDate)
+        setSelectedCheckOutDate(clickedDate);
+        dispatch(setCheckout(clickedDate.toISOString())); // ✅ save in Redux
       }
     }
-  }
+  };
 
   const numberOfNights = useMemo(() => {
     if (selectedCheckInDate && selectedCheckOutDate) {
-      const diffTime = Math.abs(selectedCheckOutDate.getTime() - selectedCheckInDate.getTime())
-      return Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      const diffTime = Math.abs(
+        selectedCheckOutDate.getTime() - selectedCheckInDate.getTime()
+      );
+      return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     }
-    return 0
-  }, [selectedCheckInDate, selectedCheckOutDate])
+    return 0;
+  }, [selectedCheckInDate, selectedCheckOutDate]);
 
   const tooltipText = useMemo(() => {
-    if (!selectedCheckInDate) {
-      return "Select Check-in Date"
-    } else if (!selectedCheckOutDate) {
-      return "Select Check-out Date"
-    }
-    return `${numberOfNights} Total Nights` // Show total nights
-  }, [selectedCheckInDate, selectedCheckOutDate, numberOfNights])
+    if (!selectedCheckInDate) return "Select Check-in Date";
+    if (!selectedCheckOutDate) return "Select Check-out Date";
+    return `${numberOfNights} Total Nights`;
+  }, [selectedCheckInDate, selectedCheckOutDate, numberOfNights]);
 
   const tooltipPositionClass = useMemo(() => {
-    if (!selectedCheckInDate) {
-      return "left-[25%] -translate-x-1/2" // Position over Check-In
-    } else if (selectedCheckInDate && !selectedCheckOutDate) {
-      return "left-[75%] -translate-x-1/2" // Position over Check-Out
-    }
-    return "left-1/2 -translate-x-1/2" // Position over "0 Night" (center)
-  }, [selectedCheckInDate, selectedCheckOutDate])
+    if (!selectedCheckInDate) return "left-[25%] -translate-x-1/2";
+    if (selectedCheckInDate && !selectedCheckOutDate)
+      return "left-[75%] -translate-x-1/2";
+    return "left-1/2 -translate-x-1/2";
+  }, [selectedCheckInDate, selectedCheckOutDate]);
 
-  const formatDateDisplay = (date) => {
-    return date ? new Intl.DateTimeFormat("en-US", { day: "numeric", month: "short" }).format(date) : "-"
-  }
+  const formatDateDisplay = (date) =>
+    date
+      ? new Intl.DateTimeFormat("en-US", {
+          day: "numeric",
+          month: "short",
+        }).format(date)
+      : "-";
 
   const renderMonth = (date) => {
-    const year = date.getFullYear()
-    const month = date.getMonth()
-    const monthName = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date)
+    const year = date.getFullYear();
+    const month = date.getMonth();
+    const monthName = new Intl.DateTimeFormat("en-US", {
+      month: "long",
+    }).format(date);
 
-    const daysInMonth = getDaysInMonth(year, month)
-    const firstDay = getFirstDayOfMonth(year, month)
-    // Adjust firstDay to be 0 for Monday, 6 for Sunday
-    const startDayIndex = firstDay === 0 ? 6 : firstDay - 1
+    const daysInMonth = getDaysInMonth(year, month);
+    const firstDay = getFirstDayOfMonth(year, month);
+    const startDayIndex = firstDay === 0 ? 6 : firstDay - 1;
 
-    const calendarDays = []
-    // Add empty cells for days before the 1st
+    const calendarDays = [];
+
     for (let i = 0; i < startDayIndex; i++) {
-      calendarDays.push(<div key={`empty-${month}-${i}`} className="h-10 w-10 flex items-center justify-center"></div>)
+      calendarDays.push(
+        <div
+          key={`empty-${month}-${i}`}
+          className="h-12 w-12 flex items-center justify-center"
+        />
+      );
     }
 
-    // Add actual days
     for (let day = 1; day <= daysInMonth; day++) {
-      const currentDay = new Date(year, month, day)
-      const isWeekend = currentDay.getDay() === 0 || currentDay.getDay() === 6 // Sunday (0) or Saturday (6)
+      const currentDay = new Date(year, month, day);
+      const isWeekend =
+        currentDay.getDay() === 0 || currentDay.getDay() === 6;
 
-      const isCheckIn = selectedCheckInDate && currentDay.toDateString() === selectedCheckInDate.toDateString()
-      const isCheckOut = selectedCheckOutDate && currentDay.toDateString() === selectedCheckOutDate.toDateString()
+      const isCheckIn =
+        selectedCheckInDate &&
+        currentDay.toDateString() === selectedCheckInDate.toDateString();
+      const isCheckOut =
+        selectedCheckOutDate &&
+        currentDay.toDateString() === selectedCheckOutDate.toDateString();
       const isInRange =
         selectedCheckInDate &&
         selectedCheckOutDate &&
         currentDay.getTime() > selectedCheckInDate.getTime() &&
-        currentDay.getTime() < selectedCheckOutDate.getTime()
+        currentDay.getTime() < selectedCheckOutDate.getTime();
 
       calendarDays.push(
         <div
           key={`${month}-${day}`}
           className={cn(
-            "h-10 w-10 flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
+            "h-12 w-12 flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
             isWeekend ? "text-red-500" : "text-gray-800",
-            isCheckIn && "bg-blue-500 text-white rounded-full",
-            isCheckOut && "bg-blue-500 text-white rounded-full",
-            isInRange && "bg-blue-100 text-blue-800",
+            isCheckIn && "bg-black text-white rounded-full",
+            isCheckOut && "bg-black text-white rounded-full",
+            isInRange && "bg-gray-200 text-black border border-white"
           )}
           onClick={() => handleDateClick(currentDay)}
         >
           {day}
-        </div>,
-      )
+        </div>
+      );
     }
 
     return (
       <div className="mb-8">
-        <h2 className="text-lg font-semibold mb-4 px-4">
+        <h2 className="text-lg font-semibold mb-4 ">
           {monthName} {year}
         </h2>
         <div className="grid grid-cols-7 gap-0.5">{calendarDays}</div>
       </div>
-    )
-  }
+    );
+  };
 
   const monthsToRender = useMemo(() => {
-    const months = []
-    for (let i = 0; i < 3; i++) {
-      // Render current month + next 2 months
-      const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + i, 1)
-      months.push(date)
+    const months = [];
+    for (let i = 0; i < 12; i++) {
+      const date = new Date(
+        currentMonth.getFullYear(),
+        currentMonth.getMonth() + i,
+        1
+      );
+      months.push(date);
     }
-    return months
-  }, [currentMonth])
+    return months;
+  }, [currentMonth]);
 
   return (
     <div className="flex flex-col h-screen bg-white">
@@ -153,52 +184,26 @@ const router=useRouter()
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <ChevronLeft className="h-5 w-5 text-gray-800" />
-          <h1 className="text-lg font-semibold text-gray-800">Select Check-In Date</h1>
+          <h1 className="text-lg font-semibold text-gray-800">
+            Select Check-In Date
+          </h1>
         </div>
-       
       </header>
-
-      {/* Holiday Cards Section */}
-      <div className="px-4 py-3 overflow-x-auto whitespace-nowrap border-b border-gray-200">
-        <div className="inline-flex space-x-3">
-          <HolidayCard
-            type="Holiday"
-            dateRange="15 Aug"
-            name="Independence Day"
-            colorClass="bg-orange-50 text-orange-600"
-          />
-          <HolidayCard
-            type="Long Weekend"
-            dateRange="15 Aug - 17 Aug"
-            name="Independence Day"
-            colorClass="bg-blue-50 text-blue-600"
-          />
-          <HolidayCard
-            type="Long Weekend"
-            dateRange="05 Sep - 07 Sep"
-            name="Eid-E-Milad, Onam"
-            colorClass="bg-blue-50 text-blue-600"
-          />
-          <HolidayCard
-            type="Holiday"
-            dateRange="02 Oct"
-            name="Gandhi Jayanti"
-            colorClass="bg-orange-50 text-orange-600"
-          />
-        </div>
-      </div>
 
       {/* Days of Week Header */}
       <div className="grid grid-cols-7 gap-0.5 py-3 text-center text-sm font-medium border-b border-gray-200">
         {daysOfWeek.map((day, index) => (
-          <div key={day} className={cn(index >= 5 ? "text-red-500" : "text-gray-600")}>
+          <div
+            key={day}
+            className={cn(index >= 5 ? "text-red-500" : "text-gray-600")}
+          >
             {day}
           </div>
         ))}
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-2">
         {monthsToRender.map((monthDate, index) => (
           <div key={index}>{renderMonth(monthDate)}</div>
         ))}
@@ -210,7 +215,7 @@ const router=useRouter()
           <div
             className={cn(
               "absolute -top-6 bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg transition-all duration-300",
-              tooltipPositionClass,
+              tooltipPositionClass
             )}
           >
             {tooltipText}
@@ -219,27 +224,42 @@ const router=useRouter()
           <div className="flex items-center justify-between bg-gray-100 rounded-lg p-2">
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800",
-                selectedCheckInDate && !selectedCheckOutDate ? "bg-blue-100" : "bg-gray-200",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 border border-dashed border-black",
+                selectedCheckInDate && !selectedCheckOutDate
+                  ? "bg-blue-100"
+                  : "bg-gray-200"
               )}
             >
               Check-In Date
-              <div className="text-xl font-bold">{formatDateDisplay(selectedCheckInDate)}</div>
+              <div className="text-lg font-bold">
+                {formatDateDisplay(selectedCheckInDate)}
+              </div>
             </div>
-            <div className="mx-2 text-xs text-gray-500">{numberOfNights} Night</div>
+            <div className="mx-2 bg-black p-2 text-white text-xs rounded-full">
+              {numberOfNights} Night
+            </div>
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800",
-                selectedCheckInDate && selectedCheckOutDate ? "bg-blue-100" : "bg-gray-200",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 border-dashed border border-black",
+                selectedCheckInDate && selectedCheckOutDate
+                  ? "bg-blue-100"
+                  : "bg-gray-200"
               )}
             >
               Check-Out Date
-              <div className="text-xl font-bold">{formatDateDisplay(selectedCheckOutDate)}</div>
+              <div className="text-lg font-bold">
+                {formatDateDisplay(selectedCheckOutDate)}
+              </div>
             </div>
           </div>
         </div>
-        <Button onClick={()=>router.back()} className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg">NEXT</Button>
+        <Button
+          onClick={() => router.back()}
+          className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg"
+        >
+          NEXT
+        </Button>
       </div>
     </div>
-  )
+  );
 }
