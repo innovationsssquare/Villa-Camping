@@ -1,110 +1,143 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { Search, Globe, Menu, User, Home, Lightbulb, UtensilsCrossed } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { DatePicker } from "./date-picker"
-import { GuestSelector } from "./guest-selector"
-import { LocationSearch } from "./location-search"
+import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import {
+  Search,
+  Globe,
+  Menu,
+  User,
+  Home,
+  Lightbulb,
+  UtensilsCrossed,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DatePicker } from "./date-picker";
+import { GuestSelector } from "./guest-selector";
+import { CategorySearch } from "./category-dropdown";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
-import Logo  from "../../public/Loginasset/Logo2.png"
+import {
+  setSelectedCategory,
+  setCheckin,
+  setCheckout,
+  updateGuestCount,
+  setSelectedCategoryname,
+} from "@/Redux/Slices/bookingSlice";
+import Logo from "../../public/Loginasset/Logo2.png";
 import Image from "next/image";
+import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 
 export default function AirbnbNavbar() {
-  const [isExpanded, setIsExpanded] = useState(true)
-  const [scrollY, setScrollY] = useState(0)
-  const [isMobile, setIsMobile] = useState(false)
-  const [activeDropdown, setActiveDropdown] = useState(null)
-  const { isVisible ,setIsVisible} = useScrollDirection();
+  const dispatch = useDispatch();
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+  const [activeDropdown, setActiveDropdown] = useState(null);
+  const { isVisible, setIsVisible } = useScrollDirection();
 
-  // Search state
-  const [location, setLocation] = useState("")
-  const [checkIn, setCheckIn] = useState(null)
-  const [checkOut, setCheckOut] = useState(null)
-  const [guests, setGuests] = useState({
-    adults: 1,
-    childrenn: 0,
-    infants: 0,
-    pets: 0,
-  })
+  const { categories } = useSelector((state) => state.category);
+  const { selectedCategoryId, checkin, checkout, selectedGuest ,selectedCategoryName} = useSelector(
+    (state) => state.booking
+  );
 
-  const dropdownRef = useRef(null)
+  // Get selected category name for display
+  const selectedCategory = categories?.find(
+    (cat) => cat.id === selectedCategoryId
+  );
 
- useEffect(() => {
+  const dropdownRef = useRef(null);
+
+  console.log(selectedCategoryId);
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+      setIsMobile(window.innerWidth < 768);
+    };
 
-    checkMobile()
-    window.addEventListener("resize", checkMobile)
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY
-      setScrollY(currentScrollY)
-      const threshold = isMobile ? 50 : 100
-      setIsExpanded(currentScrollY < threshold)
+      const currentScrollY = window.scrollY;
+      setScrollY(currentScrollY);
+      const threshold = isMobile ? 50 : 100;
+      setIsExpanded(currentScrollY < threshold);
 
       // Close any open dropdown when scrolling
       if (activeDropdown) {
-        setActiveDropdown(null)
+        setActiveDropdown(null);
       }
-    }
+    };
 
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setActiveDropdown(null)
+        setActiveDropdown(null);
       }
-    }
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    document.addEventListener("mousedown", handleClickOutside)
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll)
-      window.removeEventListener("resize", checkMobile)
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isMobile, activeDropdown])
-
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", checkMobile);
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isMobile, activeDropdown]);
 
   const formatDate = (date) => {
-    if (!date) return "Add dates"
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric" })
-  }
+    if (!date) return "Add dates";
+    return new Date(date).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+  };
 
   const getTotalGuests = () => {
-    const total = guests.adults + guests.childrenn
-    if (total === 1) return "1 guest"
-    return `${total} guests`
-  }
+    const total = selectedGuest.adults + selectedGuest.children;
+    if (total === 1) return "1 guest";
+    return `${total} guests`;
+  };
 
   const handleGuestChange = (type, value) => {
-    setGuests((prev) => ({ ...prev, [type]: value }))
-  }
+    dispatch(updateGuestCount({ type, value }));
+  };
 
   const handleSearch = () => {
-    console.log("Search:", { location, checkIn, checkOut, guests })
-    setActiveDropdown(null)
-    // Implement search logic here
-  }
+    console.log("Search:", {
+      selectedCategoryId,
+      selectedCategory: selectedCategory?.name,
+      checkin,
+      checkout,
+      selectedGuest,
+    });
+    setActiveDropdown(null);
+  };
 
   return (
     <div
       className={`fixed backdrop-blur-2xl top-0 hidden md:block left-0 right-0 z-50  bg-[#FFFFFF4D]  border-b border-gray-200 transition-all duration-300 ease-in-out ${
         isVisible ? (isMobile ? "h-28" : "h-44") : "h-16"
       } overflow-visible`}
-
-      
     >
       <div className="w-full mx-auto px-3  h-full">
         {/* Top row - Logo and right side menu */}
-        <div className={`flex items-center justify-between ${isMobile ? "h-16" : "h-14"}`}>
+        <div
+          className={`flex items-center justify-between ${
+            isMobile ? "h-16" : "h-14"
+          }`}
+        >
           {/* Logo */}
           <div className="flex items-center">
             <div className="flex items-center space-x-2">
-                           <Image src={Logo} alt="Thevillacamp" className="h-14 w-14 object-contain mt-2"/>
-
-              {/* <span className="text-black  font-bold text-xl hidden sm:block">Thevillacamp</span> */}
+              <Image
+                src={Logo || "/placeholder.svg"}
+                alt="Thevillacamp"
+                className="h-14 w-14 object-contain mt-2"
+              />
             </div>
           </div>
 
@@ -117,28 +150,39 @@ export default function AirbnbNavbar() {
             }`}
           >
             <div
-              onClick={() => {setActiveDropdown("minimized"),setIsVisible(!isVisible)}}
+              onClick={() => {
+                setActiveDropdown("minimized"), setIsVisible(!isVisible);
+              }}
               className={`flex items-center bg-[#FFFFFF4D] border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                 isMobile ? "scale-90" : ""
               }`}
             >
               <div className="flex items-center px-3 md:px-4 py-2">
                 <Home className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
-                <span className="text-xs md:text-sm font-medium text-gray-800">{location || "Anywhere"}</span>
+                <span className="text-xs md:text-sm font-medium text-gray-800">
+                  {selectedCategoryName || "Any category"}
+                </span>
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
                 <span className="text-xs md:text-sm font-medium text-gray-800">
-                  {checkIn && checkOut ? `${formatDate(checkIn)} - ${formatDate(checkOut)}` : "Anytime"}
+                  {checkin && checkout
+                    ? `${formatDate(checkin)} - ${formatDate(checkout)}`
+                    : "Anytime"}
                 </span>
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
                 <span className="text-xs md:text-sm text-gray-600">
-                  {guests.adults > 1 || guests.childrenn > 0 ? getTotalGuests() : "Add guests"}
+                  {selectedGuest.adults > 1 || selectedGuest.children > 0
+                    ? getTotalGuests()
+                    : "Add guests"}
                 </span>
               </div>
-              <div onClick={()=>setIsVisible(!isVisible)} className="bg-black rounded-full p-1.5 md:p-2 m-1">
+              <div
+                onClick={() => setIsVisible(!isVisible)}
+                className="bg-black rounded-full p-1.5 md:p-2 m-1"
+              >
                 <Search className="w-3 h-3 md:w-4 md:h-4 text-white" />
               </div>
             </div>
@@ -149,14 +193,26 @@ export default function AirbnbNavbar() {
             <span className="text-xs md:text-sm font-medium text-gray-800 hidden lg:block cursor-pointer hover:bg-gray-100 px-2 md:px-3 py-1 md:py-2 rounded-full transition-colors">
               Become a host
             </span>
-            <Button variant="ghost" size="icon" className="rounded-full w-8 h-8 md:w-10 md:h-10">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full w-8 h-8 md:w-10 md:h-10"
+            >
               <Globe className="w-3 h-3 md:w-4 md:h-4" />
             </Button>
             <div className="flex items-center space-x-1 border border-gray-300 rounded-full p-0.5 md:p-1 cursor-pointer hover:shadow-md transition-shadow">
-              <Button variant="ghost" size="icon" className="w-6 h-6 md:w-8 md:h-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-6 h-6 md:w-8 md:h-8"
+              >
                 <Menu className="w-3 h-3 md:w-4 md:h-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="w-6 h-6 md:w-8 md:h-8">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="w-6 h-6 md:w-8 md:h-8"
+              >
                 <User className="w-3 h-3 md:w-4 md:h-4" />
               </Button>
             </div>
@@ -166,7 +222,9 @@ export default function AirbnbNavbar() {
         {/* Navigation tabs and expanded search */}
         <div
           className={`transition-all duration-300 ease-in-out -mt-4 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"
+            isVisible
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 -translate-y-2 pointer-events-none"
           }`}
         >
           {/* Navigation tabs */}
@@ -178,12 +236,16 @@ export default function AirbnbNavbar() {
             <div className="flex items-center space-x-2 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-3 transition-colors">
               <Lightbulb className="w-4 h-4" />
               <span className="text-sm font-medium">Experiences</span>
-              <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">NEW</span>
+              <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                NEW
+              </span>
             </div>
             <div className="flex items-center space-x-2 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-3 transition-colors">
               <UtensilsCrossed className="w-4 h-4" />
               <span className="text-sm font-medium">Services</span>
-              <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">NEW</span>
+              <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                NEW
+              </span>
             </div>
           </div>
 
@@ -214,22 +276,38 @@ export default function AirbnbNavbar() {
                 // Mobile: Simplified layout
                 <>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "location" ? null : "location")}
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "category" ? null : "category"
+                      )
+                    }
                     className="flex-1 px-3 py-2 border-r border-gray-300 rounded-l-full hover:bg-gray-50 cursor-pointer transition-colors"
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-0.5">Where</div>
-                    <div className="text-xs text-gray-500 truncate">{location || "Add destination"}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-0.5">
+                      Category
+                    </div>
+                    <div className="text-xs text-gray-500 truncate">
+                      {selectedCategory?.name || "Select category"}
+                    </div>
                   </div>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "guests" ? null : "guests")}
-                    className="flex-1 px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors rounded-r-full"
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "guests" ? null : "guests"
+                      )
+                    }
+                    className="flex-1 px-3 py-2  cursor-pointer transition-colors rounded-r-full"
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-0.5">Who</div>
-                    <div className="text-xs text-gray-500">{getTotalGuests()}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-0.5">
+                      Who
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {getTotalGuests()}
+                    </div>
                   </div>
                   <button
                     onClick={handleSearch}
-                    className="bg-black rounded-full p-2 m-1 cursor-pointer hover:bg-red-600 transition-colors"
+                    className="bg-black rounded-full p-2 m-1 cursor-pointer hover:bg-black transition-colors"
                   >
                     <Search className="w-4 h-4 text-white" />
                   </button>
@@ -238,44 +316,76 @@ export default function AirbnbNavbar() {
                 // Desktop: Full layout
                 <>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "location" ? null : "location")}
-                    className={`flex-1 px-4 py-3 border-r border-gray-300 rounded-l-full hover:bg-gray-50 cursor-pointer transition-colors ${
-                      activeDropdown === "location" ? "bg-gray-100" : ""
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "category" ? null : "category"
+                      )
+                    }
+                    className={`flex-1 ml-4 px-4 py-3 border-r border-gray-300 rounded-l-full  cursor-pointer transition-colors ${
+                      activeDropdown === "category" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">Where</div>
-                    <div className="text-sm text-gray-500 truncate">{location || "Search destinations"}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                      Category
+                    </div>
+                    <div className="text-sm text-gray-700 truncate">
+                      {selectedCategoryName || "Select category"}
+                    </div>
                   </div>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "checkin" ? null : "checkin")}
-                    className={`flex-1 px-4 py-3 border-r border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      activeDropdown === "checkin" ? "bg-gray-50" : ""
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "checkin" ? null : "checkin"
+                      )
+                    }
+                    className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
+                      activeDropdown === "checkin" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">Check in</div>
-                    <div className="text-sm text-gray-500">{formatDate(checkIn)}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                      Check in
+                    </div>
+                    <div className="text-sm text-gray-700">
+                      {formatDate(checkin)}
+                    </div>
                   </div>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "checkout" ? null : "checkout")}
-                    className={`flex-1 px-4 py-3 border-r border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors ${
-                      activeDropdown === "checkout" ? "bg-gray-50" : ""
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "checkout" ? null : "checkout"
+                      )
+                    }
+                    className={`flex-1 px-4 py-3 border-r border-gray-300  cursor-pointer transition-colors ${
+                      activeDropdown === "checkout" ? "" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">Check out</div>
-                    <div className="text-sm text-gray-500">{formatDate(checkOut)}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                      Check out
+                    </div>
+                    <div className="text-sm text-gray-700">
+                      {formatDate(checkout)}
+                    </div>
                   </div>
                   <div
-                    onClick={() => setActiveDropdown(activeDropdown === "guests" ? null : "guests")}
-                    className={`flex-1 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors rounded-r-full ${
-                      activeDropdown === "guests" ? "bg-gray-50" : ""
+                    onClick={() =>
+                      setActiveDropdown(
+                        activeDropdown === "guests" ? null : "guests"
+                      )
+                    }
+                    className={`flex-1 px-4 py-3  cursor-pointer transition-colors rounded-r-full ${
+                      activeDropdown === "guests" ? " rounded-r-none" : ""
                     }`}
                   >
-                    <div className="text-xs font-semibold text-gray-800 mb-1">Who</div>
-                    <div className="text-sm text-gray-500">{getTotalGuests()}</div>
+                    <div className="text-xs font-semibold text-gray-800 mb-1">
+                      Who
+                    </div>
+                    <div className="text-sm text-gray-700">
+                      {getTotalGuests()}
+                    </div>
                   </div>
                   <button
                     onClick={handleSearch}
-                    className="bg-black rounded-full p-3 m-1 cursor-pointer hover:bg-red-600 transition-colors"
+                    className="bg-black rounded-full p-3 m-1 cursor-pointer hover:bg-black transition-colors"
                   >
                     <Search className="w-5 h-5 text-white" />
                   </button>
@@ -284,12 +394,17 @@ export default function AirbnbNavbar() {
             </div>
 
             {/* Dropdowns with mobile-optimized positioning */}
-            {activeDropdown === "location" && (
-              <div className={`absolute top-full mt-1 z-50 ${isMobile ? "left-0" : "left-24"}`}>
-                <LocationSearch
-                  onLocationSelect={(loc) => {
-                    setLocation(loc)
-                    setActiveDropdown(null)
+            {activeDropdown === "category" && (
+              <div
+                className={`absolute top-full mt-1 z-50 ${
+                  isMobile ? "left-0" : "left-24"
+                }`}
+              >
+                <CategorySearch
+                  onCategorySelect={(categoryId,categoryName) => {
+                    dispatch(setSelectedCategory(categoryId));
+                    dispatch(setSelectedCategoryname(categoryName));
+                    setActiveDropdown(null);
                   }}
                   isMobile={isMobile}
                 />
@@ -297,12 +412,16 @@ export default function AirbnbNavbar() {
             )}
 
             {activeDropdown === "checkin" && (
-              <div className={`absolute top-full mt-1 z-50 ${isMobile ? "left-0" : "left-1/4"}`}>
+              <div
+                className={`absolute top-full mt-1 z-50 ${
+                  isMobile ? "left-0" : "left-1/4"
+                }`}
+              >
                 <DatePicker
-                  selectedDate={checkIn}
+                  selectedDate={checkin}
                   onDateSelect={(date) => {
-                    setCheckIn(date)
-                    setActiveDropdown("checkout")
+                    dispatch(setCheckin(date));
+                    setActiveDropdown("checkout");
                   }}
                   placeholder="Check in"
                   isMobile={isMobile}
@@ -311,14 +430,18 @@ export default function AirbnbNavbar() {
             )}
 
             {activeDropdown === "checkout" && (
-              <div className={`absolute top-full mt-1 z-50 ${isMobile ? "left-0" : "left-[45%]"}`}>
+              <div
+                className={`absolute top-full mt-1 z-50 ${
+                  isMobile ? "left-0" : "left-[45%]"
+                }`}
+              >
                 <DatePicker
-                  selectedDate={checkOut}
+                  selectedDate={checkout}
                   onDateSelect={(date) => {
-                    setCheckOut(date)
-                    setActiveDropdown(null)
+                    dispatch(setCheckout(date));
+                    setActiveDropdown(null);
                   }}
-                  minDate={checkIn || new Date()}
+                  minDate={checkin || new Date()}
                   placeholder="Check out"
                   isMobile={isMobile}
                 />
@@ -326,12 +449,16 @@ export default function AirbnbNavbar() {
             )}
 
             {activeDropdown === "guests" && (
-              <div className={`absolute top-full mt-1 z-50 ${isMobile ? "right-0" : "right-32"}`}>
+              <div
+                className={`absolute top-full mt-1 z-50 ${
+                  isMobile ? "right-0" : "right-32"
+                }`}
+              >
                 <GuestSelector
-                  adults={guests.adults}
-                  childrenn={guests.childrenn}
-                  infants={guests.infants}
-                  pets={guests.pets}
+                  adults={selectedGuest.adults}
+                  childrenn={selectedGuest.children}
+                  infants={selectedGuest.infants}
+                  pets={selectedGuest.pets}
                   onGuestChange={handleGuestChange}
                   isMobile={isMobile}
                 />
@@ -341,5 +468,5 @@ export default function AirbnbNavbar() {
         </div>
       </div>
     </div>
-  )
+  );
 }
