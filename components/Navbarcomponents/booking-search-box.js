@@ -105,7 +105,7 @@ export function BookingSearchBox() {
       <Button
         size="icon"
         className={`
-          rounded-full bg-black hover:bg-[#0d5a6e] h-10 w-10 ml-2
+          rounded-full bg-black hover:bg-black h-10 w-10 ml-2
           transition-all duration-300 ease-in-out transform-gpu
           ${isVisible ? "scale-100 opacity-100" : "scale-90 opacity-90"}
         `}

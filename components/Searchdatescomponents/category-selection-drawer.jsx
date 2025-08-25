@@ -39,7 +39,7 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
         </DrawerHeader>
 
         <div className="px-4 py-2 space-y-3">
-          {categories.map((category) => (
+          {categories?.slice(0,4)?.map((category) => (
             <button
               key={category._id}
               onClick={() => handleSelect(category)}

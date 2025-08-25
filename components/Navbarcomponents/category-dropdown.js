@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
 import { Tag, Clock } from "lucide-react"
 import { setSelectedCategory, } from "@/Redux/Slices/bookingSlice"
+import Image from "next/image"
 
 
 export function CategorySearch({ onCategorySelect, isMobile = false }) {
@@ -84,16 +85,12 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
                     isMobile ? "p-1.5" : "p-1.5 md:p-2"
                   }`}
                 >
-                  <Tag className="w-3 h-3 md:w-4 md:h-4 text-gray-400 mr-2 md:mr-3" />
+                  <Image height={40} width={40} src={category?.image} alt={category.name} className="w-3 h-3 md:w-4 md:h-4 text-gray-400 mr-2 md:mr-3" />
                   <div className="text-left">
                     <div className={`text-gray-700 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
                       {category.name}
                     </div>
-                    {category.description && (
-                      <div className={`text-gray-500 ${isMobile ? "text-xs" : "text-xs md:text-sm"}`}>
-                        {category.description}
-                      </div>
-                    )}
+                   
                   </div>
                 </button>
               ))}
