@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,13 +41,25 @@ import {
 import { ScrollArea } from "../../components/ui/scroll-area";
 import ImageGalleryDialog from "./image-gallery-dialog";
 import BookingDialog from "./booking-dialog";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams } from "next/navigation";
+import { fetchVillaById } from "@/Redux/Slices/villaSlice";
 
 export default function Villascreen() {
+  const dispatch=useDispatch()
   const [isLiked, setIsLiked] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const params = useParams();
+  const { id } = params;
+  const { villa, loading, error } = useSelector((state) => state.villa);
+
+  useEffect(() => {
+    dispatch(fetchVillaById(id));
+  }, [id]);
+
 
   const openGallery = (startIndex = 0) => {
     setGalleryStartIndex(startIndex);
@@ -94,7 +106,7 @@ export default function Villascreen() {
         <Button variant="ghost" size="icon" className="rounded-full">
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-semibold text-lg">Vastalya Villa - Lonavala</h1>
+        <h1 className="font-semibold text-lg">{villa?.name}</h1>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" className="rounded-full">
             <Share className="h-5 w-5" />
@@ -109,12 +121,12 @@ export default function Villascreen() {
       <div className="relative">
         <Carousel className="w-full">
           <CarouselContent>
-            {images.map((image, index) => (
+            {villa?.images.map((image, index) => (
               <CarouselItem key={index}>
                 <div className="relative h-80">
                   <img
                     src={image || "/placeholder.svg"}
-                    alt={image.alt}
+                    alt={villa?.name}
                     width={90}
                     height={90}
                     className="w-full h-full object-cover"
@@ -152,34 +164,7 @@ export default function Villascreen() {
               <Camera className="h-4 w-4 mr-2" />
               View Photos
             </Button>
-            {/* <Drawer>
-              <DrawerTrigger asChild>
-                <Button className="bg-black/70 hover:bg-black/90 text-white rounded-lg">
-                  <Camera className="h-4 w-4 mr-2" />
-                  View Photos
-                </Button>
-              </DrawerTrigger>
-              <DrawerContent className="h-[80vh]">
-                <div className="p-4">
-                  <h3 className="text-lg font-semibold mb-4">
-                    Photo Gallery ({images.length} photos)
-                  </h3>
-                  <ScrollArea className="h-[65vh]">
-                    <div className="grid grid-cols-2 gap-2">
-                      {images.map((image, index) => (
-                        <div key={index} className="relative aspect-square">
-                          <img
-                            src={image.src || "/placeholder.svg"}
-                            alt={image.alt}
-                            className="w-full h-full object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </div>
-              </DrawerContent>
-            </Drawer> */}
+           
 
             <Drawer>
               <DrawerTrigger asChild>
@@ -194,16 +179,15 @@ export default function Villascreen() {
                     <span className="w-12 h-2 bg-gray-300 rounded-2xl"></span>
                   </div>
                   <div className="space-y-4">
-                    {videos.map((video, index) => (
+                  
                       <div
-                        key={index}
                         className="relative aspect-auto h-[65vh] bg-black rounded-lg overflow-hidden"
                       >
                         {!isVideoPlaying ? (
                           <>
                             <img
-                              src={video.thumbnail || "/placeholder.svg"}
-                              alt={video.alt}
+                              src={villa?.images[0] || "/placeholder.svg"}
+                              alt={villa?.name}
                               className="w-full h-full object-cover"
                             />
                             <Button
@@ -214,7 +198,7 @@ export default function Villascreen() {
                               <Play className="h-8 w-8 ml-1" />
                             </Button>
                             <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-sm">
-                              {video.alt}
+                              {villa?.name}
                             </div>
                           </>
                         ) : (
@@ -225,13 +209,13 @@ export default function Villascreen() {
                               autoPlay
                               onEnded={() => setIsVideoPlaying(false)}
                             >
-                              <source src={video.src} type="video/mp4" />
+                              <source src={villa?.reelVideo} type="video/mp4" />
                               Your browser does not support the video tag.
                             </video>
                           </>
                         )}
                       </div>
-                    ))}
+                    
                     <DrawerClose className="w-full">
                       <Button className="w-full h-10 text-lg font-semibold bg-black hover:bg-black/90">
                         Close
@@ -249,8 +233,8 @@ export default function Villascreen() {
       <div className="p-4 space-y-6">
         {/* Title and Location */}
         <div>
-          <h2 className="text-2xl font-bold mb-1">Vastalya Villa - Malawali</h2>
-          <p className="text-muted-foreground">Nainital, Uttarakhand</p>
+          <h2 className="text-2xl font-bold mb-1">{villa?.name} -{villa?.location?.addressLine}</h2>
+          <p className="text-muted-foreground">{villa?.location?.addressLine},{villa?.location?.city}</p>
         </div>
 
         {/* Rating and Reviews */}
@@ -260,11 +244,11 @@ export default function Villascreen() {
           </div>
           <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">4.8</span>
+            <span className="font-semibold">{villa?.averageRating}</span>
             <span className="text-muted-foreground">/5</span>
           </div>
           <Button variant="link" className="p-0 h-auto text-blue-500">
-            65 Reviews
+            {villa?.totalReviews} Reviews
           </Button>
         </div>
 
@@ -273,11 +257,11 @@ export default function Villascreen() {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm">Up to 15 Guests</span>
+              <span className="text-sm">Up to {villa?.maxCapacity} Guests</span>
             </div>
             <div className="flex items-center gap-2">
               <Bed className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm">5 Rooms</span>
+              <span className="text-sm">{villa?.bhkType}</span>
             </div>
             <div className="flex items-center gap-2">
               <Bath className="h-5 w-5 text-muted-foreground" />
@@ -288,20 +272,22 @@ export default function Villascreen() {
 
         {/* Amenities */}
         <div className="grid grid-cols-5 gap-4">
-          {amenities.map((amenity, index) => (
+          {villa?.amenities.map((amenity, index) => (
             <div key={index} className="flex flex-col items-center gap-2">
               <div className="w-14 h-14 rounded-md bg-gray-200 flex items-center justify-center">
-                <amenity.icon className="h-5 w-5 text-foreground" />
+                {/* <amenity className="h-5 w-5 text-foreground" /> */}
               </div>
-              <span className="text-xs text-center">{amenity.label}</span>
+              <span className="text-xs text-center">{amenity}</span>
             </div>
           ))}
         </div>
 
+
+
         {/* Pricing */}
         <div className="space-y-2">
           <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold">₹41,312</span>
+            <span className="text-2xl font-bold">₹{villa?.basePricePerNight}</span>
             <span className="text-sm text-muted-foreground line-through">
               ₹45,854
             </span>
@@ -326,14 +312,14 @@ export default function Villascreen() {
       <ImageGalleryDialog
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
-        images={images}
+        images={villa?.images}
         initialIndex={galleryStartIndex}
       />
 
       <BookingDialog
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
-        propertyName="Vastalya Villa"
+        propertyName={villa?.name}
         price={55863}
         originalPrice={62000}
       />

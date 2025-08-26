@@ -838,14 +838,14 @@ export default function PropertyFilterListing() {
           <div className="sticky top-16 z-40 bg-gray-50 md:bg-white backdrop-blur-2xl  py-4 mb-6 shrink-0 border-b border-gray-200 px-3 rounded-t-2xl md:rounded-none">
             <div className="flex md:hidden justify-between gap-2 items-center  ">
               <div className="relative w-full  h-10 rounded-full bg-[#FFFFFF4D] border-gray-300 text-gray-900 flex justify-start items-center">
-               <Button
-        size="icon"
-        className={`
+                <Button
+                  size="icon"
+                  className={`
           rounded-full bg-black hover:bg-black h-8 w-8 ml-2 absolute        
         `}
-      >
-        <Search className="h-4 w-4 text-white" />
-      </Button>
+                >
+                  <Search className="h-4 w-4 text-white" />
+                </Button>
                 <Input
                   type="text"
                   placeholder="Search properties..."

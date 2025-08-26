@@ -196,7 +196,7 @@ useEffect(() => {
             className={`absolute  left-1/2 transform -translate-x-1/2 transition-all duration-300 ease-in-out ${
               !isVisible
                 ? "opacity-100 scale-100 translate-y-0"
-                : "opacity-0 scale-95 pointer-events-none translate-y-2"
+                : "opacity-0 scale-95 pointer-events-none translate-y-2 "
             }`}
           >
             <div
@@ -204,18 +204,18 @@ useEffect(() => {
                 setActiveDropdown("minimized"), setIsVisible(!isVisible);
               }}
               className={`flex items-center bg-[#FFFFFF4D] border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                isMobile ? "scale-90" : ""
+                isMobile ? "scale-90 " : "mt-2"
               }`}
             >
               <div className="flex items-center px-3 md:px-4 py-2">
-                <FaHome className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
+                <FaHome className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
                 <span className="text-xs md:text-sm font-medium text-gray-800">
                   {selectedCategoryName || "Any category"}
                 </span>
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
-                <FaCalendarCheck className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
+                <FaCalendarCheck className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
                 <span className="text-xs md:text-sm font-medium text-gray-800">
                   {checkin && checkout
                     ? `${formatDate(checkin)} - ${formatDate(checkout)}`
@@ -224,7 +224,7 @@ useEffect(() => {
               </div>
               <div className="border-l border-gray-300 h-4 md:h-6"></div>
               <div className="flex items-center px-3 md:px-4 py-2">
-                <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4 text-gray-600 mr-1 md:mr-2" />
+                <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
 
                 <span className="text-xs md:text-sm text-gray-600">
                   {selectedGuest.adults > 1 || selectedGuest.children > 0
@@ -380,7 +380,7 @@ useEffect(() => {
                     }`}
                   >
                     <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                      <FaHome className="w-3 h-3 mr-1" />
+                      <FaHome className="w-4 h-4 mr-1" />
                       Category
                     </div>
                     <div className="text-sm text-gray-700 truncate">
@@ -398,7 +398,7 @@ useEffect(() => {
                     }`}
                   >
                     <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                      <FaCalendarCheck className="w-3 h-3 mr-1" />
+                      <FaCalendarCheck className="w-4 h-4 mr-1" />
                       Check in
                     </div>
                     <div className="text-sm text-gray-700">
@@ -416,7 +416,7 @@ useEffect(() => {
                     }`}
                   >
                     <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                      <FaCalendarCheck className="w-3 h-3 mr-1" />
+                      <FaCalendarCheck className="w-4 h-4 mr-1" />
                       Check out
                     </div>
                     <div className="text-sm text-gray-700">
@@ -434,7 +434,7 @@ useEffect(() => {
                     }`}
                   >
                     <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                      <MdPeopleAlt className="w-3 h-3 mr-1" />
+                      <MdPeopleAlt className="w-4 h-4 mr-1" />
                       Who
                     </div>
                     <div className="text-sm text-gray-700">

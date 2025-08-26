@@ -3,6 +3,7 @@ import propertyFilterReducer from "@/Redux/Slices/propertyFilterSlice";
 import propertiesSlice from "@/Redux/Slices/propertiesSlice";
 import categorySlice from "@/Redux/Slices/categorySlice";
 import bookingSlice from "@/Redux/Slices/bookingSlice";
+import villaSlice from "@/Redux/Slices/villaSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +11,6 @@ export const store = configureStore({
     properties: propertiesSlice,
     category: categorySlice,
     booking: bookingSlice,
+    villa: villaSlice,
   },
 });

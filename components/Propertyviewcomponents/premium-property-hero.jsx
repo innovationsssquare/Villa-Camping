@@ -125,7 +125,7 @@ export default function PremiumPropertyHero() {
     <div className="h-auto bg-gray-50">
       {/* Main Content */}
       <div className="w-full mx-auto px-4 sm:px-2 lg:px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[40vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[70vh]">
           {/* Main Hero Image */}
           <div className="lg:col-span-3 relative rounded-2xl overflow-hidden group">
             <div
@@ -308,42 +308,7 @@ export default function PremiumPropertyHero() {
         </div>
 
         {/* Property Title and Details */}
-        <div className="mt-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-4xl font-bold text-gray-900 mb-2">
-                Gardenéa Villa in Alibaug
-              </h1>
-              <p className="text-lg text-gray-600">
-                Luxury villa with infinity pool and stunning architecture
-              </p>
-            </div>
-            <div className="text-right">
-              <div className="text-3xl font-bold text-gray-900">₹25,000</div>
-              <div className="text-gray-600">per night</div>
-            </div>
-          </div>
-
-          {/* Quick Stats */}
-          <div className="flex items-center space-x-8 mt-6 text-gray-600">
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">8</span>
-              <span>Guests</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">4</span>
-              <span>Bedrooms</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">4</span>
-              <span>Bathrooms</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="font-medium">⭐ 4.9</span>
-              <span>(127 reviews)</span>
-            </div>
-          </div>
-        </div>
+      
       </div>
 
       <VideoDialog

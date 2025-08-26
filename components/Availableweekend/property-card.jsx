@@ -244,7 +244,7 @@ export function PropertyCard({ property }) {
         </div>
 
         <Button
-          onPress={() => router.push("/view-villa/123")}
+          onPress={() => router.push(`/view-villa/${property._id}`)}
           isIconOnly
           size="sm"
           radius="full"

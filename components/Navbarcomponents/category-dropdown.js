@@ -77,7 +77,7 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
               <h4 className={`font-medium text-gray-900 mb-2 md:mb-3 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
                 All categories
               </h4>
-              {categories?.slice(0, 6).map((category) => (
+              {categories?.slice(0, 4).map((category) => (
                 <button
                   key={category._id}
                   onClick={() => handleCategorySelect(category._id, category.name)}
