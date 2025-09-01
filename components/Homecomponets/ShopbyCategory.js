@@ -60,7 +60,7 @@ const ShopbyCategory = () => {
           className="w-full"
         >
           <CarouselContent className="md:-ml-4 -ml-1 md:justify-center">
-            {categories.map((category, index) => (
+            {categories?.map((category, index) => (
               <CarouselItem
                 key={index}
                 className="pl-4 md:basis-1/8 lg:basis-1/8 basis-4/ flex justify-center"

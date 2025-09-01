@@ -245,12 +245,11 @@ export function PropertyCard({ property }) {
 
         <Button
           onPress={() => router.push(`/view-villa/${property._id}`)}
-          isIconOnly
           size="sm"
           radius="full"
-          className="bg-white text-black hover:bg-white/90 transition-all duration-200"
+          className="bg-transparent text-sm font-bold border border-white text-white hover:bg-white/90 transition-all duration-200 absolute right-6 bottom-6"
         >
-         <ArrowRight className="h-4 w-4" />
+        Book Now
         </Button>
       </CardFooter>
     </Card>

@@ -2,14 +2,7 @@
 import { FaMinus, FaPlus, FaTimes } from "react-icons/fa"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
 
-
-
-export default function GuestSelectionDrawer({
-  isOpen,
-  onClose,
-  guestCounts,
-  onGuestCountsChange,
-}) {
+export default function GuestSelectionDrawer({ isOpen, onClose, guestCounts, onGuestCountsChange }) {
   const updateCount = (type, increment) => {
     const newCounts = { ...guestCounts }
     if (increment) {

@@ -14,14 +14,14 @@ export function NextuiProviderWrapper({ children }) {
 
   return (
     <HeroUIProvider>
-    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname.startsWith("/view-villa") ?  null : (
+    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname==="/checkout" || pathname.startsWith("/view-villa") ?  null : (
         <Navbar />
       )}
-    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname.startsWith("/view-villa") ? null : (
+    {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname==="/checkout" || pathname.startsWith("/view-villa") ? null : (
       <AppHeader/>
       )}
       {children}
-      {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" ? null : (
+      {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname==="/checkout" || pathname.startsWith("/view-villa") ? null : (
       <BottomNav/>
       )}
       {pathname === "/Signin" || pathname==="/shorts" || pathname==="/date-selection" || pathname==="/search-stay" || pathname==="/category/all" ? null : (

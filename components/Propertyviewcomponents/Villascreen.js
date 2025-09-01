@@ -37,16 +37,50 @@ import {
   Camera,
   Video,
   X,
+  MapPin,
+  Home,
+  XCircle,
+  AirVent,
+  Waves,
+  Tv,
+  Shield,
+  WashingMachine,
+  ChefHat,
+  TreePine,
+  Droplets,
+  Zap,
+  Clock,
+  CheckCircle,
+  Info,
+  IndianRupee,
 } from "lucide-react";
 import { ScrollArea } from "../../components/ui/scroll-area";
 import ImageGalleryDialog from "./image-gallery-dialog";
 import BookingDialog from "./booking-dialog";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { fetchVillaById } from "@/Redux/Slices/villaSlice";
+import VillaScreenSkeleton from "./villa-screen-skeleton";
+import ButtonLoader from "../Loadercomponents/button-loader";
+import { setcategoryId, setOwnerId, setPropertyId, setPropertyType } from "@/Redux/Slices/bookingSlice";
+
+const amenityIcons = {
+  WiFi: Wifi,
+  "Air Conditioning": AirVent,
+  "Swimming Pool": Waves,
+  Parking: Car,
+  TV: Tv,
+  Balcony: Mountain,
+  Security: Shield,
+  "Washing Machine": WashingMachine,
+  Kitchen: ChefHat,
+  Garden: TreePine,
+  "Water Supply": Droplets,
+  "Power Backup": Zap,
+};
 
 export default function Villascreen() {
-  const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const [isLiked, setIsLiked] = useState(false);
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
@@ -55,11 +89,10 @@ export default function Villascreen() {
   const params = useParams();
   const { id } = params;
   const { villa, loading, error } = useSelector((state) => state.villa);
-
+  const router = useRouter();
   useEffect(() => {
     dispatch(fetchVillaById(id));
   }, [id]);
-
 
   const openGallery = (startIndex = 0) => {
     setGalleryStartIndex(startIndex);
@@ -99,11 +132,41 @@ export default function Villascreen() {
     setIsVideoPlaying(true);
   };
 
+  if (loading) {
+    return <VillaScreenSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-500">Error loading villa details</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!villa) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black/10">
+        <div className="bg-black rounded-full flex justify-center items-center">
+          <ButtonLoader />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-background overflow-hidden md:hidden block">
+    <div className="min-h-screen bg-gray-50 pb-16 overflow-hidden md:hidden block">
       {/* Header */}
       <div className="flex items-center justify-between py-4 bg-background/95 backdrop-blur-sm sticky top-0 z-50">
-        <Button variant="ghost" size="icon" className="rounded-full">
+        <Button
+          onClick={() => router.back()}
+          variant="ghost"
+          size="icon"
+          className="rounded-full"
+        >
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <h1 className="font-semibold text-lg">{villa?.name}</h1>
@@ -164,7 +227,6 @@ export default function Villascreen() {
               <Camera className="h-4 w-4 mr-2" />
               View Photos
             </Button>
-           
 
             <Drawer>
               <DrawerTrigger asChild>
@@ -179,43 +241,40 @@ export default function Villascreen() {
                     <span className="w-12 h-2 bg-gray-300 rounded-2xl"></span>
                   </div>
                   <div className="space-y-4">
-                  
-                      <div
-                        className="relative aspect-auto h-[65vh] bg-black rounded-lg overflow-hidden"
-                      >
-                        {!isVideoPlaying ? (
-                          <>
-                            <img
-                              src={villa?.images[0] || "/placeholder.svg"}
-                              alt={villa?.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <Button
-                              size="lg"
-                              className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black"
-                              onClick={handleVideoPlay}
-                            >
-                              <Play className="h-8 w-8 ml-1" />
-                            </Button>
-                            <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-sm">
-                              {villa?.name}
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <video
-                              className="w-full h-full object-fill"
-                              controls
-                              autoPlay
-                              onEnded={() => setIsVideoPlaying(false)}
-                            >
-                              <source src={villa?.reelVideo} type="video/mp4" />
-                              Your browser does not support the video tag.
-                            </video>
-                          </>
-                        )}
-                      </div>
-                    
+                    <div className="relative aspect-auto h-[65vh] bg-black rounded-lg overflow-hidden">
+                      {!isVideoPlaying ? (
+                        <>
+                          <img
+                            src={villa?.images[0] || "/placeholder.svg"}
+                            alt={villa?.name}
+                            className="w-full h-full object-cover"
+                          />
+                          <Button
+                            size="lg"
+                            className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/90 hover:bg-white text-black"
+                            onClick={handleVideoPlay}
+                          >
+                            <Play className="h-8 w-8 ml-1" />
+                          </Button>
+                          <div className="absolute bottom-2 left-2 bg-black/70 text-white px-2 py-1 rounded text-sm">
+                            {villa?.name}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <video
+                            className="w-full h-full object-fill"
+                            controls
+                            autoPlay
+                            onEnded={() => setIsVideoPlaying(false)}
+                          >
+                            <source src={villa?.reelVideo} type="video/mp4" />
+                            Your browser does not support the video tag.
+                          </video>
+                        </>
+                      )}
+                    </div>
+
                     <DrawerClose className="w-full">
                       <Button className="w-full h-10 text-lg font-semibold bg-black hover:bg-black/90">
                         Close
@@ -230,83 +289,243 @@ export default function Villascreen() {
       </div>
 
       {/* Property Details */}
-      <div className="p-4 space-y-6">
+      <div className="p-4 space-y-4 max-w-screen-sm mx-auto">
         {/* Title and Location */}
         <div>
-          <h2 className="text-2xl font-bold mb-1">{villa?.name} -{villa?.location?.addressLine}</h2>
-          <p className="text-muted-foreground">{villa?.location?.addressLine},{villa?.location?.city}</p>
+          <h2 className="text-2xl font-bold mb-2">{villa?.name}</h2>
+          <div className="flex items-center gap-2 text-muted-foreground">
+            <MapPin className="h-4 w-4" />
+            <p className="text-sm">
+              {villa?.location?.addressLine}, {villa?.location?.city}
+            </p>
+          </div>
         </div>
 
-        {/* Rating and Reviews */}
+        {/* Rating and Reviews summary link */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1">
-            <span className="text-sm">Like a 5+</span>
-          </div>
-          <div className="flex items-center gap-1">
             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">{villa?.averageRating}</span>
-            <span className="text-muted-foreground">/5</span>
+            <span className="font-semibold">
+              {villa?.averageRating > 0 ? villa?.averageRating : "New"}
+            </span>
+            {villa?.averageRating > 0 && (
+              <span className="text-muted-foreground">/5</span>
+            )}
           </div>
           <Button variant="link" className="p-0 h-auto text-blue-500">
-            {villa?.totalReviews} Reviews
+            {villa?.totalReviews || 0} Reviews
           </Button>
         </div>
 
         {/* Property Stats */}
-        <Card className="p-4 border border-white bg-gray-200">
+        <Card className="p-3 border  border-white bg-gray-200">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               <Users className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm">Up to {villa?.maxCapacity} Guests</span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center bg-black text-white p-2 rounded-md gap-2">
               <Bed className="h-5 w-5 text-muted-foreground" />
               <span className="text-sm">{villa?.bhkType}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Bath className="h-5 w-5 text-muted-foreground" />
-              <span className="text-sm">5 Baths</span>
             </div>
           </div>
         </Card>
 
         {/* Amenities */}
-        <div className="grid grid-cols-5 gap-4">
-          {villa?.amenities.map((amenity, index) => (
-            <div key={index} className="flex flex-col items-center gap-2">
-              <div className="w-14 h-14 rounded-md bg-gray-200 flex items-center justify-center">
-                {/* <amenity className="h-5 w-5 text-foreground" /> */}
-              </div>
-              <span className="text-xs text-center">{amenity}</span>
-            </div>
-          ))}
+        <div>
+          <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {villa?.amenities?.map((amenity, index) => {
+              const IconComponent = amenityIcons[amenity] || Coffee;
+              return (
+                <div key={index} className="flex flex-col items-center gap-2">
+                  <div className="w-14 h-14 rounded-lg border  border-white bg-gray-200 flex items-center justify-center">
+                    <IconComponent className="h-6 w-6 text-black" />
+                  </div>
+                  <span className="text-xs text-center text-gray-700">
+                    {amenity}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
+        {/* Check-in Details */}
+        <Card className="p-4 space-y-3">
+          <h3 className="text-lg font-semibold">Check-in Details</h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Check-in: {villa?.checkInTime}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">Check-out: {villa?.checkOutTime}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Shield className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm">
+                Security Deposit: ₹{villa?.securityDeposit}
+              </span>
+            </div>
+          </div>
+        </Card>
 
+        {/* House Rules */}
+        <Card className="p-4 space-y-3">
+          <h3 className="text-lg font-semibold">House Rules</h3>
+          <div className="space-y-2">
+            {villa?.houseRules?.slice(0, 3).map((rule, index) => (
+              <div key={index} className="flex items-start gap-3">
+                <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                <span className="text-sm text-gray-700">{rule}</span>
+              </div>
+            ))}
+            {villa?.houseRules?.length > 3 && (
+              <Button
+                variant="link"
+                className="p-0 h-auto text-blue-500 text-sm"
+              >
+                View all {villa?.houseRules?.length} rules
+              </Button>
+            )}
+          </div>
+        </Card>
+
+        {/* Food Options */}
+        {villa?.foodOptions && (
+          <Card className="p-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ChefHat className="h-5 w-5 text-muted-foreground" />
+              <h3 className="text-lg font-semibold">Food Options</h3>
+            </div>
+            <p className="text-sm text-gray-700">{villa?.foodOptions}</p>
+          </Card>
+        )}
+
+        {/* Cancellation Policy */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center gap-2">
+            <Info className="h-5 w-5 text-muted-foreground" />
+            <h3 className="text-lg font-semibold">Cancellation Policy</h3>
+          </div>
+          <p className="text-sm text-gray-700">{villa?.cancellationPolicy}</p>
+        </Card>
+
+        {/* Reviews */}
+        <Card className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Reviews</h3>
+            <div className="flex items-center gap-1">
+              <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+              <span className="font-semibold">
+                {villa?.averageRating > 0 ? villa?.averageRating : "New"}
+              </span>
+              {villa?.averageRating > 0 && (
+                <span className="text-muted-foreground text-sm">/5</span>
+              )}
+            </div>
+          </div>
+
+          {Array.isArray(villa?.reviews) && villa?.reviews?.length > 0 ? (
+            <div className="space-y-4">
+              {villa.reviews.slice(0, 3).map((rev, idx) => (
+                <div
+                  key={idx}
+                  className="border-b last:border-b-0 pb-3 last:pb-0"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <p className="text-sm font-medium">
+                      {rev?.userName || "Guest"}
+                    </p>
+                    <span className="text-xs text-muted-foreground">
+                      {rev?.date || ""}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 mb-1">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-3.5 w-3.5 ${
+                          i < (Number(rev?.rating) || 0)
+                            ? "fill-yellow-400 text-yellow-400"
+                            : "text-muted-foreground"
+                        }`}
+                      />
+                    ))}
+                  </div>
+                  <p className="text-sm text-foreground/90">
+                    {rev?.comment || ""}
+                  </p>
+                </div>
+              ))}
+              {villa.reviews.length > 3 && (
+                <Button
+                  variant="link"
+                  className="p-0 h-auto text-blue-500 text-sm"
+                >
+                  View all {villa.reviews.length} reviews
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div className="text-sm text-muted-foreground">No reviews yet.</div>
+          )}
+        </Card>
 
         {/* Pricing */}
-        <div className="space-y-2">
-          <div className="flex items-baseline gap-2">
+        {/* <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <IndianRupee className="h-5 w-5 text-muted-foreground" />
             <span className="text-2xl font-bold">₹{villa?.basePricePerNight}</span>
-            <span className="text-sm text-muted-foreground line-through">
-              ₹45,854
-            </span>
+            <span className="text-sm text-muted-foreground">per night</span>
           </div>
-          <p className="text-sm text-muted-foreground">
-            22 - 29 Aug | 2 Guests | 📅
-          </p>
-          <p className="text-sm text-muted-foreground">
-            For 5 rooms | Per night + taxes
-          </p>
-        </div>
+          {villa?.extraPersonCharge && (
+            <p className="text-sm text-muted-foreground">Extra person charge: ₹{villa?.extraPersonCharge}</p>
+          )}
+          {villa?.kitchenCharge && (
+            <p className="text-sm text-muted-foreground">Kitchen charge: ₹{villa?.kitchenCharge}</p>
+          )}
+          {villa?.lateCheckoutCharge && (
+            <p className="text-sm text-muted-foreground">Late checkout: ₹{villa?.lateCheckoutCharge}</p>
+          )}
+        </div> */}
+      </div>
 
-        {/* Book Now Button */}
-        <Button
-          onClick={() => setIsBookingOpen(true)}
-          className="w-full h-12 text-lg font-semibold bg-black hover:bg-black/90"
-        >
-          Book Now
-        </Button>
+      {/* Sticky bottom CTA */}
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/75">
+        <div className="mx-auto max-w-screen-sm px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex flex-col leading-tight">
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-bold">
+                ₹{villa?.basePricePerNight}
+              </span>
+              <span className="text-xs text-muted-foreground">/ night</span>
+            </div>
+            {villa?.averageRating > 0 && (
+              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                <span>{villa?.averageRating}</span>
+                <span>·</span>
+                <span>{villa?.totalReviews || 0} reviews</span>
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={() => {
+              dispatch(setPropertyId(villa?._id));
+              dispatch(setcategoryId(villa?.category));
+              dispatch(setOwnerId(villa?.owner));
+              dispatch(setPropertyType("Villa"));
+              setIsBookingOpen(true);
+            }}
+            className="h-11 px-6 text-base font-semibold rounded-full text-white bg-black"
+            disabled={villa?.status !== "available"}
+          >
+            {villa?.status === "available" ? "Book Now" : "Not Available"}
+          </Button>
+        </div>
       </div>
 
       <ImageGalleryDialog
@@ -320,8 +539,12 @@ export default function Villascreen() {
         isOpen={isBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         propertyName={villa?.name}
-        price={55863}
-        originalPrice={62000}
+        price={villa?.basePricePerNight}
+        originalPrice={villa?.basePricePerNight}
+        propertyId={villa?._id}
+        ownerId={villa?.owner}
+        propertyType="Villa"
+        // customerId:={}
       />
     </div>
   );

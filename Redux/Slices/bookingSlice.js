@@ -17,6 +17,23 @@ const initialState = {
     infants: 0,
     pets: 0,
   },
+  propertyId: null,
+  ownerId: null,
+  propertyType: "",
+  categoryId: null,
+
+  customerDetails: {
+    bookingFor: "myself",
+    firstName: "",
+    lastName: "",
+    mobile: "",
+    email: "",
+    city: "",
+  },
+
+  appliedCoupon: null,
+  specialRequests: "",
+  acceptedTerms: false,
 };
 
 const bookingSlice = createSlice({
@@ -49,6 +66,41 @@ const bookingSlice = createSlice({
     updateGuestCount: (state, action) => {
       state.selectedGuest[action.payload.type] = action.payload.value;
     },
+
+    setPropertyId: (state, action) => {
+      state.propertyId = action.payload;
+    },
+    setcategoryId: (state, action) => {
+      state.categoryId = action.payload;
+    },
+    setOwnerId: (state, action) => {
+      state.ownerId = action.payload;
+    },
+    setPropertyType: (state, action) => {
+      state.propertyType = action.payload;
+    },
+
+    setCustomerDetails: (state, action) => {
+      state.customerDetails = { ...state.customerDetails, ...action.payload };
+    },
+    updateCustomerField: (state, action) => {
+      const { field, value } = action.payload;
+      state.customerDetails[field] = value;
+    },
+
+    setAppliedCoupon: (state, action) => {
+      state.appliedCoupon = action.payload;
+    },
+    removeCoupon: (state) => {
+      state.appliedCoupon = null;
+    },
+    setSpecialRequests: (state, action) => {
+      state.specialRequests = action.payload;
+    },
+    setAcceptedTerms: (state, action) => {
+      state.acceptedTerms = action.payload;
+    },
+
     resetBooking: (state) => {
       return initialState;
     },
@@ -65,6 +117,16 @@ export const {
   setSelectedCategoryname,
   setSelectedSubtype,
   updateSubtypeQuantity,
+  setPropertyId,
+  setcategoryId,
+  setOwnerId,
+  setPropertyType,
+  setCustomerDetails,
+  updateCustomerField,
+  setAppliedCoupon,
+  removeCoupon,
+  setSpecialRequests,
+  setAcceptedTerms,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

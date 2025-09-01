@@ -9,24 +9,30 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@heroui/react";
 import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import {
   FaTimes,
-  FaInfoCircle,
   FaChevronDown,
   FaPercent,
   FaTicketAlt,
   FaArrowRight,
-  FaUndo,
   FaArrowLeft,
 } from "react-icons/fa";
 import CouponsDrawer from "./coupons-drawer";
 import GuestSelectionDrawer from "./guest-selection-drawer";
 import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
-import { useLinkStatus } from 'next/link'
 import ButtonLoader from "../Loadercomponents/button-loader";
+import Script from "next/script";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setCheckin,
+  setCheckout,
+  setSelectedGuest,
+  setAppliedCoupon,
+  removeCoupon,
+} from "@/Redux/Slices/bookingSlice";
+import { calculateBookingPrice } from "@/lib/bookingUtils";
 
 export default function BookingDialog({
   isOpen,
@@ -34,87 +40,220 @@ export default function BookingDialog({
   propertyName,
   price,
   originalPrice,
+  propertyId,
+  ownerId,
+  propertyType = "Villa",
+  unitTypeName, // e.g., villa.bhkType
+  customerId, // optional: if you have auth user id available
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
-  const [guestCounts, setGuestCounts] = useState({
-    adults: 2,
-    children: 0,
-    infants: 0,
-  });
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
-  const [appliedCoupon, setAppliedCoupon] = useState({
-    code: "THEVILLACAMP",
-    title: "Get 5% off your next getaway",
-    description: "Get 5% upto 1500 off on your next getaway!",
-    discount: 5,
-    maxDiscount: 1500,
-    validTill: "31 December 2025",
-  });
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState("checkin");
-  const [checkInDate, setCheckInDate] = useState(new Date(2024, 7, 24)); // Aug 24, 2024
-  const [checkOutDate, setCheckOutDate] = useState(new Date(2024, 7, 26)); // Aug 26, 2024
-const router=useRouter()
-  const { pending } = useLinkStatus()
 
+  const dispatch = useDispatch();
+  const booking = useSelector((state) => state.booking);
+  const selectedGuest = booking?.selectedGuest;
+  const checkinISO = booking?.checkin;
+  const checkoutISO = booking?.checkout;
+  const router = useRouter();
+  const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
+
+  // Convert ISO strings to Date for UI
+  const checkInDate = checkinISO ? new Date(checkinISO) : new Date();
+  const checkOutDate = checkoutISO
+    ? new Date(checkoutISO)
+    : new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  const guestCounts = {
+    adults: Number(selectedGuest?.adults ?? 2),
+    // booking slice uses `childrenn` key; map it here safely
+    children: Number(selectedGuest?.childrenn ?? 0),
+    infants: Number(selectedGuest?.infants ?? 0),
+  };
 
   const totalGuests =
     guestCounts.adults + guestCounts.children + guestCounts.infants;
 
-  const basePrice = price;
-  const discountAmount = appliedCoupon
-    ? Math.min(
-        (basePrice * appliedCoupon.discount) / 100,
-        appliedCoupon.maxDiscount
-      )
-    : 0;
-  const totalPrice = basePrice - discountAmount;
-  const taxAmount = Math.round(totalPrice * 0.18); // 18% tax
-  const finalTotal = totalPrice + taxAmount;
+  // Nights between check-in/out (min 1)
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const nights = Math.max(
+    1,
+    Math.round((+checkOutDate - +checkInDate) / msPerDay)
+  );
+
+  const basePrice = price * nights;
+
+  const { discountAmount, finalTotal } = calculateBookingPrice(
+    price,
+    nights,
+    appliedCoupon
+  );
+
+  // const handleBooking = async () => {
+  //   try {
+  //     setIsLoading(true)
+
+  //     // Build booking payload aligned to your Booking schema
+  //     const bookingPayload = {
+  //       propertyType,
+  //       propertyId,
+  //       ownerId,
+  //       customerId, // If not available, API may reject (schema requires); see note in postamble
+  //       checkIn: checkInDate.toISOString(),
+  //       checkOut: checkOutDate.toISOString(),
+  //       guests: {
+  //         adults: guestCounts.adults,
+  //         children: guestCounts.children,
+  //       },
+  //       items: [
+  //         {
+  //           unitType:
+  //             propertyType === "Villa"
+  //               ? "VillaUnit"
+  //               : propertyType === "Hotel"
+  //                 ? "RoomUnit"
+  //                 : propertyType === "Camping"
+  //                   ? "Tent"
+  //                   : "CottageUnit",
+  //           unitId: propertyId,
+  //           typeName: unitTypeName || propertyName,
+  //           quantity: 1,
+  //           pricePerNight: price,
+  //           totalPrice: basePrice,
+  //         },
+  //       ],
+  //       payment: {
+  //         amount: finalTotal,
+  //         currency: "INR",
+  //         status: "pending",
+  //       },
+  //     }
+
+  //     // Create Razorpay order via server
+  //     const orderRes = await fetch("/api/razorpay/create-order", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({
+  //         amount: finalTotal,
+  //         currency: "INR",
+  //         booking: bookingPayload,
+  //       }),
+  //     })
+
+  //     if (!orderRes.ok) {
+  //       const err = await orderRes.json().catch(() => ({}))
+  //       throw new Error(err?.message || "Failed to create order")
+  //     }
+
+  //     const { order, publicKey } = await orderRes.json()
+
+  //     // Initialize Razorpay Checkout
+  //     const options = {
+  //       key: publicKey, // prefer NEXT_PUBLIC key from server
+  //       amount: order.amount,
+  //       currency: order.currency,
+  //       name: propertyName,
+  //       description: "Booking payment",
+  //       order_id: order.id,
+  //       handler: async (response) => {
+  //         try {
+  //           // Verify payment on server and create booking
+  //           const verifyRes = await fetch("/api/razorpay/verify", {
+  //             method: "POST",
+  //             headers: { "Content-Type": "application/json" },
+  //             body: JSON.stringify({
+  //               razorpay_order_id: response.razorpay_order_id,
+  //               razorpay_payment_id: response.razorpay_payment_id,
+  //               razorpay_signature: response.razorpay_signature,
+  //               booking: bookingPayload,
+  //             }),
+  //           })
+
+  //           if (!verifyRes.ok) {
+  //             const err = await verifyRes.json().catch(() => ({}))
+  //             throw new Error(err?.message || "Payment verification failed")
+  //           }
+
+  //           // Success: route to a confirmation or summary screen
+  //           router.push("/checkout?status=success")
+  //         } catch (e) {
+  //           console.error("[v0] verify error:",message)
+  //           router.push("/checkout?status=failed")
+  //         } finally {
+  //           setIsLoading(false)
+  //         }
+  //       },
+  //       prefill: {
+  //         // Provide if available
+  //         name: "",
+  //         email: "",
+  //         contact: "",
+  //       },
+  //       notes: {
+  //         property: propertyName,
+  //         nights: String(nights),
+  //       },
+  //       theme: {
+  //         color: "#000000",
+  //       },
+  //     }
+
+  //     const rzp = new window.Razorpay(options)
+  //     rzp.on("payment.failed", () => {
+  //       setIsLoading(false)
+  //     })
+  //     rzp.open()
+  //   } catch (error) {
+  //     console.error("[v0] booking error:",message)
+  //     setIsLoading(false)
+  //   }
+  // }
 
   const handleBooking = () => {
     setIsLoading(true);
     // Simulate booking process
     setTimeout(() => {
       setIsLoading(false);
-      router.push("/checkout")
+      router.push("/checkout");
     }, 3000);
   };
 
   const handleApplyCoupon = (coupon) => {
-    setAppliedCoupon(coupon);
+    dispatch(setAppliedCoupon(coupon));
     setIsCouponsDrawerOpen(false);
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 1.2 },
-    });
+    confetti({ particleCount: 100, spread: 70, origin: { y: 1.2 } });
   };
 
-  const handleRemoveCoupon = () => {
-    setAppliedCoupon(null);
+  const handleRemoveCouponClick = () => {
+    dispatch(removeCoupon());
   };
 
   const handleGuestCountsChange = (newCounts) => {
-    setGuestCounts(newCounts);
+    dispatch(
+      setSelectedGuest({
+        adults: newCounts.adults,
+        childrenn: newCounts.children,
+        infants: newCounts.infants,
+      })
+    );
   };
 
   const handleDateSelect = (date) => {
     if (!date) return;
-
     if (datePickerType === "checkin") {
-      setCheckInDate(date);
-      // If check-in is after check-out, update check-out to next day
-      if (date >= checkOutDate) {
-        const nextDay = new Date(date);
-        nextDay.setDate(nextDay.getDate() + 1);
-        setCheckOutDate(nextDay);
-      }
+      // If check-in >= current check-out, push check-out by +1 day
+      const nextCheckout =
+        date >= checkOutDate
+          ? new Date(date.getTime() + msPerDay)
+          : checkOutDate;
+      dispatch(setCheckin(date.toISOString()));
+      dispatch(setCheckout(nextCheckout.toISOString()));
     } else {
-      setCheckOutDate(date);
+      dispatch(setCheckout(date.toISOString()));
     }
     setShowDatePicker(false);
   };
@@ -272,7 +411,8 @@ const router=useRouter()
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-black">
-                       { guestCounts?.adults} Guest |  {guestCounts?.children} children
+                        {guestCounts?.adults} Guest | {guestCounts?.children}{" "}
+                        children
                       </span>
                       <span className="font-semibold text-black">
                         {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
@@ -303,7 +443,7 @@ const router=useRouter()
                         <Button
                           variant="ghost"
                           className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                          onPress={handleRemoveCoupon}
+                          onPress={handleRemoveCouponClick}
                         >
                           Remove
                         </Button>
@@ -343,11 +483,11 @@ const router=useRouter()
 
                 {/* Book Button */}
                 <Button
-                  className="   w-full h-12 text-lg font-semibold bg-black hover:bg-gray-800 text-white rounded-lg"
+                  className="w-full h-12 text-lg font-semibold bg-black hover:bg-gray-800 text-white rounded-lg"
                   onPress={handleBooking}
                   disabled={isLoading}
                 >
-                  {isLoading ? <ButtonLoader/> : "Procced"}
+                  {isLoading ? <ButtonLoader /> : "Proceed"}
                 </Button>
               </>
             )}
