@@ -65,7 +65,7 @@ export default function AirbnbNavbar() {
   }, [dispatch]);
 
 useEffect(() => {
-  if (categories.length > 0 && !selectedCategoryId) {
+  if (categories?.length > 0 && !selectedCategoryId) {
     dispatch(setSelectedCategory(categories[0]._id));
     dispatch(setSelectedCategoryname(categories[0].name));
   }

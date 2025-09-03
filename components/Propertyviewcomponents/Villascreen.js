@@ -521,9 +521,9 @@ export default function Villascreen() {
               setIsBookingOpen(true);
             }}
             className="h-11 px-6 text-base font-semibold rounded-full text-white bg-black"
-            disabled={villa?.status !== "available"}
+            // disabled={villa?.status !== "available"}
           >
-            {villa?.status === "available" ? "Book Now" : "Not Available"}
+            Book Now
           </Button>
         </div>
       </div>
