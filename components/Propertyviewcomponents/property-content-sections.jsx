@@ -14,20 +14,75 @@ import {
   FaLeaf,
   FaHiking,
   FaSun,
+  FaHotTub,
+  FaFire,
+  FaTv,
+  FaSnowflake,
+  FaGamepad,
+  FaCamera,
+  FaMusic,
+  FaDumbbell,
+  FaTree,
+  FaShieldAlt,
+  FaClock,
+  FaPhone,
+  FaCouch,
+  FaBlender,
+  FaMicrochip,
+  FaSwimmingPool,
+  FaTshirt,
+  FaInfoCircle,
 } from "react-icons/fa";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import GoogleMap from "./google-map";
+import { useVilla } from "@/lib/context/VillaContext";
+import Image from "next/image";
 
 export default function PropertyContentSections() {
-  const amenities = [
-    { icon: FaMountain, label: "Mountain View", available: true },
-    { icon: FaUtensils, label: "Breakfast Included", available: true },
-    { icon: FaWifi, label: "WiFi", available: true },
-    { icon: FaWater, label: "Jacuzzi", available: true },
-    { icon: FaCoffee, label: "BBQ Grill", available: true },
-    { icon: FaCar, label: "Parking", available: true },
-  ];
+  const villa = useVilla();
+
+  const amenityIcons = {
+    "Mountain View": FaMountain,
+    "Breakfast Included": FaUtensils,
+    WiFi: FaWifi,
+    Jacuzzi: FaHotTub,
+    "BBQ Grill": FaFire,
+    "Free Parking": FaCar,
+    "Smart TV": FaTv,
+    "Air Conditioning": FaSnowflake,
+    "Coffee Machine": FaCoffee,
+    "Game Room": FaGamepad,
+    "Security Cameras": FaCamera,
+    "Sound System": FaMusic,
+    "Fitness Center": FaDumbbell,
+    "Garden View": FaTree,
+    Terrace: FaSun,
+    Heating: FaSnowflake,
+    Safe: FaShieldAlt,
+    "24/7 Support": FaClock,
+    Phone: FaPhone,
+    "Laundry Service": FaTshirt,
+    Kitchen: FaUtensils,
+    "Premium Bedding": FaBed,
+    "Living Area": FaCouch,
+    Refrigerator: FaBlender,
+    Microwave: FaMicrochip,
+    "Swimming Pool": FaSwimmingPool,
+
+    // backend synonyms
+    Parking: FaCar,
+    Garden: FaTree,
+    TV: FaTv,
+    Security: FaShieldAlt,
+    Balcony: FaSun,
+    "Washing Machine": FaTshirt,
+  };
+
+  const amenities = villa?.amenities?.map((label) => ({
+    label,
+    icon: amenityIcons[label] || FaInfoCircle,
+  }));
 
   const experiences = [
     {
@@ -109,8 +164,10 @@ export default function PropertyContentSections() {
                 className="relative rounded-lg overflow-hidden group cursor-pointer transition-all duration-500 hover:shadow-xl"
                 style={{ animationDelay: `${index * 150}ms` }}
               >
-                <img
-                  src={experience.image || "/placeholder.svg"}
+                <Image
+                  height={40}
+                  width={40}
+                  src={villa?.images[index] || "/placeholder.svg"}
                   alt={experience.title}
                   className="w-full h-48 object-cover transition-all duration-500 group-hover:scale-110"
                 />
@@ -306,8 +363,9 @@ export default function PropertyContentSections() {
         <h2 className="text-2xl font-bold text-black mb-3 transition-all duration-300">
           Amenities
         </h2>
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {amenities.map((amenity, index) => (
+          {amenities?.map((amenity, index) => (
             <div
               key={index}
               className="flex items-center space-x-3 p-4 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md hover:transform hover:scale-105"
@@ -321,12 +379,8 @@ export default function PropertyContentSections() {
             </div>
           ))}
         </div>
-        <Button
-          variant="outline"
-          className="mt-6 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105 bg-transparent"
-        >
-          <span className="text-gray-600">+20 Amenities</span>
-        </Button>
+
+       
       </section>
 
       {/* Location Section */}

@@ -36,15 +36,9 @@ export function PropertyCard({ property }) {
   }, []);
 
   useEffect(() => {
-    if (
-      !isMobile ||
-      !property?.images ||
-      property?.images?.length <= 1
-    ) {
+    if (!isMobile || !property?.images || property?.images?.length <= 1) {
       return;
     }
-
-   
   }, [isMobile, property?.images]);
 
   const handleTouchStart = (e) => {
@@ -69,7 +63,6 @@ export function PropertyCard({ property }) {
     if (isRightSwipe && currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
-
   };
 
   const nextImage = () => {
@@ -82,7 +75,6 @@ export function PropertyCard({ property }) {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
-   
   };
 
   const goToImage = (index) => {
@@ -249,7 +241,7 @@ export function PropertyCard({ property }) {
           radius="full"
           className="bg-transparent text-sm font-bold border border-white text-white hover:bg-white/90 transition-all duration-200 absolute right-6 bottom-6"
         >
-        Book Now
+          Book Now
         </Button>
       </CardFooter>
     </Card>

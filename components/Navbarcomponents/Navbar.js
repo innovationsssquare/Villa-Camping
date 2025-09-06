@@ -34,6 +34,7 @@ import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 import { useRouter } from "next/navigation";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
+import { DualDatePicker } from "./dual-date-picker";
 
 export default function AirbnbNavbar() {
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ export default function AirbnbNavbar() {
     selectedCategoryName,
   } = useSelector((state) => state.booking);
   const [isSearching, setIsSearching] = useState(false);
+  const [focusedSide, setFocusedSide] = useState("checkin");
 
   // Get selected category name for display
   const selectedCategory = categories?.find(
@@ -64,13 +66,12 @@ export default function AirbnbNavbar() {
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
-useEffect(() => {
-  if (categories?.length > 0 && !selectedCategoryId) {
-    dispatch(setSelectedCategory(categories[0]._id));
-    dispatch(setSelectedCategoryname(categories[0].name));
-  }
-}, [ dispatch,selectedCategoryId,categories]);
-
+  useEffect(() => {
+    if (categories?.length > 0 && !selectedCategoryId) {
+      dispatch(setSelectedCategory(categories[0]._id));
+      dispatch(setSelectedCategoryname(categories[0].name));
+    }
+  }, [dispatch, selectedCategoryId, categories]);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -165,6 +166,17 @@ useEffect(() => {
     } finally {
       setIsSearching(false);
     }
+  };
+
+  const handleCheckinSelect = (date) => {
+    dispatch(setCheckin(date)); // save ISO string in Redux
+    dispatch(setCheckout(null)); // clear checkout if needed
+    setActiveDropdown("checkout");
+  };
+
+  const handleCheckoutSelect = (date) => {
+    dispatch(setCheckout(date));
+    setActiveDropdown(null);
   };
 
   return (
@@ -389,9 +401,9 @@ useEffect(() => {
                   </div>
                   <div
                     onClick={() =>
-                      setActiveDropdown(
+                     { setActiveDropdown(
                         activeDropdown === "checkin" ? null : "checkin"
-                      )
+                      ),setFocusedSide("checkin")}
                     }
                     className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
                       activeDropdown === "checkin" ? "" : ""
@@ -407,9 +419,9 @@ useEffect(() => {
                   </div>
                   <div
                     onClick={() =>
-                      setActiveDropdown(
+                     { setActiveDropdown(
                         activeDropdown === "checkout" ? null : "checkout"
-                      )
+                      ),setFocusedSide("checkout")}
                     }
                     className={`flex-1 px-4 py-3 border-r border-gray-300  cursor-pointer transition-colors ${
                       activeDropdown === "checkout" ? "" : ""
@@ -482,36 +494,40 @@ useEffect(() => {
             {activeDropdown === "checkin" && (
               <div
                 className={`absolute top-full mt-1 z-50 ${
-                  isMobile ? "left-0" : "left-1/4"
+                  isMobile ? "left-0" : "left-[38%]"
                 }`}
               >
-                <DatePicker
-                  selectedDate={checkin}
-                  onDateSelect={(date) => {
-                    dispatch(setCheckin(date));
-                    setActiveDropdown("checkout");
-                  }}
-                  placeholder="Check in"
-                  isMobile={isMobile}
-                />
+                {(activeDropdown === "checkin" ||
+                  activeDropdown === "checkout") && (
+                  <div className="absolute top-full  left-1/2 transform -translate-x-1/2 z-50">
+                    <DualDatePicker
+                      checkinDate={checkin}
+                      checkoutDate={checkout}
+                      onCheckinSelect={handleCheckinSelect}
+                      onCheckoutSelect={handleCheckoutSelect}
+                      onClose={() => setActiveDropdown(null)}
+                      focusedSide={focusedSide}
+                      setFocusedSide={setFocusedSide}
+                    />
+                  </div>
+                )}
               </div>
             )}
 
             {activeDropdown === "checkout" && (
               <div
                 className={`absolute top-full mt-1 z-50 ${
-                  isMobile ? "left-0" : "left-[45%]"
+                  isMobile ? "left-0" : "left-[30%]"
                 }`}
               >
-                <DatePicker
-                  selectedDate={checkout}
-                  onDateSelect={(date) => {
-                    dispatch(setCheckout(date));
-                    setActiveDropdown(null);
-                  }}
-                  minDate={checkin || new Date()}
-                  placeholder="Check out"
-                  isMobile={isMobile}
+                <DualDatePicker
+                  checkinDate={checkin}
+                  checkoutDate={checkout}
+                  onCheckinSelect={handleCheckinSelect}
+                  onCheckoutSelect={handleCheckoutSelect}
+                  onClose={() => setActiveDropdown(null)}
+                  focusedSide={focusedSide}
+                  setFocusedSide={setFocusedSide}
                 />
               </div>
             )}

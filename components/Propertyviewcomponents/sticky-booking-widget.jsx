@@ -32,6 +32,18 @@ import { format } from "date-fns";
 import confetti from "canvas-confetti";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { DateRange } from "react-day-picker";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setCheckin,
+  setCheckout,
+  setSelectedGuest,
+  updateGuestCount,
+  setAppliedCoupon,
+  removeCoupon,
+} from "@/Redux/Slices/bookingSlice";
+import { useVilla } from "@/lib/context/VillaContext";
+import { calculateBookingPrice } from "@/lib/bookingUtils";
+import { useRouter } from "next/navigation";
 
 export default function StickyBookingWidget() {
   const [stickyState, setStickyState] = useState("normal");
@@ -39,9 +51,32 @@ export default function StickyBookingWidget() {
   const [guests, setGuests] = useState({ adults: 2, children: 0 });
   const [rooms, setRooms] = useState(5);
   const [couponCode, setCouponCode] = useState("");
-  const [appliedCoupon, setAppliedCoupon] = useState(null);
   const [couponError, setCouponError] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const villa = useVilla();
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const { checkin, checkout, selectedGuest, selectedSubtype, appliedCoupon } =
+    useSelector((state) => state.booking);
+
+  const checkInDate = checkin ? new Date(checkin) : new Date();
+  const checkOutDate = checkout
+    ? new Date(checkout)
+    : new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  const msPerDay = 1000 * 60 * 60 * 24;
+  const nights = Math.max(
+    1,
+    Math.round((+checkOutDate - +checkInDate) / msPerDay)
+  );
+
+  const { discountAmount, finalTotal } = calculateBookingPrice(
+    villa?.basePricePerNight,
+    nights,
+    appliedCoupon
+  );
+
+  const totalGuests = selectedGuest?.adults + selectedGuest?.childrenn;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
@@ -54,7 +89,7 @@ export default function StickyBookingWidget() {
         "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
       discount: 10,
       type: "percentage",
-      minAmount: 10000,
+      maxDiscount: 10000,
       validUntil: "31 December 2025",
     },
     {
@@ -64,7 +99,7 @@ export default function StickyBookingWidget() {
         "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
       discount: 4000,
       type: "fixed",
-      minAmount: 15000,
+      maxDiscount: 15000,
       validUntil: "31 December 2025",
     },
     {
@@ -73,19 +108,10 @@ export default function StickyBookingWidget() {
       description: "15% off on weekend bookings",
       discount: 15,
       type: "percentage",
-      minAmount: 15000,
+      maxDiscount: 15000,
       validUntil: "31 December 2025",
     },
   ];
-
-  const basePrice = 52975;
-  const totalPrice = basePrice * rooms;
-  const discountAmount = appliedCoupon
-    ? appliedCoupon.type === "percentage"
-      ? (totalPrice * appliedCoupon.discount) / 100
-      : appliedCoupon.discount
-    : 0;
-  const finalPrice = totalPrice - discountAmount;
 
   const applyCoupon = async (code) => {
     setIsApplyingCoupon(true);
@@ -103,7 +129,7 @@ export default function StickyBookingWidget() {
       return;
     }
 
-    if (coupon.minAmount && totalPrice < coupon.minAmount) {
+    if (coupon.minAmount && villa?.basePricePerNight < coupon.minAmount) {
       setCouponError(
         `Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`
       );
@@ -111,7 +137,7 @@ export default function StickyBookingWidget() {
       return;
     }
 
-    setAppliedCoupon(coupon);
+    dispatch(setAppliedCoupon(coupon)); // 🔥 Redux
     setCouponCode("");
     setIsApplyingCoupon(false);
 
@@ -161,13 +187,15 @@ export default function StickyBookingWidget() {
     }, 200);
   };
 
-  const removeCoupon = () => {
-    setAppliedCoupon(null);
+  const removeCouponHandler = () => {
+    dispatch(removeCoupon());
     setCouponError("");
   };
 
   const applyCouponFromSheet = (coupon) => {
-    setAppliedCoupon(coupon);
+    dispatch(setAppliedCoupon(coupon)); // 🔥 Redux
+    setCouponCode("");
+    setIsApplyingCoupon(false);
 
     const sheetInputElement =
       document.querySelector("[data-coupon-input] input") ||
@@ -303,16 +331,16 @@ export default function StickyBookingWidget() {
                       <div className="flex items-center space-x-3">
                         <CalendarIcon className="w-5 h-5 text-black transition-all duration-300" />
                         <div className="flex items-center space-x-2">
-                          {dateRange?.from ? (
+                          {checkin ? (
                             <>
                               <span className="text-sm font-medium text-black">
-                                {format(dateRange.from, "MMM dd")}
+                                {format(new Date(checkin), "MMM dd")}
                               </span>
-                              {dateRange?.to && (
+                              {checkout && (
                                 <>
                                   <span className="text-gray-400">→</span>
                                   <span className="text-sm font-medium text-black">
-                                    {format(dateRange.to, "MMM dd, yyyy")}
+                                    {format(new Date(checkout), "MMM dd, yyyy")}
                                   </span>
                                 </>
                               )}
@@ -334,8 +362,16 @@ export default function StickyBookingWidget() {
                 >
                   <CalendarComponent
                     mode="range"
-                    selected={dateRange}
-                    onSelect={setDateRange}
+                    selected={{
+                      from: checkin ? new Date(checkin) : undefined,
+                      to: checkout ? new Date(checkout) : undefined,
+                    }}
+                    onSelect={(range) => {
+                      if (range?.from)
+                        dispatch(setCheckin(range.from.toISOString()));
+                      if (range?.to)
+                        dispatch(setCheckout(range.to.toISOString()));
+                    }}
                     disabled={(date) => date < new Date()}
                     numberOfMonths={2}
                     className="bg-white"
@@ -356,7 +392,8 @@ export default function StickyBookingWidget() {
                       <div className="flex items-center space-x-2">
                         <Users className="w-4 h-4 text-black transition-all duration-300" />
                         <span className="text-sm font-medium text-black transition-all duration-300">
-                          {guests.adults} Adults, {guests.children} Children
+                          {selectedGuest.adults} Adults,{" "}
+                          {selectedGuest.childrenn} Children
                         </span>
                       </div>
                       <ChevronDown className="w-4 h-4 text-black transition-transform duration-300" />
@@ -377,29 +414,31 @@ export default function StickyBookingWidget() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setGuests((prev) => ({
-                              ...prev,
-                              adults: Math.max(1, prev.adults - 1),
-                            }))
+                            dispatch(
+                              updateGuestCount({
+                                type: "adults",
+                                value: Math.max(1, selectedGuest.adults - 1),
+                              })
+                            )
                           }
-                          disabled={guests.adults <= 1}
-                          className="border-2 border-black hover:bg-black hover:text-white"
+                          disabled={selectedGuest.adults <= 1}
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-bold text-black">
-                          {guests.adults}
-                        </span>
+
+                        <span>{selectedGuest.adults}</span>
+
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setGuests((prev) => ({
-                              ...prev,
-                              adults: prev.adults + 1,
-                            }))
+                            dispatch(
+                              updateGuestCount({
+                                type: "adults",
+                                value: selectedGuest.adults + 1,
+                              })
+                            )
                           }
-                          className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
@@ -415,29 +454,30 @@ export default function StickyBookingWidget() {
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setGuests((prev) => ({
-                              ...prev,
-                              children: Math.max(0, prev.children - 1),
-                            }))
+                            dispatch(
+                              updateGuestCount({
+                                type: "childrenn",
+                                value: Math.max(0, selectedGuest.childrenn - 1),
+                              })
+                            )
                           }
-                          disabled={guests.children <= 0}
-                          className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Minus className="w-4 h-4" />
                         </Button>
-                        <span className="w-8 text-center font-bold text-black">
-                          {guests.children}
-                        </span>
+
+                        <span>{selectedGuest.childrenn}</span>
+
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() =>
-                            setGuests((prev) => ({
-                              ...prev,
-                              children: prev.children + 1,
-                            }))
+                            dispatch(
+                              updateGuestCount({
+                                type: "childrenn",
+                                value: selectedGuest.childrenn + 1,
+                              })
+                            )
                           }
-                          className="border-2 border-black hover:bg-black hover:text-white"
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
@@ -550,7 +590,6 @@ export default function StickyBookingWidget() {
                                 <span className="px-3  bg-gray-100 text-black rounded-full font-bold border-2 border-gray-200">
                                   Prime Discounts
                                 </span>
-  
                               </div>
                             </div>
 
@@ -653,7 +692,7 @@ export default function StickyBookingWidget() {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={removeCoupon}
+                    onClick={removeCouponHandler}
                     className="text-red-400 hover:text-red-300 font-medium hover:bg-red-900/20"
                   >
                     Remove
@@ -672,10 +711,10 @@ export default function StickyBookingWidget() {
                 </div>
                 <div className="flex items-baseline space-x-1">
                   <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalPrice.toLocaleString()}
+                    ₹{finalTotal.toLocaleString()}
                   </span>
                   <span className="text-gray-600 text-sm transition-all duration-300">
-                    (for {rooms} rooms)
+                    {` (for ${totalGuests} guest)`}
                   </span>
                 </div>
                 <span className="text-gray-500 text-xs transition-all duration-300">
@@ -696,7 +735,10 @@ export default function StickyBookingWidget() {
             </div>
 
             {/* Reserve Button */}
-            <Button className="w-full mt-auto bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95">
+            <Button
+              onClick={() => router.push("/checkout")}
+              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
+            >
               Reserve Now
             </Button>
           </CardContent>

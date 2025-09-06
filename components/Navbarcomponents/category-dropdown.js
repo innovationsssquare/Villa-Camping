@@ -45,7 +45,7 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
   }
 
   return (
-    <div className="relative">
+    <div className="relative animate-fade-in">
       {/* Tooltip Arrow - Responsive sizing and positioning */}
       <div
         className={`absolute -top-1.5 md:-top-2 bg-white border-l border-t border-gray-200 rotate-45 z-10 ${

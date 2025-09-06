@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import ImageGalleryDialog from "./image-gallery-dialog";
 import VideoDialog from "./video-dialog";
 import Image from "next/image";
+import { useVilla } from "@/lib/context/VillaContext";
 
 export default function PremiumPropertyHero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -27,28 +28,17 @@ export default function PremiumPropertyHero() {
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const imageRef = useRef(null);
+  const villa = useVilla();
 
-  const sidebarImages = [
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-  ];
-
-  const allImages = [
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-  ];
+;
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % allImages.length);
+    setCurrentImageIndex((prev) => (prev + 1) % villa?.images?.length);
   };
 
   const prevImage = () => {
     setCurrentImageIndex(
-      (prev) => (prev - 1 + allImages.length) % allImages.length
+      (prev) => (prev - 1 + villa?.images?.length) % villa?.images?.length
     );
   };
 
@@ -125,7 +115,7 @@ export default function PremiumPropertyHero() {
     <div className="h-auto bg-gray-50">
       {/* Main Content */}
       <div className="w-full mx-auto px-4 sm:px-2 lg:px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[70vh]">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[70vh] overflow-hidden">
           {/* Main Hero Image */}
           <div className="lg:col-span-3 relative rounded-2xl overflow-hidden group">
             <div
@@ -142,7 +132,7 @@ export default function PremiumPropertyHero() {
                 width={300}
                 height={300}
                 ref={imageRef}
-                src={allImages[currentImageIndex] || "/placeholder.svg"}
+                src={villa?.images[currentImageIndex] || "/placeholder.svg"}
                 alt="Gardenéa Villa"
                 className="w-full h-full object-cover transition-all duration-500 ease-out select-none"
                 style={{
@@ -254,7 +244,7 @@ export default function PremiumPropertyHero() {
 
             {/* Image Counter */}
             <div className="absolute bottom-6 right-6 bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-              {currentImageIndex + 1} / {allImages.length}
+              {currentImageIndex + 1} / {villa?.images?.length}
             </div>
           </div>
 
@@ -265,7 +255,7 @@ export default function PremiumPropertyHero() {
               onClick={() => setIsVideoOpen(true)}
             >
               <img
-                src={sidebarImages[0] || "/placeholder.svg"}
+                src={villa?.images[0] || "/placeholder.svg"}
                 alt="Property Video Tour"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80"
               />
@@ -285,12 +275,12 @@ export default function PremiumPropertyHero() {
             </div>
 
             {/* Bottom Sidebar Image with More Count */}
-            <div
+           {villa?.images.length >1 && <div
               className="relative flex-1 rounded-2xl overflow-hidden group cursor-pointer"
               onClick={() => openGallery(2)}
             >
               <img
-                src={sidebarImages[1] || "/placeholder.svg"}
+                src={villa?.images[1] || "/placeholder.svg"}
                 alt="Spa Pool Area"
                 className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
@@ -299,11 +289,11 @@ export default function PremiumPropertyHero() {
               {/* More Photos Overlay */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <div className="text-center text-white">
-                  <div className="text-3xl font-bold mb-1">+36</div>
+                  <div className="text-3xl font-bold mb-1">+{villa?.images?.length}</div>
                   <div className="text-lg font-medium">More</div>
                 </div>
               </div>
-            </div>
+            </div>}
           </div>
         </div>
 
@@ -314,14 +304,15 @@ export default function PremiumPropertyHero() {
       <VideoDialog
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
-        title="Gardenéa Villa - Property Tour"
+        videoUrl={villa?.reelVideo}
+        title={villa?.name}
       />
 
       {/* Image Gallery Dialog */}
       <ImageGalleryDialog
         isOpen={isGalleryOpen}
         onClose={() => setIsGalleryOpen(false)}
-        images={allImages}
+        images={villa?.images}
         initialIndex={galleryStartIndex}
       />
     </div>

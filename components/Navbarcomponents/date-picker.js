@@ -5,15 +5,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import moment from "moment-timezone";
 
-/**
- * Props:
- *  - selectedDate: ISO string (recommended) or Date | null
- *  - onDateSelect: (isoString: string) => void
- *  - minDate: ISO string or Date (optional) — days before this are disabled
- *  - placeholder: string (optional)
- *  - isMobile: boolean (optional)
- *  - timezone: string (optional) — defaults to "Asia/Kolkata"
- */
 export function DatePicker({
   selectedDate,
   onDateSelect,
@@ -51,12 +42,12 @@ export function DatePicker({
       "November",
       "December",
     ],
-    [],
+    []
   );
 
   const startOfTodayLocal = useMemo(
     () => moment.tz(timezone).startOf("day").toDate(),
-    [timezone],
+    [timezone]
   );
 
   // Normalize min boundary (if provided) to local start-of-day for comparisons
@@ -83,7 +74,8 @@ export function DatePicker({
   const navigateMonth = (direction) => {
     setCurrentMonth((prev) => {
       const m = moment(prev).tz(timezone).startOf("month");
-      const next = direction === "prev" ? m.subtract(1, "month") : m.add(1, "month");
+      const next =
+        direction === "prev" ? m.subtract(1, "month") : m.add(1, "month");
       return next.toDate();
     });
   };
@@ -114,7 +106,7 @@ export function DatePicker({
             month: mCurrent.month(),
             day,
           },
-          timezone,
+          timezone
         )
         .startOf("day");
 
@@ -149,7 +141,7 @@ export function DatePicker({
           ].join(" ")}
         >
           {day}
-        </button>,
+        </button>
       );
     }
 

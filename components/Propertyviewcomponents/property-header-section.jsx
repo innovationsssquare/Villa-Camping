@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   FaStar,
@@ -31,44 +31,63 @@ import {
   FaCouch,
   FaBlender,
   FaMicrochip,
-} from "react-icons/fa"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { useState } from "react"
+  FaSwimmingPool,
+} from "react-icons/fa";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { useState } from "react";
+import { useVilla } from "@/lib/context/VillaContext";
+import { AirVent, Car, Mountain, Tv, Waves, Wifi } from "lucide-react";
 
 export default function PropertyHeaderSection() {
-  const [showAllAmenities, setShowAllAmenities] = useState(false)
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
+  const villa = useVilla();
 
-  const allAmenities = [
-    { icon: FaMountain, label: "Mountain View" },
-    { icon: FaUtensils, label: "Breakfast Included" },
-    { icon: FaWifi, label: "WiFi", hasIndicator: true },
-    { icon: FaHotTub, label: "Jacuzzi", hasIndicator: true },
-    { icon: FaFire, label: "BBQ Grill", hasIndicator: true },
-    { icon: FaCar, label: "Free Parking" },
-    { icon: FaTv, label: "Smart TV" },
-    { icon: FaSnowflake, label: "Air Conditioning" },
-    { icon: FaCoffee, label: "Coffee Machine" },
-    { icon: FaGamepad, label: "Game Room" },
-    { icon: FaCamera, label: "Security Cameras" },
-    { icon: FaMusic, label: "Sound System" },
-    { icon: FaDumbbell, label: "Fitness Center" },
-    { icon: FaTree, label: "Garden View" },
-    { icon: FaSun, label: "Terrace" },
-    { icon: FaSnowflake, label: "Heating" },
-    { icon: FaShieldAlt, label: "Safe" },
-    { icon: FaClock, label: "24/7 Support" },
-    { icon: FaPhone, label: "Phone" },
-    { icon: FaTshirt, label: "Laundry Service" },
-    { icon: FaUtensils, label: "Kitchen" },
-    { icon: FaBed, label: "Premium Bedding" },
-    { icon: FaCouch, label: "Living Area" },
-    { icon: FaBlender, label: "Refrigerator" },
-    { icon: FaMicrochip, label: "Microwave" },
-  ]
+  const amenityIcons = {
+    "Mountain View": FaMountain,
+    "Breakfast Included": FaUtensils,
+    WiFi: FaWifi,
+    Jacuzzi: FaHotTub,
+    "BBQ Grill": FaFire,
+    "Free Parking": FaCar,
+    "Smart TV": FaTv,
+    "Air Conditioning": FaSnowflake,
+    "Coffee Machine": FaCoffee,
+    "Game Room": FaGamepad,
+    "Security Cameras": FaCamera,
+    "Sound System": FaMusic,
+    "Fitness Center": FaDumbbell,
+    "Garden View": FaTree,
+    Terrace: FaSun,
+    Heating: FaSnowflake,
+    Safe: FaShieldAlt,
+    "24/7 Support": FaClock,
+    Phone: FaPhone,
+    "Laundry Service": FaTshirt,
+    Kitchen: FaUtensils,
+    "Premium Bedding": FaBed,
+    "Living Area": FaCouch,
+    Refrigerator: FaBlender,
+    Microwave: FaMicrochip,
+    "Swimming Pool": FaSwimmingPool, // from backend
+    Parking: FaCar, // backend synonym
+    Garden: FaTree, // backend synonym
+    TV: FaTv, // backend synonym
+    Security: FaShieldAlt, // backend synonym
+    Balcony: FaSun, // backend synonym
+    "Washing Machine": FaTshirt, // backend synonym
+  };
 
-  const displayedAmenities = showAllAmenities ? allAmenities : allAmenities.slice(0, 5)
-  const remainingCount = allAmenities.length - 5
+  const allAmenities = villa?.amenities?.map((label) => ({
+    label,
+    icon: amenityIcons[label] || FaInfoCircle, // fallback if not matched
+  }));
+
+  const displayedAmenities = showAllAmenities
+    ? allAmenities
+    : allAmenities?.slice(0, 5);
+
+  const remainingCount = (allAmenities?.length || 0) - 5;
 
   return (
     <div id="overview" className="bg-white min-h-[400px] relative">
@@ -78,11 +97,13 @@ export default function PropertyHeaderSection() {
             {/* Property Title & Location */}
             <div className="mb-6">
               <h1 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-3 tracking-tight drop-shadow-lg">
-                Vastalya Villa - Malawali
+                {villa?.name} - {villa?.location?.addressLine}
               </h1>
               <div className="flex items-center gap-2 text-gray-600">
                 <FaMapMarkerAlt className="w-5 h-5 text-black" />
-                <span className="text-sm font-medium drop-shadow">Malawali, Lonavala</span>
+                <span className="text-sm font-medium drop-shadow">
+                  {villa?.location?.area}, {villa?.location?.city}
+                </span>
               </div>
             </div>
 
@@ -99,36 +120,53 @@ export default function PropertyHeaderSection() {
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-1">
                   <FaStar className="w-5 h-5 text-amber-400" />
-                  <span className="font-bold text-lg text-black drop-shadow">4.8</span>
+                  <span className="font-bold text-lg text-black drop-shadow">
+                    {villa?.averageRating}
+                  </span>
                   <span className="text-black/80">/5</span>
                 </div>
-                <Button variant="link" className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow">
-                  65 Reviews
+                <Button
+                  variant="link"
+                  className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow"
+                >
+                  {villa?.totalReviews} Reviews
                 </Button>
               </div>
             </div>
 
             {/* Property Details Grid */}
             <div className="flex flex-wrap items-center gap-3 mb-8">
-              <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+              >
                 <FaUsers className="w-4 h-4 mr-2 text-black" />
-                Up to 15 Guests
+                Up to {villa?.maxCapacity} Guests
               </Badge>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <FaHome className="w-4 h-4 mr-2 text-black" />5 Rooms
-                <FaInfoCircle className="w-4 h-4 ml-2 text-black" />
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+              >
+                <FaHome className="w-4 h-4 mr-2 text-black" />
+                {villa?.bhkType}
               </Badge>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
-                <FaBath className="w-4 h-4 mr-2 text-black" />5 Baths
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+              >
+                <FaSwimmingPool className="w-4 h-4 mr-2 text-black" /> Pool
               </Badge>
-              <Badge variant="secondary" className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full">
+              <Badge
+                variant="secondary"
+                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+              >
                 <FaUtensils className="w-4 h-4 mr-2 text-black" />
                 Meals Available
               </Badge>
             </div>
 
             {/* Great For Section */}
-            <div className="mb-8">
+            {/* <div className="mb-8">
               <div className="flex items-center gap-3">
                 <span className="text-lg font-medium text-gray-900">Great for:</span>
                 <div className="flex items-center gap-2">
@@ -136,7 +174,7 @@ export default function PropertyHeaderSection() {
                   <span className="text-gray-800 font-medium">Mountain Retreat</span>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Premium Amenities */}
             <div className="flex flex-wrap items-center gap-3 w-full">
@@ -148,7 +186,9 @@ export default function PropertyHeaderSection() {
                 >
                   <amenity.icon className="w-4 h-4 mr-2 text-black" />
                   {amenity.label}
-                  {amenity.hasIndicator && <span className="ml-1 w-2 h-2 bg-green-500 rounded-full"></span>}
+                  {amenity.hasIndicator && (
+                    <span className="ml-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                  )}
                 </Badge>
               ))}
               <Button
@@ -156,7 +196,9 @@ export default function PropertyHeaderSection() {
                 className="text-blue-600 hover:text-blue-800 p-0 h-auto font-medium"
                 onClick={() => setShowAllAmenities(!showAllAmenities)}
               >
-                {showAllAmenities ? "Show Less" : `+${remainingCount} Amenities`}
+                {showAllAmenities
+                  ? "Show Less"
+                  : `+${remainingCount} Amenities`}
               </Button>
             </div>
           </div>
@@ -165,36 +207,53 @@ export default function PropertyHeaderSection() {
             <div className="border-white border bg-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:bg-white">
               <div className="text-center">
                 <div className="mb-2">
-                  <span className="text-gray-500 line-through text-lg">₹58,750</span>
-                  <Badge variant="destructive" className="ml-2 text-xs bg-black border-0">
+                  <span className="text-gray-500 line-through text-lg">
+                    ₹58,750
+                  </span>
+                  <Badge
+                    variant="destructive"
+                    className="ml-2 text-xs bg-black border-0"
+                  >
                     Save 10%
                   </Badge>
                 </div>
 
                 <div className="mb-4">
                   <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-gray-900">₹52,975</span>
+                    <span className="text-4xl font-bold text-gray-900">
+                      ₹{villa?.basePricePerNight}
+                    </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1">(for 5 rooms) Per Night + Taxes</p>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Per Night + Taxes
+                  </p>
                 </div>
 
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex justify-between">
-                    <span>Base price (5 rooms)</span>
-                    <span>₹47,250</span>
+                    <span>Base price </span>
+                    <span>₹{villa?.basePricePerNight}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Service fee</span>
-                    <span>₹3,150</span>
+                    <span>0</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Cleaning fee</span>
-                    <span>₹2,575</span>
+                    <span>0</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Taxes</span>
+                    <span>{Math.round(villa?.basePricePerNight * 0.18)}</span>
                   </div>
                   <hr className="border-gray-200" />
                   <div className="flex justify-between font-semibold text-gray-900">
                     <span>Total per night</span>
-                    <span>₹52,975</span>
+                    <span>
+                      ₹
+                      {Math.round(villa?.basePricePerNight * 0.18) +
+                        villa?.basePricePerNight}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -203,5 +262,5 @@ export default function PropertyHeaderSection() {
         </div>
       </div>
     </div>
-  )
+  );
 }

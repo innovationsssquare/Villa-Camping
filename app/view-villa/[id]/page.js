@@ -4,10 +4,8 @@ import Villascreen from "@/components/Propertyviewcomponents/Villascreen";
 
 export default function Home() {
   return (
-    <div
-      className="min-h-screen"
-    > 
-      <Villascreen/> 
+    <div className="min-h-screen">
+      <Villascreen />
       <PropertyDetails />
     </div>
   );

@@ -10,8 +10,8 @@ import { Play, X, Volume2, VolumeX, Maximize, Minimize } from "lucide-react"
 export default function VideoDialog({
   isOpen,
   onClose,
-  videoUrl = "https://www.w3schools.com/html/mov_bbb.mp4",
-  title = "Property Video Tour",
+  videoUrl,
+  title,
 }) {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isMuted, setIsMuted] = useState(false)
@@ -51,7 +51,7 @@ export default function VideoDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className=" w-full p-0 bg-black">
+      <DialogContent className=" w-full p-0 bg-black border-none">
         <div className="relative">
           {/* Close Button */}
           <Button
