@@ -77,7 +77,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
           {/* Booking For */}
           <div>
             <Label className="text-sm font-medium text-gray-900 mb-4 block">
-              I'm booking for :
+             {` I'm booking for :`}
             </Label>
             <RadioGroup
               value={bookingFor}
