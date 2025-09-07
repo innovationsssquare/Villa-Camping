@@ -40,7 +40,7 @@ const navItems = [
   // },
   {
     title: "My Booking",
-    href: "/account/orders",
+    href: "/booking",
     icon: <FaBook className="h-5 w-5" />,
 
   },

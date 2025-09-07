@@ -40,6 +40,10 @@ import {
   updateGuestCount,
   setAppliedCoupon,
   removeCoupon,
+  setPropertyId,
+  setcategoryId,
+  setOwnerId,
+  setPropertyType,
 } from "@/Redux/Slices/bookingSlice";
 import { useVilla } from "@/lib/context/VillaContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
@@ -736,7 +740,13 @@ export default function StickyBookingWidget() {
 
             {/* Reserve Button */}
             <Button
-              onClick={() => router.push("/checkout")}
+              onClick={() => {
+                dispatch(setPropertyId(villa?._id));
+                dispatch(setcategoryId(villa?.category));
+                dispatch(setOwnerId(villa?.owner));
+                dispatch(setPropertyType("Villa"));
+                router.push("/checkout");
+              }}
               className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
             >
               Reserve Now

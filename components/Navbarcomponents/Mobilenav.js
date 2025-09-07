@@ -53,7 +53,7 @@ export function AppHeader() {
         <div className="flex items-center gap-2">
           <NotificationSheet />
 
-          <Button
+          {/* <Button
             onClick={() => router.push("/bag")}
             variant="outline"
             size="icon"
@@ -69,7 +69,7 @@ export function AppHeader() {
               </Badge>
             )}
             <span className="sr-only">Shopping cart</span>
-          </Button>
+          </Button> */}
         </div>
       </div>
 

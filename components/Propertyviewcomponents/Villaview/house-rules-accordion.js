@@ -12,9 +12,9 @@ export default function HouseRulesAccordion({ rules }) {
     <Card className="p-0 overflow-hidden">
       <Accordion type="single" collapsible className="w-full">
         <AccordionItem value="rules">
-          <AccordionTrigger className="px-4">House rules</AccordionTrigger>
-          <AccordionContent>
-            <div className="px-4 pb-4 space-y-2">
+          <AccordionTrigger className="px-4 bg-gray-200">House rules</AccordionTrigger>
+          <AccordionContent className={"bg-gray-200"}>
+            <div className="px-4 pb-4 space-y-2 ">
               {rules.map((rule, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm">
                   <CheckCircle2

@@ -9,6 +9,8 @@ import { FaUser } from "react-icons/fa";
 import { BsFillChatSquareHeartFill } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
+import { DiBootstrap } from "react-icons/di";
+import { IoMdBookmarks } from "react-icons/io";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");
@@ -24,8 +26,8 @@ export function BottomNav() {
       setActiveTab("/account");
     } else if (pathname === "/shorts") {
       setActiveTab("/shorts");
-    } else if (pathname === "/eco-friendly") {
-      setActiveTab("/eco-friendly");
+    } else if (pathname === "/booking") {
+      setActiveTab("/booking");
     } else if (
       pathname.startsWith("/category") ||
       pathname.startsWith("/products")
@@ -53,8 +55,8 @@ export function BottomNav() {
       label: "Favorites",
     },
     {
-      value: "/eco-friendly",
-      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
+      value: "/booking",
+      icon: <BsFillChatSquareHeartFill className="h-6 w-6" />,
       label: "Recycle",
     },
     {
@@ -77,7 +79,7 @@ export function BottomNav() {
         className="w-full"
         classNames={{
           tabList:
-            "h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-2xl p-1 bg-[#FFFFFF4D]",
+            "h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-3xl p-1 bg-[#FFFFFF4D]",
           tab: "flex h-14 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
           cursor: "rounded-full bg-[#FFFFFF4D] backdrop-blur-2xl ",
         }}
@@ -100,7 +102,7 @@ export function BottomNav() {
                     "flex   items-center justify-center rounded-full transition-colors duration-400",
 
                     item.value === "/shorts" && activeTab !== item.value
-                      ? " border p-3 text-black "
+                      ? " p-3 text-white bg-black "
                       : ""
                   )}
                 >

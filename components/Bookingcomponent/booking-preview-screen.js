@@ -615,7 +615,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   );
 
   return (
-    <div className="fixed inset-0 bg-[#FFFFFF4D] backdrop-blur-2xl z-50 overflow-hidden">
+    <div className="fixed inset-0 bg-[#FFFFFF4D] backdrop-blur-2xl z-50 overflow-hidden md:hidden block">
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="border-b border-gray-200 px-2 py-3">

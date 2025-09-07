@@ -219,7 +219,7 @@ export default function Villascreen() {
           <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/20 hover:bg-black/40 text-white border-none" />
 
           {/* Overlays */}
-          <Badge className="absolute top-4 left-4 bg-primary text-primary-foreground z-10">
+          <Badge className="absolute top-4 left-4 bg-black text-primary-foreground z-10">
             Best Rated
           </Badge>
 
@@ -483,7 +483,7 @@ export default function Villascreen() {
         </Card>
       </div> */}
 
-      <main className="max-w-screen-lg mx-auto px-4 py-4 md:py-6">
+      <main className="max-w-screen-lg mx-auto px-2 py-4 md:py-6">
         {/* Header */}
         <section className="space-y-3">
           <div className="flex items-start justify-between gap-3">
@@ -498,10 +498,10 @@ export default function Villascreen() {
                 </p>
               </div>
             </div>
-            <Button variant="outline" size="icon" aria-label="Save property">
-              <Heart className="h-4 w-4" />
-            </Button>
+          
           </div>
+
+
 
           {/* Rating and quick stats */}
           <div className="flex items-center gap-4">
@@ -535,6 +535,19 @@ export default function Villascreen() {
               </span>
             </div>
           </div>
+
+           <Card className="p-3 border  border-white bg-gray-200">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">Up to {villa?.maxCapacity} Guests</span>
+            </div>
+            <div className="flex items-center bg-black text-white p-2 rounded-md gap-2">
+              <Bed className="h-5 w-5 text-muted-foreground" />
+              <span className="text-sm">{villa?.bhkType}</span>
+            </div>
+          </div>
+        </Card>
         </section>
 
       
@@ -556,27 +569,22 @@ export default function Villascreen() {
 
             {/* Check-in details (accordion inside) */}
             <Card className="p-0 overflow-hidden">
-              <Accordion type="single" collapsible className="w-full">
+              <Accordion type="single" collapsible className="w-full  ">
                 <AccordionItem value="checkin">
-                  <AccordionTrigger className="px-4">
+                  <AccordionTrigger className="px-4  ">
                     Check-in details
                   </AccordionTrigger>
                   <AccordionContent>
                     <div className="px-4 pb-4 space-y-2 text-sm">
                       <div>
                         Check-in:{" "}
-                        <Badge variant="secondary">{villa.checkInTime}</Badge>
+                        <Badge variant="secondary" className={"bg-black"}>{villa.checkInTime}</Badge>
                       </div>
                       <div>
                         Check-out:{" "}
-                        <Badge variant="secondary">{villa.checkOutTime}</Badge>
+                        <Badge variant="" className={"bg-black"}>{villa.checkOutTime}</Badge>
                       </div>
-                      <div>
-                        Security Deposit:{" "}
-                        <Badge variant="secondary">
-                          ₹{villa.securityDeposit}
-                        </Badge>
-                      </div>
+                     
                     </div>
                   </AccordionContent>
                 </AccordionItem>

@@ -33,10 +33,9 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   }, [autoOpen])
 
   const handleOpenChange = (newOpen) => {
-    // Only allow closing if not autoOpen or if explicitly handled by successful login
-    if (!autoOpen || !newOpen) {
+    if (!newOpen) {
       setOpen(newOpen)
-      onOpenChange?.(newOpen)
+      onOpenChange?.(false) // User closed without authenticating
     }
   }
 
@@ -56,9 +55,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       const data = await res.json()
       // Store token in cookies
       Cookies.set("token", data.token, { expires: 7 })
-      // Close modal and redirect
-      handleOpenChange(false)
-      router.push("/")
+      setOpen(false)
+      onOpenChange?.(true) // User successfully authenticated
     } catch (err) {
       console.error(`${providerType} login failed:`, err)
     } finally {
@@ -71,7 +69,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       {/* Header */}
       <div className="text-center space-y-2">
         <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
-          <Image src={Logoicon} alt="Thevillacamp"/>
+          <Image src={Logoicon || "/placeholder.svg"} alt="Thevillacamp" />
         </div>
         <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
           Welcome !
@@ -161,8 +159,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         )}
         <DrawerContent
           className="max-w-md mx-auto bg-white border-none"
-          onEscapeKeyDown={(e) => e.preventDefault()}
-          onPointerDownOutside={(e) => e.preventDefault()}
+          onEscapeKeyDown={(e) => autoOpen && e.preventDefault()}
+          onPointerDownOutside={(e) => autoOpen && e.preventDefault()}
         >
           <div className="mx-auto w-full max-w-sm border-0">
             <DrawerHeader className="text-center hidden">
@@ -172,7 +170,6 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
             <div className="p-6">
               <AuthContent />
             </div>
-            {/* Removed DrawerClose button to make it non-dismissible */}
           </div>
         </DrawerContent>
       </Drawer>
@@ -185,7 +182,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="group relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
+            className="group hidden relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
           >
             <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
             Sign In
@@ -194,8 +191,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       )}
       <DialogContent
         className="sm:max-w-md bg-white border-none"
-        onEscapeKeyDown={(e) => e.preventDefault()}
-        onPointerDownOutside={(e) => e.preventDefault()}
+        onEscapeKeyDown={(e) => autoOpen && e.preventDefault()}
+        onPointerDownOutside={(e) => autoOpen && e.preventDefault()}
       >
         <div className="p-6">
           <AuthContent />

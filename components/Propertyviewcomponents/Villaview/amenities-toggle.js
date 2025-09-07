@@ -40,7 +40,7 @@ export default function AmenitiesToggle({ amenities }) {
         <h2 className="text-lg font-semibold">Amenities</h2>
         <Button
           variant="ghost"
-          size="sm"
+          className="underline"          size="sm"
           onClick={() => setExpanded((e) => !e)}
           aria-expanded={expanded}
         >
@@ -53,9 +53,9 @@ export default function AmenitiesToggle({ amenities }) {
           return (
             <div
               key={i}
-              className="flex items-center gap-2 rounded-md border p-2"
+              className="flex items-center gap-2 rounded-md border border-white bg-gray-200 p-2"
             >
-              <Icon className="h-4 w-4 text-primary" aria-hidden />
+              <Icon className="h-4 w-4 text-black" aria-hidden />
               <span className="text-sm">{name}</span>
             </div>
           );
