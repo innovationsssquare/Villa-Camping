@@ -36,7 +36,15 @@ export default function RootLayout({ children }) {
               'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
           }}
         >
-          <Suspense fallback={<div className="bg-black rounded-full"><ButtonLoader/></div>}>
+          <Suspense
+            fallback={
+              <div className="h-screen w-full flex justify-center items-center">
+                <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
+                  <ButtonLoader />
+                </div>
+              </div>
+            }
+          >
             <NextuiProviderWrapper>
               <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
                 <ToastProvider>{children}</ToastProvider>
