@@ -5,6 +5,8 @@ import { AuthProvider } from "@/lib/auth-provider";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Script from "next/script";
 import { ToastProvider } from "@/components/ui/toast-provider";
+import { Suspense } from "react";
+import ButtonLoader from "@/components/Loadercomponents/button-loader";
 
 export const metadata = {
   title: "THE VILLA CAMP",
@@ -34,11 +36,13 @@ export default function RootLayout({ children }) {
               'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
           }}
         >
-          <NextuiProviderWrapper>
-            <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
-              <ToastProvider>{children}</ToastProvider>
-            </GoogleOAuthProvider>
-          </NextuiProviderWrapper>
+          <Suspense fallback={<div className="bg-black rounded-full"><ButtonLoader/></div>}>
+            <NextuiProviderWrapper>
+              <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
+                <ToastProvider>{children}</ToastProvider>
+              </GoogleOAuthProvider>
+            </NextuiProviderWrapper>
+          </Suspense>
         </body>
       </html>
     </Providers>
