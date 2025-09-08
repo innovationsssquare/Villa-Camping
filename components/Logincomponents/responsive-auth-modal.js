@@ -148,13 +148,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {!autoOpen && (
           <DrawerTrigger asChild>
-            <Button
-              variant="outline"
-              className="group relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
-            >
-              <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-              Sign In
-            </Button>
+           
           </DrawerTrigger>
         )}
         <DrawerContent
