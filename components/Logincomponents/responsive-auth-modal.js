@@ -68,7 +68,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
     <div className="space-y-6 border-0 border-none">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 animate-pulse">
+        <div className="mx-auto w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center mb-4 ">
           <Image src={Logoicon || "/placeholder.svg"} alt="Thevillacamp" />
         </div>
         <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
