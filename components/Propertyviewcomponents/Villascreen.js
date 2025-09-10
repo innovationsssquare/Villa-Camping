@@ -80,6 +80,7 @@ import MapEmbed from "./Villaview/map-embed";
 import Reviews from "./Villaview/reviews";
 import ImageCarousel from "./Villaview/image-carousel";
 import { Separator } from "@/components/ui/separator";
+import GoogleMap from "./google-map";
 
 const amenityIcons = {
   WiFi: Wifi,
@@ -614,11 +615,12 @@ export default function Villascreen() {
             </Card>
 
             {/* Map */}
-            <MapEmbed
+            <GoogleMap/>
+            {/* <MapEmbed
               lat={villa.location.lat}
               lng={villa.location.lng}
               address={`${villa.location.addressLine}, ${villa.location.city}`}
-            />
+            /> */}
 
             {/* Reviews */}
             {/* <div id="reviews">

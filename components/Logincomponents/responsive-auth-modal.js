@@ -39,30 +39,75 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
     }
   }
 
-  const handleLogin = async (providerType) => {
-    const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading
-    setLoading(true)
-    try {
-      const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com")
-      const result = await signInWithPopup(auth, provider)
-      const idToken = await result.user.getIdToken()
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      })
-      if (!res.ok) throw new Error("Login API failed")
-      const data = await res.json()
-      // Store token in cookies
-      Cookies.set("token", data.token, { expires: 7 })
-      setOpen(false)
-      onOpenChange?.(true) // User successfully authenticated
-    } catch (err) {
-      console.error(`${providerType} login failed:`, err)
-    } finally {
-      setLoading(false)
+  // const handleLogin = async (providerType) => {
+  //   const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading
+  //   setLoading(true)
+  //   try {
+  //     const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com")
+  //     const result = await signInWithPopup(auth, provider)
+  //     console.log(result)
+  //     const idToken = await result.user.getIdToken()
+  //     const res = await fetch("/api/login", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify({ idToken }),
+  //     })
+  //     if (!res.ok) throw new Error("Login API failed")
+  //     const data = await res.json()
+  //     // Store token in cookies
+  //     Cookies.set("token", data.token, { expires: 7 })
+  //     setOpen(false)
+  //     onOpenChange?.(true) // User successfully authenticated
+  //   } catch (err) {
+  //     console.error(`${providerType} login failed:`, err)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+const handleLogin = async (providerType) => {
+  const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading;
+  setLoading(true);
+
+  try {
+    const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com");
+
+    // Open the sign-in popup and wait for the result
+    const result = await signInWithPopup(auth, provider);
+
+    // Check if result is null, which could indicate that the popup was closed
+    if (!result) {
+      throw new Error("Popup was closed before authentication.");
     }
+
+    console.log(result);
+    const idToken = await result.user.getIdToken();
+    const res = await fetch("/api/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    });
+
+    if (!res.ok) throw new Error("Login API failed");
+    const data = await res.json();
+    Cookies.set("token", data.token, { expires: 7 });
+    
+    // Close the dialog only after successful authentication
+    setOpen(false);
+    onOpenChange?.(true); // User successfully authenticated
+  } catch (err) {
+    console.error(`${providerType} login failed:`, err);
+    if (err.message === "Popup was closed before authentication.") {
+      alert("You closed the popup before completing the login process.");
+    }
+  } finally {
+    setLoading(false);
   }
+};
+
+
+
+
 
   const AuthContent = () => (
     <div className="space-y-6 border-0 border-none">
