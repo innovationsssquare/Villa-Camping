@@ -7,6 +7,7 @@ import Script from "next/script";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { Suspense } from "react";
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
+import { CookieConsent } from "@/components/Homecomponets/CookieConsent";
 
 export const metadata = {
   title: "THE VILLA CAMP",
@@ -47,7 +48,11 @@ export default function RootLayout({ children }) {
           >
             <NextuiProviderWrapper>
               <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
-                <ToastProvider>{children}</ToastProvider>
+                <ToastProvider>
+                {children}
+                 <CookieConsent/>
+
+                </ToastProvider>
               </GoogleOAuthProvider>
             </NextuiProviderWrapper>
           </Suspense>

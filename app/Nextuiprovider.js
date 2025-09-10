@@ -62,7 +62,6 @@ export function NextuiProviderWrapper({ children }) {
         <AppHeader />
       )}
       <ResponsiveAuthModal autoOpen={showAuthModal} onOpenChange={handleModalClose} />
-
       {children}
       {pathname === "/Signin" ||
       pathname === "/shorts" ||
