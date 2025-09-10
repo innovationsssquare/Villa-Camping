@@ -35,7 +35,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   const handleOpenChange = (newOpen) => {
     if (!newOpen) {
       setOpen(newOpen)
-      onOpenChange?.(false) // User closed without authenticating
+      onOpenChange?.(false) 
     }
   }
 
@@ -45,7 +45,6 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
     try {
       const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com")
       const result = await signInWithPopup(auth, provider)
-      console.log(result)
       const idToken = await result.user.getIdToken()
       const res = await fetch("/api/login", {
         method: "POST",
@@ -57,7 +56,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       // Store token in cookies
       Cookies.set("token", data.token, { expires: 7 })
       setOpen(false)
-      onOpenChange?.(true) // User successfully authenticated
+      onOpenChange?.(true)
+      router.refresh()
     } catch (err) {
       console.error(`${providerType} login failed:`, err)
     } finally {
