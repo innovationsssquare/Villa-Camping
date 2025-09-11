@@ -10,10 +10,16 @@ import Image from "next/image";
 export default function SignInPage() {
   const router = useRouter()
 
-  const handleModalClose = () => {
-    router.push("/")
+  const handleModalClose = (isAuthenticated = false) => {
+    if (isAuthenticated) {
+      // User successfully authenticated, redirect to home or intended page
+      router.push("/")
+    } else {
+      // User cancelled authentication, go back to home
+      router.push("/")
+    }
+    router.refresh()
   }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8 text-center">

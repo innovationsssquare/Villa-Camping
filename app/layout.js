@@ -48,11 +48,7 @@ export default function RootLayout({ children }) {
           >
             <NextuiProviderWrapper>
               <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
-                <ToastProvider>
-                {children}
-                 <CookieConsent/>
-
-                </ToastProvider>
+                <ToastProvider>{children}</ToastProvider>
               </GoogleOAuthProvider>
             </NextuiProviderWrapper>
           </Suspense>
