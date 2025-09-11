@@ -41,11 +41,11 @@ export default function SignInPage() {
             </div>
 
             {/* Brand Name Animation */}
-            <div className="animate-in slide-in-from-bottom duration-700 delay-700">
+            {/* <div className="animate-in slide-in-from-bottom duration-700 delay-700">
               <p className="text-gray-600 mt-2 animate-in fade-in duration-500 delay-1000">
                 Thevillacamp
               </p>
-            </div>
+            </div> */}
 
           
            

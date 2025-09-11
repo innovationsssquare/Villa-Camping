@@ -388,13 +388,13 @@ export default function BookingScreen() {
           <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-200 shadow-card">
             <TabsTrigger
               value="all"
-              className="data-[state=active]:bg-black data-[state=active]:text-white"
+              className="data-[state=active]:bg-black/80 data-[state=active]:text-white"
             >
               All ({getTabCount("all")})
             </TabsTrigger>
             <TabsTrigger
               value="upcoming"
-              className="data-[state=active]:bg-black data-[state=active]:text-white"
+              className="data-[state=active]:bg-black/80 data-[state=active]:text-white"
             >
               Upcoming ({getTabCount("upcoming")})
             </TabsTrigger>
@@ -429,7 +429,7 @@ export default function BookingScreen() {
                       onClick={() => router.push("/category/all")}
                       variant="luxury"
                       size="lg"
-                      className="bg-black text-white"
+                      className="bg-black/80 text-white"
                     >
                       Explore
                     </Button>

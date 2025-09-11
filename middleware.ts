@@ -10,16 +10,22 @@ export function middleware(request: NextRequest) {
   // Check if the current path is a protected route
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
-  if (isProtectedRoute) {
-    // Check for authentication token in cookies
-    const token = request.cookies.get("token")
+  // Check for authentication token in cookies
+  const token = request.cookies.get("token")
 
-    if (!token) {
-      const url = request.nextUrl.clone()
-      url.pathname = "/Signin"
-      url.searchParams.set("returnUrl", pathname)
-      return NextResponse.redirect(url)
-    }
+  // If token exists and user is trying to access /Signin, redirect to home (/)
+  if (pathname === "/Signin" && token) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/" // Redirect to home
+    return NextResponse.redirect(url)
+  }
+
+  // If it's a protected route and no token exists, redirect to Signin
+  if (isProtectedRoute && !token) {
+    const url = request.nextUrl.clone()
+    url.pathname = "/Signin"
+    url.searchParams.set("returnUrl", pathname) // Store the original path to redirect back after login
+    return NextResponse.redirect(url)
   }
 
   return NextResponse.next()

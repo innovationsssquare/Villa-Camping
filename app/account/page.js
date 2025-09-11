@@ -24,21 +24,21 @@ import { NotificationSheet } from "@/components/Navbarcomponents/Notificationshe
 export default function PremiumProfile() {
   return (
     <div className="bg-background min-h-screen">
-     <section
-            className={cn(
-              " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
-            )}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <UserSidebar />
-                Profile
-              </div>
+      <section
+        className={cn(
+          " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+        )}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <UserSidebar />
+            Profile
+          </div>
 
-              <div className="flex items-center gap-2">
-                <NotificationSheet />
+          <div className="flex items-center gap-2">
+            <NotificationSheet />
 
-                {/* <Button
+            {/* <Button
                            onClick={() => router.push("/bag")}
                            variant="outline"
                            size="icon"
@@ -55,14 +55,13 @@ export default function PremiumProfile() {
                            )}
                            <span className="sr-only">Shopping cart</span>
                          </Button> */}
-              </div>
-            </div>
-          </section>
+          </div>
+        </div>
+      </section>
       {/* Premium Header */}
-      <header className="bg-black/90 text-white p-4 pb-16 relative overflow-hidden">
+      <header className="bg-black/80 text-white p-4 pb-16 pt-8 relative overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative z-10">
-         
           <div className="flex items-center gap-6">
             <div className="relative">
               <Avatar className="w-16 h-16 border-4 border-white/20 shadow-elevated">
@@ -74,9 +73,7 @@ export default function PremiumProfile() {
                   JD
                 </AvatarFallback>
               </Avatar>
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-gradient-gold rounded-full flex items-center justify-center">
-                <Trophy className="w-3 h-3 text-luxury-navy" />
-              </div>
+             
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-bold mb-1">John Doe</h2>
@@ -85,7 +82,7 @@ export default function PremiumProfile() {
                 variant="outline"
                 className="border-white/30 text-white bg-white/10"
               >
-                VIP Status
+                Thevillacamp@gmail.com
               </Badge>
             </div>
           </div>
@@ -93,7 +90,7 @@ export default function PremiumProfile() {
       </header>
 
       {/* Main Content */}
-      <main className="p-3 -mt-12 relative z-20 space-y-6">
+      <main className="p-3 -mt-8 relative z-20 space-y-6">
         {/* Current Booking Status */}
         <Card className="bg-gray-200 border-0">
           <CardContent className="p-4">
@@ -136,13 +133,13 @@ export default function PremiumProfile() {
           <TabsList className="grid w-full grid-cols-2 bg-gray-200 h-12  border border-white">
             <TabsTrigger
               value="personal"
-              className="data-[state=active]:bg-black/95 data-[state=active]:text-white"
+              className="data-[state=active]:bg-black/80 data-[state=active]:text-white"
             >
               Personal Details
             </TabsTrigger>
             <TabsTrigger
               value="wishlist"
-              className="data-[state=active]:bg-black/95 data-[state=active]:text-white "
+              className="data-[state=active]:bg-black/80 data-[state=active]:text-white "
             >
               Wishlist
             </TabsTrigger>
