@@ -15,11 +15,9 @@ export function middleware(request: NextRequest) {
     const token = request.cookies.get("token")
 
     if (!token) {
-      // Redirect to home with a query parameter to trigger auth modal
       const url = request.nextUrl.clone()
-      url.pathname = "/"
-      url.searchParams.set("auth", "required")
-      url.searchParams.set("redirect", pathname)
+      url.pathname = "/Signin"
+      url.searchParams.set("returnUrl", pathname)
       return NextResponse.redirect(url)
     }
   }

@@ -66,8 +66,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       setOpen(false);
       setTimeout(() => {
         onOpenChange?.(true);
-
-        router.refresh();
+        window.location.href = returnUrl;
       }, 100);
     } catch (err) {
       console.error(`${providerType} login failed:`, err);

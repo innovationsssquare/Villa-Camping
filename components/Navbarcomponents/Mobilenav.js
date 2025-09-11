@@ -4,16 +4,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { cn } from "@/lib/utils";
-import { FilterDrawer } from "../Productcomponets/filter-drawer";
 import { usePathname, useRouter } from "next/navigation";
 import { UserSidebar } from "./Sidebar";
 import { NotificationSheet } from "./Notificationsheet";
-import { Badge } from "@/components/ui/badge";
-import { IoMdPin } from "react-icons/io";
-import { HeaderTitle } from "./HeaderTitle";
-import { IoBag } from "react-icons/io5";
+
 import { BookingSearchBox } from "./booking-search-box";
-import SearchStayPage from "../Searchdatescomponents/search-stay-page";
 import UserLocationDisplay from "../Homecomponets/user-location-display";
 
 export function AppHeader() {
@@ -31,7 +26,9 @@ export function AppHeader() {
     <header
       className={cn(
         "fixed top-0 left-0 right-0 w-full  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden ",
-        isVisible ? "translate-y-0 bg-[#FFFFFF4D] backdrop-blur-2xl" : "-translate-y-14 bg-gray-50"
+        isVisible
+          ? "translate-y-0 bg-[#FFFFFF4D] backdrop-blur-2xl"
+          : "-translate-y-14 bg-gray-50"
       )}
     >
       <div className="flex items-center justify-between">
@@ -43,7 +40,7 @@ export function AppHeader() {
           pathname.startsWith("/category/") ? (
             <div>
               <div className="text-xs font-medium">Location</div>
-              <UserLocationDisplay/>
+              <UserLocationDisplay />
             </div>
           ) : (
             ""
