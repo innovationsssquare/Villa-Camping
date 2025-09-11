@@ -1,11 +1,15 @@
-"use client"
-import { useState, useEffect } from "react"
-import { GoogleAuthProvider, OAuthProvider, signInWithPopup } from "firebase/auth"
-import { auth } from "@/lib/firebase"
-import { useRouter } from "next/navigation"
-import Cookies from "js-cookie"
-import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+"use client";
+import { useState, useEffect } from "react";
+import {
+  GoogleAuthProvider,
+  OAuthProvider,
+  signInWithPopup,
+} from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
@@ -13,63 +17,64 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/ui/drawer"
-import { LogIn, Loader2 } from "lucide-react"
-import { useIsMobile } from "@/hooks/use-mobile"
-import Logoicon from "@/public/Productasset/Logoicon.png"
-import Image from "next/image"
+} from "@/components/ui/drawer";
+import { LogIn, Loader2 } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import Logoicon from "@/public/Productasset/Logoicon.png";
+import Image from "next/image";
 
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
-  const [googleLoading, setGoogleLoading] = useState(false)
-  const [appleLoading, setAppleLoading] = useState(false)
-  const [open, setOpen] = useState(autoOpen)
-  const router = useRouter()
-  const isMobile = useIsMobile()
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading, setAppleLoading] = useState(false);
+  const [open, setOpen] = useState(autoOpen);
+  const router = useRouter();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (autoOpen) {
-      setOpen(true)
+      setOpen(true);
     }
-  }, [autoOpen])
+  }, [autoOpen]);
 
   const handleOpenChange = (newOpen) => {
     if (!newOpen) {
-      setOpen(newOpen)
-      onOpenChange?.(false) 
+      setOpen(newOpen);
+      onOpenChange?.(false);
     }
-  }
+  };
 
   const handleLogin = async (providerType) => {
-    const setLoading = providerType === "google" ? setGoogleLoading : setAppleLoading
-    setLoading(true)
+    const setLoading =
+      providerType === "google" ? setGoogleLoading : setAppleLoading;
+    setLoading(true);
     try {
-      const provider = providerType === "google" ? new GoogleAuthProvider() : new OAuthProvider("apple.com")
-      const result = await signInWithPopup(auth, provider)
-      const idToken = await result.user.getIdToken()
+      const provider =
+        providerType === "google"
+          ? new GoogleAuthProvider()
+          : new OAuthProvider("apple.com");
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
-      })
-      if (!res.ok) throw new Error("Login API failed")
-      const data = await res.json()
+      });
+      if (!res.ok) throw new Error("Login API failed");
+      const data = await res.json();
       // Store token in cookies
-      Cookies.set("token", data.token, { expires: 7 })
-      setOpen(false)
-      onOpenChange?.(true)
-      router.refresh()
+      Cookies.set("token", data.token, { expires: 7 });
+      setOpen(false);
+      setTimeout(() => {
+        onOpenChange?.(true);
+
+        router.refresh();
+      }, 100);
     } catch (err) {
-      console.error(`${providerType} login failed:`, err)
+      console.error(`${providerType} login failed:`, err);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
-
-
-
-
-
-
+  };
 
   const AuthContent = () => (
     <div className="space-y-6 border-0 border-none">
@@ -95,7 +100,10 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           {googleLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
           ) : (
-            <svg className="mr-3 h-5 w-5 transition-transform group-hover:scale-110" viewBox="0 0 24 24">
+            <svg
+              className="mr-3 h-5 w-5 transition-transform group-hover:scale-110"
+              viewBox="0 0 24 24"
+            >
               <path
                 fill="#4285F4"
                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -148,16 +156,12 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         </a>
       </p>
     </div>
-  )
+  );
 
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        {!autoOpen && (
-          <DrawerTrigger asChild>
-           
-          </DrawerTrigger>
-        )}
+        {!autoOpen && <DrawerTrigger asChild></DrawerTrigger>}
         <DrawerContent
           className="max-w-md mx-auto bg-white border-none"
           onEscapeKeyDown={(e) => autoOpen && e.preventDefault()}
@@ -174,7 +178,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
           </div>
         </DrawerContent>
       </Drawer>
-    )
+    );
   }
 
   return (
@@ -200,7 +204,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         </div>
       </DialogContent>
     </Dialog>
-  )
-}
+  );
+};
 
-export default ResponsiveAuthModal
+export default ResponsiveAuthModal;
