@@ -79,9 +79,9 @@ export function BottomNav() {
         className="w-full"
         classNames={{
           tabList:
-            "h-16 z-20 w-full border border-gray-300 rounded-full backdrop-blur-3xl p-1 bg-[#FFFFFF4D]",
+            "h-16 z-20 w-full border border-gray-300 rounded-full  p-1 bg-white",
           tab: "flex h-14 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-          cursor: "rounded-full bg-[#FFFFFF4D] backdrop-blur-2xl ",
+          cursor: "rounded-full bg-gray-200 backdrop-blur-2xl ",
         }}
       >
         {navItems.map((item) => (

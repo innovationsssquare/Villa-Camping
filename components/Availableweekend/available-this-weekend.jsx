@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/carousel";
 import { PropertyCard } from "@/components/Availableweekend/property-card";
 import { cn } from "@/lib/utils";
+import Weekendcard from "./Weekendcard";
 
 const locations = [
   "All",
@@ -120,7 +121,7 @@ export function AvailableThisWeekend() {
   const [searchQuery, setSearchQuery] = useState("Manali");
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-6 space-y-6 ">
+    <div className="w-full  mx-auto md:px-4 px-3 py-6 space-y-6 ">
       {/* Available This Weekend Section */}
       <div className="space-y-4">
         <h2 className="md:text-4xl md:text-center font-medium text-foreground">
@@ -150,7 +151,7 @@ export function AvailableThisWeekend() {
         <Carousel
           opts={{
             align: "start",
-            loop: false,
+           
           }}
           className="w-full"
         >
@@ -158,9 +159,9 @@ export function AvailableThisWeekend() {
             {properties.map((property) => (
               <CarouselItem
                 key={property.id}
-                className="pl-2 md:pl-4 basis-full md:basis-1/2 lg:basis-1/3 xl:basis-1/4"
+                className="pl-2 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
               >
-                <PropertyCard property={property} />
+                <Weekendcard property={property} />
               </CarouselItem>
             ))}
           </CarouselContent>
@@ -169,13 +170,6 @@ export function AvailableThisWeekend() {
         </Carousel>
 
         {/* Standard Features Section (Mobile) */}
-        <div className="md:hidden mt-8 space-y-3">
-          <h3 className="text-lg font-semibold">Standard Features</h3>
-          <p className="text-muted-foreground text-sm leading-relaxed">
-            Enjoy the best of luxury living in our private villas, with premium
-            amenities designed for your comfort and convenience.
-          </p>
-        </div>
       </div>
     </div>
   );

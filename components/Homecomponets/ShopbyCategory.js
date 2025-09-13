@@ -21,6 +21,7 @@ import {
   setSelectedCategoryname,
 } from "@/Redux/Slices/bookingSlice";
 import { useRouter } from "next/navigation";
+import { Highlighter } from "../magicui/highlighter";
 
 const ShopbyCategory = () => {
   const router = useRouter();
@@ -80,8 +81,10 @@ const ShopbyCategory = () => {
                       className="object-contain"
                     />
                   </Button>
-                  <span className="text-center md:text-sm text-xs font-medium text-gray-800">
+                  <span className="text-center md:text-sm text-xs font-medium text-white">
+                    <Highlighter action="highlight" color="#000">
                     {category?.name}
+                    </Highlighter>
                   </span>
                 </div>
               </CarouselItem>
