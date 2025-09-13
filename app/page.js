@@ -18,9 +18,9 @@ export default function Home() {
       <AvailableThisWeekend />
       <WhyChooseUs/>
       <DestinationHighlights/>
-      <Experiences/>
+      {/* <Experiences/>
       <SpecialOffers/>
-      <Testimonials/>
+      <Testimonials/> */}
 
     </main>
   );

@@ -40,8 +40,8 @@ export function Experiences() {
             Curated Experiences
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Whether you're seeking romance, family fun, adventure, or luxury, 
-            we have the perfect experience waiting for you
+            {`Whether you're seeking romance, family fun, adventure, or luxury, 
+            we have the perfect experience waiting for you`}
           </p>
         </div>
 

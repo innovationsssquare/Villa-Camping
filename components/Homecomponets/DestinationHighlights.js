@@ -108,7 +108,7 @@ export function DestinationHighlights() {
             Choose Your Destination
           </h2>
           <p className="text-xs sm:text-base md:text-sm text-gray-400 max-w-3xl mx-auto text-pretty">
-            Discover the perfect getaway in Lonavala's most beautiful hill stations
+           {` Discover the perfect getaway in Lonavala's most beautiful hill stations`}
           </p>
         </div>
 
