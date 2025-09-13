@@ -99,7 +99,7 @@ export function SpecialOffers() {
             Special Offers & Packages
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Don't miss out on these exclusive deals and seasonal packages
+           {` Don't miss out on these exclusive deals and seasonal packages`}
           </p>
         </div>
 
@@ -210,8 +210,8 @@ export function SpecialOffers() {
             Ready to Save on Your Next Getaway?
           </h3>
           <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">
-            These offers won't last forever. Book now and create unforgettable memories 
-            at unbeatable prices.
+           {` These offers won't last forever. Book now and create unforgettable memories 
+            at unbeatable prices.`}
           </p>
           <Button 
             size="lg" 

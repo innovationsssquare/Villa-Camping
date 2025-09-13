@@ -44,8 +44,8 @@ export function WhyChooseUs() {
             Why Choose The Villa Camp
           </h2>
           <p className="md:text-sm text-xs text-gray-600 max-w-3xl mx-auto">
-            We're committed to providing exceptional experiences that create
-            lasting memories
+           {` We're committed to providing exceptional experiences that create
+            lasting memories`}
           </p>
         </div>
 
