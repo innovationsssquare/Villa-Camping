@@ -123,7 +123,7 @@ const PropertyReviewCard = ({
 
         {/* Review Text */}
         <blockquote className="md:text-sm text-xs text-gray-600 dark:text-gray-300 mb-3 line-clamp-3">
-          "{review}"
+          {review}
         </blockquote>
 
         {/* User Info */}
