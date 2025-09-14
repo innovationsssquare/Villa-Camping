@@ -43,7 +43,7 @@ const destinations = [
 
 function DestinationCard({ destination }) {
   return (
-    <div className="group w-48 md:w-auto  rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 h-full border border-gray-200">
+    <div className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300  h-full border border-gray-200">
       <div className="relative md:h-56 h-36  overflow-hidden">
         <img
           src={destination.image || "/placeholder.svg"}
@@ -62,7 +62,7 @@ function DestinationCard({ destination }) {
       <div className="flex  items-center text-sm text-gray-400 mb-2">
 
        <MapPin className="w-4 h-4 mr-1 text-red-400 " />
-        <h3 className="text-lg sm:text-xl font-serif text-black ">{destination.name}</h3>
+        <h3 className="text-lg sm:text-xl  text-black ">{destination.name}</h3>
       </div>
         <p className="text-sm sm:text-base text-gray-600 mb-4 truncate">{destination.description}</p>
         <div className="flex items-center justify-between">
@@ -101,7 +101,7 @@ export function DestinationHighlights() {
   }, [])
 
   return (
-    <section className="py-4 sm:py-12 md:py-20 ">
+    <section className=" sm:py-6 md:py-12 ">
       <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
         <div className="md:text-center  sm:mb-12 md:mb-4">
           <h2 className="text-lg  sm:text-3xl md:text-4xl font-medium text-black md:mb-4 text-balance">

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import {
   Carousel,
   CarouselContent,
@@ -159,7 +159,7 @@ export function AvailableThisWeekend() {
             {properties.map((property) => (
               <CarouselItem
                 key={property.id}
-                className="pl-2 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
+                className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
               >
                 <Weekendcard property={property} />
               </CarouselItem>
@@ -170,6 +170,11 @@ export function AvailableThisWeekend() {
         </Carousel>
 
         {/* Standard Features Section (Mobile) */}
+        <div className="w-full py-2 md:py-4 flex justify-center items-center">
+          <Button size="sm" className="bg-black text-white w-1/2 md:w-60">
+            View All
+          </Button>
+        </div>
       </div>
     </div>
   );

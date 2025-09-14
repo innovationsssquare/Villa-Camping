@@ -74,7 +74,7 @@ export function WhyChooseUs() {
         </div>
 
         {/* Stats Section */}
-        <div className="md:mt-20 mt-4 bg-gray-300 border-white border rounded-3xl p-3 md:p-8">
+        <div className="md:mt-20 mt-4 bg-gray-200 border-white border rounded-3xl p-3 md:p-8">
           <div className="grid grid-cols-4 md:grid-cols-4 gap-8 text-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1 ">

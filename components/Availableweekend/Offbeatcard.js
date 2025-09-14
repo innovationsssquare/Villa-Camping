@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 
-export function Weekendcard({ property }) {
+export function Offbeatcard({ property }) {
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
@@ -88,7 +88,7 @@ export function Weekendcard({ property }) {
   return (
     <Card
       isFooterBlurred
-      className="md:w-full md:h-[400px] h-64 w-full rounded-2xl group hover:shadow-lg transition-all duration-300"
+      className="md:w-full md:h-[400px] h-80 w-64 rounded-2xl group hover:shadow-lg transition-all duration-300"
     >
       <CardHeader className="absolute z-10 md:top-3 top-0 flex-row items-start justify-between w-full md:px-3 px-1">
         {/* Rating Badge */}
@@ -248,4 +248,4 @@ export function Weekendcard({ property }) {
   );
 }
 
-export default Weekendcard;
+export default Offbeatcard;
