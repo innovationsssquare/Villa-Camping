@@ -56,7 +56,7 @@ export default function WeekendGetaway() {
     activeTab === "weekend" ? weekendDestinations : staycationDestinations;
 
   return (
-    <div className="w-full md:px-4 px-3 py-6 bg-gray-50 flex justify-center items-center flex-col">
+    <div className="w-full md:px-4 px-3 md:py-6 bg-gray-50 flex justify-center items-center flex-col">
       <div className="text-center md:py-4 py-2">
         <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-2 px-1">
           Plan your perfect getaway
@@ -74,9 +74,9 @@ export default function WeekendGetaway() {
         classNames={{
           tabList: "w-full   bg-gray-200  rounded-md p-0 mb-2",
           cursor: "w-full bg-black border border-black",
-          tab: " px-0 h-10 ",
+          tab: " px-0 md:h-10 ",
           tabContent:
-            "group-data-[selected=true]:text-white w-full flex justify-center items-center font-semibold",
+            "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
         }}
         color="primary"
         variant="light"

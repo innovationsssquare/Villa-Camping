@@ -121,7 +121,7 @@ export function AvailableThisWeekend() {
   const [searchQuery, setSearchQuery] = useState("Manali");
 
   return (
-    <div className="w-full  mx-auto md:px-4 px-3 py-6 space-y-6 ">
+    <div className="w-full  mx-auto md:px-4 px-3 md:py-6 py-3 space-y-6 ">
       {/* Available This Weekend Section */}
       <div className="space-y-4">
         <h2 className="md:text-4xl md:text-center font-medium text-foreground">

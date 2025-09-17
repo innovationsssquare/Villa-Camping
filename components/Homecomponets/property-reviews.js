@@ -165,7 +165,7 @@ export default function PropertyReviews() {
             <PropertyReviewCard key={`first-${index}`} {...review} />
           ))}
         </Marquee>
-        <Marquee reverse pauseOnHover className="[--duration:25s]">
+        <Marquee reverse pauseOnHover className="[--duration:25s] hidden">
           {secondRow.map((review, index) => (
             <PropertyReviewCard key={`second-${index}`} {...review} />
           ))}
