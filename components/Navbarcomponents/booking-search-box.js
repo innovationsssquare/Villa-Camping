@@ -35,14 +35,14 @@ export function BookingSearchBox() {
     <div
       onClick={() => router.push("/search-stay")}
       className={`
-        bg-[#FFFFFF4D] rounded-full border border-gray-300 shadow-sm p-1 flex gap-2 justify-between w-full items-center
+        bg-[#FFFFFF4D] rounded-full border border-gray-300 shadow-sm py-0.5 flex gap-2 justify-between w-full items-center
         transition-all duration-300 ease-in-out transform-gpu
-        ${isVisible ? "scale-100 opacity-100" : "scale-90 mt-1"}
+        ${isVisible ? "scale-100 opacity-100" : "scale-95 mt-1"}
       `}
     >
       <div
         className={`
-        flex-1 justify-center items-center  py-2 
+        flex-1 justify-center items-center  py-1 
         transition-all duration-300 ease-in-out
         ${isVisible ? "opacity-100" : "opacity-70"}
       `}
@@ -102,16 +102,16 @@ export function BookingSearchBox() {
       </div>
 
       {/* Search Button */}
-      <Button
+      {/* <Button
         size="icon"
         className={`
-          rounded-full bg-black hover:bg-black h-10 w-10 ml-2
+          rounded-full bg-black hover:bg-black h-8 w-8
           transition-all duration-300 ease-in-out transform-gpu
           ${isVisible ? "scale-100 opacity-100" : "scale-90 opacity-90"}
         `}
       >
         <Search className="h-4 w-4" />
-      </Button>
+      </Button> */}
     </div>
   );
 }

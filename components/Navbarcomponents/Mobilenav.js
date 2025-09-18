@@ -25,10 +25,10 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 w-full  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden ",
+        "fixed top-0 left-0 right-0 w-full  rounded-b-2xl px-4 py-1 z-50 transition-transform duration-300 ease-in-out md:hidden ",
         isVisible
           ? "translate-y-0 bg-white backdrop-blur-2xl"
-          : "-translate-y-14 bg-white"
+          : "-translate-y-12 bg-white"
       )}
     >
       <div className="flex items-center justify-between">
@@ -71,7 +71,7 @@ export function AppHeader() {
       </div>
 
       {(pathname === "/" || pathname.startsWith("/category/")) && (
-        <div className="mt-4 flex w-full justify-between items-center gap-2">
+        <div className="py-1 mt-1 flex w-full justify-between items-center gap-2">
           <div className="w-full">
             <BookingSearchBox />
           </div>

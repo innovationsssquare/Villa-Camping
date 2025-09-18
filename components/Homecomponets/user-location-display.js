@@ -98,7 +98,7 @@ export default function UserLocationDisplay() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-1 text-sm font-semibold">
+      <div className="flex items-center gap-1 text-xs font-semibold">
         <span>Loading location...</span>
         <IoMdPin className="text-gray-400" size={15} />
       </div>
@@ -115,7 +115,7 @@ export default function UserLocationDisplay() {
   }
 
   return (
-    <div className="flex items-center gap-1 text-sm font-semibold">
+    <div className="flex items-center gap-1 text-xs font-semibold">
       <span>
         {location.city || "Unknown City"}
         {location.country && location.city

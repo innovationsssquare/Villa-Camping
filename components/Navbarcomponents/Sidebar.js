@@ -102,7 +102,7 @@ export function UserSidebar() {
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" className="rounded-full">
-            <TiThMenu size={24} className="-ml-4" />
+            <TiThMenu size={15} className="-ml-4" />
             <span className="sr-only">Menu</span>
           </Button>
         </SheetTrigger>

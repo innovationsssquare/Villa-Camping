@@ -57,10 +57,10 @@ export function WhyChooseUs() {
                 key={feature.title}
                 className="text-center group hover:bg-stone-50 rounded-2xl md:p-6 p-2 transition-all duration-300"
               >
-                <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-black transition-colors duration-300">
-                  <IconComponent className="w-8 h-8  text-black group-hover:text-white transition-colors duration-300" />
+                <div className="w-10 h-10 md:h-14 md:w-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-black transition-colors duration-300">
+                  <IconComponent className="w-5 h-5  text-black group-hover:text-white transition-colors duration-300" />
                 </div>
-                <h3 className="md:text-xl text-sm font-bold text-black mb-3">
+                <h3 className="md:text-lg text-xs font-bold text-black mb-3">
                   <Highlighter action="underline" color="#000">
                     {feature.title}
                   </Highlighter>

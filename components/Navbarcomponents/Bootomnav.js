@@ -41,27 +41,27 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-5 w-5" />,
+      icon: <RiHome5Fill className="h-4 w-4" />,
       label: "Home",
     },
     {
       value: "/category/all",
-      icon: <IoGrid className="h-5 w-5" />,
+      icon: <IoGrid className="h-4 w-4" />,
       label: "category",
     },
     {
       value: "/shorts",
-      icon: <FaPlay size={24} className="h-5 w-5" />,
+      icon: <FaPlay size={24} className="h-4 w-4" />,
       label: "Favorites",
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-6 w-6" />,
+      icon: <BsFillChatSquareHeartFill className="h-4 w-4" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-5 w-5" />,
+      icon: <FaUser className="h-4 w-4" />,
       label: "Profile",
     },
   ];
@@ -69,7 +69,7 @@ export function BottomNav() {
   return (
     <div
       className={cn(
-        "fixed md:hidden bottom-1 left-0 right-0 mx-auto w-full overflow-hidden   px-2 z-40 transition-transform duration-300 ease-in-out",
+        "fixed md:hidden bottom-0.5 left-0 right-0 mx-auto w-full overflow-hidden   px-4 z-40 transition-transform duration-300 ease-in-out",
         isVisible ? "translate-y-0" : "translate-y-20"
       )}
     >
@@ -79,9 +79,9 @@ export function BottomNav() {
         className="w-full"
         classNames={{
           tabList:
-            "h-16 z-20 w-full border border-gray-300 rounded-full  p-1 bg-white",
-          tab: "flex h-14 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-          cursor: "rounded-full bg-gray-200 backdrop-blur-2xl ",
+            "h-14 z-20 w-full border border-gray-300 rounded-full  p-1 bg-white",
+          tab: "flex h-10 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+          cursor: "rounded-full border-gray-300 border backdrop-blur-2xl ",
         }}
       >
         {navItems.map((item) => (

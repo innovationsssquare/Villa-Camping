@@ -54,13 +54,13 @@ const carouselItems = [
   }
 
   return (
-    <div className="absolute md:h-40 h-28 bg-[#00000033] backdrop-blur-xs w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
+    <div className="absolute md:h-40 h-24 bg-[#00000033] backdrop-blur-xs w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
       {/* Content Overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white px-4 md:max-w-md max-w-xs flex flex-col items-center">
-          <Image className="md:w-10 md:h-10 h-6 w-6 mr-4 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/>
-          <h1 className="text-sm md:text-3xl font-bold ">{carouselItems[currentSlide].title}</h1>
-          <h2 className="md:mb-4 mb-2 text-xs md:text-base">{carouselItems[currentSlide].description}</h2>
+          <Image className="md:w-8 md:h-8 h-4 w-4  mb-2 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/>
+          <h1 className="text-xs md:text-2xl font-bold ">{carouselItems[currentSlide].title}</h1>
+          <h2 className="md:mb-4 mb-2 text-xs md:text-sm">{carouselItems[currentSlide].description}</h2>
           <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg">
             {carouselItems[currentSlide].cta}
           </button>

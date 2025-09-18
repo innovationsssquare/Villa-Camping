@@ -58,7 +58,7 @@ export default function WeekendGetaway() {
   return (
     <div className="w-full md:px-4 px-3 md:py-6 bg-gray-50 flex justify-center items-center flex-col">
       <div className="text-center md:py-4 py-2">
-        <h2 className="text-lg md:text-2xl font-bold text-gray-900 mb-2 px-1">
+        <h2 className="text-lg md:text-3xl font-bold text-gray-900 mb-2 px-1">
           Plan your perfect getaway
         </h2>
         <p className="text-gray-600 md:text-sm text-xs mb-4 px-1">

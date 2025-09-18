@@ -113,8 +113,8 @@ export default function TrendingVideos() {
                       </span>
                     </div>
                   </div>
-                  <div className="p-3">
-                    <h3 className="font-medium text-sm text-black mb-3 line-clamp-2 leading-tight">
+                  <div className="p-2">
+                    <h3 className="font-medium md:text-sm text-xs text-black mb-3 line-clamp-2 leading-tight">
                       {video.title}
                     </h3>
                     <div className="flex items-center gap-2">

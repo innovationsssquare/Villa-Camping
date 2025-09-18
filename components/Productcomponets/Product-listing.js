@@ -58,6 +58,8 @@ import {
 import PropertyCardSkeleton from "../Availableweekend/property-card-skeleton";
 import { IoSearchCircle } from "react-icons/io5";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
+import { SortDrawer } from "./SortDrawer";
+import { Separator } from "@/components/ui/separator";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
   return {
@@ -835,34 +837,21 @@ export default function PropertyFilterListing() {
         </div>
 
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <div className="sticky top-16 z-40 bg-gray-50 md:bg-white backdrop-blur-2xl  py-4 mb-6 shrink-0 border-b border-gray-200 px-3 rounded-t-2xl md:rounded-none">
-            <div className="flex md:hidden justify-between gap-2 items-center  ">
-              <div className="relative w-full  h-10 rounded-full bg-[#FFFFFF4D] border-gray-300 text-gray-900 flex justify-start items-center">
-                <Button
-                  size="icon"
-                  className={`
-          rounded-full bg-black hover:bg-black h-8 w-8 ml-2 absolute        
-        `}
-                >
-                  <Search className="h-4 w-4 text-white" />
-                </Button>
-                <Input
-                  type="text"
-                  placeholder="Search properties..."
-                  className="w-full pl-12 h-10  border rounded-full  text-sm focus:border-gray-300"
-                  value={searchQuery}
-                  onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                />
-              </div>
-
+          <div className="fixed w-11/12 transform -translate-x-1/2 -translate-y-1/2 left-1/2 border border-gray-300  -bottom-7 z-40 bg-white md:bg-white backdrop-blur-2xl  py-1 shrink-0 border-b  px-3 rounded-full md:rounded-none">
+            <div className="flex md:hidden justify-around  gap-2 items-center   ">
+              <SortDrawer />
+            |
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button
                     variant="outline"
-                    className="bg-black border-gray-300 text-white hover:bg-black"
+                    className="bg-white text-xs border-gray-200 text-gray-700 hover:bg-gray-50 h-12 px-6 rounded-full flex items-center gap-3 min-w-[120px] justify-center font-medium"
                   >
-                    <Filter className="h-4 w-4  text-white" />
-                    Filter
+                    <Filter className="h-4 w-4" />
+                    FILTER
+                    {/* { (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full" />
+                )} */}
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
@@ -969,7 +958,7 @@ export default function PropertyFilterListing() {
           </div>
 
           <div className="flex-1 overflow-hidden">
-            <div className="h-auto mt-10 md:mt-0">
+            <div className="h-auto mt-24 md:mt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
                 {dataloading
                   ? Array.from({ length: 6 }).map((_, index) => (
