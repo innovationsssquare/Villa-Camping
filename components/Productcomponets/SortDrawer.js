@@ -59,7 +59,7 @@ export function SortDrawer({ onSortChange, currentSort = "" }) {
         <DrawerHeader>
           <DrawerTitle>Sort Properties</DrawerTitle>
           <DrawerDescription>
-            Choose how you'd like to sort the properties
+           {` Choose how you'd like to sort the properties`}
           </DrawerDescription>
         </DrawerHeader>
         <ScrollArea className="h-[50vh] px-4">
