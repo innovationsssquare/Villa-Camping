@@ -56,9 +56,9 @@ export const PropertiesListDrawer = ({
   return (
     <>
       <Sheet open={isOpen} onOpenChange={onOpenChange}>
-        <SheetContent side="bottom" className="h-full fixed bottom-0 left-0 right-0 p-0">
+        <SheetContent side="bottom" className="h-full border-none fixed bottom-0 left-0 right-0 p-0 w-full overflow-hidden">
           <div className="flex flex-col h-full">
-            <SheetHeader className="p-6 pb-4 border-b">
+            <SheetHeader className="p-6 pb-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 bg-villa-primary/10 rounded-full flex items-center justify-center">
@@ -73,39 +73,17 @@ export const PropertiesListDrawer = ({
                     )}
                   </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
             </SheetHeader>
             
             {properties.length > 0 ? (
               <>
                 {/* Filters and Sort */}
-                <div className="px-6 py-4 border-b bg-gray-50">
-                  <div className="flex items-center gap-3">
-                    <div className="flex-1">
-                      <Select value={selectedType} onValueChange={setSelectedType}>
-                        <SelectTrigger className="bg-white">
-                          <Filter className="w-4 h-4 mr-2" />
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {propertyTypes.map((type) => (
-                            <SelectItem key={type.value} value={type.value}>
-                              {type.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="flex-1">
+                <div className="px-3 py-4 border-b border-gray-200 bg-gray-50 w-full">
+                  <div className="grid grid-cols-2 gap-2 items-center w-full ">
+                    <div className="w-full ">
                       <Select value={sortBy} onValueChange={(value) => setSortBy(value)}>
-                        <SelectTrigger className="bg-white">
+                        <SelectTrigger className="bg-white border-gray-200 w-full">
                           <SlidersHorizontal className="w-4 h-4 mr-2" />
                           <SelectValue />
                         </SelectTrigger>
@@ -118,13 +96,28 @@ export const PropertiesListDrawer = ({
                         </SelectContent>
                       </Select>
                     </div>
+                    <div className=" w-full">
+                      <Select value={selectedType} onValueChange={setSelectedType}>
+                        <SelectTrigger className="bg-white border-gray-200 w-full">
+                          <Filter className="w-4 h-4 mr-2" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {propertyTypes.map((type) => (
+                            <SelectItem key={type.value} value={type.value}>
+                              {type.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   
                   <div className="flex items-center justify-between mt-3">
                     <div className="text-sm text-villa-text-muted">
                       Showing {filteredProperties.length} of {totalCount} properties
                     </div>
-                    <div className="flex gap-1">
+                    {/* <div className="flex gap-1">
                       <Badge variant="secondary" className="text-xs">
                         {filteredProperties.filter(p => p.isHot).length} Hot
                       </Badge>
@@ -134,16 +127,16 @@ export const PropertiesListDrawer = ({
                       <Badge variant="secondary" className="text-xs">
                         {filteredProperties.filter(p => p.has3DTour).length} 3D Tours
                       </Badge>
-                    </div>
+                    </div> */}
                   </div>
                 </div>
                 
-                <ScrollArea className="flex-1">
-                  <div className="p-6 space-y-4">
+                <ScrollArea className="flex-1 h-[70vh] pb-8">
+                  <div className="p-3 space-y-4">
                     {filteredProperties.map((property) => (
                       <div
                         key={property.id}
-                        onClick={() => setSelectedProperty(property)}
+                        // onClick={() => setSelectedProperty(property)}
                         className="cursor-pointer"
                       >
                         <PropertyCard
@@ -156,7 +149,7 @@ export const PropertiesListDrawer = ({
                 </ScrollArea>
               </>
             ) : (
-              <div className="p-6 text-center">
+              <div className="p-6 text-center mt-40">
                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                   <MapPin className="w-6 h-6 text-gray-400" />
                 </div>

@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bed, Bath, Square, MapPin, Camera } from "lucide-react";
+import Image from "next/image";
 
 export const PropertyHoverCard = ({ property, position }) => {
   return (
@@ -14,10 +15,10 @@ export const PropertyHoverCard = ({ property, position }) => {
           position.x > window.innerWidth / 2 ? "translateX(-100%)" : "none",
       }}
     >
-      <Card className="w-72 bg-white shadow-xl rounded-xl overflow-hidden border-2 border-villa-primary/20">
+      <Card className="w-72 bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
         <CardContent className="p-0">
           <div className="relative">
-            <img
+            <Image
               src={property.image}
               alt={property.title}
               className="w-full h-32 object-cover"

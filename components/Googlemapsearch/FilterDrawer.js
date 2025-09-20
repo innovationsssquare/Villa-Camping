@@ -6,14 +6,15 @@ import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Filter, SlidersHorizontal, X, Home, Building, TreePine } from 'lucide-react';
+import { Filter, SlidersHorizontal, X, Home, Building, TreePine, HouseWifi, Tent, House, Bed } from 'lucide-react';
 
 
 
 const PROPERTY_TYPES = [
-  { id: 'villa', label: 'Villa', icon: Home },
-  { id: 'apartment', label: 'Apartment', icon: Building },
-  { id: 'house', label: 'House', icon: TreePine },
+  { id: 'villa', label: 'Villa', icon: HouseWifi },
+  { id: 'Camping', label: 'Camping', icon: Tent },
+  { id: 'Cottage', label: 'Cottage', icon: House },
+  { id: 'Hotels', label: 'Hotels', icon: Bed },
 ];
 
 const AMENITIES = [
@@ -95,9 +96,9 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh] p-0">
+      <SheetContent side="bottom" className="h-[90vh] border-none p-0">
         <div className="flex flex-col h-full">
-          <SheetHeader className="p-6 pb-4 border-b">
+          <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-left flex items-center">
                 <SlidersHorizontal className="w-5 h-5 mr-2" />
@@ -112,44 +113,20 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
                 >
                   Clear All
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
               </div>
             </div>
           </SheetHeader>
           
-          <ScrollArea className="flex-1">
+          <ScrollArea className="flex-1 h-[60vh] pb-4">
             <div className="p-6 space-y-8">
-              {/* Price Range */}
-              <div>
-                <h3 className="font-semibold mb-4 text-villa-text">Price Range</h3>
-                <div className="px-2">
-                  <Slider
-                    value={priceRange}
-                    onValueChange={setPriceRange}
-                    max={2000000}
-                    min={50000}
-                    step={10000}
-                    className="mb-4"
-                  />
-                  <div className="flex justify-between text-sm text-villa-text-muted">
-                    <span>₹{(priceRange[0] / 1000).toFixed(0)}K</span>
-                    <span>₹{(priceRange[1] / 1000000).toFixed(1)}M</span>
-                  </div>
-                </div>
-              </div>
+            
 
-              <Separator />
+         
 
               {/* Property Type */}
               <div>
                 <h3 className="font-semibold mb-4 text-villa-text">Property Type</h3>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 gap-3">
                   {PROPERTY_TYPES.map((type) => {
                     const Icon = type.icon;
                     return (
@@ -178,48 +155,11 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
 
               <Separator />
 
-              {/* Bedrooms & Bathrooms */}
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <h3 className="font-semibold mb-4 text-villa-text">Bedrooms</h3>
-                  <div className="px-2">
-                    <Slider
-                      value={bedrooms}
-                      onValueChange={setBedrooms}
-                      max={6}
-                      min={1}
-                      step={1}
-                      className="mb-2"
-                    />
-                    <div className="flex justify-between text-sm text-villa-text-muted">
-                      <span>{bedrooms[0]} BHK</span>
-                      <span>{bedrooms[1]}+ BHK</span>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-4 text-villa-text">Bathrooms</h3>
-                  <div className="px-2">
-                    <Slider
-                      value={bathrooms}
-                      onValueChange={setBathrooms}
-                      max={5}
-                      min={1}
-                      step={1}
-                      className="mb-2"
-                    />
-                    <div className="flex justify-between text-sm text-villa-text-muted">
-                      <span>{bathrooms[0]}</span>
-                      <span>{bathrooms[1]}+</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            
 
-              <Separator />
 
               {/* Locations */}
-              <div>
+              {/* <div>
                 <h3 className="font-semibold mb-4 text-villa-text">Locations</h3>
                 <div className="flex flex-wrap gap-2">
                   {LOCATIONS.map((location) => (
@@ -235,7 +175,7 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
                 </div>
               </div>
 
-              <Separator />
+              <Separator /> */}
 
               {/* Amenities */}
               <div>
@@ -262,7 +202,7 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
           </ScrollArea>
 
           {/* Apply Button */}
-          <div className="p-6 border-t bg-white">
+          <div className="p-2 border-t border-gray-200 bg-white">
             <div className="flex gap-3">
               <Button
                 variant="outline"
@@ -272,7 +212,7 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
                 Cancel
               </Button>
               <Button
-                className="flex-1 bg-villa-primary hover:bg-villa-primary/90"
+                className="flex-1 bg-black hover:bg-villa-primary/90"
                 onClick={applyFilters}
               >
                 Apply Filters

@@ -24,9 +24,12 @@ export const PropertyCountHeader = ({
     <div className="fixed bottom-0  left-0 right-0 z-20">
       <Button
         onClick={onToggleDrawer}
-        className="w-full bg-white hover:bg-gray-50 text-villa-text border border-gray-200 shadow-lg rounded-t-2xl  h-auto transition-all duration-300"
+        className="w-full bg-white relative hover:bg-gray-50 text-villa-text border border-gray-200 shadow-lg rounded-t-2xl  h-auto transition-all duration-300"
         variant="outline"
-      >
+      > 
+      <div className='w-16 h-1 bg-gray-300 absolute top-1 rounded-full'>
+
+      </div>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-villa-primary/10 rounded-full flex items-center justify-center">
@@ -44,7 +47,7 @@ export const PropertyCountHeader = ({
             </div>
           </div>
           <ChevronUp 
-            className={`w-5 h-5 text-villa-primary transition-transform duration-200 ${
+            className={`w-5 h-5 text-villa-primary hidden transition-transform duration-200 ${
               isDrawerOpen ? 'rotate-180' : ''
             }`} 
           />

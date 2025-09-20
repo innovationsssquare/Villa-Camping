@@ -62,6 +62,8 @@ import { SortDrawer } from "./SortDrawer";
 import { Separator } from "@/components/ui/separator";
 import { FaMapMarkedAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import PropertyCardnew from "../Availableweekend/PropertyCard";
+import PropertyCardSkeletonnew from "../Availableweekend/PropertyCardSkeleton";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
   return {
@@ -962,13 +964,13 @@ const router=useRouter()
 
           <div className="flex-1 overflow-hidden">
             <div className="h-auto mt-24 md:mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
                 {dataloading
                   ? Array.from({ length: 6 }).map((_, index) => (
-                      <PropertyCardSkeleton key={`skeleton-${index}`} />
+                      <PropertyCardSkeletonnew key={`skeleton-${index}`} />
                     ))
                   : data?.map((property) => (
-                      <PropertyCard key={property._id} property={property} />
+                      <PropertyCardnew key={property._id} property={property} />
                     ))}
               </div>
 

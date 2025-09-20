@@ -78,7 +78,7 @@ export function BottomNav() {
       classNames={{
         tabList:
           "h-14  z-20 w-full border border-gray-300 rounded-full   bg-white",
-        tab: "flex h-12 w-12 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+        tab: "flex  w-full h-12 w-12 flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
         cursor: "rounded-full border-gray-200 border  ",
       }}
     >
@@ -87,7 +87,7 @@ export function BottomNav() {
           key={item.value}
           title={
             <div
-              className="w-full h-full flex flex-col items-center justify-center"
+              className="h-12 w-12 flex flex-col items-center justify-center"
               onClick={() => {
                 setActiveTab(item.value);
                 if (pathname !== item.value) {
@@ -97,7 +97,7 @@ export function BottomNav() {
             >
               <div
                 className={cn(
-                  "flex   items-center justify-center rounded-full transition-colors duration-400",
+                  "flex h-full w-full   items-center justify-center rounded-full transition-colors duration-400",
 
                   item.value === "/shorts" && activeTab !== item.value
                     ? " p-3 text-white bg-black "

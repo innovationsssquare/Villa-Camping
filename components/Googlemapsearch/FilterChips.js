@@ -5,7 +5,7 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Flame, Plus, Zap, Video } from "lucide-react";
+import { Flame, Plus, Zap, Video, Bed, HouseWifi, Tent, House } from "lucide-react";
 
 export const FilterChips = ({ onFilterSelect }) => {
   const [activeFilters, setActiveFilters] = React.useState(new Set());
@@ -14,25 +14,25 @@ export const FilterChips = ({ onFilterSelect }) => {
     {
       id: "hot",
       label: "Villa",
-      icon: <Flame className="h-3 w-3 text-red-500" />,
+      icon: <HouseWifi className="h-3 w-3 text-red-500" />,
       active: activeFilters.has("hot"),
     },
     {
       id: "price-20k",
       label: "Camping",
-      icon: <Plus className="h-3 w-3 text-green-500" />,
+      icon: <Tent className="h-3 w-3 text-green-500" />,
       active: activeFilters.has("price-20k"),
     },
     {
       id: "price-2k",
       label: "Cottage",
-      icon: <Zap className="h-3 w-3 text-yellow-500" />,
+      icon: <House className="h-3 w-3 text-yellow-500" />,
       active: activeFilters.has("price-2k"),
     },
     {
       id: "trending",
       label: "Hotels",
-      icon: <Video className="h-3 w-3 text-purple-500" />,
+      icon: <Bed className="h-3 w-3 text-purple-500" />,
       active: activeFilters.has("trending"),
     },
   ];
