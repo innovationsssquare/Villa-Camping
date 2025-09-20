@@ -41,27 +41,27 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-5 w-5" />,
+      icon: <RiHome5Fill className="h-6 w-6" />,
       label: "Home",
     },
     {
       value: "/category/all",
-      icon: <IoGrid className="h-5 w-5" />,
+      icon: <IoGrid className="h-6 w-6" />,
       label: "category",
     },
     {
       value: "/shorts",
-      icon: <FaPlay size={24} className="h-5 w-5" />,
+      icon: <FaPlay size={24} className="h-6 w-6" />,
       label: "Favorites",
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
+      icon: <BsFillChatSquareHeartFill className="h-6 w-6" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-5 w-5" />,
+      icon: <FaUser className="h-6 w-6" />,
       label: "Profile",
     },
   ];
