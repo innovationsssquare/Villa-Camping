@@ -63,7 +63,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
   }
 
   return (
-    <Card className="w-full bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in max-w-md mx-auto">
+    <Card className="w-full max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[60vh] mx-auto">
       <CardContent className="p-0">
         {onClose && (
           <button

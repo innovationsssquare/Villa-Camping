@@ -169,7 +169,7 @@ export const SearchBar = ({
           onClick={onFilterClick}
           className="h-10 w-10 p-0 bg-white border-gray-200 hover:bg-gray-50"
         >
-          <Filter className="h-4 w-4 text-gray-600" />
+          <Filter className="h-4 w-4 text-gray-600 " />
         </Button>
       </form>
 

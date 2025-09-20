@@ -13,25 +13,25 @@ export const FilterChips = ({ onFilterSelect }) => {
   const filters = [
     {
       id: "hot",
-      label: "97",
+      label: "Villa",
       icon: <Flame className="h-3 w-3 text-red-500" />,
       active: activeFilters.has("hot"),
     },
     {
       id: "price-20k",
-      label: "20.2K+",
+      label: "Camping",
       icon: <Plus className="h-3 w-3 text-green-500" />,
       active: activeFilters.has("price-20k"),
     },
     {
       id: "price-2k",
-      label: "2.3K+",
+      label: "Cottage",
       icon: <Zap className="h-3 w-3 text-yellow-500" />,
       active: activeFilters.has("price-2k"),
     },
     {
       id: "trending",
-      label: "2.9K+",
+      label: "Hotels",
       icon: <Video className="h-3 w-3 text-purple-500" />,
       active: activeFilters.has("trending"),
     },
@@ -57,7 +57,7 @@ export const FilterChips = ({ onFilterSelect }) => {
               <Badge
                 variant="outline"
                 className={`villa-filter-chip cursor-pointer bg-white border border-gray-300 rounded-full px-2 p-2 shadow-2xl whitespace-nowrap flex items-center gap-2 ${
-                  filter.active ? "active" : ""
+                  filter.active ? "bg-black text-white" : ""
                 }`}
                 onClick={() => handleFilterClick(filter.id)}
               >

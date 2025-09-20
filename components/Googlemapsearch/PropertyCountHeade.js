@@ -21,10 +21,10 @@ export const PropertyCountHeader = ({
   };
 
   return (
-    <div className="absolute bottom-12 left-0 right-0 z-20">
+    <div className="fixed bottom-0  left-0 right-0 z-20">
       <Button
         onClick={onToggleDrawer}
-        className="w-full bg-white hover:bg-gray-50 text-villa-text border border-gray-200 shadow-lg rounded-t-2xl p-4 h-auto transition-all duration-300"
+        className="w-full bg-white hover:bg-gray-50 text-villa-text border border-gray-200 shadow-lg rounded-t-2xl  h-auto transition-all duration-300"
         variant="outline"
       >
         <div className="flex items-center justify-between w-full">
@@ -34,7 +34,7 @@ export const PropertyCountHeader = ({
             </div>
             <div className="text-left">
               <div className="text-lg font-bold text-villa-text">
-                {formatCount(count)} homes
+                {formatCount(count)} Properties
               </div>
               {location && (
                 <div className="text-sm text-villa-text-muted">

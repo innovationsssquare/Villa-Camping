@@ -35,7 +35,7 @@ export const PropertyMarker = ({
           bg-slate-800 text-white rounded-full px-4 py-2 shadow-lg hover:shadow-xl 
           transition-all duration-300 hover:scale-105 cursor-pointer
           flex items-center gap-2 min-w-[80px] justify-center
-          border-2 border-white
+         
         `}>
           {/* Status icon inside marker */}
           {isHot && <span className="text-orange-400">🔥</span>}

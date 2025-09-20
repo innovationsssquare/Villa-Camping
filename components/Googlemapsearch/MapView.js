@@ -239,8 +239,8 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
   }
 
   return (
-    <div className="relative w-full h-full">
-      <div ref={mapContainer} className="w-full h-full" />
+    <div className="relative w-full  h-full">
+      <div ref={mapContainer} className="w-full h-full " />
 
       {/* Hover Card */}
       {hoveredProperty && hoverPosition && (
@@ -252,7 +252,7 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
 
       {/* Property Card Overlay */}
       {selectedProperty && (
-        <div className="absolute bottom-4 left-4 right-4 z-50">
+        <div className="absolute bottom-40 left-4 right-4 z-50">
           <PropertyCard
             property={selectedProperty}
             onClose={() => {

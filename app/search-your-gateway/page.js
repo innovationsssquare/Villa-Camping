@@ -110,7 +110,7 @@ const VillaCamp = () => {
 
 
   return (
-    <div className="fixed inset-0 h-screen  ">
+    <div className="fixed inset-0 h-screen z-50 overflow-hidden ">
       {/* Header with Search */}
       <div className="absolute top-0 left-0 right-0 z-30 md:p-4 p-1 ">
         <SearchBar
@@ -129,7 +129,7 @@ const VillaCamp = () => {
 
 
       {/* Map View */}
-      <div className="h-screen">
+      <div className="h-screen flex-1">
         <MapView
           googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
           onPropertySelect={handlePropertySelect}
@@ -139,7 +139,7 @@ const VillaCamp = () => {
 
       {/* Property Count Header - Bottom clickable bar */}
  
-        <div className="absolute bottom-0 left-0 right-0 z-20">
+        <div className="fixed bottom-0 left-0 right-0 z-20">
           <PropertyCountHeader
             count={selectedLocation?.propertyCount || 0}
             location={selectedLocation?.name}
