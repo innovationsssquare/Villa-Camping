@@ -17,6 +17,7 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/date-selection" ||
       pathname === "/search-stay" ||
       pathname === "/checkout" ||
+      pathname === "/search-your-gateway" ||
       pathname.startsWith("/view-villa") ? null : (
         <Navbar />
       )}
@@ -26,6 +27,7 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/checkout" ||
       pathname === "/account" ||
+      pathname === "/search-your-gateway" ||
       pathname === "/booking" ||
       pathname.startsWith("/view-villa") ? null : (
         <AppHeader />
@@ -35,6 +37,7 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/shorts" ||
       pathname === "/date-selection" ||
       pathname === "/search-stay" ||
+      pathname === "/search-your-gateway" ||
       pathname === "/checkout" ||
       pathname.startsWith("/view-villa") ? null : (
         <BottomNav />
@@ -43,6 +46,7 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/shorts" ||
       pathname === "/date-selection" ||
       pathname === "/search-stay" ||
+      pathname === "/search-your-gateway" ||
       pathname === "/category/all" ? null : (
         <Footer />
       )}

@@ -41,27 +41,27 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-4 w-4" />,
+      icon: <RiHome5Fill className="h-5 w-5" />,
       label: "Home",
     },
     {
       value: "/category/all",
-      icon: <IoGrid className="h-4 w-4" />,
+      icon: <IoGrid className="h-5 w-5" />,
       label: "category",
     },
     {
       value: "/shorts",
-      icon: <FaPlay size={24} className="h-4 w-4" />,
+      icon: <FaPlay size={24} className="h-5 w-5" />,
       label: "Favorites",
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-4 w-4" />,
+      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-4 w-4" />,
+      icon: <FaUser className="h-5 w-5" />,
       label: "Profile",
     },
   ];
@@ -79,7 +79,7 @@ export function BottomNav() {
         className="w-full"
         classNames={{
           tabList:
-            "h-14 z-20 w-full border border-gray-300 rounded-full  p-1 bg-white",
+          "h-14 z-20 w-full border border-gray-300 rounded-full  p-1 bg-white",
           tab: "flex h-10 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
           cursor: "rounded-full border-gray-300 border backdrop-blur-2xl ",
         }}

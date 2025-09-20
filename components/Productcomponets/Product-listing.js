@@ -830,14 +830,14 @@ export default function PropertyFilterListing() {
           className={`w-full shrink-0 hidden md:block order-1 md:order-1 transition-all duration-300 ease-in-out ${
             showFilterSidebar
               ? "md:w-64 opacity-100"
-              : "md:w-0 opacity-0 overflow-hidden"
+              : "md:w-0 opacity-0 overflow-hidden -ml-8"
           }`}
         >
           <FilterSidebar />
         </div>
 
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <div className="fixed w-11/12 transform -translate-x-1/2 -translate-y-1/2 left-1/2 border border-gray-300  -bottom-7 z-40 bg-white md:bg-white backdrop-blur-2xl  py-1 shrink-0 border-b  px-3 rounded-full md:rounded-none">
+          <div className="md:sticky md:top-16 fixed w-11/12 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-7 z-40 bg-gray-50 md:bg-white backdrop-blur-2xl  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200 px-3 md:rounded-t-2xl rounded-full md:rounded-none">
             <div className="flex md:hidden justify-around  gap-2 items-center   ">
               <SortDrawer />
             |

@@ -74,13 +74,13 @@ export function WhyChooseUs() {
         </div>
 
         {/* Stats Section */}
-        <div className="md:mt-20 mt-4 bg-gray-200 border-white border rounded-3xl p-3 md:p-8">
+        <div className="md:mt-20 mt-4 bg-gray-200 border-white border rounded-3xl p-3 md:p-4">
           <div className="grid grid-cols-4 md:grid-cols-4 gap-8 text-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={500}
-                className="whitespace-pre-wraptext-lg md:text-4xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
               />
              <span>+</span>
 
@@ -91,7 +91,7 @@ export function WhyChooseUs() {
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={500}
-                className="whitespace-pre-wraptext-lg md:text-4xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
               />
              <span>+</span>
              </div>
@@ -103,7 +103,7 @@ export function WhyChooseUs() {
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={4.4}
-                className="whitespace-pre-wraptext-lg md:text-4xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
               />
              <span>+</span>
 
@@ -113,15 +113,15 @@ export function WhyChooseUs() {
               </div>
             </div>
             <div>
-              <div className="text-lg md:text-4xl font-bold text-black md:mb-2">
+              <div className="text-lg md:text-2xl font-bold text-black md:mb-2">
                 <NumberTicker
                   value={24}
-                  className="whitespace-pre-wraptext-lg md:text-4xl font-bold tracking-tighter text-black"
+                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
                 />
                 /
                 <NumberTicker
                   value={7}
-                  className="whitespace-pre-wraptext-lg md:text-4xl font-bold tracking-tighter text-black"
+                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
                 />
               </div>
               <div className="text-black  text-xs md:text-sm">
