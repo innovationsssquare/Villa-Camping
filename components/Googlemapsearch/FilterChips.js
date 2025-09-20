@@ -49,14 +49,14 @@ export const FilterChips = ({ onFilterSelect }) => {
   };
 
   return (
-    <div className="px-4 py-2">
+    <div className="px-2 py-3 ">
       <Carousel className="w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
           {filters.map((filter) => (
             <CarouselItem key={filter.id} className="pl-2 md:pl-4 basis-auto">
               <Badge
                 variant="outline"
-                className={`villa-filter-chip cursor-pointer whitespace-nowrap flex items-center gap-2 ${
+                className={`villa-filter-chip cursor-pointer bg-white border border-gray-300 rounded-full px-2 p-2 shadow-2xl whitespace-nowrap flex items-center gap-2 ${
                   filter.active ? "active" : ""
                 }`}
                 onClick={() => handleFilterClick(filter.id)}

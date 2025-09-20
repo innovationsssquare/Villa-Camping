@@ -10,7 +10,7 @@ import {
   DrawerTrigger,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -49,7 +49,7 @@ export function SortDrawer({ onSortChange, currentSort = "" }) {
       <DrawerTrigger asChild>
         <Button
           variant="outline"
-          className="bg-white text-xs border-none shadow-none text-gray-700 hover:bg-gray-50 h-12 px-6 rounded-full flex items-center gap-3 min-w-[120px] justify-center font-medium"
+          className="bg-white border text-xs border-gray-200 shadow-none text-black hover:bg-gray-50 h-10 px-6 rounded-full flex items-center gap-3  justify-center font-medium"
         >
           <ArrowUpDown className="h-4 w-4" />
           SORT

@@ -60,6 +60,8 @@ import { IoSearchCircle } from "react-icons/io5";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import { SortDrawer } from "./SortDrawer";
 import { Separator } from "@/components/ui/separator";
+import { FaMapMarkedAlt } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
   return {
@@ -307,6 +309,7 @@ export default function PropertyFilterListing() {
   const { dataloading, error, data, pagination } = useSelector(
     (state) => state.properties
   );
+const router=useRouter()
 
   useEffect(() => {
     dispatch(
@@ -837,15 +840,15 @@ export default function PropertyFilterListing() {
         </div>
 
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <div className="md:sticky md:top-16 fixed w-11/12 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-7 z-40 bg-gray-50 md:bg-white backdrop-blur-2xl  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200 px-3 md:rounded-t-2xl rounded-full md:rounded-none">
+          <div className="md:sticky md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200  md:rounded-t-2xl rounded-full md:rounded-none">
             <div className="flex md:hidden justify-around  gap-2 items-center   ">
               <SortDrawer />
-            |
+              <Button onPress={()=>router.push("/search-your-gateway")} className="rounded-full bg-white border border-gray-200 uppercase font-medium"><FaMapMarkedAlt  size={24}/>map</Button>
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button
                     variant="outline"
-                    className="bg-white text-xs border-gray-200 text-gray-700 hover:bg-gray-50 h-12 px-6 rounded-full flex items-center gap-3 min-w-[120px] justify-center font-medium"
+                    className="bg-white border text-xs border-gray-200 text-black hover:bg-gray-50  h-10 px-6 rounded-full flex items-center gap-3  justify-center font-medium"
                   >
                     <Filter className="h-4 w-4" />
                     FILTER

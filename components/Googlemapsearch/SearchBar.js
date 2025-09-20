@@ -158,7 +158,7 @@ export const SearchBar = ({
               }
               setShowSuggestions(true);
             }}
-            className="pl-10 border-0 bg-transparent focus:ring-0 text-base placeholder:text-gray-500"
+            className="pl-10 border-0 bg-transparent focus:ring-0 text-sm placeholder:text-gray-500"
           />
         </div>
 

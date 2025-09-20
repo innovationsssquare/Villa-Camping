@@ -110,7 +110,7 @@ const VillaCamp = () => {
 
 
   return (
-    <div className="fixed inset-0 h-screen  bg-gray-50">
+    <div className="fixed inset-0 h-screen  ">
       {/* Header with Search */}
       <div className="absolute top-0 left-0 right-0 z-30 md:p-4 p-1 ">
         <SearchBar
@@ -120,7 +120,7 @@ const VillaCamp = () => {
           onLocationSelect={handleLocationSelect}
         />
       {/* Filter Chips */}
-      <div className="absolute top-20 left-0 right-0 z-20">
+      <div className="absolute top-16 overflow-hidden mx-1.5 rounded-md   left-0 right-0 z-20">
         <FilterChips
           onFilterSelect={(filter) => console.log("Filter:", filter)}
         />

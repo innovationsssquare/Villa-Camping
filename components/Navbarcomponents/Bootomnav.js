@@ -41,27 +41,27 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-5 w-5" />,
+      icon: <RiHome5Fill className="h-4 w-4" />,
       label: "Home",
     },
     {
       value: "/category/all",
-      icon: <IoGrid className="h-5 w-5" />,
+      icon: <IoGrid className="h-4 w-4" />,
       label: "category",
     },
     {
       value: "/shorts",
-      icon: <FaPlay size={24} className="h-6 w-6" />,
+      icon: <FaPlay size={24} className="h-5 w-5" />,
       label: "Favorites",
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
+      icon: <BsFillChatSquareHeartFill className="h-4 w-4" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-5 w-5" />,
+      icon: <FaUser className="h-4 w-4" />,
       label: "Profile",
     },
   ];
@@ -77,9 +77,9 @@ export function BottomNav() {
       )}
       classNames={{
         tabList:
-          "h-16 z-20 w-full border border-gray-300 rounded-full   bg-white",
-        tab: "flex h-13 w-13 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-        cursor: "rounded-full border-gray-300 border backdrop-blur-2xl ",
+          "h-14  z-20 w-full border border-gray-300 rounded-full   bg-white",
+        tab: "flex h-12 w-12 w-full flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
+        cursor: "rounded-full border-gray-200 border  ",
       }}
     >
       {navItems.map((item) => (
