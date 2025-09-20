@@ -210,7 +210,7 @@ export function SearchDrawer({ isOpen, onClose, onLocationSelect, searchQuery, o
           {/* No Results */}
           {!isLoading && searchQuery && locations.length === 0 && (
             <div className="text-center py-8">
-              <div className="text-muted-foreground mb-2">No locations found for "{searchQuery}"</div>
+              <div className="text-muted-foreground mb-2">No locations found for {searchQuery}</div>
               <div className="text-sm text-muted-foreground">Try searching for Lonavala, Khandala, or Pune Hills</div>
             </div>
           )}
