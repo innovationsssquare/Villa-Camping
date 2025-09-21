@@ -9,10 +9,10 @@ import {
 } from "@/components/ui/carousel";
 import Image from "next/image";
 import Link from "next/link";
-import Banner1 from "@/public/Aboutusasset/Villabanner.png";
-import Banner2 from "@/public/Aboutusasset/Campbanner.png";
-import Banner3 from "@/public/Aboutusasset/Cottagebanner.png";
-import Banner4 from "@/public/Aboutusasset/Hotelbanner.png";
+import Banner1 from "@/public/Aboutusasset/Villabanner.jpg";
+import Banner2 from "@/public/Aboutusasset/Campbanner.jpg";
+import Banner3 from "@/public/Aboutusasset/Cottagebanner.jpg";
+import Banner4 from "@/public/Aboutusasset/Hotelbanner.jpg";
 import Autoplay from "embla-carousel-autoplay";
 
 import { useEffect, useState } from "react";
@@ -70,9 +70,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-screen h-[350px] w-full">
                 <Image
-                  src={
-                    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg"
-                  }
+                  src={Banner3}        
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
                   fill
                   className="object-fill"
@@ -83,9 +81,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-screen h-[350px] w-full">
                 <Image
-                  src={
-                    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg"
-                  }
+                  src={Banner4}
                   alt="Sewing supplies"
                   fill
                   className="object-fill"
@@ -95,7 +91,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-screen h-[350px]  w-full">
                 <Image
-                  src={Banner3}
+                  src={Banner1}
                   alt="Crafting materials"
                   fill
                   className="object-fill"
@@ -105,7 +101,7 @@ export default function Hero() {
             <CarouselItem>
               <div className="relative md:h-screen h-[350px]  w-full">
                 <Image
-                  src={Banner4}
+                  src={Banner2}
                   alt="Crafting materials"
                   fill
                   className="object-fill"

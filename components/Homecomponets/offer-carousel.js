@@ -27,6 +27,12 @@ const carouselItems = [
     cta: "Explore locations ↗",
     icon: disscount,
   },
+  {
+    title: "All-In-One Getaway Hub",
+    description: "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
+    cta: "Explore locations ↗",
+    icon: disscount,
+  },
 ];
 
 
@@ -54,7 +60,7 @@ const carouselItems = [
   }
 
   return (
-    <div className="absolute md:h-40 h-24 bg-[#00000033] backdrop-blur-xs w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
+    <div className="absolute md:h-40 h-24  w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
       {/* Content Overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white px-4 md:max-w-md max-w-xs flex flex-col items-center">

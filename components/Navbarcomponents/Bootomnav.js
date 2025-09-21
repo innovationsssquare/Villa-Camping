@@ -41,12 +41,12 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-4 w-4" />,
+      icon: <RiHome5Fill className="h-5 w-5" />,
       label: "Home",
     },
     {
       value: "/category/all",
-      icon: <IoGrid className="h-4 w-4" />,
+      icon: <IoGrid className="h-5 w-5" />,
       label: "category",
     },
     {
@@ -56,12 +56,12 @@ export function BottomNav() {
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-4 w-4" />,
+      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-4 w-4" />,
+      icon: <FaUser className="h-5 w-5" />,
       label: "Profile",
     },
   ];
@@ -80,14 +80,21 @@ export function BottomNav() {
           "h-14  z-20 w-full border border-gray-300 rounded-full   bg-white",
         tab: "flex  w-full h-12 w-12 flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
         cursor: "rounded-full border-gray-200 border  ",
+        tabContent: "group-data-[selected=true]:text-black ",
       }}
     >
       {navItems.map((item) => (
         <Tab
           key={item.value}
+          onClick={() => {
+            setActiveTab(item.value);
+            if (pathname !== item.value) {
+              router.push(item.value);
+            }
+          }}
           title={
             <div
-              className="h-12 w-12 flex flex-col items-center justify-center"
+              className="h-14 w-14  flex flex-col items-center justify-center"
               onClick={() => {
                 setActiveTab(item.value);
                 if (pathname !== item.value) {
@@ -97,17 +104,17 @@ export function BottomNav() {
             >
               <div
                 className={cn(
-                  "flex h-full w-full   items-center justify-center rounded-full transition-colors duration-400",
+                  "flex h-12 w-12   items-center justify-center rounded-full transition-colors duration-400",
 
                   item.value === "/shorts" && activeTab !== item.value
                     ? " p-3 text-white bg-black "
                     : ""
                 )}
               >
-                <span>{item.icon}</span>
+                <span> {item.icon}</span>
               </div>
 
-              {/* <span className="sr-only">{item.label}</span> */}
+              <span className="sr-only">{item.label}</span>
             </div>
           }
         >
