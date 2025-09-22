@@ -66,7 +66,7 @@ const PropertyCardnew = ({
 
   return (
     <Card
-      className={`overflow-hidden shadow-none p-0 transition-all duration-300 bg-gradient-luxury border border-gray-200 ${className}`}
+      className={`overflow-hidden shadow-none p-0 transition-all duration-300 bg-gradient-luxury border border-gray-300 ${className}`}
     >
       {/* Desktop Layout (Horizontal) */}
       <div className="hidden md:flex md:h-80">
@@ -249,7 +249,7 @@ const PropertyCardnew = ({
                 <CarouselItem key={index}>
                   <Image
                   height={50}
-                  
+                  unoptimized
                   width={50}
                     src={image}
                     alt={`${title} - Image ${index + 1}`}
@@ -364,7 +364,7 @@ const PropertyCardnew = ({
           </div>
 
           {/* Amenities */}
-          <div className="flex gap-3 mb-4 overflow-x-auto">
+          <div className="flex gap-3 mb-4 overflow-hidden">
             {amenities.map((amenity, index) => (
               <div
                 key={index}
