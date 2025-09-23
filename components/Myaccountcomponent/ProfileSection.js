@@ -4,10 +4,10 @@ import { Edit, Mail } from "lucide-react";
 const ProfileSection = ({ name, email, onEditProfile }) => {
   return (
     <div className=" px-3 ">
-      <div className="bg-white rounded-2xl  border border-gray-300">
+      <div className="bg-white rounded-2xl p-3  border border-gray-300">
         <div className="flex items-start gap-4">
           {/* Profile Avatar */}
-          <div className="w-20 h-20 flex justify-center items-center bg-amber-300 rounded-full overflow-hidden flex-shrink-0">
+          <div className="w-20 h-20 flex justify-center items-center bg-black  text-white rounded-full overflow-hidden flex-shrink-0">
             SA
           </div>
           

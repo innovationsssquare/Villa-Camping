@@ -1,7 +1,7 @@
+"use client"
+import { useToast } from "@/components/ui/toast-provider";
 import { Moon, Sun, Globe, Shield, Smartphone, CreditCard, ChevronRight } from "lucide-react";
-import Header from "@/components/Header";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 
 const SettingItem = ({ 
@@ -60,22 +60,22 @@ const SettingSection = ({ title, children }) => {
 };
 
 const Settings = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
+  const navigate = useRouter();
+  const { addToast } = useToast();
 
   const handleBackClick = () => {
-    navigate("/");
+    navigate.push("/");
   };
 
   const handleToggle = (setting, value) => {
-    toast({
+    addToast({
       title: "Setting updated",
       description: `${setting} has been ${value ? "enabled" : "disabled"}`,
     });
   };
 
   const handleSettingClick = (setting) => {
-    toast({
+    addToast({
       title: "Coming soon",
       description: `${setting} settings will be available soon`,
     });
@@ -83,11 +83,11 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto bg-background min-h-screen">
-        <Header 
+      <div className="w-full px-3 mx-auto bg-background min-h-screen">
+        {/* <Header 
           title="Settings" 
           onBackClick={handleBackClick}
-        />
+        /> */}
         
         <div className="py-section-gap">
           <SettingSection title="Appearance">

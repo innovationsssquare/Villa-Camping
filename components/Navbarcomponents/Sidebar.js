@@ -217,7 +217,7 @@ export function UserSidebar() {
 
               <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
                 <CardContent className="p-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">Rewards</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">Legal and Support</h3>
                   <div className="space-y-3">
                     <div className="flex items-center justify-between py-2">
                       <div className="flex items-center space-x-3">

@@ -11,6 +11,7 @@ import { FaPlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
 import { DiBootstrap } from "react-icons/di";
 import { IoMdBookmarks } from "react-icons/io";
+import { House } from "lucide-react";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");

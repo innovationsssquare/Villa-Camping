@@ -36,7 +36,7 @@ const AccountSection = ({ onSignOut }) => {
   const navigate = useRouter();
 
   const handleSettings = () => {
-    navigate.push("/settings");
+    navigate.push("/account/settings");
   };
 
   const handleNotifications = () => {
@@ -53,7 +53,7 @@ const AccountSection = ({ onSignOut }) => {
         ACCOUNT SETTINGS
       </h2>
 
-      <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
+      <div className="bg-white p-2 rounded-2xl border border-gray-200 overflow-hidden">
         <AccountItem
           icon={<Settings className="w-6 h-6" />}
           title="Settings"

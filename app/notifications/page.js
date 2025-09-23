@@ -128,7 +128,7 @@ const Notifications = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-md mx-auto bg-background min-h-screen">
+      <div className="w-full px-3 mx-auto bg-background min-h-screen">
         {/* <Header 
           title="Notifications" 
           onBackClick={handleBackClick}

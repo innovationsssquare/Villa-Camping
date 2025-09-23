@@ -242,7 +242,7 @@ const PropertyCardnew = ({
       {/* Mobile Layout (Vertical) */}
       <div className="md:hidden">
         {/* Image Section */}
-        <div className="relative h-64 bg-gray-100">
+        <div className="relative h-auto bg-gray-100">
           <Carousel className="w-full h-full">
             <CarouselContent>
               {propertyImages.map((image, index) => (
