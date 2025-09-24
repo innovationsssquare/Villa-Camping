@@ -27,6 +27,9 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/checkout" ||
       pathname === "/account" ||
+      pathname === "/wishlist" ||
+      pathname === "/account/settings" ||
+      pathname === "/notifications" ||
       pathname === "/search-your-gateway" ||
       pathname === "/booking" ||
       pathname.startsWith("/view-villa") ? null : (

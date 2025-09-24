@@ -1,17 +1,32 @@
-"use client"
+"use client";
+import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
+import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { useToast } from "@/components/ui/toast-provider";
-import { Moon, Sun, Globe, Shield, Smartphone, CreditCard, ChevronRight } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Moon,
+  Sun,
+  Globe,
+  Shield,
+  Smartphone,
+  CreditCard,
+  ChevronRight,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
-const SettingItem = ({ 
-  icon, title, description, value, hasToggle, isToggled, onClick, onToggle 
+const SettingItem = ({
+  icon,
+  title,
+  description,
+  value,
+  hasToggle,
+  isToggled,
+  onClick,
+  onToggle,
 }) => {
   return (
     <div className="flex items-center gap-4 p-4">
-      <div className="text-foreground">
-        {icon}
-      </div>
+      <div className="text-foreground">{icon}</div>
       <div className="flex-1">
         <h3 className="font-medium-weight text-foreground">{title}</h3>
         {description && (
@@ -22,7 +37,7 @@ const SettingItem = ({
         <button
           onClick={() => onToggle?.(!isToggled)}
           className={`relative w-12 h-6 rounded-full transition-colors ${
-            isToggled ? "bg-accent" : "bg-muted"
+            isToggled ? "bg-black" : "bg-muted"
           }`}
         >
           <div
@@ -48,14 +63,17 @@ const SettingItem = ({
 
 const SettingSection = ({ title, children }) => {
   return (
-    <div className="mb-6">
+    <>
+
       <h2 className="text-sm font-medium-weight text-muted-foreground uppercase tracking-wider mb-3 px-mobile">
         {title}
       </h2>
+    <div className="mb-6 border p-2 rounded-xl border-gray-300">
       <div className="bg-card rounded-2xl shadow-soft overflow-hidden mx-mobile">
         {children}
       </div>
     </div>
+    </>
   );
 };
 
@@ -84,24 +102,54 @@ const Settings = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="w-full px-3 mx-auto bg-background min-h-screen">
-        {/* <Header 
-          title="Settings" 
-          onBackClick={handleBackClick}
-        /> */}
-        
-        <div className="py-section-gap">
+        <section
+          className={cn(
+            " w-full sticky top-0  bg-white   px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserSidebar/>
+              Settings
+            </div>
+
+            <div className="flex items-center gap-2">
+              <NotificationSheet />
+
+              {/* <Button
+                           onClick={() => router.push("/bag")}
+                           variant="outline"
+                           size="icon"
+                           className="rounded-md  border-gray-300 relative bg-[#FFFFFF4D]"
+                         >
+                           <IoBag className="h-5 w-5" />
+                           {cartItemCount > 0 && (
+                             <Badge
+                               className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
+                               variant="default"
+                             >
+                               {cartItemCount}
+                             </Badge>
+                           )}
+                           <span className="sr-only">Shopping cart</span>
+                         </Button> */}
+            </div>
+          </div>
+        </section>
+
+        <div className="py-4">
           <SettingSection title="Appearance">
             <SettingItem
-              icon={<Moon className="w-6 h-6" />}
+              icon={<Moon className="w-6 h-6 text-gray-500" />}
               title="Dark Mode"
               description="Switch between light and dark themes"
               hasToggle
-              isToggled={false}
+              isToggled={true}
               onToggle={(value) => handleToggle("Dark Mode", value)}
             />
-            <div className="border-t border-border" />
+            <div className="border-t border-gray-200" />
             <SettingItem
-              icon={<Globe className="w-6 h-6" />}
+              icon={<Globe className="w-6 h-6 text-gray-500" />}
               title="Language"
               value="English"
               onClick={() => handleSettingClick("Language")}
@@ -110,16 +158,18 @@ const Settings = () => {
 
           <SettingSection title="Privacy & Security">
             <SettingItem
-              icon={<Shield className="w-6 h-6" />}
+              icon={<Shield className="w-6 h-6 text-gray-500" />}
               title="Two-Factor Authentication"
               description="Add an extra layer of security"
               hasToggle
               isToggled={true}
-              onToggle={(value) => handleToggle("Two-Factor Authentication", value)}
+              onToggle={(value) =>
+                handleToggle("Two-Factor Authentication", value)
+              }
             />
-            <div className="border-t border-border" />
+            <div className="border-t border-gray-200" />
             <SettingItem
-              icon={<Smartphone className="w-6 h-6" />}
+              icon={<Smartphone className="w-6 h-6 text-gray-500" />}
               title="Biometric Login"
               description="Use fingerprint or face recognition"
               hasToggle
@@ -130,7 +180,7 @@ const Settings = () => {
 
           <SettingSection title="Notifications">
             <SettingItem
-              icon={<Smartphone className="w-6 h-6" />}
+              icon={<Smartphone className="w-6 h-6 text-gray-500" />}
               title="Push Notifications"
               description="Receive notifications on your device"
               hasToggle
@@ -141,7 +191,7 @@ const Settings = () => {
 
           <SettingSection title="Payment">
             <SettingItem
-              icon={<CreditCard className="w-6 h-6" />}
+              icon={<CreditCard className="w-6 h-6 text-gray-500" />}
               title="Payment Methods"
               description="Manage your cards and payment options"
               onClick={() => handleSettingClick("Payment Methods")}

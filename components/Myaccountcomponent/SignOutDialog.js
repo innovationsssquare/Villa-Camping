@@ -16,8 +16,8 @@ const SignOutDialog = ({ open, onOpenChange, onConfirm }) => {
       <AlertDialogContent className="w-full mx-auto border-none">
         <AlertDialogHeader>
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
-              <LogOut className="w-6 h-6 text-destructive" />
+            <div className="w-12 h-12 bg-red-500/10 rounded-full flex items-center justify-center">
+              <LogOut className="w-6 h-6 text-red-500" />
             </div>
             <div>
               <AlertDialogTitle className="text-left">
@@ -26,12 +26,12 @@ const SignOutDialog = ({ open, onOpenChange, onConfirm }) => {
             </div>
           </div>
           <AlertDialogDescription className="text-left">
-            Are you sure you want to sign out of your account? You'll need to
-            sign in again to access your trips and bookings.
+           {` Are you sure you want to sign out of your account? You'll need to
+            sign in again to access your trips and bookings.`}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel className="w-full sm:w-auto">
+          <AlertDialogCancel className="w-full sm:w-auto border border-gray-300">
             Cancel
           </AlertDialogCancel>
           <AlertDialogAction

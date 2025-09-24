@@ -1,110 +1,202 @@
-"use client"
+"use client";
+import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
+import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { useToast } from "@/components/ui/toast-provider";
-import { Bell, Check, X } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@heroui/react";
+import { Bell, Check, ChevronRight, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
+// Sample notification data
+const initialNotifications = [
+  {
+    id: "1",
+    title: "Order Shipped",
+    message: "Your order #12345 has been shipped and is on its way.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
+    read: false,
+    priority: "medium",
+    type: "order",
+  },
+  {
+    id: "2",
+    title: "Payment Successful",
+    message: "Your payment of $49.99 has been processed successfully.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+    read: false,
+    priority: "medium",
+    type: "payment",
+  },
+  {
+    id: "3",
+    title: "Account Security",
+    message:
+      "We noticed a login from a new device. Please verify if this was you.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+    read: false,
+    priority: "high",
+    type: "account",
+  },
+  {
+    id: "4",
+    title: "New Feature Available",
+    message: "Check out our new wishlist feature! Save items for later.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+    read: true,
+    priority: "low",
+    type: "system",
+  },
+  {
+    id: "5",
+    title: "Special Offer",
+    message: "Enjoy 20% off your next purchase with code SPECIAL20.",
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
+    read: true,
+    priority: "medium",
+    type: "system",
+  },
+];
 
+// Helper function to format the timestamp
+function formatTimestamp(date) {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffSecs = Math.floor(diffMs / 1000);
+  const diffMins = Math.floor(diffSecs / 60);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
 
-const NotificationItem = ({ 
-  id, title, message, time, isRead, type, onMarkRead, onDelete 
-}) => {
-  const getTypeColor = () => {
-    switch (type) {
-      case "booking": return "bg-primary/10 text-primary";
-      case "payment": return "bg-success/10 text-success";
-      case "trip": return "bg-accent/10 text-accent";
-      default: return "bg-muted text-muted-foreground";
-    }
-  };
+  if (diffSecs < 60) {
+    return "just now";
+  } else if (diffMins < 60) {
+    return `${diffMins} ${diffMins === 1 ? "minute" : "minutes"} ago`;
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+  } else if (diffDays < 7) {
+    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+  } else {
+    return date.toLocaleDateString();
+  }
+}
 
-  return (
-    <div className={`p-4 rounded-xl border transition-colors ${
-      isRead ? "bg-card border-border" : "bg-primary-light/20 border-primary/20"
-    }`}>
-      <div className="flex items-start gap-3">
-        <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-          isRead ? "bg-muted" : "bg-primary"
-        }`} />
-        
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2 mb-1">
-            <h3 className="font-medium-weight text-foreground text-sm">
-              {title}
-            </h3>
-            <span className={`text-xs px-2 py-1 rounded-full ${getTypeColor()}`}>
-              {type}
-            </span>
-          </div>
-          
-          <p className="text-sm text-muted-foreground mb-2 leading-relaxed">
-            {message}
-          </p>
-          
-          <div className="flex items-center justify-between">
-            <span className="text-xs text-muted-foreground">{time}</span>
-            <div className="flex gap-2">
-              {!isRead && (
-                <button
-                  onClick={() => onMarkRead(id)}
-                  className="p-1 hover:bg-secondary rounded-lg transition-colors"
-                  aria-label="Mark as read"
-                >
-                  <Check className="w-4 h-4 text-success" />
-                </button>
-              )}
-              <button
-                onClick={() => onDelete(id)}
-                className="p-1 hover:bg-secondary rounded-lg transition-colors"
-                aria-label="Delete notification"
-              >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </button>
-            </div>
-          </div>
+// Get the appropriate icon for the notification type
+function getNotificationIcon(type) {
+  switch (type) {
+    case "order":
+      return (
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-blue-600"
+          >
+            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <path d="M16 10a4 4 0 0 1-8 0" />
+          </svg>
         </div>
-      </div>
-    </div>
-  );
-};
+      );
+    case "payment":
+      return (
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-green-600"
+          >
+            <rect x="2" y="5" width="20" height="14" rx="2" />
+            <line x1="2" y1="10" x2="22" y2="10" />
+          </svg>
+        </div>
+      );
+    case "account":
+      return (
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-red-600"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+      );
+    case "system":
+      return (
+        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-purple-600"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
+        </div>
+      );
+  }
+}
 
 const Notifications = () => {
   const navigate = useRouter();
   const { addToast } = useToast();
 
-  const notifications = [
-    {
-      id: "1",
-      title: "Booking Confirmed",
-      message: "Your booking for Cozy Mountain Cabin has been confirmed for Dec 15-18.",
-      time: "2 hours ago",
-      isRead: false,
-      type: "booking" 
-    },
-    {
-      id: "2",
-      title: "Payment Successful",
-      message: "Payment of $540 for your upcoming trip has been processed successfully.",
-      time: "1 day ago",
-      isRead: false,
-      type: "payment" 
-    },
-    {
-      id: "3",
-      title: "Trip Reminder",
-      message: "Don't forget! Your trip to Malibu starts in 3 days. Check your itinerary.",
-      time: "2 days ago",
-      isRead: true,
-      type: "trip"
-    },
-    {
-      id: "4",
-      title: "App Update",
-      message: "New features available! Update to the latest version for the best experience.",
-      time: "1 week ago",
-      isRead: true,
-      type: "system"
-    }
-  ];
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const [open, setOpen] = useState(false);
+
+  const unreadCount = notifications.filter(
+    (notification) => !notification.read
+  ).length;
+
+  const markAsRead = (id) => {
+    setNotifications((prev) =>
+      prev.map((notification) =>
+        notification.id === id ? { ...notification, read: true } : notification
+      )
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true }))
+    );
+  };
+
+  const removeNotification = (id) => {
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
+  };
 
   const handleBackClick = () => {
     navigate.push("/");
@@ -124,49 +216,101 @@ const Notifications = () => {
     });
   };
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
-
   return (
     <div className="min-h-screen bg-background">
-      <div className="w-full px-3 mx-auto bg-background min-h-screen">
-        {/* <Header 
-          title="Notifications" 
-          onBackClick={handleBackClick}
-        /> */}
-        
-        <div className="px-mobile py-section-gap">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-heading-weight text-foreground">
-              {unreadCount > 0 ? `${unreadCount} unread` : "All caught up!"}
-            </h2>
-            {notifications.length > 0 && (
-              <button className="text-sm text-accent hover:text-accent/80 transition-colors">
-                Mark all read
-              </button>
-            )}
+      <div className="w-full  mx-auto bg-background min-h-screen">
+        <section
+          className={cn(
+            " w-full sticky top-0  bg-white   px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserSidebar />
+              Notifications
+            </div>
           </div>
-          
-          {notifications.length > 0 ? (
-            <div className="space-y-3">
-              {notifications.map((notification) => (
-                <NotificationItem
-                  key={notification.id}
-                  {...notification}
-                  onMarkRead={handleMarkRead}
-                  onDelete={handleDeleteNotification}
-                />
-              ))}
+        </section>
+
+        <div className="flex-1 overflow-auto">
+          {notifications.length === 0 ? (
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
+                <Bell className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium mb-1">No notifications</h3>
+              <p className="text-gray-500">{`You're all caught up!`}</p>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <h2 className="text-xl font-heading-weight text-foreground mb-2">
-                No notifications
-              </h2>
-              <p className="text-muted-foreground">
-                You're all caught up! New notifications will appear here.
-              </p>
-            </div>
+            <ul className="divide-y divide-gray-200">
+              {notifications.map((notification) => (
+                <li
+                  key={notification.id}
+                  className={cn(
+                    "p-4 transition-colors hover:bg-gray-50",
+                    !notification.read && "bg-gray-50"
+                  )}
+                >
+                  <div className="flex items-start gap-3">
+                    {getNotificationIcon(notification.type)}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <h4
+                          className={cn(
+                            "text-sm font-medium",
+                            !notification.read && "font-semibold"
+                          )}
+                        >
+                          {notification.title}
+                        </h4>
+                        <span className="text-xs text-gray-500 whitespace-nowrap">
+                          {formatTimestamp(notification.timestamp)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {notification.message}
+                      </p>
+                      <div className="flex items-center justify-between mt-2">
+                        <Button
+                          variant="light"
+                          size="sm"
+                          className="text-xs text-[#106C83] hover:text-teal-700 hover:bg-teal-50 px-2 h-7"
+                          onPress={() => {
+                            // In a real app, this would navigate to the relevant page
+                            markAsRead(notification.id);
+                          }}
+                        >
+                          View Details
+                          <ChevronRight className="ml-1 h-3 w-3" />
+                        </Button>
+                        <div className="flex items-center gap-1">
+                          {!notification.read && (
+                            <Button
+                              variant="light"
+                              size="icon"
+                              className="h-7 w-7 text-gray-400 hover:text-[#106C83]"
+                              onPress={() => markAsRead(notification.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                              <span className="sr-only">Mark as read</span>
+                            </Button>
+                          )}
+                          <Button
+                            variant="light"
+                            size="icon"
+                            className="h-7 w-7 text-gray-400 hover:text-red-600"
+                            onPress={() => removeNotification(notification.id)}
+                          >
+                            <X className="h-4 w-4" />
+                            <span className="sr-only">Remove</span>
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>

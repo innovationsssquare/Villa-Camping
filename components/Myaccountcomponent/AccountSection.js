@@ -1,3 +1,4 @@
+import { Button } from "@heroui/react";
 import { Settings, Bell, HelpCircle, LogOut, ChevronRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -16,19 +17,21 @@ const AccountItem = ({
       : "text-gray-400 group-hover:text-accent";
 
   return (
-    <button
-      onClick={onClick}
+    <Button
+    variant="light"
+    size=""
+      onPress={onClick}
       className="w-full flex items-center gap-4 p-2  transition-colors rounded-xl group"
     >
       <div className={`${iconColor} transition-colors`}>{icon}</div>
       <div className="flex-1 text-left">
-        <h3 className={`font-medium  ${textColor}`}>{title}</h3>
+        <h3 className={`  ${textColor}`}>{title}</h3>
         {description && (
-          <p className="text-xs text-muted-foreground mt-1">{description}</p>
+          <p className="text-xs text-gray-500 mt-1">{description}</p>
         )}
       </div>
       <ChevronRight className="w-5 h-5 text-accent" />
-    </button>
+    </Button>
   );
 };
 
@@ -55,7 +58,7 @@ const AccountSection = ({ onSignOut }) => {
 
       <div className="bg-white p-2 rounded-2xl border border-gray-200 overflow-hidden">
         <AccountItem
-          icon={<Settings className="w-6 h-6" />}
+          icon={<Settings className="w-5 h-5" />}
           title="Settings"
           description="Privacy, notifications, and preferences"
           onClick={handleSettings}
@@ -64,7 +67,7 @@ const AccountSection = ({ onSignOut }) => {
         <div className="border-t border-gray-200" />
 
         <AccountItem
-          icon={<Bell className="w-6 h-6" />}
+          icon={<Bell className="w-5 h-5" />}
           title="Notifications"
           description="Manage your notification preferences"
           onClick={handleNotifications}
@@ -73,7 +76,7 @@ const AccountSection = ({ onSignOut }) => {
         <div className="border-t border-gray-200" />
 
         <AccountItem
-          icon={<HelpCircle className="w-6 h-6" />}
+          icon={<HelpCircle className="w-5 h-5" />}
           title="Help & Support"
           description="Get help and contact support"
           onClick={handleHelp}
@@ -82,7 +85,7 @@ const AccountSection = ({ onSignOut }) => {
         <div className="border-t border-gray-200" />
 
         <AccountItem
-          icon={<LogOut className="w-6 h-6" />}
+          icon={<LogOut className="w-5 h-5" />}
           title="Sign Out"
           onClick={onSignOut}
           variant="danger"

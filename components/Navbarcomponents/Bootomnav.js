@@ -35,7 +35,7 @@ export function BottomNav() {
     ) {
       setActiveTab("/category/all");
     } else {
-      setActiveTab("/"); // Or null, if you want no tab to be active on unknown pages like product details
+      setActiveTab("/"); 
     }
   }, [pathname]);
 

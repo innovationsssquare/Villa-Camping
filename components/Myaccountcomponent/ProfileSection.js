@@ -27,7 +27,7 @@ const ProfileSection = ({ name, email, onEditProfile }) => {
             </button>
             
             {/* Email */}
-            <div className="flex items-center gap-2 text-gray-400">
+            <div className="flex items-center gap-2 text-gray-500">
               <Mail className="w-4 h-4" />
               <span className="text-sm">{email}</span>
             </div>

@@ -20,7 +20,7 @@ const PrivacyPolicy = () => {
     <div className="min-h-screen bg-background">
       <div className="w-full  mx-auto bg-background min-h-screen">
         {/* Header */}
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-gray-300">
           <div className="flex items-center gap-4 px-mobile py-4">
             <button
               onClick={handleBackClick}
@@ -33,9 +33,9 @@ const PrivacyPolicy = () => {
           </div>
         </div>
 
-        <div className="px-mobile py-6 space-y-6">
+        <div className="px-2 py-2 space-y-6">
           {/* Privacy Overview Card */}
-          <Card className="animate-fade-in shadow-soft">
+          <Card className="border border-gray-300 shadow-soft">
             <CardHeader>
               <CardTitle className="text-lg">Your Privacy Matters</CardTitle>
             </CardHeader>
@@ -51,9 +51,9 @@ const PrivacyPolicy = () => {
           </Card>
 
           {/* Privacy Accordion */}
-          <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
+          <div className="" style={{ animationDelay: "0.1s" }}>
             <Accordion type="single" collapsible className="bg-card rounded-2xl shadow-soft overflow-hidden">
-              <AccordionItem value="collection" className="border-b border-border last:border-b-0">
+              <AccordionItem value="collection" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">1. Information We Collect</span>
                 </AccordionTrigger>
@@ -71,7 +71,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="usage" className="border-b border-border last:border-b-0">
+              <AccordionItem value="usage" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">2. How We Use Your Information</span>
                 </AccordionTrigger>
@@ -86,7 +86,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="sharing" className="border-b border-border last:border-b-0">
+              <AccordionItem value="sharing" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">3. Information Sharing</span>
                 </AccordionTrigger>
@@ -104,7 +104,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="security" className="border-b border-border last:border-b-0">
+              <AccordionItem value="security" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">4. Data Security</span>
                 </AccordionTrigger>
@@ -119,7 +119,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="cookies" className="border-b border-border last:border-b-0">
+              <AccordionItem value="cookies" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">5. Cookies & Tracking</span>
                 </AccordionTrigger>
@@ -137,7 +137,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="rights" className="border-b border-border last:border-b-0">
+              <AccordionItem value="rights" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">6. Your Rights</span>
                 </AccordionTrigger>
@@ -153,7 +153,7 @@ const PrivacyPolicy = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="retention" className="border-b border-border last:border-b-0">
+              <AccordionItem value="retention" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">7. Data Retention</span>
                 </AccordionTrigger>
@@ -170,11 +170,11 @@ const PrivacyPolicy = () => {
           </div>
 
           {/* Contact Card */}
-          <Card className="animate-fade-in shadow-soft" style={{ animationDelay: "0.2s" }}>
-            <CardContent className="pt-6">
+          <Card className={"border border-gray-300"} style={{ animationDelay: "0.2s" }}>
+            <CardContent className="">
               <h3 className="font-medium-weight text-foreground mb-2">Privacy Questions?</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                For any privacy-related questions or to exercise your rights, contact our Data Protection Officer at privacy@travelapp.com
+                For any privacy-related questions or to exercise your rights, contact our team
               </p>
             </CardContent>
           </Card>

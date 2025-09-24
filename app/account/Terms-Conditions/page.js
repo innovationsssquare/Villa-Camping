@@ -20,7 +20,7 @@ const TermsConditions = () => {
     <div className="min-h-screen bg-background">
       <div className="w-full mx-auto bg-background min-h-screen">
         {/* Header */}
-        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border">
+        <div className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-gray-200">
           <div className="flex items-center gap-4 px-mobile py-4">
             <button
               onClick={handleBackClick}
@@ -33,9 +33,9 @@ const TermsConditions = () => {
           </div>
         </div>
 
-        <div className="px-mobile py-6 space-y-6">
+        <div className="px-2 py-2 space-y-6">
           {/* Last Updated Card */}
-          <Card className="animate-fade-in shadow-soft">
+          <Card className="border border-gray-300">
             <CardHeader>
               <CardTitle className="text-lg">Agreement Overview</CardTitle>
             </CardHeader>
@@ -53,7 +53,7 @@ const TermsConditions = () => {
           {/* Terms Accordion */}
           <div className="animate-fade-in" style={{ animationDelay: "0.1s" }}>
             <Accordion type="single" collapsible className="bg-card rounded-2xl shadow-soft overflow-hidden">
-              <AccordionItem value="acceptance" className="border-b border-border last:border-b-0">
+              <AccordionItem value="acceptance" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">1. Acceptance of Terms</span>
                 </AccordionTrigger>
@@ -69,7 +69,7 @@ const TermsConditions = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="booking" className="border-b border-border last:border-b-0">
+              <AccordionItem value="booking" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">2. Booking & Reservations</span>
                 </AccordionTrigger>
@@ -88,7 +88,7 @@ const TermsConditions = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="payment" className="border-b border-border last:border-b-0">
+              <AccordionItem value="payment" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">3. Payment Terms</span>
                 </AccordionTrigger>
@@ -107,7 +107,7 @@ const TermsConditions = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="cancellation" className="border-b border-border last:border-b-0">
+              <AccordionItem value="cancellation" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">4. Cancellation Policy</span>
                 </AccordionTrigger>
@@ -126,7 +126,7 @@ const TermsConditions = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="liability" className="border-b border-border last:border-b-0">
+              <AccordionItem value="liability" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">5. Limitation of Liability</span>
                 </AccordionTrigger>
@@ -145,7 +145,7 @@ const TermsConditions = () => {
                 </AccordionContent>
               </AccordionItem>
 
-              <AccordionItem value="conduct" className="border-b border-border last:border-b-0">
+              <AccordionItem value="conduct" className="border-b border-gray-200 last:border-b-0">
                 <AccordionTrigger className="px-6 py-4 hover:bg-secondary/30 transition-colors">
                   <span className="font-medium-weight text-left">6. User Conduct</span>
                 </AccordionTrigger>
@@ -167,8 +167,8 @@ const TermsConditions = () => {
           </div>
 
           {/* Contact Card */}
-          <Card className="animate-fade-in shadow-soft" style={{ animationDelay: "0.2s" }}>
-            <CardContent className="pt-6">
+          <Card className="border border-gray-300" style={{ animationDelay: "0.2s" }}>
+            <CardContent className="">
               <h3 className="font-medium-weight text-foreground mb-2">Questions?</h3>
               <p className="text-sm text-muted-foreground leading-relaxed">
                 If you have any questions about these Terms & Conditions, please contact our support team.
