@@ -10,6 +10,7 @@ import { NotificationSheet } from "./Notificationsheet";
 
 import { BookingSearchBox } from "./booking-search-box";
 import UserLocationDisplay from "../Homecomponets/user-location-display";
+import { NavigationCarousel } from "../Availableweekend/NavigationCarousel";
 
 export function AppHeader() {
   const pathname = usePathname();
@@ -71,7 +72,7 @@ export function AppHeader() {
       </div>
 
       {(pathname === "/" || pathname.startsWith("/category/")) && (
-        <div className="py-1 mt-1 flex w-full justify-between items-center gap-2">
+        <div className="py-1 mt-2 flex  w-full justify-between items-center gap-2">
           <div className="w-full">
             <BookingSearchBox />
           </div>

@@ -181,7 +181,7 @@ export default function AirbnbNavbar() {
 
   return (
     <div
-      className={`fixed backdrop-blur-2xl top-0 hidden md:block left-0 right-0 z-50  bg-[#FFFFFF4D]  border-b border-gray-200 transition-all duration-300 ease-in-out ${
+      className={`fixed top-0 hidden md:block left-0 right-0 z-50  bg-white border-b border-gray-200 transition-all duration-300 ease-in-out ${
         isVisible ? (isMobile ? "h-28" : "h-44") : "h-16"
       } overflow-visible`}
     >

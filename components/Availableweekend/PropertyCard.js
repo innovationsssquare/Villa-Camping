@@ -28,7 +28,6 @@ import {
 import VideoModal from "./VideoModal";
 import Image from "next/image";
 
-
 const PropertyCardnew = ({
   title = "Paashaan - Khopoli",
   location = "Lonavala, Maharashtra",
@@ -77,8 +76,8 @@ const PropertyCardnew = ({
               {propertyImages.map((image, index) => (
                 <CarouselItem key={index}>
                   <Image
-                     height={50}
-                     width={50}
+                    height={50}
+                    width={50}
                     src={image}
                     alt={`${title} - Image ${index + 1}`}
                     className="w-full h-full object-cover"
@@ -231,7 +230,6 @@ const PropertyCardnew = ({
             </div>
           </div>
           <div className="space-y-3">
-           
             <Button className="w-full bg-black hover:bg-black text-primary-foreground font-semibold">
               View →
             </Button>
@@ -248,9 +246,9 @@ const PropertyCardnew = ({
               {propertyImages.map((image, index) => (
                 <CarouselItem key={index}>
                   <Image
-                  height={50}
-                  unoptimized
-                  width={50}
+                    height={50}
+                    unoptimized
+                    width={50}
                     src={image}
                     alt={`${title} - Image ${index + 1}`}
                     className="w-full h-full object-cover"
@@ -314,7 +312,7 @@ const PropertyCardnew = ({
                   {title}
                 </h3>
                 {isVerified && (
-                  <BadgeCheck className="text-xs text-green-500" size={14}/>
+                  <BadgeCheck className="text-xs text-green-500" size={14} />
                 )}
               </div>
               <div className="flex flex-col gap-1 text-sm text-muted-foreground">
@@ -356,7 +354,11 @@ const PropertyCardnew = ({
             </span>
             <div className="inline-flex gap-2">
               {greatFor.map((tag) => (
-                <Badge key={tag} variant="secondary" className="text-xs bg-gray-200 text-black">
+                <Badge
+                  key={tag}
+                  variant="secondary"
+                  className="text-xs bg-gray-200 text-black"
+                >
                   {tag}
                 </Badge>
               ))}
@@ -400,8 +402,11 @@ const PropertyCardnew = ({
               <div className="text-xl font-bold text-price-text">{price}</div>
             </div>
             <div className="space-y-3">
-              <Button className="w-full bg-black  text-primary-foreground font-semibold">
-               Book Now →
+              <Button
+                // onPress={() => router.push(`/view-villa/${property._id}`)}
+                className="w-full bg-black  text-primary-foreground font-semibold"
+              >
+                Book Now →
               </Button>
             </div>
           </div>

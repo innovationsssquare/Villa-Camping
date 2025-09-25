@@ -64,6 +64,7 @@ import { FaMapMarkedAlt } from "react-icons/fa";
 import { useRouter } from "next/navigation";
 import PropertyCardnew from "../Availableweekend/PropertyCard";
 import PropertyCardSkeletonnew from "../Availableweekend/PropertyCardSkeleton";
+import { NavigationCarousel } from "../Availableweekend/NavigationCarousel";
 
 const fetchProperties = async (filters, page = 1, limit = 6) => {
   return {
@@ -311,7 +312,7 @@ export default function PropertyFilterListing() {
   const { dataloading, error, data, pagination } = useSelector(
     (state) => state.properties
   );
-const router=useRouter()
+  const router = useRouter();
 
   useEffect(() => {
     dispatch(
@@ -842,10 +843,18 @@ const router=useRouter()
         </div>
 
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <div className="md:sticky md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200  md:rounded-t-2xl rounded-full md:rounded-none">
+          <NavigationCarousel />
+
+          <div className="md:sticky hidden md:block md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200  md:rounded-t-2xl rounded-full md:rounded-none">
             <div className="flex md:hidden justify-around  gap-2 items-center   ">
               <SortDrawer />
-              <Button onPress={()=>router.push("/search-your-gateway")} className="rounded-full bg-white border border-gray-200 uppercase font-medium"><FaMapMarkedAlt  size={24}/>map</Button>
+              <Button
+                onPress={() => router.push("/search-your-gateway")}
+                className="rounded-full bg-white border border-gray-200 uppercase font-medium"
+              >
+                <FaMapMarkedAlt size={24} />
+                map
+              </Button>
               <Drawer>
                 <DrawerTrigger asChild>
                   <Button
