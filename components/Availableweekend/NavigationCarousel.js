@@ -1,6 +1,6 @@
 "use client";
 import { useState, useRef, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import {
   ChevronDown,
   Filter,
@@ -105,9 +105,9 @@ export const NavigationCarousel = ({
       <div className="flex items-center gap-3 p-2 mt-1">
         {/* Fixed Filter Button */}
         <Button
-          variant="default"
-          size=""
-          onClick={handleFilterClick}
+          variant="solid"
+          size="sm"
+          onPress={handleFilterClick}
           className="flex-shrink-0 bg-black text-white hover:bg-black/90 shadow-soft"
         >
           <SlidersHorizontal className="w-4 h-4" />

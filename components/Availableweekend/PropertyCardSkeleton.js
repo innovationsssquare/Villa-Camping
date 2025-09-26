@@ -3,11 +3,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 const PropertyCardSkeletonnew = () => {
   return (
-    <Card className="overflow-hidden shadow-luxury hover:shadow-xl transition-all duration-300 bg-gradient-luxury border-0">
+    <Card className="overflow-hidden p-0 shadow-luxury hover:shadow-xl transition-all duration-300 bg-gradient-luxury border-0">
       {/* Desktop Layout (Horizontal) */}
-      <div className="hidden md:flex md:h-80">
+      <div className="hidden md:flex md:h-80 p-0">
         {/* Image Section */}
-        <div className="relative w-2/5 bg-gray-100">
+        <div className="relative w-2/5 bg-gray-100 p-0">
           <Skeleton className="w-full h-full" />
           
           {/* Badges area */}
@@ -99,10 +99,10 @@ const PropertyCardSkeletonnew = () => {
       </div>
 
       {/* Mobile Layout (Vertical) */}
-      <div className="md:hidden">
+      <div className="md:hidden p-0">
         {/* Image Section */}
-        <div className="relative h-64 bg-gray-100">
-          <Skeleton className="w-full h-full" />
+        <div className="relative h-64  ">
+          <Skeleton className="w-full h-full p-0" />
           
           {/* Badges area */}
           <div className="absolute top-4 left-4 flex gap-2">

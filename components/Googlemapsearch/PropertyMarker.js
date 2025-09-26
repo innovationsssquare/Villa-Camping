@@ -32,7 +32,7 @@ export const PropertyMarker = ({
         {/* Main price marker */}
         <div className={`
           ${getMarkerClass()} 
-          bg-slate-800 text-white rounded-full px-4 py-2 shadow-lg hover:shadow-xl 
+          bg-white text-black border border-gray-300  rounded-full px-4 py-2 shadow-lg hover:shadow-xl 
           transition-all duration-300 hover:scale-105 cursor-pointer
           flex items-center gap-2 min-w-[80px] justify-center
          
@@ -41,13 +41,13 @@ export const PropertyMarker = ({
           {isHot && <span className="text-orange-400">🔥</span>}
           {has3DTour && <span className="text-purple-400">📦</span>}
           
-          <span className="font-bold text-sm whitespace-nowrap">
-            {formatPrice(price)}
+          <span className="font-bold text-xs whitespace-nowrap">
+            ₹{formatPrice(price)}
           </span>
         </div>
         
         {/* Speech bubble tail */}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-slate-800"></div>
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-white"></div>
       </div>
     </div>
   );

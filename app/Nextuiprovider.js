@@ -5,10 +5,21 @@ import { BottomNav } from "@/components/Navbarcomponents/Bootomnav"
 import { AppHeader } from "@/components/Navbarcomponents/Mobilenav"
 import { HeroUIProvider } from "@heroui/react"
 import { usePathname } from "next/navigation"
+import SplashScreen from "@/components/Homecomponets/SplashScreen"
+import { useState } from "react"
+import {ToastProvider} from "@heroui/toast";
 
 export function NextuiProviderWrapper({ children }) {
   const pathname = usePathname()
- 
+   const [showSplash, setShowSplash] = useState(true);
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+  };
+
+  if (showSplash) {
+    return <SplashScreen onComplete={handleSplashComplete} />;
+  }
 
   return (
     <HeroUIProvider>
@@ -35,6 +46,7 @@ export function NextuiProviderWrapper({ children }) {
       pathname.startsWith("/view-villa") ? null : (
         <AppHeader />
       )}
+      <ToastProvider />
       {children}
       {pathname === "/Signin" ||
       pathname === "/shorts" ||

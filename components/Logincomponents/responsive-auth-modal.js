@@ -8,7 +8,6 @@ import {
 import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   Drawer,
@@ -22,6 +21,7 @@ import { LogIn, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Logoicon from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
+import { addToast, Button } from "@heroui/react";
 
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -59,7 +59,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idToken }),
       });
-      if (!res.ok) throw new Error("Login API failed");
+      if (!res.ok) throw new Error("Login failed");
       const data = await res.json();
       // Store token in cookies
       Cookies.set("token", data.token, { expires: 7 });
@@ -69,6 +69,11 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
         window.location.href = returnUrl;
       }, 100);
     } catch (err) {
+      addToast({
+        title: "login failed",
+        description: err,
+        color: "Danger",
+      });
       console.error(`${providerType} login failed:`, err);
     } finally {
       setLoading(false);

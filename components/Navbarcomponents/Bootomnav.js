@@ -57,7 +57,7 @@ export function BottomNav() {
     },
     {
       value: "/booking",
-      icon: <BsFillChatSquareHeartFill className="h-5 w-5" />,
+      icon: <IoMdBookmarks className="h-6 w-6" />,
       label: "Recycle",
     },
     {
