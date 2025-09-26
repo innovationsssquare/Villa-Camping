@@ -61,7 +61,6 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       });
       if (!res.ok) throw new Error("Login failed");
       const data = await res.json();
-      // Store token in cookies
       Cookies.set("token", data.token, { expires: 7 });
       setOpen(false);
       setTimeout(() => {
@@ -71,8 +70,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
     } catch (err) {
       addToast({
         title: "login failed",
-        description: err,
-        color: "Danger",
+        description: `${providerType} login failed please try again`,
+        color: "danger",
       });
       console.error(`${providerType} login failed:`, err);
     } finally {
@@ -165,7 +164,17 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        {!autoOpen && <DrawerTrigger asChild></DrawerTrigger>}
+        {!autoOpen && (
+          <DrawerTrigger asChild>
+            <Button
+              variant="outline"
+              className="group hidden relative overflow-hidden bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:from-blue-100 hover:to-indigo-100 transition-all duration-300"
+            >
+              <LogIn className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+              Sign In
+            </Button>
+          </DrawerTrigger>
+        )}
         <DrawerContent
           className="max-w-md mx-auto bg-white border-none"
           onEscapeKeyDown={(e) => autoOpen && e.preventDefault()}

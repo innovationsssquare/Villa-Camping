@@ -31,7 +31,6 @@ import { NotificationSheet } from "@/components/Navbarcomponents/Notificationshe
 import { IoBag } from "react-icons/io5";
 import { IoMdBookmarks } from "react-icons/io";
 import { useRouter } from "next/navigation";
-// import heroImage from "@/assets/hotel-hero.jpg";
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = (status) => {
@@ -330,7 +329,7 @@ export default function BookingScreen() {
 
   return (
     <div className="min-h-screen bg-gradient-surface ">
-      {/* Hero Header */}
+    
       <header
         className={cn(
           " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
