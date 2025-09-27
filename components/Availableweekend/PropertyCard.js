@@ -27,6 +27,7 @@ import {
 } from "lucide-react";
 import VideoModal from "./VideoModal";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 
 const PropertyCardnew = ({
   title = "Paashaan - Khopoli",
@@ -44,7 +45,7 @@ const PropertyCardnew = ({
   className = "",
 }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
-
+const router=useRouter()
   const propertyImages = [
     "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
     ,
@@ -403,7 +404,7 @@ const PropertyCardnew = ({
             </div>
             <div className="space-y-3">
               <Button
-                // onPress={() => router.push(`/view-villa/${property._id}`)}
+                onClick={() => router.push(`/view-villa/688a04a405e8c738822b9de0`)}
                 className="w-full bg-black  text-primary-foreground font-semibold"
               >
                 Book Now →

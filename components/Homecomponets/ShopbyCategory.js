@@ -81,10 +81,11 @@ const ShopbyCategory = () => {
                       className="object-contain"
                     />
                   </Button>
-                  <span className="text-center md:text-sm text-xs font-medium text-white">
-                    <Highlighter action="highlight" color="#000">
+                  <span className="text-center md:text-sm text-xs font-medium text-black">
                     {category?.name}
-                    </Highlighter>
+                    {/* <Highlighter action="highlight" color="#000">
+                    {category?.name}
+                    </Highlighter> */}
                   </span>
                 </div>
               </CarouselItem>
