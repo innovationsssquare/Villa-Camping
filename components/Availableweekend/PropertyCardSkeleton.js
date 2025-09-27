@@ -180,12 +180,6 @@ const PropertyCardSkeletonnew = () => {
               <Skeleton className="h-6 w-24" />
             </div>
             <div className="space-y-3">
-              <div className="p-2 border border-gray-200 rounded-md">
-                <div className="flex items-center justify-between">
-                  <Skeleton className="h-4 w-16" />
-                  <Skeleton className="h-4 w-4" />
-                </div>
-              </div>
               <Skeleton className="h-10 w-full rounded-md" />
             </div>
           </div>

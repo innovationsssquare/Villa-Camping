@@ -21,7 +21,7 @@ import { MyBooking } from "@/lib/API/User/User";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, Tab } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
@@ -329,7 +329,6 @@ export default function BookingScreen() {
 
   return (
     <div className="min-h-screen bg-gradient-surface ">
-    
       <header
         className={cn(
           " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
@@ -382,83 +381,99 @@ export default function BookingScreen() {
       </div>
 
       {/* Content */}
-      <div className="w-full mx-auto ">
-        <Tabs defaultValue="all" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-8 bg-gray-200 shadow-card">
-            <TabsTrigger
-              value="all"
-              className="data-[state=active]:bg-black/80 data-[state=active]:text-white"
-            >
-              All ({getTabCount("all")})
-            </TabsTrigger>
-            <TabsTrigger
-              value="upcoming"
-              className="data-[state=active]:bg-black/80 data-[state=active]:text-white"
-            >
-              Upcoming ({getTabCount("upcoming")})
-            </TabsTrigger>
-            <TabsTrigger
-              value="completed"
-              className="data-[state=active]:bg-black data-[state=active]:text-white"
-            >
-              Completed ({getTabCount("completed")})
-            </TabsTrigger>
-          </TabsList>
-
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-flex items-center gap-2 text-muted-foreground">
-                <div className="w-5 h-5 border-2 border-hotel-primary border-t-transparent rounded-full animate-spin" />
-                Loading your bookings...
+      <div className="w-full mx-auto py-2">
+        <Tabs
+          aria-label="Options"
+          color="primary"
+          variant="bordered"
+          className="w-full md:w-1/2"
+          classNames={{
+            tabList: "w-full   bg-gray-200  rounded-md p-0 mb-2",
+            cursor: "w-full bg-black border border-black",
+            tab: " px-0 md:h-10 ",
+            tabContent:
+              "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
+          }}
+        
+        >
+          <Tab
+            key="photos"
+            title={
+              <div className="flex items-center space-x-2">
+                <span>All</span>
               </div>
-            </div>
-          ) : (
-            <>
-              <TabsContent value="all" className="space-y-6">
-                {filtered.length === 0 ? (
-                  <div className="text-center py-16">
-                    <IoMdBookmarks className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                    <h3 className="text-xl font-semibold mb-2">
-                      No bookings found
-                    </h3>
-                    <p className="text-muted-foreground mb-6">
-                      Start planning your next getaway!
-                    </p>
-                    <Button
-                      onClick={() => router.push("/category/all")}
-                      variant="luxury"
-                      size="lg"
-                      className="bg-black/80 text-white"
-                    >
-                      Explore
-                    </Button>
-                  </div>
-                ) : (
-                  filtered.map((booking) => (
-                    <BookingCard key={booking._id} booking={booking} />
-                  ))
-                )}
-              </TabsContent>
-
-              <TabsContent value="upcoming" className="space-y-6">
-                {filtered
-                  .filter((b) => new Date(b.CheckinDate) > new Date())
-                  .map((booking) => (
-                    <BookingCard key={booking._id} booking={booking} />
-                  ))}
-              </TabsContent>
-
-              <TabsContent value="completed" className="space-y-6">
-                {filtered
-                  .filter((b) => new Date(b.CheckOutDate) < new Date())
-                  .map((booking) => (
-                    <BookingCard key={booking._id} booking={booking} />
-                  ))}
-              </TabsContent>
-            </>
-          )}
+            }
+          />
+          <Tab
+            key="music"
+            title={
+              <div className="flex items-center space-x-2">
+                <span>Upcoming</span>
+              </div>
+            }
+          />
+          <Tab
+            key="videos"
+            title={
+              <div className="flex items-center space-x-2">
+                <span>Completed</span>
+              </div>
+            }
+          />
         </Tabs>
       </div>
     </div>
   );
 }
+
+// {loading ? (
+//   <div className="text-center py-12">
+//     <div className="inline-flex items-center gap-2 text-muted-foreground">
+//       <div className="w-5 h-5 border-2 border-hotel-primary border-t-transparent rounded-full animate-spin" />
+//       Loading your bookings...
+//     </div>
+//   </div>
+// ) : (
+//   <>
+//     <TabsContent value="all" className="space-y-6">
+//       {filtered.length === 0 ? (
+//         <div className="text-center py-16">
+//           <IoMdBookmarks className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+//           <h3 className="text-xl font-semibold mb-2">
+//             No bookings found
+//           </h3>
+//           <p className="text-muted-foreground mb-6">
+//             Start planning your next getaway!
+//           </p>
+//           <Button
+//             onClick={() => router.push("/category/all")}
+//             variant="luxury"
+//             size="lg"
+//             className="bg-black/80 text-white"
+//           >
+//             Explore
+//           </Button>
+//         </div>
+//       ) : (
+//         filtered.map((booking) => (
+//           <BookingCard key={booking._id} booking={booking} />
+//         ))
+//       )}
+//     </TabsContent>
+
+//     <TabsContent value="upcoming" className="space-y-6">
+//       {filtered
+//         .filter((b) => new Date(b.CheckinDate) > new Date())
+//         .map((booking) => (
+//           <BookingCard key={booking._id} booking={booking} />
+//         ))}
+//     </TabsContent>
+
+//     <TabsContent value="completed" className="space-y-6">
+//       {filtered
+//         .filter((b) => new Date(b.CheckOutDate) < new Date())
+//         .map((booking) => (
+//           <BookingCard key={booking._id} booking={booking} />
+//         ))}
+//     </TabsContent>
+//   </>

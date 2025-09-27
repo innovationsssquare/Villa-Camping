@@ -7,9 +7,14 @@ import Script from "next/script";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { Suspense } from "react";
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
+import { Inter } from "next/font/google";
 
+const geist = Inter({
+  subsets: ["latin"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+});
 export const metadata = {
-  title: "THE VILLA CAMP",
+  title: "Thevillacamp : your one-stop destination for booking the best villas in lonavala!",
   description:
     "Discover the perfect escape with ThevillaCamp, your one-stop destination for booking the best villas, campsites, cottages, and hotels across Lonavala, Malavli, Kamshet, and Pawna Lake. Whether you're planning a relaxing family vacation, a romantic weekend, or an adventurous trip with friends, we offer handpicked stays nestled in nature with modern comforts",
 };
@@ -29,13 +34,7 @@ export default function RootLayout({ children }) {
           strategy="lazyOnload"
         />
 
-        <body
-          className={``}
-          style={{
-            fontFamily:
-              'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-          }}
-        >
+        <body className={geist.className}>
           <Suspense
             fallback={
               <div className="h-screen w-full flex justify-center items-center">

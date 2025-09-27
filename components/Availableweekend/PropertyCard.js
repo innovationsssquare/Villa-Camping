@@ -91,13 +91,13 @@ const PropertyCardnew = ({
 
           <div className="absolute top-4 left-4 flex gap-2">
             {isBestRated && (
-              <Badge className="bg-card text-primary font-semibold">
+              <Badge className="bg-card text-primary font-normal">
                 <Star className="w-3 h-3 mr-1" />
                 Best Rated
               </Badge>
             )}
             {isLuxury && (
-              <Badge className="bg-primary text-primary-foreground font-semibold">
+              <Badge className="bg-primary text-primary-foreground font-light">
                 Luxury
               </Badge>
             )}
