@@ -1,7 +1,6 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { Card, CardHeader, CardFooter, Image, Button } from "@heroui/react";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Heart,
   Star,
@@ -14,16 +13,23 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
+import Image from "next/image";
 
-export function Weekendcard({ property }) {
+
+
+
+
+
+export function PropertyCard({ property, onBookNow }) {
   const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const [isMobile, setIsMobile] = useState(false);
-  const [isAutoPlaying, setIsAutoPlaying] = useState(true);
-  const router = useRouter();
+
+  // Use the imported hero image as fallback
+  const displayImages = property.images || [property.image || propertyHero];
+
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -31,15 +37,8 @@ export function Weekendcard({ property }) {
 
     checkMobile();
     window.addEventListener("resize", checkMobile);
-
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  useEffect(() => {
-    if (!isMobile || !property?.images || property?.images?.length <= 1) {
-      return;
-    }
-  }, [isMobile, property?.images]);
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
@@ -57,7 +56,7 @@ export function Weekendcard({ property }) {
     const isLeftSwipe = distance > 50;
     const isRightSwipe = distance < -50;
 
-    if (isLeftSwipe && currentImageIndex < property?.images?.length - 1) {
+    if (isLeftSwipe && currentImageIndex < displayImages.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
     if (isRightSwipe && currentImageIndex > 0) {
@@ -66,7 +65,7 @@ export function Weekendcard({ property }) {
   };
 
   const nextImage = () => {
-    if (currentImageIndex < property?.images?.length - 1) {
+    if (currentImageIndex < displayImages.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
   };
@@ -83,169 +82,172 @@ export function Weekendcard({ property }) {
 
   useEffect(() => {
     setCurrentImageIndex(0);
-  }, [property?.id]);
+  }, [property._id]);
+
+  const handleBookNow = () => {
+    if (onBookNow) {
+      onBookNow(property._id);
+    }
+  };
 
   return (
-    <Card
-      isFooterBlurred
-      className="md:w-full md:h-[400px] h-64 w-full rounded-2xl group hover:shadow-lg transition-all duration-300"
-    >
-      <CardHeader className="absolute z-10 md:top-3 top-0 flex-row items-start justify-between w-full md:px-3 px-1">
+    <Card className="relative overflow-hidden p-0   transition-all duration-300 ease-smooth group rounded-2xl border border-gray-300  w-full mx-auto">
+      {/* Card Header with Rating and Like Button */}
+      <CardHeader className="absolute z-20 top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 flex flex-row items-start justify-between p-0">
         {/* Rating Badge */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
-          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-          <span className="md:text-sm text-xs font-medium text-black">
-            {property?.rating}
+        <div className="bg-white/95 backdrop-blur-sm rounded-full px-2 md:px-3 py-1 md:py-1.5 flex items-center gap-1 md:gap-1.5 shadow-lg">
+          <Star className="h-2.5 w-2.5 md:h-3 md:w-3 fill-rating-star text-rating-star" />
+          <span className="text-xs md:text-sm font-medium text-foreground">
+            {property.rating}
           </span>
         </div>
 
-        {/* Heart Icon */}
+        {/* Heart Button */}
         <Button
-          isIconOnly
-          variant="flat"
-          className="bg-white/50 backdrop-blur-sm hover:bg-white rounded-full md:h-8 md:w-8  "
-          onPress={() => setIsLiked(!isLiked)}
+          size="sm"
+          variant="secondary"
+          className="bg-white/80 backdrop-blur-sm hover:bg-white/95 rounded-full h-6 w-6 md:h-8 md:w-8 p-0 border-0 shadow-lg"
+          onClick={() => setIsLiked(!isLiked)}
         >
           <Heart
             className={cn(
-              "h-4 w-4 transition-colors duration-200",
-              isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
+              "h-3 w-3 md:h-4 md:w-4 transition-all duration-200 ease-bounce",
+              isLiked ? "fill-heart-red text-heart-red" : "text-gray-600"
             )}
           />
         </Button>
       </CardHeader>
 
+      {/* Image Carousel */}
       <div
-        className="relative w-full h-full overflow-hidden"
+        className="relative w-full h-32 md:h-72 overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
         <Image
-          removeWrapper
-          alt={`${property?.name} - Image ${currentImageIndex + 1}`}
-          className="z-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          src={
-            property?.images?.[currentImageIndex] ||
-            property?.image ||
-            "/placeholder.svg"
-          }
+        height={50}
+        width={50}
+        unoptimized
+          alt={`${property.name} - Image ${currentImageIndex + 1}`}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-smooth"
+          src={displayImages[currentImageIndex]}
         />
 
-        {property?.images && property?.images?.length > 1 && (
+        {/* Navigation Arrows */}
+        {displayImages.length > 1 && (
           <>
             <Button
-              isIconOnly
-              variant="flat"
               size="sm"
+              variant="secondary"
               className={cn(
-                "absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-                currentImageIndex === 0 && "opacity-0 pointer-events-none"
+                "absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-backdrop-blur/80 hover:bg-backdrop-blur rounded-full h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                currentImageIndex === 0 && "pointer-events-none"
               )}
-              onPress={prevImage}
+              onClick={prevImage}
             >
-              <ChevronLeft className="h-4 w-4 text-black" />
+              <ChevronLeft className="h-4 w-4 text-foreground" />
             </Button>
 
             <Button
-              isIconOnly
-              variant="flat"
               size="sm"
+              variant="secondary"
               className={cn(
-                "absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity duration-200",
-                currentImageIndex === property?.images?.length - 1 &&
-                  "opacity-0 pointer-events-none"
+                "absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-backdrop-blur/80 hover:bg-backdrop-blur rounded-full h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200",
+                currentImageIndex === displayImages.length - 1 && "pointer-events-none"
               )}
-              onPress={nextImage}
+              onClick={nextImage}
             >
-              <ChevronRight className="h-4 w-4 text-black" />
+              <ChevronRight className="h-4 w-4 text-foreground" />
             </Button>
           </>
         )}
 
-        {property?.images && property?.images?.length > 1 && (
-          <div className="absolute md:top-4 top-2 left-1/2 -translate-x-1/2 z-20 flex gap-1">
-            {property?.images.map((_, index) => (
+        {/* Image Indicators */}
+        {displayImages.length > 1 && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-1.5">
+            {displayImages.map((_, index) => (
               <Button
                 key={index}
-                isIconOnly
                 size="sm"
-                variant="flat"
+                variant="secondary"
                 className={cn(
-                  "w-2 h-2 min-w-2 rounded-full transition-all duration-200 p-0",
+                  "w-2 h-2 min-w-0 rounded-full transition-all duration-200 p-0 border-0",
                   index === currentImageIndex
-                    ? "bg-white"
-                    : "bg-white/50 hover:bg-white/70"
+                    ? "bg-backdrop-blur"
+                    : "bg-backdrop-blur/50 hover:bg-backdrop-blur/70"
                 )}
-                onPress={() => goToImage(index)}
+                onClick={() => goToImage(index)}
               />
             ))}
           </div>
         )}
+
+        {/* Best Rated Badge */}
+        {property.bestRated && (
+          <div className="absolute bottom-3 right-3 bg-white text-card-text-light text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
+            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+            Best Rated
+          </div>
+        )}
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-overlay" />
       </div>
 
-      {/* Best Rated Badge */}
-      {property?.bestRated && (
-        <div className="absolute bottom-20 right-3 bg-black/80 text-white text-xs px-2 py-1 rounded flex items-center gap-1 z-10">
-          <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-          Best Rated
+      {/* Card Content */}
+      <CardContent className="md:p-4   p-1 -mt-6 md:space-y-3 space-y-1">
+        {/* Property Name */}
+        <h3 className="font-semibold md:text-lg text-sm text-foreground leading-tight">
+          {property.name}
+        </h3>
+
+        {/* Location */}
+        <div className="flex items-center gap-2 text-card-text-muted">
+          <MapPin className="h-4 w-4" />
+          <span className="md:text-sm text-xs">{property.location.addressLine}</span>
         </div>
-      )}
 
-      <CardFooter className="absolute bg-black/60 bottom-0 z-10 border-t-1 border-white/20 justify-between h-14 md:h-auto">
-        <div className="flex flex-col gap-1 flex-grow">
-          {/* Property Name */}
-          <h3 className="text-white font-semibold md:text-lg text-xs leading-tight">
-            {property?.name}
-          </h3>
-
-          {/* Location */}
-          <div className="flex items-center gap-1 text-white/80">
-            <MapPin className="h-3 w-3" />
-            <span className="text-xs">{property?.location?.addressLine}</span>
+        {/* Property Details */}
+        <div className="flex items-center gap-4 md:text-sm text-xs text-card-text-muted">
+          <div className="flex items-center gap-1">
+            <span>Up to {property.maxCapacity} Guests</span>
           </div>
-
-          {/* Property Details */}
-          <div className="md:flex hidden items-center gap-3 text-xs text-white/70">
-            <div className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              <span>Upto {property?.maxCapacity} Guests</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Bed className="h-3 w-3" />
-              <span>{property?.rooms} Rooms</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Bath className="h-3 w-3" />
-              <span>{property?.baths} Baths</span>
-            </div>
+          <div className="flex items-center gap-1">
+            <span>{property.rooms} Rooms</span>
           </div>
+          <div className="flex items-center gap-1">
+            <span>{property.baths} Baths</span>
+          </div>
+        </div>
 
-          {/* Pricing */}
-          <div className="flex items-center gap-2 mt-1">
-            <span className="text-lg font-bold text-white">
-              ₹{property?.basePricePerNight?.toLocaleString()}
-            </span>
-            {property?.basePricePerNight && (
-              <span className="text-xs text-white/60 line-through">
+        {/* Pricing and Book Button */}
+        <div className="flex items-end justify-between pt-2">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-bold text-foreground">
                 ₹{property?.basePricePerNight?.toLocaleString()}
               </span>
-            )}
+              {property?.originalPrice && (
+                <span className="text-sm text-card-text-muted line-through">
+                  ₹{property?.originalPrice?.toLocaleString()}
+                </span>
+              )}
+            </div>
+            <span className="text-xs text-card-text-muted">For Per Night + Taxes</span>
           </div>
-          <span className="text-xs text-white/60">For Per Night + Taxes</span>
-        </div>
 
-        <Button
-          onPress={() => router.push(`/view-villa/${property._id}`)}
-          size="sm"
-          radius="full"
-          className="bg-transparent text-sm font-bold border border-white text-white hover:bg-white/90 transition-all duration-200 absolute md:right-6 md:bottom-6 right-3 bottom-3"
-        >
-          Book Now
-        </Button>
-      </CardFooter>
+          {/* <Button
+            onClick={handleBookNow}
+            className=" text-black bg-white border text-xs font-semibold hover:shadow-lg transition-all duration-200 ease-bounce rounded-md px-6"
+          >
+            Book Now
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </Button> */}
+        </div>
+      </CardContent>
     </Card>
   );
 }
 
-export default Weekendcard;
+export default PropertyCard;

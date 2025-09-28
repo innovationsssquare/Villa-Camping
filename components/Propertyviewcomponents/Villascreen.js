@@ -81,6 +81,7 @@ import Reviews from "./Villaview/reviews";
 import ImageCarousel from "./Villaview/image-carousel";
 import { Separator } from "@/components/ui/separator";
 import GoogleMap from "./google-map";
+import Image from "next/image";
 
 const amenityIcons = {
   WiFi: Wifi,
@@ -205,7 +206,7 @@ export default function Villascreen() {
             {villa?.images.map((image, index) => (
               <CarouselItem key={index}>
                 <div className="relative h-80">
-                  <img
+                  <Image
                     src={image || "/placeholder.svg"}
                     alt={villa?.name}
                     width={90}

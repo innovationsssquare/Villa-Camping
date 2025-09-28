@@ -108,7 +108,7 @@ export default function GoogleMap({
 
   return (
     <div className={className}>
-      <div ref={mapRef} className="w-full h-full rounded-lg" />
+      <div ref={mapRef} className="w-full h-full  rounded-lg" />
     </div>
   )
 }
