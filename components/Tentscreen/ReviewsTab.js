@@ -86,7 +86,7 @@ const ReviewsTab = () => {
             </DrawerTrigger>
             <DrawerContent>
               <DrawerHeader>
-                <DrawerTitle >All Reviews ({mockReviews.length})</DrawerTitle>
+                <DrawerTitle>All Reviews ({mockReviews.length})</DrawerTitle>
               </DrawerHeader>
               <div className="px-4 pb-4 max-h-96 overflow-y-auto">
                 <div className="space-y-4">

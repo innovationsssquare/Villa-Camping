@@ -104,7 +104,7 @@ export function DestinationHighlights() {
     <section className=" sm:py-6 md:py-12 ">
       <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
         <div className="text-center  sm:mb-12 md:mb-4">
-          <h2 className="text-lg  sm:text-3xl md:text-4xl  text-black md:mb-4 text-balance">
+        <h2 className="md:text-4xl text-center font-medium text-foreground">
             Choose Your Destination
           </h2>
           <p className="text-xs sm:text-base md:text-sm text-gray-400 max-w-3xl mx-auto text-pretty">

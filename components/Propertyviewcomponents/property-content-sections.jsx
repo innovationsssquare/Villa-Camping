@@ -141,7 +141,7 @@ export default function PropertyContentSections() {
     <div className="w-full space-y-12">
       {/* Highlights Section */}
       <section
-        id="highlights"
+        id="highlightss"
         className="scroll-mt-32 min-h-[300px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
@@ -184,7 +184,7 @@ export default function PropertyContentSections() {
 
       {/* Refund Policy Section */}
       <section
-        id="refund-policy"
+        id="refund-policyy"
         className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
@@ -225,7 +225,7 @@ export default function PropertyContentSections() {
 
       {/* Spaces Section */}
       <section
-        id="spaces"
+        id="spacess"
         className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
@@ -289,7 +289,7 @@ export default function PropertyContentSections() {
 
       {/* Reviews Section */}
       <section
-        id="reviews"
+        id="reviewss"
         className="scroll-mt-32 min-h-[600px] transition-all duration-500 ease-out"
       >
         <div className="flex items-center justify-between mb-6">
@@ -357,7 +357,7 @@ export default function PropertyContentSections() {
 
       {/* Amenities Section */}
       <section
-        id="amenities"
+        id="amenitiess"
         className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-3 transition-all duration-300">
@@ -385,7 +385,7 @@ export default function PropertyContentSections() {
 
       {/* Location Section */}
       <section
-        id="location"
+        id="locationn"
         className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
@@ -423,7 +423,7 @@ export default function PropertyContentSections() {
 
       {/* FAQs Section */}
       <section
-        id="faqs"
+        id="faqss"
         className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out"
       >
         <h2 className="text-lg font-bold text-black mb-6 transition-all duration-300">

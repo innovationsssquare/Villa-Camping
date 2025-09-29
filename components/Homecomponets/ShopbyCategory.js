@@ -49,7 +49,7 @@ const ShopbyCategory = () => {
   return (
     <section className="w-full relative rounded-t-3xl bg-white md:py-12 py-3 overflow-hidden">
       <div className="mx-auto">
-        <h2 className="md:mb-10 mb-4 text-center text-sm md:text-3xl font-medium text-gray-800">
+          <h2 className="md:text-4xl text-center md:mb-10 mb-4 font-medium text-foreground">
           Explore by Categories!
         </h2>
 

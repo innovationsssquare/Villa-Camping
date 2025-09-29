@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/carousel";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Play } from "lucide-react";
+import { Button } from "@heroui/react";
 
 const trendingVideos = [
   {
@@ -76,12 +77,25 @@ const trendingVideos = [
 export default function TrendingVideos() {
   return (
     <div className="w-full px-4 md:py-6 py-2 bg-white mb-4">
-      <div className="md:mb-6 mb-2">
-        <h2 className="text-lg font-bold text-black mb-1">Trending Videos</h2>
-        <div className="flex items-center gap-1">
-          <span className="text-sm text-gray-600">Powered By</span>
-          <span className="text-sm font-medium text-red-500">📹 Shorts</span>
+      <div className="md:mb-6 mb-2 flex justify-between items-center w-full">
+        <div>
+          <h2 className="md:text-4xl  font-medium text-foreground">
+            Trending Videos
+          </h2>
+          <div className="flex items-center  gap-1">
+            <span className="text-sm text-gray-600">Powered By</span>
+            <span className="text-sm font-medium text-red-500">📹 Shorts</span>
+          </div>
         </div>
+        <Button size="sm" className="flex gap-1 justify-between  items-center text-xs font-medium bg-orange-200 rounded-full ">
+          <div className="p-1">
+            <span>View All</span>
+          </div>
+          
+          <div className="bg-orange-500 rounded-full flex justify-center items-center p-1">
+            <Play className="fill-white text-white" size={12} />
+          </div>
+        </Button>
       </div>
 
       <Carousel className="w-full">

@@ -8,7 +8,7 @@ export default function Home() {
     <div className="min-h-screen">
       {/* <Villascreen /> */}
       <Villaview/>
-      <PropertyDetails />
+      <PropertyDetails/>
     </div>
   );
 }

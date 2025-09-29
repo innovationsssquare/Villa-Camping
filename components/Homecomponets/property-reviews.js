@@ -151,7 +151,7 @@ export default function PropertyReviews() {
   return (
     <div className="w-full px-4 mx-auto py-4 md:py-8">
       <div className="md:mb-6 mb-4 text-center">
-        <h2 className="text-lg md:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+          <h2 className="md:text-4xl  font-medium text-foreground">
           Guest Reviews
         </h2>
         <p className="text-gray-600 dark:text-gray-400 text-sm">

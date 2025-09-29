@@ -1,12 +1,11 @@
 "use client";
+import Cottageview from "@/components/Cottagescreen/Cottageview";
 import PropertyDetails from "@/components/Propertyviewcomponents/property-details";
-import Tentview from "@/components/Tentscreen/Tentview";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* <Villascreen /> */}
-      <Tentview/>
+      <Cottageview />
       <PropertyDetails />
     </div>
   );

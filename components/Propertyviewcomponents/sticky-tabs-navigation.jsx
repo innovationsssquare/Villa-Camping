@@ -16,13 +16,13 @@ export default function StickyTabsNavigation({ onTabChange }) {
 
   const tabs = [
     { id: "overview", label: "Overview" },
-    { id: "highlights", label: "Highlights" },
-    { id: "refund-policy", label: "Refund Policy" },
-    { id: "spaces", label: "Spaces" },
-    { id: "reviews", label: "Reviews" },
-    { id: "amenities", label: "Amenities" },
-    { id: "location", label: "Location" },
-    { id: "faqs", label: "FAQ's" },
+    { id: "highlightss", label: "Highlights" },
+    { id: "refund-policyy", label: "Refund Policy" },
+    { id: "spacess", label: "Spaces" },
+    { id: "reviewss", label: "Reviews" },
+    { id: "amenitiess", label: "Amenities" },
+    { id: "locationn", label: "Location" },
+    { id: "faqss", label: "FAQ's" },
   ]
 
   // Update indicator position smoothly with better calculation

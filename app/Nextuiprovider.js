@@ -1,17 +1,17 @@
-"use client"
-import Navbar from "@/components/Navbarcomponents/Navbar"
-import Footer from "@/components/Footercomponents/Footer"
-import { BottomNav } from "@/components/Navbarcomponents/Bootomnav"
-import { AppHeader } from "@/components/Navbarcomponents/Mobilenav"
-import { HeroUIProvider } from "@heroui/react"
-import { usePathname } from "next/navigation"
-import SplashScreen from "@/components/Homecomponets/SplashScreen"
-import { useState } from "react"
-import {ToastProvider} from "@heroui/toast";
+"use client";
+import Navbar from "@/components/Navbarcomponents/Navbar";
+import Footer from "@/components/Footercomponents/Footer";
+import { BottomNav } from "@/components/Navbarcomponents/Bootomnav";
+import { AppHeader } from "@/components/Navbarcomponents/Mobilenav";
+import { HeroUIProvider } from "@heroui/react";
+import { usePathname } from "next/navigation";
+import SplashScreen from "@/components/Homecomponets/SplashScreen";
+import { useState } from "react";
+import { ToastProvider } from "@heroui/toast";
 
 export function NextuiProviderWrapper({ children }) {
-  const pathname = usePathname()
-   const [showSplash, setShowSplash] = useState(true);
+  const pathname = usePathname();
+  const [showSplash, setShowSplash] = useState(true);
 
   const handleSplashComplete = () => {
     setShowSplash(false);
@@ -29,6 +29,8 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/checkout" ||
       pathname === "/search-your-gateway" ||
+      pathname.startsWith("/view-camping") ||
+      pathname.startsWith("/view-cottage") ||
       pathname.startsWith("/view-villa") ? null : (
         <Navbar />
       )}
@@ -43,6 +45,8 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/notifications" ||
       pathname === "/search-your-gateway" ||
       pathname === "/booking" ||
+      pathname.startsWith("/view-camping") ||
+      pathname.startsWith("/view-cottage") ||
       pathname.startsWith("/view-villa") ? null : (
         <AppHeader />
       )}
@@ -54,6 +58,8 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/search-your-gateway" ||
       pathname === "/checkout" ||
+      pathname.startsWith("/view-camping") ||
+      pathname.startsWith("/view-cottage") ||
       pathname.startsWith("/view-villa") ? null : (
         <BottomNav />
       )}
@@ -66,5 +72,5 @@ export function NextuiProviderWrapper({ children }) {
         <Footer />
       )}
     </HeroUIProvider>
-  )
+  );
 }
