@@ -148,7 +148,7 @@ const AllTabsContent = ({ refs }) => {
             </DrawerContent>
           </Drawer>
           <button className="bg-villa-grey text-villa-text-dark px-6 py-2 rounded-full text-sm font-medium">
-            FAQ's
+          {`  FAQ's`}
           </button>
         </div>
       </section>
@@ -352,7 +352,7 @@ const AllTabsContent = ({ refs }) => {
         {/* FAQ Section */}
         <div >
           <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-            FAQ's related to Barkat Villa - Ramgarh - Nainital
+           {` FAQ's related to Vastalya Villa - Malwali - Lonavala`}
           </h3>
           <Accordion type="single" collapsible className="space-y-3">
             <AccordionItem
