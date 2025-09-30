@@ -117,27 +117,30 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
     map.current = new window.google.maps.Map(mapContainer.current, {
       center: { lat: 18.7537, lng: 73.4062 }, // Lonavala center
       zoom: 11,
-      styles: [
-        {
-          featureType: "all",
-          elementType: "geometry.fill",
-          stylers: [{ color: "#f5f5f5" }],
-        },
-        {
-          featureType: "water",
-          elementType: "geometry",
-          stylers: [{ color: "#e9e9e9" }, { lightness: 17 }],
-        },
-        {
-          featureType: "administrative",
-          elementType: "geometry.stroke",
-          stylers: [{ color: "#c9b2a6" }, { lightness: 17 }, { weight: 1.2 }],
-        },
-      ],
-      disableDefaultUI: false,
-      zoomControl: true,
-      streetViewControl: false,
-      fullscreenControl: false,
+       mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+      // styles: [
+      //   {
+      //     featureType: "all",
+      //     elementType: "geometry.fill",
+      //     stylers: [{ color: "#f5f5f5" }],
+      //   },
+      //   {
+      //     featureType: "water",
+      //     elementType: "geometry",
+      //     stylers: [{ color: "#e9e9e9" }, { lightness: 17 }],
+      //   },
+      //   {
+      //     featureType: "administrative",
+      //     elementType: "geometry.stroke",
+      //     stylers: [{ color: "#c9b2a6" }, { lightness: 17 }, { weight: 1.2 }],
+      //   },
+      // ],
+      // disableDefaultUI: false,
+      // zoomControl: true,
+      // streetViewControl: false,
+      // fullscreenControl: false,
     });
 
     // Add property markers with custom React pin markers
