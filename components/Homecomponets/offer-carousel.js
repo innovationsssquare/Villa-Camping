@@ -60,21 +60,21 @@ const carouselItems = [
   }
 
   return (
-    <div className="absolute md:h-40 h-24  w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
+    <div className="absolute md:h-40 h-32   w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
       {/* Content Overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="text-center text-white px-4 md:max-w-md max-w-xs flex flex-col items-center">
-          <Image className="md:w-8 md:h-8 h-4 w-4  mb-2 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/>
-          <h1 className="text-xs md:text-2xl font-bold ">{carouselItems[currentSlide].title}</h1>
-          <h2 className="md:mb-4 mb-2 text-xs md:text-sm">{carouselItems[currentSlide].description}</h2>
-          <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg">
+          {/* <Image className="md:w-8 md:h-8 h-6 w-6  mb-2 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/> */}
+          <h1 className="text-lg md:text-2xl font-extrabold ">{carouselItems[currentSlide].title}</h1>
+          <h2 className="md:mb-4 mb-2 text-sm font-medium md:text-sm">{carouselItems[currentSlide].description}</h2>
+          <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-sm md:text-lg">
             {carouselItems[currentSlide].cta}
           </button>
         </div>
       </div>
 
       {/* Navigation Buttons */}
-      <button
+      {/* <button
         onClick={prevSlide}
         className="absolute left-2 top-1/2 -translate-y-1/2 bg-black hover:bg-black/80 rounded p-2 text-white"
         aria-label="Previous slide"
@@ -88,7 +88,7 @@ const carouselItems = [
         aria-label="Next slide"
       >
         <ChevronRight className="md:h-5 md:w-5 h-2 w-2" />
-      </button>
+      </button> */}
 
       {/* <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
         {carouselItems.map((_, index) => (

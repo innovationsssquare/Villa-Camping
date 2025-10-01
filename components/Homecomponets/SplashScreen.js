@@ -43,14 +43,12 @@ const SplashScreen = ({ onComplete }) => {
               : 'opacity-0 scale-95 translate-y-4'
           }`}
         >
-          <div className="relative p-4">
-            <div className="w-20 h-20 md:w-24 md:h-24 mx-auto bg-white rounded-2xl shadow-large flex items-center justify-center">
+          <div className="relative ">
               <Image 
                 src={logo} 
                 alt="Thevillacamp" 
-                className="w-16 h-16 md:w-16 md:h-16 object-contain"
+                className="w-20 h-20 md:w-24 md:h-24 object-contain"
               />
-            </div>
           </div>
         </div>
 
@@ -77,18 +75,13 @@ const SplashScreen = ({ onComplete }) => {
               : 'opacity-0 translate-y-4'
           }`}
         >
-          <div className="flex flex-col items-center space-y-4">
-            {/* Spinner Loader */}
-            <div className='bg-black rounded-full flex justify-center items-center'>
-            <ButtonLoader/>
-
-            </div>
-            
-            {/* Loading text */}
-            <span className="text-sm text-muted-foreground font-medium font-body animate-pulse-slow">
-              Loading experience...
-            </span>
-          </div>
+        <div className="loader">
+    <div className="circle"></div>
+    <div className="circle"></div>
+    <div className="circle"></div>
+    <div className="circle"></div>
+    <div className="circle"></div>
+  </div>
         </div>
       </div>
     </div>

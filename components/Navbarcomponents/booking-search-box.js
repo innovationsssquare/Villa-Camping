@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Search } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { BsCalendar2CheckFill } from "react-icons/bs";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
@@ -32,8 +32,9 @@ export function BookingSearchBox() {
   };
 
   return (
-    <div
-      onClick={() => router.push("/search-stay")}
+    <Button
+    size=""
+      onPress={() => router.push("/search-stay")}
       className={`
         bg-[#FFFFFF4D] rounded-full border border-gray-300 shadow-sm py-0.5 flex gap-2 justify-between w-full items-center
         transition-all duration-300 ease-in-out transform-gpu
@@ -112,6 +113,6 @@ export function BookingSearchBox() {
       >
         <Search className="h-4 w-4" />
       </Button> */}
-    </div>
+    </Button>
   );
 }

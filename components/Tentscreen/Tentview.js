@@ -7,7 +7,6 @@ import TentHeader from "./TentHeader";
 import TentHero from "./TentHero";
 import TentDetails from "./TentDetails";
 
-
 const tabs = [
   { id: "highlights", label: "Highlights" },
   { id: "refund-policy", label: "Refund Policy" },
@@ -23,6 +22,13 @@ const Tentview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
   const [showStickyTabs, setShowStickyTabs] = useState(false);
   const tabsRef = useRef(null);
+const [tents, setTents] = useState([]);
+
+
+  const handleBookTent = (tentId, tentType, price) => {
+    console.log('Booking tent:', { tentId, tentType, price });
+    // TODO: Navigate to payment page or open booking modal
+  };
 
   // Intersection Observer for each section
   const { ref: highlightsRef, inView: highlightsInView } = useInView({
@@ -98,9 +104,9 @@ const Tentview = () => {
 
   return (
     <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
-      <TentHeader/>
-      <TentHero/>
-      <TentDetails/>
+      <TentHeader />
+      <TentHero />
+      <TentDetails />
 
       <div ref={tabsRef}>
         <StickyTabs
@@ -134,6 +140,8 @@ const Tentview = () => {
             experiencesRef,
             faqsRef,
           }}
+          tents={tents}
+          onBookTent={handleBookTent}
         />
       </div>
 

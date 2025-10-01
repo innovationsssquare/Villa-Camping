@@ -115,7 +115,7 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
 
     // Initialize Google Map
     map.current = new window.google.maps.Map(mapContainer.current, {
-      center: { lat: 18.7537, lng: 73.4062 }, // Lonavala center
+      center: { lat: 18.7537, lng: 73.4062 }, 
       zoom: 11,
        mapTypeControl: false,
           streetViewControl: false,

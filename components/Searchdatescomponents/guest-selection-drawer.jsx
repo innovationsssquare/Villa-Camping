@@ -17,7 +17,7 @@ export function GuestSelectionDrawer({ isOpen, onClose }) {
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[90vh]">
+      <DrawerContent className="max-h-[90vh] border-none">
         <DrawerHeader className="text-left">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-xl font-bold">Total Guests</DrawerTitle>

@@ -39,118 +39,18 @@ import { FaSwimmer } from "react-icons/fa";
 import GoogleMap from "../Propertyviewcomponents/google-map";
 import ReviewsTab from "./ReviewsTab";
 import ExperiencesTab from "./ExperiencesTab";
+import HighlightsTab from "./HighlightsTab";
+import SpacesTab from "./SpacesTab";
 
-const AllTabsContent = ({ refs }) => {
+const AllTabsContent = ({ refs ,tents,onBookTent}) => {
   const [expandedDescription, setExpandedDescription] = useState(false);
+
 
   return (
     <div className="pb-20">
       {/* Highlights Section */}
-      <section
-        ref={refs.highlightsRef}
-        id="highlights"
-        className="p-3 space-y-6 scroll-mt-16"
-      >
-        {/* The StayVista Experience */}
-        <div className="">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-base font-semibold border-l-3 border-orange-500 pl-2">
-              The Villacamp Experience
-            </h3>
-            <div className="flex space-x-2"></div>
-          </div>
-
-          <Carousel className="w-full">
-            <CarouselContent className="-ml-2 md:-ml-4">
-              <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                <div className="min-w-48 relative rounded-lg overflow-hidden">
-                  <Image
-                    src={fullyServicedImage}
-                    alt="Fully-Serviced Villas"
-                    className="w-full h-32 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <h4 className="text-lg font-bold">FULLY-SERVICED</h4>
-                      <p className="text-sm">VILLAS</p>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-              <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                <div className="min-w-48 relative rounded-lg overflow-hidden">
-                  <Image
-                    src={fourCourseMealImage}
-                    alt="Four Course Meals"
-                    className="w-full h-32 object-cover"
-                  />
-                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                    <div className="text-center text-white">
-                      <h4 className="text-lg font-bold">FOUR COURSE</h4>
-                      <p className="text-sm">MEALS</p>
-                    </div>
-                  </div>
-                </div>
-              </CarouselItem>
-            </CarouselContent>
-          </Carousel>
-        </div>
-
-        {/* Villa Description */}
-        <div className="">
-          <h3 className="text-lg font-semibold mb-3 border-l-3 border-orange-500 pl-2">
-            Barkat Villa - Ramgarh - Villa in Nainital
-          </h3>
-          <p className="text-villa-text-light text-sm leading-relaxed">
-            {expandedDescription
-              ? "Some places fill your heart before you've even stepped in — Barkat Villa is one of them. Situated in the serene hill station of Ramgarh, this beautiful villa offers breathtaking views of the surrounding mountains and valleys. With its traditional architecture blended with modern amenities, the villa provides the perfect escape from city life. The property features spacious rooms, a well-equipped kitchen, and outdoor areas perfect for relaxation and bonding with family and friends."
-              : "Some places fill your heart before you've even stepped in — Barkat Villa is one of them. Situat..."}
-          </p>
-          <button
-            onClick={() => setExpandedDescription(!expandedDescription)}
-            className="text-villa-text-dark font-medium text-sm mt-2 underline"
-          >
-            {expandedDescription ? "Read Less" : "Read More"}
-          </button>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex space-x-4">
-          <Drawer>
-            <DrawerTrigger asChild>
-              <button className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium">
-                View Brochure
-              </button>
-            </DrawerTrigger>
-            <DrawerContent>
-              <DrawerHeader>
-                <DrawerTitle>Villa Brochure</DrawerTitle>
-              </DrawerHeader>
-              <div className="p-4 space-y-4">
-                <div className="bg-villa-grey/30 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Property Highlights</h4>
-                  <ul className="text-sm text-villa-text-light space-y-1">
-                    <li>• 5 Bedroom Villa with Mountain Views</li>
-                    <li>• Fully Furnished & Serviced</li>
-                    <li>• Private Garden & BBQ Area</li>
-                    <li>• Chef Services Available</li>
-                  </ul>
-                </div>
-                <div className="bg-villa-grey/30 p-4 rounded-lg">
-                  <h4 className="font-semibold mb-2">Location Benefits</h4>
-                  <ul className="text-sm text-villa-text-light space-y-1">
-                    <li>• 15 minutes to Nainital Lake</li>
-                    <li>• Peaceful hill station setting</li>
-                    <li>• Easy access to trekking trails</li>
-                  </ul>
-                </div>
-              </div>
-            </DrawerContent>
-          </Drawer>
-          <button className="bg-villa-grey text-villa-text-dark px-6 py-2 rounded-full text-sm font-medium">
-          {`  FAQ's`}
-          </button>
-        </div>
+     <section ref={refs.highlightsRef} id="highlights" className="scroll-mt-16">
+        <HighlightsTab/>
       </section>
 
       {/* Refund Policy Section */}
@@ -198,45 +98,8 @@ const AllTabsContent = ({ refs }) => {
       </section>
 
       {/* Spaces Section */}
-      <section
-        ref={refs.spacesRef}
-        id="spaces"
-        className="p-3 space-y-6 scroll-mt-16"
-      >
-        <div>
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-            Villa Spaces
-          </h3>
-
-          <div className="space-y-4">
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Living Areas</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Spacious living room with mountain views</li>
-                <li>• Modern kitchen with dining area</li>
-                <li>• Outdoor terrace and balconies</li>
-              </ul>
-            </div>
-
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Bedrooms (5)</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Master bedroom with en-suite bathroom</li>
-                <li>• 4 additional bedrooms with comfortable beds</li>
-                <li>• All rooms have mountain or garden views</li>
-              </ul>
-            </div>
-
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Outdoor Spaces</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Private garden area</li>
-                <li>• BBQ and bonfire area</li>
-                <li>• Parking for multiple vehicles</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+      <section ref={refs.spacesRef} id="spaces" className="scroll-mt-16">
+        <SpacesTab tents={tents} onBookTent={onBookTent} />
       </section>
 
       {/* Reviews Section */}

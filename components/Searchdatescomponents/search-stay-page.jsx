@@ -26,7 +26,7 @@ const router=useRouter()
   const {
     selectedCategoryId,
     selectedCategoryName,
-    selectedSubtype, // ✅ now from Redux
+    selectedSubtype, 
     checkin,
     checkout,
     selectedGuest,
@@ -156,9 +156,12 @@ const router=useRouter()
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2"> 
+           <Button onPress={()=>router.back()} isIconOnly variant="light">
+
           <ChevronLeft className="h-5 w-5 text-gray-800" />
-          <h1 className="text-lg font-semibold text-gray-800">
+           </Button>
+          <h1 className="text-md font-semibold text-gray-800">
             Search your Stay
           </h1>
         </div>
@@ -215,7 +218,6 @@ const router=useRouter()
           Request Callback
         </Button>
         <div className="text-center text-xs text-gray-500 mt-3">
-          <span className="mr-1">🔒</span>
           www.thevillacamp.com
         </div>
       </footer>

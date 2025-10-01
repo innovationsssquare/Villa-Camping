@@ -24,7 +24,7 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
-      <DrawerContent className="max-h-[80vh]">
+      <DrawerContent className="max-h-[80vh] border-none">
         <DrawerHeader className="text-left">
           <div className="flex items-center justify-between">
             <DrawerTitle className="text-xl font-semibold text-gray-800">

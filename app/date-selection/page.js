@@ -35,8 +35,7 @@ export default function DatePickerPage() {
   const getDaysInMonth = (year, month) =>
     new Date(year, month + 1, 0).getDate();
 
-  const getFirstDayOfMonth = (year, month) =>
-    new Date(year, month, 1).getDay();
+  const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
   const handleDateClick = (date) => {
     const clickedDate = new Date(
@@ -123,8 +122,7 @@ export default function DatePickerPage() {
 
     for (let day = 1; day <= daysInMonth; day++) {
       const currentDay = new Date(year, month, day);
-      const isWeekend =
-        currentDay.getDay() === 0 || currentDay.getDay() === 6;
+      const isWeekend = currentDay.getDay() === 0 || currentDay.getDay() === 6;
 
       const isCheckIn =
         selectedCheckInDate &&
@@ -183,8 +181,10 @@ export default function DatePickerPage() {
       {/* Top Header */}
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <ChevronLeft className="h-5 w-5 text-gray-800" />
-          <h1 className="text-lg font-semibold text-gray-800">
+          <Button onClick={() => router.back()}  variant="light">
+            <ChevronLeft className="h-5 w-5 text-gray-800" />
+          </Button>{" "}
+          <h1 className="text-md font-semibold text-gray-800">
             Select Check-In Date
           </h1>
         </div>
@@ -203,15 +203,15 @@ export default function DatePickerPage() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-y-auto p-2">
+      <div className="flex-1 overflow-y-auto p-1">
         {monthsToRender.map((monthDate, index) => (
           <div key={index}>{renderMonth(monthDate)}</div>
         ))}
       </div>
 
       {/* Bottom Fixed Bar */}
-      <div className="sticky bottom-0 w-full bg-white p-4 shadow-[0_-4px_6px_-1px_rgb(0_0_0_/_0.1),_0_-2px_4px_-2px_rgb(0_0_0_/_0.1)]">
-        <div className="relative mb-4">
+      <div className="sticky bottom-0 w-full bg-white p-1 shadow-[0_-4px_6px_-1px_rgb(0_0_0_/_0.1),_0_-2px_4px_-2px_rgb(0_0_0_/_0.1)]">
+        <div className="relative ">
           <div
             className={cn(
               "absolute -top-6 bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg transition-all duration-300",
@@ -221,33 +221,33 @@ export default function DatePickerPage() {
             {tooltipText}
             <div className="absolute left-1/2 -bottom-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black -translate-x-1/2"></div>
           </div>
-          <div className="flex items-center justify-between bg-gray-100 rounded-lg p-2">
+          <div className="flex items-center justify-between  rounded-lg p-2">
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 border border-dashed border-black",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 ",
                 selectedCheckInDate && !selectedCheckOutDate
                   ? "bg-blue-100"
                   : "bg-gray-200"
               )}
             >
               Check-In Date
-              <div className="text-lg font-bold">
+              <div className="text-md font-bold">
                 {formatDateDisplay(selectedCheckInDate)}
               </div>
             </div>
-            <div className="mx-2 bg-black p-2 text-white text-xs rounded-full">
+            <div className="mx-2  bg-black p-2 text-white text-xs rounded-full">
               {numberOfNights} Night
             </div>
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 border-dashed border border-black",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 ",
                 selectedCheckInDate && selectedCheckOutDate
                   ? "bg-blue-100"
                   : "bg-gray-200"
               )}
             >
               Check-Out Date
-              <div className="text-lg font-bold">
+              <div className="text-md font-bold">
                 {formatDateDisplay(selectedCheckOutDate)}
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function DatePickerPage() {
         </div>
         <Button
           onClick={() => router.back()}
-          className="w-full py-3 text-lg font-semibold bg-black text-white rounded-lg"
+          className="w-full py-3 text-base font-semibold bg-black text-white rounded-lg"
         >
           NEXT
         </Button>
