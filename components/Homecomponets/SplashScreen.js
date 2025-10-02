@@ -1,9 +1,7 @@
-import { useState, useEffect } from 'react';
-import logo from '@/public/Productasset/Logoicon.png';
-import Image from 'next/image';
-import ButtonLoader from '../Loadercomponents/button-loader';
-
-
+import { useState, useEffect } from "react";
+import logo from "@/public/Productasset/Logoicon.png";
+import Image from "next/image";
+import ButtonLoader from "../Loadercomponents/button-loader";
 
 const SplashScreen = ({ onComplete }) => {
   const [showContent, setShowContent] = useState(false);
@@ -32,23 +30,23 @@ const SplashScreen = ({ onComplete }) => {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-professional-blue rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-professional-accent rounded-full blur-3xl" />
       </div>
-      
+
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center space-y-8 px-6 text-center max-w-md mx-auto">
         {/* Logo */}
-        <div 
+        <div
           className={`transform transition-all duration-700 ease-out ${
-            showContent 
-              ? 'opacity-100 scale-100 translate-y-0' 
-              : 'opacity-0 scale-95 translate-y-4'
+            showContent
+              ? "opacity-100 scale-100 translate-y-0"
+              : "opacity-0 scale-95 translate-y-4"
           }`}
         >
           <div className="relative ">
-              <Image 
-                src={logo} 
-                alt="Thevillacamp" 
-                className="w-20 h-20 md:w-24 md:h-24 object-contain"
-              />
+            <Image
+              src={logo}
+              alt="Thevillacamp"
+              className="w-20 h-20 md:w-24 md:h-24 object-contain"
+            />
           </div>
         </div>
 
@@ -66,22 +64,22 @@ const SplashScreen = ({ onComplete }) => {
         </div> */}
 
         {/* Tagline with Italic */}
-       
+
         {/* Animated Loader */}
-        <div 
+        <div
           className={`transform transition-all duration-700 ease-out delay-500 ${
-            showContent 
-              ? 'opacity-100 translate-y-0' 
-              : 'opacity-0 translate-y-4'
+            showContent
+              ? "opacity-100 translate-y-0"
+              : "opacity-0 translate-y-4"
           }`}
         >
-        <div className="loader">
-    <div className="circle"></div>
-    <div className="circle"></div>
-    <div className="circle"></div>
-    <div className="circle"></div>
-    <div className="circle"></div>
-  </div>
+          <div className="loader">
+            <div className="circle"></div>
+            <div className="circle"></div>
+            <div className="circle"></div>
+            <div className="circle"></div>
+            <div className="circle"></div>
+          </div>
         </div>
       </div>
     </div>

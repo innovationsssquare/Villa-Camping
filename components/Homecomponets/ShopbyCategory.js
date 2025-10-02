@@ -64,7 +64,7 @@ const ShopbyCategory = () => {
             {loading ? (
               <CarouselItem
                
-                className="pl-4 md:basis-1/8 lg:basis-1/8 basis-4/ flex justify-center gap-3"
+                className="pl-4 md:basis-auto lg:basis-auto basis-4/ flex justify-center gap-3"
               >
                 <div className="rounded-md md:rounded-full animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
                 <div className="rounded-md md:rounded-full  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
