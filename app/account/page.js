@@ -46,7 +46,7 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-gray-100">
       {/* Mobile-first design container */}
       <div className="w-full mx-auto  min-h-screen">
        <section

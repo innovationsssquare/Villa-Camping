@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Drawer, DrawerClose, DrawerContent, DrawerHeader, DrawerTitle, DrawerFooter } from "@/components/ui/drawer"
 import { useSelector, useDispatch } from "react-redux"
 import Image from "next/image"
-import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice"
+import { setSelectedCategory, setSelectedCategoryImage, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice"
 
 export function CategorySelectionDrawer({ isOpen, onClose }) {
   const dispatch = useDispatch()
@@ -18,8 +18,9 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
   }, [isOpen])
 
   const handleSelect = (category) => {
-    dispatch(setSelectedCategory(category._id))
-    dispatch(setSelectedCategoryname(category.name))
+    dispatch(setSelectedCategory(category?._id))
+    dispatch(setSelectedCategoryname(category?.name))
+    dispatch(setSelectedCategoryImage(category?.image))
   }
 
   return (

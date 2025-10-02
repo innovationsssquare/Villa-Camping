@@ -31,6 +31,7 @@ import { NotificationSheet } from "@/components/Navbarcomponents/Notificationshe
 import { IoBag } from "react-icons/io5";
 import { IoMdBookmarks } from "react-icons/io";
 import { useRouter } from "next/navigation";
+import { EmptyState } from "./empty-states";
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = (status) => {
@@ -381,45 +382,42 @@ export default function BookingScreen() {
       </div>
 
       {/* Content */}
-      <div className="w-full mx-auto py-2">
+      <div className="w-full mx-auto ">
         <Tabs
           aria-label="Options"
           color="primary"
           variant="bordered"
           className="w-full md:w-1/2"
           classNames={{
-            tabList: "w-full   bg-gray-200  rounded-md p-0 mb-2",
+            tabList: "w-full z-50  bg-gray-200  rounded-md p-0 mb-2",
             cursor: "w-full bg-black border border-black",
             tab: " px-0 md:h-10 ",
             tabContent:
               "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
           }}
-        
         >
           <Tab
-            key="photos"
+            key="Active"
             title={
               <div className="flex items-center space-x-2">
-                <span>All</span>
+                <span>Active</span>
               </div>
             }
-          />
+          >
+           
+            <EmptyState />
+          </Tab>
+
           <Tab
-            key="music"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Upcoming</span>
-              </div>
-            }
-          />
-          <Tab
-            key="videos"
+            key="Completed"
             title={
               <div className="flex items-center space-x-2">
                 <span>Completed</span>
               </div>
             }
-          />
+          >
+            <EmptyState />
+          </Tab>
         </Tabs>
       </div>
     </div>

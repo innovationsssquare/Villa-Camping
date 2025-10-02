@@ -175,10 +175,10 @@ export const SearchBar = ({
 
       {/* Enhanced Suggestions Dropdown */}
       {showSuggestions && (
-        <Card className="absolute top-full md:left-4 md:right-4 md:mt-2 mt-1 z-50 md:max-h-80 h-[60vh] overflow-y-auto bg-white border border-gray-200 shadow-lg rounded-xl">
+        <Card className="absolute top-full md:left-4 md:right-4 md:mt-2 mt-1 z-50 md:max-h-80 h-[60vh] overflow-y-auto scrollbar-hide bg-white border border-gray-200 shadow-lg rounded-xl">
           <div className="md:p-4 p-2">
             {/* Current Location Option */}
-            <button
+            {/* <button
               onClick={handleCurrentLocationClick}
               className="w-full flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors text-left mb-4 border-b border-gray-100"
             >
@@ -188,7 +188,7 @@ export const SearchBar = ({
               <span className="font-medium text-gray-900">
                 Use my current location
               </span>
-            </button>
+            </button> */}
 
             {/* Search Results Section */}
             {(searchQuery.trim()

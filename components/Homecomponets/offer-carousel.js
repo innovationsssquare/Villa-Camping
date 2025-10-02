@@ -1,73 +1,93 @@
-"use client"
-import { useEffect, useState } from "react"
-import { ChevronLeft, ChevronRight, Snowflake } from "lucide-react"
-import Image from "next/image"
-import disscount from "@/public/Homeasset/disscount.png"
-import { useRouter } from "next/navigation"
+"use client";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Snowflake } from "lucide-react";
+import Image from "next/image";
+import disscount from "@/public/Homeasset/disscount.png";
+import { useRouter } from "next/navigation";
+import { TypingAnimation } from "@/components/ui/typing-animation";
 
-export default function OfferCarousel({ heroApi, heroCurrentIndex = 0, heroCount = 0 }) {
-  const [currentSlide, setCurrentSlide] = useState(0)
-const router=useRouter()
-const carouselItems = [
-  {
-    title: "Escape to Nature!",
-    description: "Book lakeside villas, cottages, and camps in Lonavala & Pawna",
-    cta: "Book your stay ↗",
-    icon: disscount,
-  },
-  {
-    title: "Limited-Time Deals!",
-    description: "Get exclusive discounts on weekend getaways",
-    cta: "Grab the offer ↗",
-    icon: disscount,
-  },
-  {
-    title: "All-In-One Getaway Hub",
-    description: "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
-    cta: "Explore locations ↗",
-    icon: disscount,
-  },
-  {
-    title: "All-In-One Getaway Hub",
-    description: "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
-    cta: "Explore locations ↗",
-    icon: disscount,
-  },
-];
+export default function OfferCarousel({
+  heroApi,
+  heroCurrentIndex = 0,
+  heroCount = 0,
+}) {
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const router = useRouter();
+  const carouselItems = [
+    {
+      title: "Escape to Nature!",
+      description:
+        "Book lakeside villas, cottages, and camps in Lonavala & Pawna",
+      cta: "Book your stay ↗",
+      icon: disscount,
+    },
+    {
+      title: "Limited-Time Deals!",
+      description: "Get exclusive discounts on weekend getaways",
+      cta: "Grab the offer ↗",
+      icon: disscount,
+    },
+    {
+      title: "All-In-One Getaway Hub",
+      description:
+        "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
+      cta: "Explore locations ↗",
+      icon: disscount,
+    },
+    {
+      title: "All-In-One Getaway Hub",
+      description:
+        "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
+      cta: "Explore locations ↗",
+      icon: disscount,
+    },
+  ];
 
-
-
- useEffect(() => {
-    if (heroCurrentIndex !== undefined && heroCurrentIndex < carouselItems.length) {
-      setCurrentSlide(heroCurrentIndex)
+  useEffect(() => {
+    if (
+      heroCurrentIndex !== undefined &&
+      heroCurrentIndex < carouselItems.length
+    ) {
+      setCurrentSlide(heroCurrentIndex);
     }
-  }, [heroCurrentIndex, carouselItems.length])
+  }, [heroCurrentIndex, carouselItems.length]);
 
   const nextSlide = () => {
-    const nextIndex = currentSlide === carouselItems.length - 1 ? 0 : currentSlide + 1
-    setCurrentSlide(nextIndex)
+    const nextIndex =
+      currentSlide === carouselItems.length - 1 ? 0 : currentSlide + 1;
+    setCurrentSlide(nextIndex);
     if (heroApi && nextIndex < heroCount) {
-      heroApi.scrollTo(nextIndex)
+      heroApi.scrollTo(nextIndex);
     }
-  }
+  };
 
   const prevSlide = () => {
-    const prevIndex = currentSlide === 0 ? carouselItems.length - 1 : currentSlide - 1
-    setCurrentSlide(prevIndex)
+    const prevIndex =
+      currentSlide === 0 ? carouselItems.length - 1 : currentSlide - 1;
+    setCurrentSlide(prevIndex);
     if (heroApi && prevIndex < heroCount) {
-      heroApi.scrollTo(prevIndex)
+      heroApi.scrollTo(prevIndex);
     }
-  }
+  };
 
   return (
     <div className="absolute md:h-40 h-32   w-full top-1/2 -translate-1/2 -translate-y-1/2 left-1/2  overflow-hidden ">
       {/* Content Overlay */}
       <div className="absolute inset-0 flex items-center justify-center">
-        <div className="text-center text-white px-4 md:max-w-md max-w-xs flex flex-col items-center">
+        <div className="text-center text-white px-4 md:max-w-4xl max-w-md flex flex-col items-center">
           {/* <Image className="md:w-8 md:h-8 h-6 w-6  mb-2 md:mr-0" alt={carouselItems[currentSlide].title} src={carouselItems[currentSlide].icon}/> */}
-          <h1 className="text-lg md:text-2xl font-extrabold ">{carouselItems[currentSlide].title}</h1>
-          <h2 className="md:mb-4 mb-2 text-sm font-medium md:text-sm">{carouselItems[currentSlide].description}</h2>
-          <button onClick={()=>router.push("/category/all")} className="inline-flex items-center text-white hover:underline font-medium text-sm md:text-lg">
+          <h1 className="text-2xl md:text-5xl font-extrabold ">
+            <TypingAnimation loop>
+              {carouselItems[currentSlide].title}
+            </TypingAnimation>
+          </h1>
+          <h2 className="md:mb-4 mb-2 text-xs font-medium md:text-xl">
+            {carouselItems[currentSlide].description}
+          </h2>
+          <button
+            onClick={() => router.push("/category/all")}
+            className="inline-flex items-center text-white hover:underline font-medium text-xs md:text-lg"
+          >
             {carouselItems[currentSlide].cta}
           </button>
         </div>
@@ -101,6 +121,5 @@ const carouselItems = [
         ))}
       </div> */}
     </div>
-  )
+  );
 }
-

@@ -5,13 +5,23 @@ import { useEffect, useState } from "react";
 import { RiHome5Fill } from "react-icons/ri";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { IoGrid } from "react-icons/io5";
-import { FaUser } from "react-icons/fa";
 import { BsFillChatSquareHeartFill } from "react-icons/bs";
 import { FaPlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
 import { DiBootstrap } from "react-icons/di";
 import { IoMdBookmarks } from "react-icons/io";
 import { House } from "lucide-react";
+import { IoHome } from "react-icons/io5";
+import { IoHomeOutline } from "react-icons/io5";
+import { IoGridOutline } from "react-icons/io5";
+import { BiSolidBookBookmark } from "react-icons/bi";
+import { BiBookBookmark } from "react-icons/bi";
+import { FaRegUser } from "react-icons/fa6";
+import { FaUser } from "react-icons/fa6";
+import { IoPerson } from "react-icons/io5";
+import { IoPersonOutline } from "react-icons/io5";
+import { IoTicket } from "react-icons/io5";
+import { IoTicketOutline } from "react-icons/io5";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");
@@ -42,27 +52,32 @@ export function BottomNav() {
   const navItems = [
     {
       value: "/",
-      icon: <RiHome5Fill className="h-5 w-5" />,
+      icon: <IoHome  className="h-5 w-5" />,
+      outline: <IoHomeOutline  className="h-5 w-5" />,
       label: "Home",
     },
     {
       value: "/category/all",
       icon: <IoGrid className="h-5 w-5" />,
+      outline: <IoGridOutline  className="h-5 w-5" />,
       label: "category",
     },
     {
       value: "/shorts",
       icon: <FaPlay size={24} className="h-5 w-5" />,
+      outline: <FaPlay size={24} className="h-5 w-5" />,
       label: "Favorites",
     },
     {
       value: "/booking",
-      icon: <IoMdBookmarks className="h-6 w-6" />,
+      icon: <IoTicket  className="h-6 w-6" />,
+      outline: <IoTicketOutline  className="h-6 w-6" />,
       label: "Recycle",
     },
     {
       value: "/account",
-      icon: <FaUser className="h-5 w-5" />,
+      icon: <IoPerson className="h-5 w-5" />,
+      outline: <IoPersonOutline  className="h-5  w-5" />,
       label: "Profile",
     },
   ];
@@ -112,7 +127,7 @@ export function BottomNav() {
                     : ""
                 )}
               >
-                <span> {item.icon}</span>
+              {activeTab === item.value ?  <span>{item.icon}</span>:<span>{item.outline}</span>}
               </div>
 
               <span className="sr-only">{item.label}</span>

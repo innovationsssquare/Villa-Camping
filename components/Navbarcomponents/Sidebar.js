@@ -27,6 +27,7 @@ import { MdHelp } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { Card, CardContent } from "@/components/ui/card";
+import Listprop from "@/public/Homeasset/Listprop.jpg"
 import {
   User,
   MessageCircle,
@@ -45,6 +46,7 @@ import {
   Facebook,
   Menu,
 } from "lucide-react";
+import Image from "next/image";
 const navItems = [
   {
     title: "Profile Details",
@@ -196,8 +198,8 @@ export function UserSidebar() {
                 <CardContent className="p-2">
                   <div className="flex items-center space-x-3">
                     <div className="h-12 w-12 rounded-lg overflow-hidden">
-                      <img
-                        src="/house-property-hosting.jpg"
+                      <Image
+                        src={Listprop}
                         alt="Hosting"
                         className="h-full w-full object-cover"
                       />

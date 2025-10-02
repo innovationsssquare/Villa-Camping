@@ -73,7 +73,7 @@ export default function Hero() {
                   src={Banner3}        
                   alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
                   fill
-                  className="object-fill brightness-60"
+                  className="object-fill brightness-50"
                   priority
                 />
               </div>
@@ -84,7 +84,7 @@ export default function Hero() {
                   src={Banner4}
                   alt="Sewing supplies"
                   fill
-                  className="object-fill brightness-60"
+                  className="object-fill brightness-50"
                 />
               </div>
             </CarouselItem>
@@ -94,7 +94,7 @@ export default function Hero() {
                   src={Banner1}
                   alt="Crafting materials"
                   fill
-                  className="object-fill brightness-60"
+                  className="object-fill brightness-50"
                 />
               </div>
             </CarouselItem>
@@ -104,7 +104,7 @@ export default function Hero() {
                   src={Banner2}
                   alt="Crafting materials"
                   fill
-                  className="object-fill brightness-60"
+                  className="object-fill brightness-50"
                 />
               </div>
             </CarouselItem>

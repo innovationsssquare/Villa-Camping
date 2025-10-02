@@ -37,7 +37,7 @@ export default function SignInPage() {
           <div className="flex flex-col items-center justify-center space-y-6 animate-in fade-in duration-500">
             {/* Logo Animation */}
             <div className="animate-in zoom-in duration-700 delay-300">
-              <Image src={Logoicon} alt="thevillacamp" className="w-32 h-32" />
+              <Image src={Logoicon} alt="thevillacamp" className="w-24 h-24" />
             </div>
 
             {/* Brand Name Animation */}

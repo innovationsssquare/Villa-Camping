@@ -23,6 +23,7 @@ import {
   Phone,
 } from "lucide-react";
 import Image from "next/image";
+import { IoLogoWhatsapp } from "react-icons/io";
 
 export const PropertyCard = ({ property, onClose, compact = false }) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -144,7 +145,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
           </div>
         </div>
 
-        <ScrollArea className="max-h-80">
+        <ScrollArea className="h-80">
           <div className="p-6">
             <div className="flex items-center justify-between mb-3">
               <span className="text-2xl font-bold text-villa-primary">
@@ -186,54 +187,15 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
               <span className="text-sm">{property.address}</span>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-4">
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <Bed className="w-5 h-5 mx-auto mb-1 text-villa-primary" />
-                <div className="text-lg font-semibold">{property.beds}</div>
-                <div className="text-xs text-villa-text-muted">Bedrooms</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <Bath className="w-5 h-5 mx-auto mb-1 text-villa-primary" />
-                <div className="text-lg font-semibold">{property.baths}</div>
-                <div className="text-xs text-villa-text-muted">Bathrooms</div>
-              </div>
-              <div className="text-center p-3 bg-gray-50 rounded-lg">
-                <Square className="w-5 h-5 mx-auto mb-1 text-villa-primary" />
-                <div className="text-lg font-semibold">{property.sqft}</div>
-                <div className="text-xs text-villa-text-muted">Sq Ft</div>
-              </div>
-            </div>
-
-            {property.description && (
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2">Description</h4>
-                <p className="text-sm text-villa-text-muted leading-relaxed">
-                  {property.description}
-                </p>
-              </div>
-            )}
-
-            {property.features && property.features.length > 0 && (
-              <div className="mb-6">
-                <h4 className="font-semibold mb-2">Features</h4>
-                <div className="flex flex-wrap gap-2">
-                  {property.features.map((feature, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {feature}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
+          
             <div className="flex gap-2">
-              <Button className="flex-1 bg-villa-primary hover:bg-villa-primary/90">
+              <Button className="flex-1 bg-black hover:bg-villa-primary/90">
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
               </Button>
               <Button variant="outline">
-                <Phone className="w-4 h-4 mr-2" />
-                Call
+                <IoLogoWhatsapp className="text-green-600"/>
+                Chat
               </Button>
             </div>
           </div>

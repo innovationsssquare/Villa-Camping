@@ -8,6 +8,8 @@ const tomorrow = today.clone().add(1, "day");
 const initialState = {
   selectedCategoryId: null,
   selectedCategoryName: "",
+  selectedCategoryImage: null,
+
   selectedSubtype: { type: "", quantity: 1 },
   checkin: today.format(),
   checkout: tomorrow.format(),
@@ -45,6 +47,9 @@ const bookingSlice = createSlice({
     },
     setSelectedCategoryname: (state, action) => {
       state.selectedCategoryName = action.payload;
+    },
+    setSelectedCategoryImage: (state, action) => {
+      state.selectedCategoryImage = action.payload;
     },
 
     setSelectedSubtype: (state, action) => {
@@ -127,6 +132,7 @@ export const {
   removeCoupon,
   setSpecialRequests,
   setAcceptedTerms,
+  setSelectedCategoryImage,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

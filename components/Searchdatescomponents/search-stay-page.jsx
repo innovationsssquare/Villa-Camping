@@ -10,26 +10,28 @@ import { CategorySelectionDrawer } from "./category-selection-drawer";
 import { RoomSelectionDrawer } from "./room-selection-drawer";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
-import { setSelectedSubtype } from "@/Redux/Slices/bookingSlice";
+import { setSelectedCategory, setSelectedCategoryImage, setSelectedCategoryname, setSelectedSubtype } from "@/Redux/Slices/bookingSlice";
 import moment from "moment";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function SearchStayPage() {
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
   const [isRoomDrawerOpen, setIsRoomDrawerOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-const router=useRouter()
+  const router = useRouter();
   const { categories } = useSelector((state) => state.category);
   const {
     selectedCategoryId,
     selectedCategoryName,
-    selectedSubtype, 
+    selectedSubtype,
     checkin,
     checkout,
     selectedGuest,
+    selectedCategoryImage,
   } = useSelector((state) => state.booking);
 
   const dispatch = useDispatch();
@@ -37,6 +39,17 @@ const router=useRouter()
   useEffect(() => {
     dispatch(fetchAllCategories());
   }, [dispatch]);
+
+
+  useEffect(() => {
+    if (categories && categories?.length > 0) {
+      const firstCategory = categories[0]; // Or apply any selection logic you want
+      // Dispatch actions separately
+      dispatch(setSelectedCategory(firstCategory?._id));
+      dispatch(setSelectedCategoryname(firstCategory?.name));
+      dispatch(setSelectedCategoryImage(firstCategory?.image));
+    }
+  }, [categories, dispatch]); 
 
   // ✅ Guest summary directly from Redux
   const guestSummary = useMemo(() => {
@@ -90,15 +103,28 @@ const router=useRouter()
   // ✅ Category display
   const categoryDisplay = useMemo(() => {
     const categoryMap = {
-      cottage: { name: "Cottage", icon: "🏡" },
-      camping: { name: "Camping", icon: "⛺" },
-      villa: { name: "Villa", icon: "🏖️" },
-      hotel: { name: "Hotel", icon: "🏨" },
+      cottage: {
+        name: "Cottage",
+        image: selectedCategoryImage || "/default-cottage-image.jpg",
+      },
+      camping: {
+        name: "Camping",
+        image: selectedCategoryImage || "/default-camping-image.jpg",
+      },
+      villa: {
+        name: "Villa",
+        image: selectedCategoryImage || "/default-villa-image.jpg",
+      },
+      hotel: {
+        name: "Hotel",
+        image: selectedCategoryImage || "/default-hotel-image.jpg",
+      },
     };
+
     return (
       categoryMap[selectedCategoryName?.toLowerCase()] || categoryMap.villa
     );
-  }, [selectedCategoryName]);
+  }, [selectedCategoryName,selectedCategoryImage]);
 
   // ✅ Room save uses Redux
   const handleSaveRoom = (newRoom) => {
@@ -121,14 +147,6 @@ const router=useRouter()
     setIsSearching(true);
 
     try {
-      console.log("Search:", {
-        selectedCategoryId,
-        selectedCategoryName,
-        checkin,
-        checkout,
-        selectedGuest,
-      });
-
       // Navigate to category page
 
       // Dispatch async action to fetch properties
@@ -156,11 +174,10 @@ const router=useRouter()
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Top Header */}
       <header className="flex items-center justify-between p-4 border-b border-gray-200">
-        <div className="flex items-center gap-2"> 
-           <Button onPress={()=>router.back()} isIconOnly variant="light">
-
-          <ChevronLeft className="h-5 w-5 text-gray-800" />
-           </Button>
+        <div className="flex items-center gap-2">
+          <Button onPress={() => router.back()} isIconOnly variant="light">
+            <ChevronLeft className="h-5 w-5 text-gray-800" />
+          </Button>
           <h1 className="text-md font-semibold text-gray-800">
             Search your Stay
           </h1>
@@ -170,7 +187,15 @@ const router=useRouter()
       {/* Search Inputs */}
       <main className="flex-1 overflow-y-auto p-4 space-y-4">
         <SearchInputCard
-          icon={<span className="text-xl">{categoryDisplay.icon}</span>}
+          icon={
+            <Image
+              src={categoryDisplay.image}
+              height={50}
+              width={50}
+              alt={categoryDisplay.name}
+              className="h-6 w-6"
+            />
+          }
           label="Category"
           value={categoryDisplay.name}
           onClick={() => setIsCategoryDrawerOpen(true)}

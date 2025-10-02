@@ -13,7 +13,8 @@ import {
   Sparkles,
   Clock,
 } from "lucide-react";
-import { Button } from "./ui/button";
+import { Button } from "@heroui/react";
+import { IoTicket } from "react-icons/io5";
 
 const containerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -181,7 +182,7 @@ export function EmptyState({ type, searchTerm, onAction }) {
 
       default:
         return {
-          icon: <BookOpen className="w-16 h-16 text-gray-400" />,
+          icon: <IoTicket className="w-16 h-16 text-gray-400" />,
           title: "No bookings found",
           description: "Start planning your next adventure!",
           actionText: "Explore",
@@ -202,7 +203,7 @@ export function EmptyState({ type, searchTerm, onAction }) {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div
-          className="absolute top-1/4 left-1/4 w-32 h-32 rounded-full bg-blue-100 opacity-30"
+          className="absolute top-1/2 left-1/4 w-12 h-12 rounded-full bg-blue-100 opacity-30"
           animate={{
             scale: [1, 1.2, 1],
             x: [0, 20, 0],
@@ -256,7 +257,7 @@ export function EmptyState({ type, searchTerm, onAction }) {
         >
           <motion.div
             className="p-4 rounded-full bg-gradient-to-br from-blue-50 to-purple-50 shadow-lg"
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
             {content.icon}
@@ -267,13 +268,13 @@ export function EmptyState({ type, searchTerm, onAction }) {
         {/* Text Content */}
         <motion.div className="space-y-3 max-w-md" variants={itemVariants}>
           <motion.h3
-            className="text-2xl text-foreground"
+            className="text-lg text-foreground"
             variants={itemVariants}
           >
             {content.title}
           </motion.h3>
           <motion.p
-            className="text-muted-foreground leading-relaxed"
+            className="text-muted-foreground text-sm leading-relaxed"
             variants={itemVariants}
           >
             {content.description}
@@ -284,8 +285,8 @@ export function EmptyState({ type, searchTerm, onAction }) {
         <motion.div variants={itemVariants}>
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Button
-              className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg px-8 py-2.5"
-              onClick={onAction}
+              className="bg-black text-white shadow-lg px-8 py-2.5"
+              onPress={onAction}
             >
               <motion.span
                 className="flex items-center gap-2"
@@ -305,7 +306,7 @@ export function EmptyState({ type, searchTerm, onAction }) {
       </motion.div>
 
       {/* Decorative Elements */}
-      <motion.div
+      {/* <motion.div
         className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
         animate={{ opacity: [0.3, 0.7, 0.3] }}
         transition={{ duration: 3, repeat: Infinity }}
@@ -327,7 +328,7 @@ export function EmptyState({ type, searchTerm, onAction }) {
             />
           ))}
         </div>
-      </motion.div>
+      </motion.div> */}
     </motion.div>
   );
 }
