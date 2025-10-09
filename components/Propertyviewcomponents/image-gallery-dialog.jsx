@@ -262,10 +262,10 @@ export default function ImageGalleryDialog({
         </div>
 
         {/* Thumbnail Strip */}
-        <div className="absolute  bottom-12 md:bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
+        <div className="absolute  bottom-0  md:bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent">
           <div className="p-4 md:p-6">
             <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
-              {images.map((image, index) => (
+              {images?.map((image, index) => (
                 <button
                   key={index}
                   onClick={() => {
@@ -288,9 +288,9 @@ export default function ImageGalleryDialog({
             </div>
           </div>
         </div>
-        <Button onClick={onClose} className="w-11/12 flex justify-center items-center mx-auto md:hidden  h-10 text-lg text-black mb-2 font-semibold bg-white hover:bg-white border border-black">
+        {/* <Button onClick={onClose} className="w-11/12 flex justify-center items-center mx-auto md:hidden  h-10 text-lg text-black mb-2 font-semibold bg-white hover:bg-white border border-black">
           Close
-        </Button>
+        </Button> */}
         {/* Instructions */}
         <div className="absolute bottom-20 right-6 text-white/70 text-sm hidden md:block">
           <div>← → Navigate • Double-click to zoom • ESC to close</div>

@@ -3,11 +3,7 @@ import { Play, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-const VideoModal = ({
-  trigger,
-  videoUrl = "https://res.cloudinary.com/db60uwvhk/video/upload/v1755329753/villas/100cb757-f0e4-41dd-8cb5-04ac141be6f2_ooqqmx.mp4",
-  thumbnailSrc,
-}) => {
+const VideoModal = ({ trigger, videoUrl, thumbnailSrc }) => {
   const [isOpen, setIsOpen] = useState(false);
 
   // Handle escape key to close modal
@@ -75,9 +71,9 @@ const VideoModal = ({
           <Button
             variant="secondary"
             size="lg"
-            className=" border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
+            className="  bg-[#201e1e80]     rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
           >
-            <Play className="w-4 h-4 mr-1" />
+            <Play className="w-4 h-4 mr-1 fill-white" />
             <span className="text-xs font-medium">Video</span>
           </Button>
         )}

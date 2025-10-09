@@ -49,14 +49,15 @@ const VillaHero = () => {
   return (
     <>
       <div className="relative">
-        <div className="relative h-60 bg-gray-50 overflow-hidden rounded-none">
+        <div className="relative h-72 bg-gray-50 overflow-hidden rounded-none">
           <Carousel setApi={setApi} className="w-full h-full">
             <CarouselContent>
               {villa?.images?.map((image, index) => (
                 <CarouselItem key={index}>
                   <Image
                     src={image}
-                    height={50}
+                    height={80}
+                    unoptimized
                     width={50}
                     alt={`${villa?.name} ${index + 1}`}
                     className="w-full h-72 object-fill rounded-none"
@@ -67,9 +68,15 @@ const VillaHero = () => {
           </Carousel>
 
           {/* Best Rated Badge */}
-          <div className="absolute top-4 left-4 bg-background px-3 py-1 rounded-full flex items-center shadow-md z-10">
-            <span className="text-xs font-medium">⭐ Best Rated</span>
-          </div>
+          {villa?.tags && (
+            <div className="absolute top-4 left-4 bg-background px-3 py-1 rounded-full flex items-center shadow-md z-10">
+              {villa?.tags?.map((tag, k) => (
+                <span key={k} className="text-xs font-medium capitalize">
+                  ⭐ {tag}
+                </span>
+              ))}
+            </div>
+          )}
 
           {/* Heart Icon */}
           <button className="absolute top-4 right-4 p-2 bg-background rounded-full shadow-md z-10">
@@ -81,19 +88,20 @@ const VillaHero = () => {
           <Button
             onPress={() => openGallery(0)}
             size="md"
-            className="absolute bottom-3 right-22 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
+            className="absolute bottom-4 right-22 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
           >
             <span className="text-xs font-medium">View</span>
             <span className="text-xs font-medium">Photos</span>
           </Button>
-          <div
-            className="absolute bottom-3 right-3 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
-           >
-            <VideoModal thumbnailSrc={villa?.images[0]} />
+          <div className="absolute bottom-4 right-3 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10">
+            <VideoModal
+              thumbnailSrc={villa?.images[0]}
+              videoUrl={villa?.reelVideo}
+            />
           </div>
 
           {/* Carousel Dots */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
             {villa?.images.map((_, index) => (
               <button
                 key={index}

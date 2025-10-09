@@ -39,8 +39,6 @@ const Villaview = () => {
     dispatch(fetchVillaById(id));
   }, [id]);
 
-  
-
   // Intersection Observer for each section
   const { ref: highlightsRef, inView: highlightsInView } = useInView({
     threshold: 0.3,
@@ -113,7 +111,7 @@ const Villaview = () => {
     }
   };
 
-if (loading) {
+  if (loading) {
     return <VillaScreenSkeleton />;
   }
 
@@ -137,7 +135,6 @@ if (loading) {
       </div>
     );
   }
-
 
   return (
     <VillaProvider villa={villa}>
