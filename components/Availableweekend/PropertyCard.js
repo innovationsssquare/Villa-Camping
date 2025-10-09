@@ -404,7 +404,7 @@ const router=useRouter()
             </div>
             <div className="space-y-3">
               <Button
-                onClick={() => router.push(`/view-camping/688a04a405e8c738822b9de0`)}
+                onClick={() => router.push(`/view-villa/68e6b22178066ac5b42c4e98`)}
                 className="w-full bg-black  text-primary-foreground font-semibold"
               >
                 Book Now →

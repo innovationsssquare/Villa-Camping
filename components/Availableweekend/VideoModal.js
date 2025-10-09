@@ -56,7 +56,6 @@ const VideoModal = ({
                 className="w-full h-full object-cover rounded-xl"
                 controls
                 autoPlay
-                muted
                 poster={thumbnailSrc}
               >
                 <source src={videoUrl} type="video/mp4" />
@@ -75,11 +74,11 @@ const VideoModal = ({
         {trigger || (
           <Button
             variant="secondary"
-            size="sm"
-            className="bg-black/50 hover:bg-black/70 text-white border-0 backdrop-blur-sm"
+            size="lg"
+            className=" border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
           >
             <Play className="w-4 h-4 mr-1" />
-            View Video
+            <span className="text-xs font-medium">Video</span>
           </Button>
         )}
       </div>

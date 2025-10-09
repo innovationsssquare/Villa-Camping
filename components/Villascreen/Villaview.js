@@ -6,7 +6,13 @@ import VillaDetails from "./VillaDetails";
 import StickyTabs from "./StickyTabs";
 import AllTabsContent from "./AllTabsContent";
 import FixedBookingBar from "./FixedBookingBar";
-
+import { VillaProvider } from "@/lib/context/VillaContext";
+import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
+import { XCircle } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchVillaById } from "@/Redux/Slices/villaSlice";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
@@ -23,6 +29,17 @@ const Villaview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
   const [showStickyTabs, setShowStickyTabs] = useState(false);
   const tabsRef = useRef(null);
+
+  const dispatch = useDispatch();
+  const params = useParams();
+  const { id } = params;
+  const { villa, loading, error } = useSelector((state) => state.villa);
+  const router = useRouter();
+  useEffect(() => {
+    dispatch(fetchVillaById(id));
+  }, [id]);
+
+  
 
   // Intersection Observer for each section
   const { ref: highlightsRef, inView: highlightsInView } = useInView({
@@ -96,49 +113,77 @@ const Villaview = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
-      <VillaHeader/>
-      <VillaHero/>
-      <VillaDetails/>
+if (loading) {
+    return <VillaScreenSkeleton />;
+  }
 
-      <div ref={tabsRef}>
-        <StickyTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isSticky={false}
-        />
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-500">Error loading villa details</p>
+        </div>
       </div>
+    );
+  }
 
-      {showStickyTabs && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+  if (!villa) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black/10">
+        <div className="bg-black rounded-full flex justify-center items-center">
+          <ButtonLoader />
+        </div>
+      </div>
+    );
+  }
+
+
+  return (
+    <VillaProvider villa={villa}>
+      <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
+        <VillaHeader />
+        <VillaHero />
+        <VillaDetails />
+
+        <div ref={tabsRef}>
           <StickyTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            isSticky={true}
+            isSticky={false}
           />
         </div>
-      )}
 
-      <div>
-        <AllTabsContent
-          refs={{
-            highlightsRef,
-            refundRef,
-            spacesRef,
-            reviewsRef,
-            amenitiesRef,
-            locationRef,
-            experiencesRef,
-            faqsRef,
-          }}
-        />
+        {showStickyTabs && (
+          <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+            <StickyTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isSticky={true}
+            />
+          </div>
+        )}
+
+        <div>
+          <AllTabsContent
+            refs={{
+              highlightsRef,
+              refundRef,
+              spacesRef,
+              reviewsRef,
+              amenitiesRef,
+              locationRef,
+              experiencesRef,
+              faqsRef,
+            }}
+          />
+        </div>
+
+        <FixedBookingBar />
       </div>
-
-      <FixedBookingBar />
-    </div>
+    </VillaProvider>
   );
 };
 

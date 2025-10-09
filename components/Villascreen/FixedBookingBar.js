@@ -4,7 +4,7 @@ import { SquarePen } from "lucide-react";
 
 const FixedBookingBar = () => {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-gray-200 p-2 z-50">
+    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-gray-200 p-2 z-40">
       <div className="flex items-center justify-between">
         <div>
           <div className="flex items-center space-x-2">
