@@ -49,7 +49,7 @@ const VillaHero = () => {
   return (
     <>
       <div className="relative">
-        <div className="relative h-72 bg-gray-50 overflow-hidden rounded-none">
+        <div className="relative h-64 bg-gray-50 overflow-hidden rounded-none">
           <Carousel setApi={setApi} className="w-full h-full">
             <CarouselContent>
               {villa?.images?.map((image, index) => (
@@ -60,7 +60,7 @@ const VillaHero = () => {
                     unoptimized
                     width={50}
                     alt={`${villa?.name} ${index + 1}`}
-                    className="w-full h-72 object-fill rounded-none"
+                    className="w-full h-64 object-fill rounded-none"
                   />
                 </CarouselItem>
               ))}

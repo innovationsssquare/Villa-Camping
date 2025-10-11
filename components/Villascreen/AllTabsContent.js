@@ -1,16 +1,16 @@
 import React, { forwardRef, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Star,
-  Check,
-  Wifi,
-  WavesLadder,
-  CookingPot,
-  Car,
-  Fence,
-  AirVent,
-} from "lucide-react";
+// import {
+//   ChevronLeft,
+//   ChevronRight,
+//   Star,
+//   Check,
+//   Wifi,
+//   WavesLadder,
+//   CookingPot,
+//   Car,
+//   Fence,
+//   AirVent,
+// } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -39,9 +39,86 @@ import { FaSwimmer } from "react-icons/fa";
 import GoogleMap from "../Propertyviewcomponents/google-map";
 import ReviewsTab from "./ReviewsTab";
 import ExperiencesTab from "./ExperiencesTab";
+import { useVilla } from "@/lib/context/VillaContext";
+import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+
+import {
+  Wifi,
+  Wind,
+  WavesLadder,
+  CookingPot,
+  Car,
+  Fence,
+  AirVent,
+  Tv,
+  Shield,
+  Droplets,
+  BatteryCharging,
+  Building2,
+  Snowflake,
+  Key,
+  Flame,
+  Refrigerator,
+  Sun,
+  ShowerHead,
+  Dumbbell,
+  Coffee,
+  Utensils,
+  Waves,
+  Bath,
+  WashingMachine,
+} from "lucide-react";
+import { FaUmbrellaBeach, FaPeopleRoof, FaBroom } from "react-icons/fa6";
+import { Button } from "../ui/button";
 
 const AllTabsContent = ({ refs }) => {
   const [expandedDescription, setExpandedDescription] = useState(false);
+  const villa = useVilla();
+  const [showAll, setShowAll] = useState(false);
+  const [spacesApi, setSpacesApi] = useState();
+  const [spacesCurrent, setSpacesCurrent] = useState(1);
+
+  React.useEffect(() => {
+    if (!spacesApi) return;
+
+    setSpacesCurrent(spacesApi.selectedScrollSnap() + 1);
+
+    spacesApi.on("select", () => {
+      setSpacesCurrent(spacesApi.selectedScrollSnap() + 1);
+    });
+  }, [spacesApi]);
+
+  const amenityIcons = {
+    WiFi: <Wifi className="w-4 h-4 text-black" />,
+    "Air Conditioning": <Wind className="w-4 h-4 text-black" />,
+    "Swimming Pool": <WavesLadder className="w-4 h-4 text-black" />,
+    Parking: <Car className="w-4 h-4 text-black" />,
+    TV: <Tv className="w-4 h-4 text-black" />,
+    Kitchen: <CookingPot className="w-4 h-4 text-black" />,
+    "Washing Machine": <WashingMachine className="w-4 h-4 text-black" />,
+    Balcony: <FaPeopleRoof className="w-4 h-4 text-black" />,
+    Security: <Shield className="w-4 h-4 text-black" />,
+    Garden: <Fence className="w-4 h-4 text-black" />,
+    "Water Supply": <Droplets className="w-4 h-4 text-black" />,
+    "Power Backup": <BatteryCharging className="w-4 h-4 text-black" />,
+    Heater: <Snowflake className="w-4 h-4 text-black" />,
+    "Beach Access": <FaUmbrellaBeach className="w-4 h-4 text-black" />,
+    Housekeeping: <FaBroom className="w-4 h-4 text-black" />,
+    Jacuzzi: <Bath className="w-4 h-4 text-black" />,
+    "Mini Bar": <Coffee className="w-4 h-4 text-black" />,
+    "Dining Area": <Utensils className="w-4 h-4 text-black" />,
+    Refrigerator: <Refrigerator className="w-4 h-4 text-black" />,
+    "Private Entrance": <Key className="w-4 h-4 text-black" />,
+    "Hot Water": <Flame className="w-4 h-4 text-black" />,
+    Shower: <ShowerHead className="w-4 h-4 text-black" />,
+    Gym: <Dumbbell className="w-4 h-4 text-black" />,
+    "Sun Deck": <Sun className="w-4 h-4 text-black" />,
+    Spa: <Waves className="w-4 h-4 text-black" />,
+  };
+
+  const displayedAmenities = showAll
+    ? villa?.amenities
+    : villa?.amenities?.slice(0, 8);
 
   return (
     <div className="pb-20">
@@ -99,12 +176,11 @@ const AllTabsContent = ({ refs }) => {
         {/* Villa Description */}
         <div className="">
           <h3 className="text-lg font-semibold mb-3 border-l-3 border-orange-500 pl-2">
-            Barkat Villa - Ramgarh - Villa in Nainital
+            {villa?.name} - {villa?.address?.area} - Villa in{" "}
+            {villa?.address?.city}
           </h3>
           <p className="text-villa-text-light text-sm leading-relaxed">
-            {expandedDescription
-              ? "Some places fill your heart before you've even stepped in — Barkat Villa is one of them. Situated in the serene hill station of Ramgarh, this beautiful villa offers breathtaking views of the surrounding mountains and valleys. With its traditional architecture blended with modern amenities, the villa provides the perfect escape from city life. The property features spacious rooms, a well-equipped kitchen, and outdoor areas perfect for relaxation and bonding with family and friends."
-              : "Some places fill your heart before you've even stepped in — Barkat Villa is one of them. Situat..."}
+            {expandedDescription ? villa?.description : villa?.description}
           </p>
           <button
             onClick={() => setExpandedDescription(!expandedDescription)}
@@ -148,7 +224,7 @@ const AllTabsContent = ({ refs }) => {
             </DrawerContent>
           </Drawer>
           <button className="bg-villa-grey text-villa-text-dark px-6 py-2 rounded-full text-sm font-medium">
-          {`  FAQ's`}
+            {`  FAQ's`}
           </button>
         </div>
       </section>
@@ -168,29 +244,27 @@ const AllTabsContent = ({ refs }) => {
             <div>
               <h4 className="font-medium mb-2">Cancellation Policy</h4>
               <ul className="space-y-1 text-villa-text-light">
-                <li>• Free cancellation up to 7 days before check-in</li>
-                <li>• 50% refund for cancellations 3-7 days before</li>
-                <li>• No refund for cancellations within 3 days</li>
+                {villa?.cancellationPolicy.map((policy, index) => (
+                  <li key={index}>• {policy}</li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">House Rules</h4>
               <ul className="space-y-1 text-villa-text-light">
-                <li>• Check-in: 2:00 PM - 8:00 PM</li>
-                <li>• Check-out: 11:00 AM</li>
-                <li>• No smoking inside the property</li>
-                <li>• No pets allowed</li>
-                <li>• No parties or events</li>
+                {villa?.houseRules.map((rule, index) => (
+                  <li key={index}>• {rule}</li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Payment Terms</h4>
               <ul className="space-y-1 text-villa-text-light">
-                <li>• 25% advance payment required at booking</li>
-                <li>• Remaining amount due at check-in</li>
-                <li>• Security deposit: ₹10,000 (refundable)</li>
+                {villa?.paymentTerms.map((terms, index) => (
+                  <li key={index}>• {terms}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -203,50 +277,83 @@ const AllTabsContent = ({ refs }) => {
         id="spaces"
         className="p-3 space-y-6 scroll-mt-16"
       >
-        <div>
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-            Villa Spaces
-          </h3>
+        <div className=" space-y-6">
+          {/* Villa Spaces Carousel */}
+          {villa?.spaces.length > 0 && (
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold"> Spaces</h3>
+                <span className="text-sm text-muted-foreground">
+                  {spacesCurrent}/{villa?.spaces.length}
+                </span>
+              </div>
+              <Carousel className="w-full" setApi={setSpacesApi}>
+                <CarouselContent className="-ml-4">
+                  {villa?.spaces.map((space) => {
+                    const spaceId =
+                      typeof space._id === "string" ? space._id : space._id;
+                    return (
+                      <CarouselItem
+                        key={spaceId}
+                        className="pl-4 md:basis-1/2 lg:basis-1/3"
+                      >
+                        <Card className="overflow-hidden h-full p-0">
+                          <CardHeader className="p-0 ">
+                            <Image
+                              src={space.image}
+                              height={48}
+                              width={48}
+                              alt={space.name}
+                              className="w-full h-48 object-fill"
+                            />
+                          </CardHeader>
+                          <CardContent className="p-4 space-y-3">
+                            <CardTitle className="text-lg">
+                              {space.name}
+                            </CardTitle>
+                            <p className="text-sm text-muted-foreground">
+                              {space.description}
+                            </p>
 
-          <div className="space-y-4">
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Living Areas</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Spacious living room with mountain views</li>
-                <li>• Modern kitchen with dining area</li>
-                <li>• Outdoor terrace and balconies</li>
-              </ul>
+                            {space.details && space.details.length > 0 && (
+                              <div className="space-y-1">
+                                <p className="text-sm font-semibold">
+                                  Details:
+                                </p>
+                                <ul className="space-y-1">
+                                  {space.details.map((detail, index) => (
+                                    <li
+                                      key={index}
+                                      className="text-sm text-muted-foreground"
+                                    >
+                                      • {detail}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious className="hidden md:flex" />
+                <CarouselNext className="hidden md:flex" />
+              </Carousel>
             </div>
-
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Bedrooms (5)</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Master bedroom with en-suite bathroom</li>
-                <li>• 4 additional bedrooms with comfortable beds</li>
-                <li>• All rooms have mountain or garden views</li>
-              </ul>
-            </div>
-
-            <div className="bg-villa-grey/30  rounded-lg">
-              <h4 className="font-medium mb-2">Outdoor Spaces</h4>
-              <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Private garden area</li>
-                <li>• BBQ and bonfire area</li>
-                <li>• Parking for multiple vehicles</li>
-              </ul>
-            </div>
-          </div>
+          )}
         </div>
       </section>
 
       {/* Reviews Section */}
       <section ref={refs.reviewsRef} id="reviews" className="scroll-mt-16">
-        <ReviewsTab/>
+        <ReviewsTab />
       </section>
 
       {/* Amenities Section */}
       <section
-        ref={refs.amenitiesRef}
+        ref={refs?.amenitiesRef}
         id="amenities"
         className="p-3 space-y-6 scroll-mt-16"
       >
@@ -255,49 +362,34 @@ const AllTabsContent = ({ refs }) => {
             Amenities
           </h3>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <Wifi className="w-4 h-4 text-black" />
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 transition-all duration-300 ease-in-out">
+            {displayedAmenities?.map((amenity, index) => (
+              <div
+                key={index}
+                className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg"
+              >
+                <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
+                  {amenityIcons[amenity] || (
+                    <Building2 className="w-4 h-4 text-black" />
+                  )}
+                </div>
+                <span className="text-sm font-medium">{amenity}</span>
               </div>
-              <span className="text-sm font-medium">Free WiFi</span>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <WavesLadder className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-sm font-medium">Swimming Pool</span>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <CookingPot className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-sm font-medium">Kitchen</span>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <Car className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-sm font-medium">Parking</span>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <Fence className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-sm font-medium">Garden</span>
-            </div>
-
-            <div className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg">
-              <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                <AirVent className="w-4 h-4 text-black" />
-              </div>
-              <span className="text-sm font-medium">AC</span>
-            </div>
+            ))}
           </div>
+
+          {/* Show More / Show Less */}
+          {villa?.amenities?.length > 8 && (
+            <div className="flex justify-center mt-4">
+              <Button
+                onPress={() => setShowAll(!showAll)}
+                variant="flat"
+                className="bg-orange-500/10 text-orange-600 font-medium text-sm"
+              >
+                {showAll ? "Show Less" : "Show More"}
+              </Button>
+            </div>
+          )}
         </div>
       </section>
 
@@ -307,27 +399,32 @@ const AllTabsContent = ({ refs }) => {
         id="location"
         className="p-3 space-y-6 scroll-mt-16"
       >
-        <div >
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">Location</h3>
+        <div>
+          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
+            Location
+          </h3>
 
           <div className="bg-gray-100 border border-gray-200 p-2 h-auto  rounded-lg flex items-center justify-center mb-4">
-           <GoogleMap/>
+            <GoogleMap address={villa?.coordinates} />
           </div>
 
           <div className="space-y-3">
             <div>
               <h4 className="font-medium mb-2">Address</h4>
               <p className="text-sm text-villa-text-light">
-                RMalawali,Lonavala,Pune India
+                {villa?.address.addressLine},{villa?.address.area},
+                {villa?.address.city}
               </p>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Nearby Attractions</h4>
               <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Pawana Lake - 15 km</li>
-                <li>• Tiger point - 12 km</li>
-                <li>• Lohgad Fort - 18 km</li>
+                {villa?.nearbyattractions?.map((loc, index) => (
+                  <li key={index}>
+                    • {loc?.nearbylocation} - {loc?.distance} km
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -335,8 +432,12 @@ const AllTabsContent = ({ refs }) => {
       </section>
 
       {/* Experiences Section */}
-    <section ref={refs.experiencesRef} id="experiences" className="scroll-mt-16">
-        <ExperiencesTab/>
+      <section
+        ref={refs.experiencesRef}
+        id="experiences"
+        className="scroll-mt-16"
+      >
+        <ExperiencesTab experiences={villa?.experiences} />
       </section>
 
       {/* FAQ Section */}
@@ -350,9 +451,9 @@ const AllTabsContent = ({ refs }) => {
         </button> */}
 
         {/* FAQ Section */}
-        <div >
+        <div>
           <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-           {` FAQ's related to Vastalya Villa - Malwali - Lonavala`}
+            {` FAQ's related to Vastalya Villa - Malwali - Lonavala`}
           </h3>
           <Accordion type="single" collapsible className="space-y-3">
             <AccordionItem
@@ -396,57 +497,40 @@ const AllTabsContent = ({ refs }) => {
         </div>
 
         {/* Explore Your Stay */}
-        <div >
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">Explore Your Stay</h3>
-          <Accordion type="single" collapsible className="space-y-3">
-            <AccordionItem
-              value="explore-1"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Villa Tour & Facilities
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Take a virtual tour of our spacious villa with modern amenities
-                and beautiful mountain views.
-              </AccordionContent>
-            </AccordionItem>
+        <div className="p-3 space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
+              Explore Your Stay
+            </h3>
 
-            <AccordionItem
-              value="explore-2"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Local Attractions & Activities
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Discover nearby attractions, adventure activities, and cultural
-                experiences in Nainital.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem
-              value="explore-3"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Food & Dining Options
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Enjoy home-cooked meals, local cuisine, and nearby restaurant
-                recommendations.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+            {villa?.exploreStay?.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-3">
+                {villa?.exploreStay?.map((item, index) => (
+                  <AccordionItem
+                    key={item._id || index}
+                    value={`explore-${index}`}
+                    className="bg-gray-100 rounded-lg px-4 border-0"
+                  >
+                    <AccordionTrigger className="font-medium hover:no-underline">
+                      {item.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-villa-text-light">
+                      {item.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <p className="text-sm text-gray-400">No details available</p>
+            )}
+          </div>
         </div>
 
         {/* Nearby Villas */}
-        <div >
+        <div>
           <div className="flex items-center justify-between mb-4 border-l-3 border-orange-500 pl-2">
             <h3 className="text-lg font-semibold">Nearby Villas</h3>
-            <div className="flex items-center space-x-2 text-sm text-villa-text-light">
-            
-            </div>
+            <div className="flex items-center space-x-2 text-sm text-villa-text-light"></div>
           </div>
 
           <Carousel className="w-full">

@@ -4,13 +4,15 @@ import { useEffect, useRef, useState } from "react";
 
 export default function GoogleMap({
   center = { lat: 18.7645, lng: 73.4084 },
+
   zoom = 14,
   className = "w-full h-64 rounded-lg",
+  address,
 }) {
   const mapRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
-
+  console.log(address);
   useEffect(() => {
     const loadGoogleMaps = async () => {
       try {
@@ -68,7 +70,7 @@ export default function GoogleMap({
 
       // Add marker for the property
       new window.google.maps.Marker({
-        position: center,
+        position: { lat:address[1], lng: address[0] },
         map,
         title: "Vastalya Villa - Malawali",
         icon: {
