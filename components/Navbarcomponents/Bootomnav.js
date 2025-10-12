@@ -22,6 +22,8 @@ import { IoPerson } from "react-icons/io5";
 import { IoPersonOutline } from "react-icons/io5";
 import { IoTicket } from "react-icons/io5";
 import { IoTicketOutline } from "react-icons/io5";
+import { setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import { useSelector } from "react-redux";
 
 export function BottomNav() {
   const [activeTab, setActiveTab] = useState("home");
@@ -29,6 +31,9 @@ export function BottomNav() {
   const router = useRouter();
   const pathname = usePathname();
   const [activeitem, setactiveitem] = useState();
+  const {
+    selectedCategoryName,
+  } = useSelector((state) => state.booking);
 
   useEffect(() => {
     if (pathname === "/") {
@@ -43,23 +48,23 @@ export function BottomNav() {
       pathname.startsWith("/category") ||
       pathname.startsWith("/products")
     ) {
-      setActiveTab("/category/all");
+      setActiveTab(`/category/${selectedCategoryName}`);
     } else {
-      setActiveTab("/"); 
+      setActiveTab("/");
     }
   }, [pathname]);
 
   const navItems = [
     {
       value: "/",
-      icon: <IoHome  className="h-5 w-5" />,
-      outline: <IoHomeOutline  className="h-5 w-5" />,
+      icon: <IoHome className="h-5 w-5" />,
+      outline: <IoHomeOutline className="h-5 w-5" />,
       label: "Home",
     },
     {
-      value: "/category/all",
+      value:`/category/${selectedCategoryName}`,
       icon: <IoGrid className="h-5 w-5" />,
-      outline: <IoGridOutline  className="h-5 w-5" />,
+      outline: <IoGridOutline className="h-5 w-5" />,
       label: "category",
     },
     {
@@ -70,14 +75,14 @@ export function BottomNav() {
     },
     {
       value: "/booking",
-      icon: <IoTicket  className="h-6 w-6" />,
-      outline: <IoTicketOutline  className="h-6 w-6" />,
+      icon: <IoTicket className="h-6 w-6" />,
+      outline: <IoTicketOutline className="h-6 w-6" />,
       label: "Recycle",
     },
     {
       value: "/account",
       icon: <IoPerson className="h-5 w-5" />,
-      outline: <IoPersonOutline  className="h-5  w-5" />,
+      outline: <IoPersonOutline className="h-5  w-5" />,
       label: "Profile",
     },
   ];
@@ -127,7 +132,11 @@ export function BottomNav() {
                     : ""
                 )}
               >
-              {activeTab === item.value ?  <span>{item.icon}</span>:<span>{item.outline}</span>}
+                {activeTab === item.value ? (
+                  <span>{item.icon}</span>
+                ) : (
+                  <span>{item.outline}</span>
+                )}
               </div>
 
               <span className="sr-only">{item.label}</span>

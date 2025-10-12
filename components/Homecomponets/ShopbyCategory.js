@@ -43,7 +43,7 @@ const ShopbyCategory = () => {
     dispatch(setSelectedCategory(id));
 
     dispatch(setSelectedCategoryname(name));
-    router.push(`/category/${selectedCategoryName}`);
+    router.push(`/category/${name}`);
   };
 
   return (
@@ -81,9 +81,7 @@ const ShopbyCategory = () => {
                   className="pl-4 md:basis-1/8 lg:basis-1/8 basis-4/ flex justify-center"
                 >
                   <div
-                    onClick={() =>
-                      handleselectcategory(category?._id, category?.name)
-                    }
+                   
                     className="group flex flex-col items-center justify-center"
                   >
                     <Button

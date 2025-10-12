@@ -42,12 +42,16 @@ import {
 } from "lucide-react";
 import { FaUmbrellaBeach, FaPeopleGroup, FaChild, FaTv } from "react-icons/fa6";
 import { FaFilePdf } from "react-icons/fa6";
+import { useSelector } from "react-redux";
 
 const PropertyCardnew = ({ property }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState();
+  const {
+    selectedCategoryName,
+  } = useSelector((state) => state.booking);
 
   useEffect(() => {
     if (!api) return;
@@ -457,8 +461,8 @@ const PropertyCardnew = ({ property }) => {
             </div>
             <div className="space-y-3">
               <Button
-                onClick={() =>
-                  router.push(`/view-villa/68e6b22178066ac5b42c4e98`)
+                onPress={() =>
+                  router.push(`/view-${selectedCategoryName}/${property?._id}`)
                 }
                 className="w-full bg-black  text-primary-foreground font-semibold"
               >
