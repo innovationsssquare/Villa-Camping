@@ -47,7 +47,7 @@ export default function GoogleMap({
       if (!mapRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapRef.current, {
-        center,
+        center: { lat: address[1], lng: address[0] },
         zoom,
         // styles: [
         //   {
@@ -70,7 +70,7 @@ export default function GoogleMap({
 
       // Add marker for the property
       new window.google.maps.Marker({
-        position: { lat:address[1], lng: address[0] },
+        position: { lat: address[1], lng: address[0] },
         map,
         title: "Vastalya Villa - Malawali",
         icon: {

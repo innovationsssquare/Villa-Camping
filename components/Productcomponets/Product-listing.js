@@ -845,7 +845,7 @@ export default function PropertyFilterListing() {
         <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
           <NavigationCarousel />
 
-          <div className="md:sticky hidden md:block md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200  md:rounded-none rounded-full md:rounded-none">
+          <div className="md:sticky hidden md:block md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200   rounded-full md:rounded-none">
             <div className="flex md:hidden justify-around  gap-2 items-center   ">
               <SortDrawer />
               <Button

@@ -2,11 +2,12 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { setCheckin, setCheckout } from "@/Redux/Slices/bookingSlice";
+import { flushSync } from "react-dom";
 
 export default function DatePickerPage() {
   const router = useRouter();
@@ -37,6 +38,35 @@ export default function DatePickerPage() {
 
   const getFirstDayOfMonth = (year, month) => new Date(year, month, 1).getDay();
 
+  // const handleDateClick = (date) => {
+  //   const clickedDate = new Date(
+  //     date.getFullYear(),
+  //     date.getMonth(),
+  //     date.getDate()
+  //   );
+
+  //   if (!selectedCheckInDate || (selectedCheckInDate && selectedCheckOutDate)) {
+  //     setSelectedCheckInDate(clickedDate);
+  //     setSelectedCheckOutDate(null);
+  //     dispatch(setCheckin(clickedDate.toISOString())); // ✅ save in Redux
+  //     dispatch(setCheckout(null));
+  //   } else if (selectedCheckInDate) {
+  //     if (clickedDate.getTime() < selectedCheckInDate.getTime()) {
+  //       setSelectedCheckInDate(clickedDate);
+  //       setSelectedCheckOutDate(null);
+  //       dispatch(setCheckin(clickedDate.toISOString()));
+  //       dispatch(setCheckout(null));
+  //     } else if (clickedDate.getTime() === selectedCheckInDate.getTime()) {
+  //       setSelectedCheckInDate(null);
+  //       setSelectedCheckOutDate(null);
+  //       dispatch(setCheckin(null));
+  //       dispatch(setCheckout(null));
+  //     } else {
+  //       setSelectedCheckOutDate(clickedDate);
+  //       dispatch(setCheckout(clickedDate.toISOString())); // ✅ save in Redux
+  //     }
+  //   }
+  // };
   const handleDateClick = (date) => {
     const clickedDate = new Date(
       date.getFullYear(),
@@ -44,27 +74,41 @@ export default function DatePickerPage() {
       date.getDate()
     );
 
-    if (!selectedCheckInDate || (selectedCheckInDate && selectedCheckOutDate)) {
-      setSelectedCheckInDate(clickedDate);
-      setSelectedCheckOutDate(null);
-      dispatch(setCheckin(clickedDate.toISOString())); // ✅ save in Redux
-      dispatch(setCheckout(null));
-    } else if (selectedCheckInDate) {
-      if (clickedDate.getTime() < selectedCheckInDate.getTime()) {
+    flushSync(() => {
+      // all setState and dispatch inside flushSync run immediately
+      if (
+        !selectedCheckInDate ||
+        (selectedCheckInDate && selectedCheckOutDate)
+      ) {
         setSelectedCheckInDate(clickedDate);
         setSelectedCheckOutDate(null);
         dispatch(setCheckin(clickedDate.toISOString()));
         dispatch(setCheckout(null));
-      } else if (clickedDate.getTime() === selectedCheckInDate.getTime()) {
-        setSelectedCheckInDate(null);
-        setSelectedCheckOutDate(null);
-        dispatch(setCheckin(null));
-        dispatch(setCheckout(null));
-      } else {
-        setSelectedCheckOutDate(clickedDate);
-        dispatch(setCheckout(clickedDate.toISOString())); // ✅ save in Redux
+      } else if (selectedCheckInDate) {
+        if (clickedDate.getTime() < selectedCheckInDate.getTime()) {
+          setSelectedCheckInDate(clickedDate);
+          setSelectedCheckOutDate(null);
+          dispatch(setCheckin(clickedDate.toISOString()));
+          dispatch(setCheckout(null));
+        } else if (clickedDate.getTime() === selectedCheckInDate.getTime()) {
+          setSelectedCheckInDate(null);
+          setSelectedCheckOutDate(null);
+          dispatch(setCheckin(null));
+          dispatch(setCheckout(null));
+        } else {
+          setSelectedCheckOutDate(clickedDate);
+          dispatch(setCheckout(clickedDate.toISOString()));
+        }
       }
+    });
+  };
+
+  const handleNext = () => {
+    if (!selectedCheckInDate || !selectedCheckOutDate) {
+      alert("Please select both check-in and check-out dates");
+      return;
     }
+    router.back();
   };
 
   const numberOfNights = useMemo(() => {
@@ -115,7 +159,7 @@ export default function DatePickerPage() {
       calendarDays.push(
         <div
           key={`empty-${month}-${i}`}
-          className="h-12 w-12 flex items-center justify-center"
+          className="h-12 w-12  flex items-center justify-center"
         />
       );
     }
@@ -140,7 +184,7 @@ export default function DatePickerPage() {
         <div
           key={`${month}-${day}`}
           className={cn(
-            "h-12 w-12 flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
+            "h-12 w-12  flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
             isWeekend ? "text-red-500" : "text-gray-800",
             isCheckIn && "bg-black text-white rounded-full",
             isCheckOut && "bg-black text-white rounded-full",
@@ -179,9 +223,9 @@ export default function DatePickerPage() {
   return (
     <div className="flex flex-col h-screen bg-white">
       {/* Top Header */}
-      <header className="flex items-center justify-between p-4 border-b border-gray-200">
+      <header className="flex items-center justify-between py-3  border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <Button onClick={() => router.back()}  variant="light">
+          <Button onPress={() => router.back()} variant="light" isIconOnly>
             <ChevronLeft className="h-5 w-5 text-gray-800" />
           </Button>{" "}
           <h1 className="text-md font-semibold text-gray-800">
@@ -203,28 +247,31 @@ export default function DatePickerPage() {
       </div>
 
       {/* Calendar Grid */}
-      <div className="flex-1 overflow-y-auto p-1">
+      <div className="flex-1 overflow-y-auto p-1 pb-28">
         {monthsToRender.map((monthDate, index) => (
           <div key={index}>{renderMonth(monthDate)}</div>
         ))}
       </div>
 
       {/* Bottom Fixed Bar */}
-      <div className="sticky bottom-0 w-full bg-white p-1 shadow-[0_-4px_6px_-1px_rgb(0_0_0_/_0.1),_0_-2px_4px_-2px_rgb(0_0_0_/_0.1)]">
-        <div className="relative ">
+      <div className="fixed bottom-0 left-0 w-full bg-white p-1 z-[200] shadow-[0_-4px_6px_-1px_rgb(0_0_0_/_0.1),_0_-2px_4px_-2px_rgb(0_0_0_/_0.1)]">
+        <div className="relative">
+          {/* Tooltip */}
           <div
             className={cn(
-              "absolute -top-6 bg-black text-white text-xs px-2 py-1 rounded-md shadow-lg transition-all duration-300",
+              "absolute -top-8 left-1/2 -translate-x-1/2 bg-black text-white text-xs px-3 py-1 rounded-md shadow-lg pointer-events-none opacity-100 scale-100 transition-all duration-300 ease-out",
               tooltipPositionClass
             )}
           >
             {tooltipText}
             <div className="absolute left-1/2 -bottom-1 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-black -translate-x-1/2"></div>
           </div>
-          <div className="flex items-center justify-between  rounded-lg p-2">
+
+          {/* Summary */}
+          <div className="flex items-center justify-between rounded-lg p-2">
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 ",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 transition-colors duration-300",
                 selectedCheckInDate && !selectedCheckOutDate
                   ? "bg-blue-100"
                   : "bg-gray-200"
@@ -235,12 +282,14 @@ export default function DatePickerPage() {
                 {formatDateDisplay(selectedCheckInDate)}
               </div>
             </div>
-            <div className="mx-2  bg-black p-2 text-white text-xs rounded-full">
-              {numberOfNights} Night
+
+            <div className="mx-2 bg-black p-2 text-white text-xs rounded-full transition-all duration-300">
+              {numberOfNights} {numberOfNights === 1 ? "Night" : "Nights"}
             </div>
+
             <div
               className={cn(
-                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 ",
+                "flex-1 rounded-md p-2 text-sm font-medium text-gray-800 transition-colors duration-300",
                 selectedCheckInDate && selectedCheckOutDate
                   ? "bg-blue-100"
                   : "bg-gray-200"
@@ -253,9 +302,11 @@ export default function DatePickerPage() {
             </div>
           </div>
         </div>
+
+        {/* ✅ Next button - always clickable */}
         <Button
           onClick={() => router.back()}
-          className="w-full py-3 text-base font-semibold bg-black text-white rounded-lg"
+          className="w-full py-3 text-base font-semibold bg-black text-white rounded-lg active:scale-[0.98] transition-transform duration-150 z-[300]"
         >
           NEXT
         </Button>

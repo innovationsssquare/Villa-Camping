@@ -1,15 +1,20 @@
-"use client"
+"use client";
 
-import  React from "react"
-import { useState } from "react"
-import { FaTimes, FaTicketAlt } from "react-icons/fa"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from "@/components/ui/drawer"
-import { Button } from "@heroui/react"
-
-
+import React from "react";
+import { useState } from "react";
+import { FaTimes, FaTicketAlt } from "react-icons/fa";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+} from "@/components/ui/drawer";
+import { Button } from "@heroui/react";
+import { X } from "lucide-react";
 
 const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
-  const [couponCode, setCouponCode] = useState("")
+  const [couponCode, setCouponCode] = useState("");
 
   const availableCoupons = [
     {
@@ -39,29 +44,38 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
       maxDiscount: 1500,
       validTill: "31 December 2025",
     },
-  ]
+  ];
 
   const handleManualApply = () => {
-    const foundCoupon = availableCoupons.find((coupon) => coupon.code.toLowerCase() === couponCode.toLowerCase())
+    const foundCoupon = availableCoupons.find(
+      (coupon) => coupon.code.toLowerCase() === couponCode.toLowerCase()
+    );
     if (foundCoupon) {
-      onApplyCoupon(foundCoupon)
-      setCouponCode("")
+      onApplyCoupon(foundCoupon);
+      setCouponCode("");
     }
-  }
+  };
 
   const handleCouponApply = (coupon) => {
-    onApplyCoupon(coupon)
-  }
+    onApplyCoupon(coupon);
+  };
 
   return (
     <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent className="max-h-[80vh] border-none">
         <DrawerHeader className="flex flex-row items-center justify-between p-2 border-b border-gray-100">
-          <DrawerTitle className="text-lg font-semibold text-black">Coupons and Offers</DrawerTitle>
+          <DrawerTitle className="text-lg font-semibold text-black">
+            Coupons and Offers
+          </DrawerTitle>
           <DrawerClose asChild>
-            <button className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-              <FaTimes className="w-5 h-5 text-gray-600" />
-            </button>
+            <Button
+              variant="light"
+              size="icon"
+              onPress={onClose}
+              className="rounded-full p-1 border-gray-300 border "
+            >
+              <X className="h-5 w-5 text-black" />
+            </Button>
           </DrawerClose>
         </DrawerHeader>
 
@@ -88,20 +102,31 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
           {/* Available Offers */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <h3 className="text-sm font-medium text-gray-600">Offers Available</h3>
+              <h3 className="text-sm font-medium text-gray-600">
+                Offers Available
+              </h3>
               <span className="text-xs text-gray-400">T&C</span>
             </div>
 
             {/* Coupon Cards */}
             {availableCoupons.map((coupon) => (
-              <div key={coupon.code} className="border border-white bg-gray-200 rounded-lg p-4 space-y-3">
+              <div
+                key={coupon.code}
+                className="border border-white bg-gray-200 rounded-lg p-4 space-y-3"
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">valid till: {coupon.validTill}</p>
-                    <p className="text-sm text-gray-700 mb-2">{coupon.description}</p>
+                    <p className="text-xs text-gray-500 mb-1">
+                      valid till: {coupon.validTill}
+                    </p>
+                    <p className="text-sm text-gray-700 mb-2">
+                      {coupon.description}
+                    </p>
                     <div className="flex items-center gap-2">
                       <FaTicketAlt className="w-4 h-4 text-gray-600" />
-                      <span className="font-bold text-black text-lg">{coupon.code}</span>
+                      <span className="font-bold text-black text-lg">
+                        {coupon.code}
+                      </span>
                     </div>
                   </div>
                   <button
@@ -118,7 +143,7 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
         </div>
       </DrawerContent>
     </Drawer>
-  )
-}
+  );
+};
 
-export default CouponsDrawer
+export default CouponsDrawer;

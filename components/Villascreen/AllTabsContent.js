@@ -69,7 +69,7 @@ import {
   WashingMachine,
 } from "lucide-react";
 import { FaUmbrellaBeach, FaPeopleRoof, FaBroom } from "react-icons/fa6";
-import { Button } from "../ui/button";
+import { Button } from "@heroui/react";
 
 const AllTabsContent = ({ refs }) => {
   const [expandedDescription, setExpandedDescription] = useState(false);
@@ -297,13 +297,15 @@ const AllTabsContent = ({ refs }) => {
                         key={spaceId}
                         className="pl-4 md:basis-1/2 lg:basis-1/3"
                       >
-                        <Card className="overflow-hidden h-full p-0">
+                        <Card className="overflow-hidden h-full p-0 shadow-none">
                           <CardHeader className="p-0 ">
                             <Image
                               src={space.image}
                               height={48}
                               width={48}
                               alt={space.name}
+                              unoptimized
+                              
                               className="w-full h-48 object-fill"
                             />
                           </CardHeader>
@@ -497,7 +499,7 @@ const AllTabsContent = ({ refs }) => {
         </div>
 
         {/* Explore Your Stay */}
-        <div className="p-3 space-y-6">
+        <div className=" space-y-6">
           <div>
             <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
               Explore Your Stay

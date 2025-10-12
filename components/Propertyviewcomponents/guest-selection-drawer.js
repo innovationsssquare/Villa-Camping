@@ -1,36 +1,55 @@
-"use client"
-import { FaMinus, FaPlus, FaTimes } from "react-icons/fa"
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer"
+"use client";
+import { FaMinus, FaPlus, FaTimes } from "react-icons/fa";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { X } from "lucide-react";
+import { Button } from "@heroui/react";
 
-export default function GuestSelectionDrawer({ isOpen, onClose, guestCounts, onGuestCountsChange }) {
+export default function GuestSelectionDrawer({
+  isOpen,
+  onClose,
+  guestCounts,
+  onGuestCountsChange,
+}) {
   const updateCount = (type, increment) => {
-    const newCounts = { ...guestCounts }
+    const newCounts = { ...guestCounts };
     if (increment) {
-      newCounts[type] += 1
+      newCounts[type] += 1;
     } else if (newCounts[type] > 0) {
-      newCounts[type] -= 1
+      newCounts[type] -= 1;
     }
 
     // Ensure at least 1 adult
     if (type === "adults" && newCounts.adults < 1) {
-      newCounts.adults = 1
+      newCounts.adults = 1;
     }
 
-    onGuestCountsChange(newCounts)
-  }
+    onGuestCountsChange(newCounts);
+  };
 
   const handleDone = () => {
-    onClose()
-  }
+    onClose();
+  };
 
   return (
-    <Drawer open={isOpen} onOpenChange={() => {}}>
+    <Drawer open={isOpen} onOpenChange={onClose}>
       <DrawerContent className="max-h-[80vh] w-full border-none">
         <DrawerHeader className="flex flex-row items-center justify-between w-full ">
-          <DrawerTitle className="text-lg font-semibold text-black">Total Guests</DrawerTitle>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 bg-gray-300 rounded-md transition-colors">
-            <FaTimes className="w-4 h-4 text-black" />
-          </button>
+          <DrawerTitle className="text-lg font-semibold text-black">
+            Total Guests
+          </DrawerTitle>
+          <Button
+            variant="light"
+            size="icon"
+            onPress={onClose}
+            className="rounded-full p-1 border-gray-300 border "
+          >
+            <X className="h-5 w-5 text-black" />
+          </Button>
         </DrawerHeader>
 
         <div className="p-6 space-y-6">
@@ -123,5 +142,5 @@ export default function GuestSelectionDrawer({ isOpen, onClose, guestCounts, onG
         </div>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

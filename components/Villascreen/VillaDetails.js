@@ -40,7 +40,7 @@ const VillaDetails = () => {
   };
 
   const amenitiesIcons = {
-    "Air Conditioning": <Wind className="w-6 h-6 text-gray-600" />,
+    "AC": <Wind className="w-6 h-6 text-gray-600" />,
     WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
     Balcony: <Home className="w-6 h-6 text-gray-600" />,
     TV: <FaTv className="w-6 h-6 text-gray-600" />,
@@ -112,8 +112,8 @@ const VillaDetails = () => {
       {/* Great For Section */}
       {villa?.greatFor?.length > 0 && (
         <div className="flex flex-col">
-          <div className="flex flex-wrap gap-2">
-            <p className="text-sm text-villa-text-light mb-1">Great for:</p>
+          <div className="flex flex-wrap gap-2 items-center">
+            <p className="text-sm text-villa-text-light ">Great for:</p>
             {villa.greatFor.slice(0, 1).map((item, index) => (
               <div
                 key={index}

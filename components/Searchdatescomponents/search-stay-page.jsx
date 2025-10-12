@@ -234,11 +234,11 @@ export default function SearchStayPage() {
       </main>
 
       {/* Footer */}
-      <footer className="p-4 text-center border-t border-gray-200 mb-12">
-        <p className="text-sm text-gray-600 mb-2">
+      <footer className="p-2 text-center border-t border-gray-200 mb-12">
+        <p className="text-xs text-gray-600 mb-2">
           Finding your ideal vacation spot should be easy, we're here to help!
         </p>
-        <Button variant="ghost" className="text-black text-sm font-semibold">
+        <Button size="sm" variant="light" className="text-orange-500 bg-orange-100 text-sm font-semibold">
           <Phone className="h-4 w-4 mr-2" />
           Request Callback
         </Button>

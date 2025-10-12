@@ -6,6 +6,7 @@ import {
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
+  DrawerClose,
 } from "@/components/ui/drawer";
 import { Button } from "@heroui/react";
 import { Card } from "@/components/ui/card";
@@ -33,18 +34,15 @@ import {
   removeCoupon,
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
+import { X } from "lucide-react";
 
 export default function BookingDialog({
   isOpen,
+  Setopen,
   onClose,
   propertyName,
   price,
   originalPrice,
-  propertyId,
-  ownerId,
-  propertyType = "Villa",
-  unitTypeName, // e.g., villa.bhkType
-  customerId, // optional: if you have auth user id available
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
@@ -92,126 +90,6 @@ export default function BookingDialog({
     nights,
     appliedCoupon
   );
-
-  // const handleBooking = async () => {
-  //   try {
-  //     setIsLoading(true)
-
-  //     // Build booking payload aligned to your Booking schema
-  //     const bookingPayload = {
-  //       propertyType,
-  //       propertyId,
-  //       ownerId,
-  //       customerId, // If not available, API may reject (schema requires); see note in postamble
-  //       checkIn: checkInDate.toISOString(),
-  //       checkOut: checkOutDate.toISOString(),
-  //       guests: {
-  //         adults: guestCounts.adults,
-  //         children: guestCounts.children,
-  //       },
-  //       items: [
-  //         {
-  //           unitType:
-  //             propertyType === "Villa"
-  //               ? "VillaUnit"
-  //               : propertyType === "Hotel"
-  //                 ? "RoomUnit"
-  //                 : propertyType === "Camping"
-  //                   ? "Tent"
-  //                   : "CottageUnit",
-  //           unitId: propertyId,
-  //           typeName: unitTypeName || propertyName,
-  //           quantity: 1,
-  //           pricePerNight: price,
-  //           totalPrice: basePrice,
-  //         },
-  //       ],
-  //       payment: {
-  //         amount: finalTotal,
-  //         currency: "INR",
-  //         status: "pending",
-  //       },
-  //     }
-
-  //     // Create Razorpay order via server
-  //     const orderRes = await fetch("/api/razorpay/create-order", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify({
-  //         amount: finalTotal,
-  //         currency: "INR",
-  //         booking: bookingPayload,
-  //       }),
-  //     })
-
-  //     if (!orderRes.ok) {
-  //       const err = await orderRes.json().catch(() => ({}))
-  //       throw new Error(err?.message || "Failed to create order")
-  //     }
-
-  //     const { order, publicKey } = await orderRes.json()
-
-  //     // Initialize Razorpay Checkout
-  //     const options = {
-  //       key: publicKey, // prefer NEXT_PUBLIC key from server
-  //       amount: order.amount,
-  //       currency: order.currency,
-  //       name: propertyName,
-  //       description: "Booking payment",
-  //       order_id: order.id,
-  //       handler: async (response) => {
-  //         try {
-  //           // Verify payment on server and create booking
-  //           const verifyRes = await fetch("/api/razorpay/verify", {
-  //             method: "POST",
-  //             headers: { "Content-Type": "application/json" },
-  //             body: JSON.stringify({
-  //               razorpay_order_id: response.razorpay_order_id,
-  //               razorpay_payment_id: response.razorpay_payment_id,
-  //               razorpay_signature: response.razorpay_signature,
-  //               booking: bookingPayload,
-  //             }),
-  //           })
-
-  //           if (!verifyRes.ok) {
-  //             const err = await verifyRes.json().catch(() => ({}))
-  //             throw new Error(err?.message || "Payment verification failed")
-  //           }
-
-  //           // Success: route to a confirmation or summary screen
-  //           router.push("/checkout?status=success")
-  //         } catch (e) {
-  //           console.error("[v0] verify error:",message)
-  //           router.push("/checkout?status=failed")
-  //         } finally {
-  //           setIsLoading(false)
-  //         }
-  //       },
-  //       prefill: {
-  //         // Provide if available
-  //         name: "",
-  //         email: "",
-  //         contact: "",
-  //       },
-  //       notes: {
-  //         property: propertyName,
-  //         nights: String(nights),
-  //       },
-  //       theme: {
-  //         color: "#000000",
-  //       },
-  //     }
-
-  //     const rzp = new window.Razorpay(options)
-  //     rzp.on("payment.failed", () => {
-  //       setIsLoading(false)
-  //     })
-  //     rzp.open()
-  //   } catch (error) {
-  //     console.error("[v0] booking error:",message)
-  //     setIsLoading(false)
-  //   }
-  // }
 
   const handleBooking = () => {
     setIsLoading(true);
@@ -275,29 +153,29 @@ export default function BookingDialog({
     <>
       <Drawer
         open={isOpen}
-        onOpenChange={() => {}}
+        onOpenChange={Setopen}
         shouldScaleBackground={false}
       >
-        <DrawerContent className="max-h-[95vh] bg-gray-50 border-none">
+        <DrawerContent className="max-h-[95vh]  border-none">
           <DrawerHeader className="p-0">
             {/* Header */}
             <div className="flex items-center justify-between px-3 w-full">
               {showDatePicker ? (
                 <>
-                  <Button
-                    variant="ghost"
-                    isIconOnly
-                    onPress={() => setShowDatePicker(false)}
-                    className="rounded-md bg-gray-300 border-white p-2 hover:bg-black"
-                  >
-                    <FaArrowLeft className="h-6 w-6 text-black" />
-                  </Button>
                   <DrawerTitle className="text-xl font-bold text-black">
                     Select{" "}
                     {datePickerType === "checkin" ? "Check-in" : "Check-out"}{" "}
                     Date
                   </DrawerTitle>
-                  <div className="w-10" /> {/* Spacer */}
+                  <Button
+                    variant="light"
+                    isIconOnly
+                    onPress={() => setShowDatePicker(false)}
+                    className="rounded-full border-gray-300 border bg-white p-1 hover:bg-black"
+                  >
+                    <X size={15} className=" text-black" />
+                  </Button>
+                 
                 </>
               ) : (
                 <>
@@ -305,12 +183,12 @@ export default function BookingDialog({
                     {propertyName}
                   </DrawerTitle>
                   <Button
-                    variant="ghost"
+                    variant="light"
                     size="icon"
                     onPress={onClose}
-                    className="rounded-md bg-gray-300 hover:bg-gray-100"
+                    className="rounded-full p-1 border-gray-300 border "
                   >
-                    <FaTimes className="h-5 w-5 text-black" />
+                    <X className="h-5 w-5 text-black" />
                   </Button>
                 </>
               )}
@@ -343,7 +221,7 @@ export default function BookingDialog({
                 <div className="px-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-black">
-                      ₹{price.toLocaleString()}
+                      ₹{price}
                     </span>
                     {originalPrice && (
                       <span className="text-gray-500 line-through">
@@ -351,9 +229,7 @@ export default function BookingDialog({
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm">
-                    (For 1 room) Per night + taxes
-                  </p>
+                  <p className="text-gray-600 text-sm">Per night + taxes</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 px-2">
@@ -364,16 +240,16 @@ export default function BookingDialog({
                     <Button
                       size=""
                       onPress={() => openDatePicker("checkin")}
-                      className="w-full border border-white rounded-lg p-3 bg-gray-300 hover:bg-gray-100 transition-colors"
+                      className="w-full  border bg-white  rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center justify-between w-full">
                         <div className="flex flex-col items-start gap-1">
-                          <p className="font-semibold text-black">
+                          <p className="font-semibold text-black text-sm">
                             {formatDate(checkInDate)}
                           </p>
-                          <p className="text-sm text-gray-600">2:00pm</p>
+                          <p className="text-xs text-gray-600">2:00pm</p>
                         </div>
-                        <FaChevronDown className="h-4 w-4 text-black" />
+                        <FaChevronDown size={12} className=" text-black" />
                       </div>
                     </Button>
                   </div>
@@ -384,16 +260,16 @@ export default function BookingDialog({
                     <Button
                       size=""
                       onPress={() => openDatePicker("checkout")}
-                      className="w-full border border-white rounded-lg p-3 bg-gray-300 hover:bg-gray-100 transition-colors"
+                      className="w-full  border bg-white  rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
                     >
                       <div className="flex items-center justify-between w-full">
                         <div className="flex flex-col items-start gap-1">
-                          <p className="font-semibold text-black">
+                          <p className="font-semibold text-black text-sm">
                             {formatDate(checkOutDate)}
                           </p>
-                          <p className="text-sm text-gray-600">11:00am</p>
+                          <p className="text-xs text-gray-600">11:00am</p>
                         </div>
-                        <FaChevronDown className="h-4 w-4 text-black" />
+                        <FaChevronDown size={12} className=" text-black" />
                       </div>
                     </Button>
                   </div>
@@ -407,24 +283,24 @@ export default function BookingDialog({
                   <Button
                     size=""
                     onPress={() => setIsGuestDrawerOpen(true)}
-                    className="w-full border border-white rounded-lg p-3 bg-gray-300 hover:bg-gray-100 transition-colors"
+                    className="w-full border bg-white rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-medium text-black">
+                      <span className="font-medium text-sm text-black">
                         {guestCounts?.adults} Guest | {guestCounts?.children}{" "}
                         children
                       </span>
-                      <span className="font-semibold text-black">
+                      <span className="font-semibold text-sm text-black">
                         {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
                       </span>
-                      <FaChevronDown className="h-4 w-4 text-black" />
+                      <FaChevronDown size={12} className=" text-black" />
                     </div>
                   </Button>
                 </div>
 
                 {appliedCoupon && (
                   <div className="px-2">
-                    <Card className="p-4 border-white bg-gray-300 shadow-none px-3">
+                    <Card className="p-4 bg-white border-gray-300 border shadow-none px-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
@@ -441,8 +317,8 @@ export default function BookingDialog({
                           </div>
                         </div>
                         <Button
-                          variant="ghost"
-                          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                          variant="light"
+                          className="text-red-500 border border-red-500 hover:text-red-600 hover:bg-red-50"
                           onPress={handleRemoveCouponClick}
                         >
                           Remove
@@ -468,12 +344,12 @@ export default function BookingDialog({
                 <div className="border-t pt-2 border-gray-200 px-3">
                   <div className="flex items-center justify-between mb-2">
                     <div>
-                      <span className="text-xl font-bold text-black">
+                      <span className="text-lg font-bold text-black">
                         Total
                       </span>
                     </div>
                     <div className="text-right">
-                      <p className="text-xl font-bold text-black">
+                      <p className="text-lg font-bold text-black">
                         ₹{finalTotal.toLocaleString()}
                       </p>
                       <p className="text-sm text-gray-500">(Incl. taxes)</p>

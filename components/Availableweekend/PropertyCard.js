@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { Card } from "@/components/ui/card";
 import {
   Carousel,
@@ -15,11 +15,8 @@ import {
   Star,
   MapPin,
   Users,
-  Home,
-  Bath,
   Utensils,
   Wifi,
-  Mountain,
   Trees,
   Waves,
   Play,
@@ -28,45 +25,64 @@ import {
 import VideoModal from "./VideoModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import {
+  Bed,
+  Bath,
+  Mountain,
+  Sun,
+  Home,
+  Coffee,
+  Tv,
+  Wind,
+  Baby,
+  Snowflake,
+  AirVent,
+  Building2,
+  GlassWater,
+} from "lucide-react";
+import { FaUmbrellaBeach, FaPeopleGroup, FaChild, FaTv } from "react-icons/fa6";
+import { FaFilePdf } from "react-icons/fa6";
 
-const PropertyCardnew = ({
-  title = "Paashaan - Khopoli",
-  location = "Lonavala, Maharashtra",
-  distance = "19.6km to Kune Falls",
-  guests = 12,
-  rooms = 4,
-  baths = 4,
-  price = "₹14,61,686",
-  rating = 5,
-  duration = "Min 2 Nights",
-  isVerified = true,
-  isBestRated = true,
-  isLuxury = true,
-  className = "",
-}) => {
+const PropertyCardnew = ({ property }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
-const router=useRouter()
-  const propertyImages = [
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    ,
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-  ];
+  const router = useRouter();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [api, setApi] = useState();
 
-  const amenities = [
-    { icon: Waves, label: "Heated Pool" },
-    { icon: Trees, label: "Lawn" },
-    { icon: Mountain, label: "Mountain View" },
-    { icon: Utensils, label: "Meals Available" },
-    { icon: Wifi, label: "WiFi" },
-  ];
+  useEffect(() => {
+    if (!api) return;
 
-  const greatFor = ["Food", "Senior Citizens"];
+    setCurrentSlide(api.selectedScrollSnap());
+
+    api.on("select", () => {
+      setCurrentSlide(api.selectedScrollSnap());
+    });
+  }, [api]);
+
+  const amenitiesIcons = {
+    "AC": <Wind className="w-6 h-6 text-gray-600" />,
+    WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
+    Balcony: <Home className="w-6 h-6 text-gray-600" />,
+    TV: <FaTv className="w-6 h-6 text-gray-600" />,
+    "Breakfast Included": <Utensils className="w-6 h-6 text-gray-600" />,
+    "BBQ Grill": <Waves className="w-6 h-6 text-gray-600" />,
+    Jacuzzi: <Coffee className="w-6 h-6 text-gray-600" />,
+    "Mini Bar": <GlassWater className="w-6 h-6 text-gray-600" />,
+    Heater: <Snowflake className="w-6 h-6 text-gray-600" />,
+  };
+
+  const greatForIcons = {
+    "Mountain View": <Mountain className="w-4 h-4 text-gray-600" />,
+    "Ideal for Families": <FaChild className="w-4 h-4 text-gray-600" />,
+    "Ideal for Groups": <FaPeopleGroup className="w-4 h-4 text-gray-600" />,
+    Beachfront: <FaUmbrellaBeach className="w-4 h-4 text-gray-600" />,
+    "Nature Retreat": <Trees className="w-4 h-4 text-gray-600" />,
+    "Romantic Getaway": <Heart className="w-4 h-4 text-gray-600" />,
+  };
 
   return (
     <Card
-      className={`overflow-hidden shadow-none p-0 transition-all duration-300 bg-gradient-luxury border border-gray-300 ${className}`}
+      className={`overflow-hidden shadow-none p-0 transition-all duration-300 bg-gradient-luxury border border-gray-300`}
     >
       {/* Desktop Layout (Horizontal) */}
       <div className="hidden md:flex md:h-80">
@@ -74,14 +90,15 @@ const router=useRouter()
         <div className="relative w-2/5 bg-gray-100">
           <Carousel className="w-full h-full">
             <CarouselContent>
-              {propertyImages.map((image, index) => (
+              {property?.images?.map((image, index) => (
                 <CarouselItem key={index}>
                   <Image
                     height={50}
                     width={50}
+                    unoptimized
                     src={image}
-                    alt={`${title} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    alt={`${property?.name} - Image ${index + 1}`}
+                    className="w-full h-80 object-fill"
                   />
                 </CarouselItem>
               ))}
@@ -91,24 +108,24 @@ const router=useRouter()
           </Carousel>
 
           <div className="absolute top-4 left-4 flex gap-2">
-            {isBestRated && (
-              <Badge className="bg-card text-primary font-normal">
-                <Star className="w-3 h-3 mr-1" />
+            {property?.tags && (
+              <Badge className="bg-white text-black font-normal">
+                <Star className="w-3 h-3 mr-1 fill-amber-400 text-amber-400" />
                 Best Rated
               </Badge>
             )}
-            {isLuxury && (
+            {/* {isLuxury && (
               <Badge className="bg-primary text-primary-foreground font-light">
                 Luxury
               </Badge>
-            )}
+            )} */}
           </div>
 
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="bg-card/80 hover:bg-card text-foreground"
+              className="bg-white/50 hover:bg-white text-black"
               onClick={() => setIsWishlisted(!isWishlisted)}
             >
               <Heart
@@ -120,7 +137,7 @@ const router=useRouter()
             <Button
               variant="ghost"
               size="icon"
-              className="bg-card/80 hover:bg-card text-foreground"
+              className="bg-white/50 hover:bg-white text-black"
             >
               <Share2 className="w-4 h-4" />
             </Button>
@@ -128,7 +145,10 @@ const router=useRouter()
 
           {/* Video Button */}
           <div className="absolute bottom-4 left-4">
-            <VideoModal thumbnailSrc={propertyImages[0]} />
+            <VideoModal
+              thumbnailSrc={property?.images[0]}
+              videoUrl={property?.reelVideo}
+            />
           </div>
         </div>
 
@@ -140,9 +160,9 @@ const router=useRouter()
               <div>
                 <div className="flex items-center gap-2 mb-1">
                   <h3 className="text-xl font-semibold text-foreground">
-                    {title}
+                    {property?.name}
                   </h3>
-                  {isVerified && (
+                  {property?.isapproved && (
                     <div className="w-4 h-4 bg-verified-green rounded-full flex items-center justify-center">
                       <div className="w-1.5 h-1.5 bg-card rounded-full" />
                     </div>
@@ -151,15 +171,17 @@ const router=useRouter()
                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <MapPin className="w-3 h-3" />
-                    {location}
+                    {property?.address?.addressLine}, {property?.address?.city}
                   </span>
-                  <span className="text-location-blue">{distance}</span>
+                  <span className="text-location-blue">23km</span>
                 </div>
               </div>
               <div className="text-right">
                 <div className="flex items-center gap-1 mb-1">
                   <Star className="w-4 h-4 fill-star-gold text-star-gold" />
-                  <span className="font-semibold">{rating} of 5</span>
+                  <span className="font-semibold">
+                    {property?.averageRating} of 5
+                  </span>
                 </div>
               </div>
             </div>
@@ -168,15 +190,15 @@ const router=useRouter()
             <div className="flex items-center gap-6 mb-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Users className="w-4 h-4" />
-                Upto {guests} Guests
+                Upto {property?.maxCapacity} Guests
               </span>
               <span className="flex items-center gap-1">
                 <Home className="w-4 h-4" />
-                {rooms} Rooms
+                {property?.rooms} Rooms
               </span>
               <span className="flex items-center gap-1">
                 <Bath className="w-4 h-4" />
-                {baths} Baths
+                {property?.baths} Baths
               </span>
             </div>
 
@@ -186,7 +208,7 @@ const router=useRouter()
                 Great for:
               </span>
               <div className="inline-flex gap-2">
-                {greatFor.map((tag) => (
+                {property?.greatFor?.map((tag) => (
                   <Badge key={tag} variant="secondary" className="text-xs">
                     {tag}
                   </Badge>
@@ -196,25 +218,26 @@ const router=useRouter()
 
             {/* Amenities */}
             <div className="flex gap-4">
-              {amenities.map((amenity, index) => (
+              {property?.topamenities.map((amenity, index) => (
                 <div
                   key={index}
                   className="flex flex-col items-center gap-1 text-xs text-muted-foreground"
                 >
-                  <div className="w-8 h-8 rounded-full bg-success-light flex items-center justify-center">
-                    <amenity.icon className="w-4 h-4 text-verified-green" />
+                  <div>
+                    {amenitiesIcons[amenity] || (
+                      <Building2 className="w-6 h-6 text-gray-600" />
+                    )}
+                    {index === 5 && villa.topamenities.length > 6 && (
+                      <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
+                        <span className="text-white text-xs font-bold">
+                          +{villa?.amenities?.length - 5}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <span className="text-center max-w-12">{amenity.label}</span>
+                  <p className="text-xs">{amenity}</p>
                 </div>
               ))}
-              <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground">
-                <div className="w-8 h-8 rounded-full bg-success-light flex items-center justify-center">
-                  <span className="text-xs font-semibold text-verified-green">
-                    27+
-                  </span>
-                </div>
-                <span className="text-center">More</span>
-              </div>
             </div>
           </div>
         </div>
@@ -222,12 +245,14 @@ const router=useRouter()
         {/* Price and Booking Section */}
         <div className="w-1/4 p-6 border-l border-gray-200 flex flex-col justify-between">
           <div className="text-right">
-            <div className="text-sm text-muted-foreground mb-1">{duration}</div>
+            <div className="text-sm text-muted-foreground mb-1">
+              Min 1 Nights
+            </div>
             <div className="text-2xl font-bold text-price-text mb-2">
-              {price}
+              {property?.pricing?.weekdayPrice}{" "}
             </div>
             <div className="text-xs text-muted-foreground">
-              for 23 Nights + Taxes (1 room)
+              for 1 Nights + Taxes
             </div>
           </div>
           <div className="space-y-3">
@@ -242,17 +267,17 @@ const router=useRouter()
       <div className="md:hidden">
         {/* Image Section */}
         <div className="relative h-auto bg-gray-100">
-          <Carousel className="w-full h-full">
+          <Carousel className="w-full h-64" setApi={setApi}>
             <CarouselContent>
-              {propertyImages.map((image, index) => (
+              {property?.images.map((image, index) => (
                 <CarouselItem key={index}>
                   <Image
                     height={50}
                     unoptimized
                     width={50}
                     src={image}
-                    alt={`${title} - Image ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    alt={`${property?.name} - Image ${index + 1}`}
+                    className="w-full h-64 object-fill"
                   />
                 </CarouselItem>
               ))}
@@ -260,27 +285,42 @@ const router=useRouter()
             {/* <CarouselPrevious className="absolute left-2 top-1/2 -translate-y-1/2 h-8 w-8" />
             <CarouselNext className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8" /> */}
           </Carousel>
+          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+            {property?.images.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => api?.scrollTo(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === currentSlide ? "bg-white" : "bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
 
           <div className="absolute top-4 left-4 flex gap-2">
-            {isBestRated && (
-              <Badge className="bg-white text-black rounded-full font-semibold text-xs">
-                <Star className="w-3 h-3 mr-1" />
-                Best Rated
-              </Badge>
-            )}
-            {isLuxury && (
+            {property?.tags &&
+              property?.tags.map((tag, index) => (
+                <Badge
+                  key={index}
+                  className="bg-white text-black rounded-full font-semibold text-xs"
+                >
+                  <Star className="w-3 h-3 mr-1" />
+                  {tag}
+                </Badge>
+              ))}
+            {/* {isLuxury && (
               <Badge className="bg-black text-primary-foreground rounded-full font-semibold text-xs">
                 Luxury
               </Badge>
-            )}
+            )} */}
           </div>
 
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
               variant="ghost"
               size="icon"
-              className="bg-white/80 hover:bg-card text-foreground h-8 w-8"
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              className="bg-white/80 hover:bg-card text-foreground rounded-md h-8 w-8"
+              onPress={() => setIsWishlisted(!isWishlisted)}
             >
               <Heart
                 className={`w-4 h-4 ${
@@ -290,8 +330,9 @@ const router=useRouter()
             </Button>
             <Button
               variant="ghost"
+              
               size="icon"
-              className="bg-white/80 hover:bg-card text-foreground h-8 w-8"
+              className="bg-white/80 hover:bg-card text-foreground rounded-md h-8 w-8"
             >
               <Share2 className="w-4 h-4" />
             </Button>
@@ -299,7 +340,10 @@ const router=useRouter()
 
           {/* Video Button */}
           <div className="absolute bottom-4 left-4">
-            <VideoModal thumbnailSrc={propertyImages[0]} />
+            <VideoModal
+              thumbnailSrc={property?.images[0]}
+              videoUrl={property?.reelVideo}
+            />
           </div>
         </div>
 
@@ -310,24 +354,26 @@ const router=useRouter()
             <div className="flex-1">
               <div className="flex items-center gap-2 mb-1">
                 <h3 className="text-lg font-semibold text-foreground">
-                  {title}
+                  {property?.name}
                 </h3>
-                {isVerified && (
+                {property?.isapproved && (
                   <BadgeCheck className="text-xs text-green-500" size={14} />
                 )}
               </div>
               <div className="flex flex-col gap-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <MapPin className="w-3 h-3 text-red-500" />
-                  {location}
+                  {property?.address?.addressLine}, {property?.address?.city}
                 </span>
-                <span className="text-blue-500">{distance}</span>
+                <span className="text-blue-500">5km</span>
               </div>
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1 mb-1">
                 <Star className="w-4 h-4 fill-star-gold text-star-gold fill-amber-400 text-amber-400" />
-                <span className="font-semibold text-sm">{rating} of 5</span>
+                <span className="font-semibold text-sm">
+                  {property?.averageRating} of 5
+                </span>
               </div>
             </div>
           </div>
@@ -336,75 +382,84 @@ const router=useRouter()
           <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
             <span className="flex items-center gap-1">
               <Users className="w-4 h-4" />
-              Upto {guests} Guests
+              Upto {property?.maxCapacity} Guests
             </span>
             <span className="flex items-center gap-1">
               <Home className="w-4 h-4" />
-              {rooms} Rooms
+              {property?.rooms} Rooms
             </span>
             <span className="flex items-center gap-1">
               <Bath className="w-4 h-4" />
-              {baths} Baths
+              {property?.baths} Baths
             </span>
           </div>
 
           {/* Great For Tags */}
           <div className="mb-4">
-            <span className="text-sm text-muted-foreground mr-2">
-              Great for:
-            </span>
-            <div className="inline-flex gap-2">
-              {greatFor.map((tag) => (
-                <Badge
-                  key={tag}
-                  variant="secondary"
-                  className="text-xs bg-gray-200 text-black"
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+            {property?.greatFor?.length > 0 && (
+              <div className="flex flex-col">
+                <div className="flex flex-wrap  items-center">
+                  <p className="text-sm text-villa-text-light">Great for:</p>
+                  {property.greatFor.slice(0, 1).map((item, index) => (
+                    <div
+                      key={index}
+                      className="bg-villa-green/10 px-3 py-1 rounded-full flex items-center gap-1"
+                    >
+                      {greatForIcons[item] || (
+                        <Sun className="w-4 h-4 text-gray-600" />
+                      )}
+                      <span className="text-xs">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Amenities */}
-          <div className="flex gap-3 mb-4 overflow-hidden">
-            {amenities.map((amenity, index) => (
+          <div className="grid grid-cols-5   gap-3 mb-4 overflow-hidden">
+            {property?.topamenities.map((amenity, index) => (
               <div
                 key={index}
-                className="flex flex-col items-center gap-1 text-xs text-muted-foreground min-w-fit"
+                className="flex flex-col  items-center gap-1 text-xs text-muted-foreground w-full px-2"
               >
-                <div className="w-8 h-8 rounded-full bg-success-light flex items-center justify-center">
-                  <amenity.icon className="w-4 h-4 text-verified-green" />
+                <div>
+                  {amenitiesIcons[amenity] || (
+                    <Building2 className="w-6 h-6 text-gray-600" />
+                  )}
+                  {index === 5 && villa.topamenities.length > 6 && (
+                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">
+                        +{villa?.amenities?.length - 5}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <span className="text-center whitespace-nowrap">
-                  {amenity.label}
-                </span>
+                <p className="text-xs">{amenity}</p>
               </div>
             ))}
-            <div className="flex flex-col items-center gap-1 text-xs text-muted-foreground min-w-fit">
-              <div className="w-8 h-8 rounded-full bg-success-light flex items-center justify-center">
-                <span className="text-xs font-semibold text-verified-green">
-                  27+
-                </span>
-              </div>
-              <span className="text-center">More</span>
-            </div>
           </div>
 
           {/* Price and Booking Section */}
           <div className="border-t border-gray-200 pt-4">
             <div className="flex items-end justify-between mb-3">
               <div>
-                <div className="text-sm text-muted-foreground">{duration}</div>
+                <div className="text-sm text-muted-foreground">
+                  Min 1 Nights
+                </div>
                 <div className="text-xs text-muted-foreground">
-                  for 23 Nights + Taxes (1 room)
+                  for 1 Nights + Taxes
                 </div>
               </div>
-              <div className="text-xl font-bold text-price-text">{price}</div>
+              <div className="text-xl font-bold text-price-text">
+                {property?.pricing?.weekdayPrice}
+              </div>
             </div>
             <div className="space-y-3">
               <Button
-                onClick={() => router.push(`/view-villa/68e6b22178066ac5b42c4e98`)}
+                onClick={() =>
+                  router.push(`/view-villa/68e6b22178066ac5b42c4e98`)
+                }
                 className="w-full bg-black  text-primary-foreground font-semibold"
               >
                 Book Now →

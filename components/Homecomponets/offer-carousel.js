@@ -18,27 +18,27 @@ export default function OfferCarousel({
       title: "Escape to Nature!",
       description:
         "Book lakeside villas, cottages, and camps in Lonavala & Pawna",
-      cta: "Book your stay ↗",
+      cta: "Book your stay",
       icon: disscount,
     },
     {
       title: "Limited-Time Deals!",
       description: "Get exclusive discounts on weekend getaways",
-      cta: "Grab the offer ↗",
+      cta: "Grab the offer",
       icon: disscount,
     },
     {
       title: "All-In-One Getaway Hub",
       description:
         "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
-      cta: "Explore locations ↗",
+      cta: "Explore locations",
       icon: disscount,
     },
     {
       title: "All-In-One Getaway Hub",
       description:
         "Explore villas, camps, cottages & hotels in Malavli, Kamshet & more",
-      cta: "Explore locations ↗",
+      cta: "Explore locations",
       icon: disscount,
     },
   ];
@@ -81,7 +81,7 @@ export default function OfferCarousel({
               {carouselItems[currentSlide].title}
             </TypingAnimation>
           </h1>
-          <h2 className="md:mb-4 mb-2 text-xs font-medium md:text-xl">
+          <h2 className="md:mb-4 -mt-6 md:mt-0 mb-2 text-xs font-medium md:text-xl">
             {carouselItems[currentSlide].description}
           </h2>
           <button
