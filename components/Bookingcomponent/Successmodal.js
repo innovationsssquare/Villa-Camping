@@ -27,7 +27,7 @@ export default function Successmodal() {
   const router = useRouter();
 
   const handleRedirect = () => {
-    router.push("/bookings");
+    router.push("/booking");
   };
 
   const iconVariants = {

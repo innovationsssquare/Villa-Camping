@@ -83,8 +83,8 @@ const booking = useSelector((state) => state.booking);
         Setopen={setIsBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         propertyName={villa?.name}
-        price={villa?.weekdayPrice}
-        originalPrice={villa?.weekdayPrice + 3000}
+        price={villa?.pricing?.weekdayPrice}
+        originalPrice={villa?.pricing?.weekdayPrice + 3000}
         propertyId={villa?._id}
         ownerId={villa?.owner}
         propertyType="Villa"

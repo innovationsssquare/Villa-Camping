@@ -59,7 +59,6 @@ export default function BookingDialog({
   const checkoutISO = booking?.checkout;
   const router = useRouter();
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
-
   // Convert ISO strings to Date for UI
   const checkInDate = checkinISO ? new Date(checkinISO) : new Date();
   const checkOutDate = checkoutISO

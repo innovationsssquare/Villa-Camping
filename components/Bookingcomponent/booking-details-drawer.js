@@ -8,7 +8,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -70,17 +70,18 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
   };
 
   return (
-    <Drawer open={isOpen} onOpenChange={() => {}} shouldScaleBackground={false}>
-      <DrawerContent className="h-[90vh] bg-gray-200 border-none">
+    <Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
+      <DrawerContent className="h-[90vh] bg-white border-none">
         <DrawerHeader className="flex flex-row items-center justify-between px-3 ">
           <DrawerTitle className="text-lg font-semibold text-black">
             Verify your details
           </DrawerTitle>
           <Button
-            variant="ghost"
+            variant="light"
             size="sm"
-            onClick={onClose}
-            className="h-8 w-8 p-0 hover:bg-gray-100"
+            isIconOnly
+            onPress={onClose}
+            className="h-8 w-8 p-0 border rounded-full bg-white hover:bg-gray-100"
           >
             <FaTimes className="h-4 w-4 text-gray-600" />
           </Button>
@@ -94,16 +95,14 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
             </Label>
             <RadioGroup
               value={customerDetails.bookingFor}
-              onValueChange={(value) =>
-                handleInputChange("bookingFor", value)
-              }
+              onValueChange={(value) => handleInputChange("bookingFor", value)}
               className="flex gap-6"
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem
                   value="myself"
                   id="myself"
-                  className="border-2 border-black text-black"
+                  className="border-2 border-orange-300 text-orange-500"
                 />
                 <Label
                   htmlFor="myself"
@@ -116,7 +115,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 <RadioGroupItem
                   value="someone-else"
                   id="someone-else"
-                  className="border-2 border-gray-300"
+                  className="border-2 border-orange-300 text-orange-500"
                 />
                 <Label
                   htmlFor="someone-else"
@@ -136,10 +135,8 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
             <div className="relative">
               <Input
                 value={customerDetails.firstName}
-                onChange={(e) =>
-                  handleInputChange("firstName", e.target.value)
-                }
-                className="bg-[#FFFFFF4D] border-white border text-black pr-10 h-12"
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                className="border-gray-200 bg-white border text-black pr-10 h-12"
                 placeholder="Enter first name"
               />
               {customerDetails.firstName && (
@@ -162,10 +159,8 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
             <div className="relative">
               <Input
                 value={customerDetails.lastName}
-                onChange={(e) =>
-                  handleInputChange("lastName", e.target.value)
-                }
-                className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                className="border-gray-200 bg-white border text-black pr-10 h-12"
                 placeholder="Enter last name"
               />
               {customerDetails.lastName && (
@@ -188,10 +183,8 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
             <div className="relative">
               <Input
                 value={customerDetails.mobile}
-                onChange={(e) =>
-                  handleInputChange("mobile", e.target.value)
-                }
-                className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
+                onChange={(e) => handleInputChange("mobile", e.target.value)}
+                className="border-gray-200 bg-white border text-black pr-10 h-12"
                 placeholder="+91 Enter mobile number"
               />
               {customerDetails.mobile && (
@@ -215,7 +208,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
               <Input
                 value={customerDetails.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
-                className="bg-[#FFFFFF4D] border-white border pr-10 h-12"
+                className="border-gray-200 bg-white border text-black pr-10 h-12"
                 placeholder="Enter email address"
                 type="email"
               />
@@ -237,7 +230,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
             <Input
               value={customerDetails.city}
               onChange={(e) => handleInputChange("city", e.target.value)}
-              className="bg-[#FFFFFF4D] border-white border h-12"
+              className="border-gray-200 bg-white border text-black pr-10 h-12"
               placeholder="Enter city"
             />
           </div>

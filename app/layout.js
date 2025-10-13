@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
         <body className={geist.className}>
           <Suspense
             fallback={
-              <div className="h-screen w-full flex justify-center items-center">
+              <div className="h-screen bg-white w-full flex justify-center items-center">
                 <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
                   <ButtonLoader />
                 </div>

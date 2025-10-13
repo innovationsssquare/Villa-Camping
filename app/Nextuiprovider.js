@@ -29,9 +29,9 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/checkout" ||
       pathname === "/search-your-gateway" ||
-      pathname.startsWith("/view-camping") ||
-      pathname.startsWith("/view-cottage") ||
-      pathname.startsWith("/view-villa") ? null : (
+      pathname.startsWith("/view-Camping") ||
+      pathname.startsWith("/view-Cottage") ||
+      pathname.startsWith("/view-Villa") ? null : (
         <Navbar />
       )}
       {pathname === "/Signin" ||
@@ -45,12 +45,14 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/notifications" ||
       pathname === "/search-your-gateway" ||
       pathname === "/booking" ||
-      pathname.startsWith("/view-camping") ||
-      pathname.startsWith("/view-cottage") ||
-      pathname.startsWith("/view-villa") ? null : (
+      pathname.startsWith("/view-Camping") ||
+      pathname.startsWith("/view-Cottage") ||
+      pathname.startsWith("/view-Villa") ? null : (
         <AppHeader />
       )}
-      <ToastProvider />
+      <div className="z-[400]">
+        <ToastProvider placement={"top-center"} />
+      </div>
       {children}
       {pathname === "/Signin" ||
       pathname === "/shorts" ||
@@ -58,9 +60,9 @@ export function NextuiProviderWrapper({ children }) {
       pathname === "/search-stay" ||
       pathname === "/search-your-gateway" ||
       pathname === "/checkout" ||
-      pathname.startsWith("/view-camping") ||
-      pathname.startsWith("/view-cottage") ||
-      pathname.startsWith("/view-villa") ? null : (
+      pathname.startsWith("/view-Camping") ||
+      pathname.startsWith("/view-Cottage") ||
+      pathname.startsWith("/view-Villa") ? null : (
         <BottomNav />
       )}
       {pathname === "/Signin" ||

@@ -129,7 +129,7 @@ export function AvailableThisWeekend() {
         </h2>
 
         {/* Location Filter Tabs */}
-        <div className="flex md:justify-center gap-2 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex md:justify-center sm:justify-center  gap-2 overflow-x-auto pb-2 scrollbar-hide">
           {locations.map((location) => (
             <Button
               key={location}

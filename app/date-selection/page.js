@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { ChevronLeft } from "lucide-react";
-import { Button } from "@heroui/react";
+import { Button ,addToast} from "@heroui/react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -105,7 +105,10 @@ export default function DatePickerPage() {
 
   const handleNext = () => {
     if (!selectedCheckInDate || !selectedCheckOutDate) {
-      alert("Please select both check-in and check-out dates");
+       addToast({
+        title: "Please select both check-in and check-out dates",
+        color: "danger",
+      });
       return;
     }
     router.back();
@@ -184,7 +187,7 @@ export default function DatePickerPage() {
         <div
           key={`${month}-${day}`}
           className={cn(
-            "h-12 w-12  flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
+            "h-12 w-12 flex-1  flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
             isWeekend ? "text-red-500" : "text-gray-800",
             isCheckIn && "bg-black text-white rounded-full",
             isCheckOut && "bg-black text-white rounded-full",
@@ -305,7 +308,7 @@ export default function DatePickerPage() {
 
         {/* ✅ Next button - always clickable */}
         <Button
-          onClick={() => router.back()}
+          onPress={handleNext}
           className="w-full py-3 text-base font-semibold bg-black text-white rounded-lg active:scale-[0.98] transition-transform duration-150 z-[300]"
         >
           NEXT

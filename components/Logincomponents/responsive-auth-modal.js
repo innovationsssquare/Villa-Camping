@@ -95,7 +95,7 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       <div className="space-y-4">
         {/* Google Sign In */}
         <Button
-          onClick={() => handleLogin("google")}
+          onPress={() => handleLogin("google")}
           disabled={googleLoading || appleLoading}
           className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm transition-all duration-200 hover:shadow-md group"
           variant="outline"
