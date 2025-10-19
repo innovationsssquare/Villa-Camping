@@ -186,12 +186,12 @@ export default function DatePickerPage() {
       calendarDays.push(
         <div
           key={`${month}-${day}`}
-          className={cn(
-            "h-12 w-12 flex-1  flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
+         className={cn(
+            "aspect-square flex items-center justify-center text-sm border border-gray-200 cursor-pointer",
             isWeekend ? "text-red-500" : "text-gray-800",
             isCheckIn && "bg-black text-white rounded-full",
             isCheckOut && "bg-black text-white rounded-full",
-            isInRange && "bg-gray-200 text-black border border-white"
+            isInRange && "bg-gray-200 text-black border border-white",
           )}
           onClick={() => handleDateClick(currentDay)}
         >
