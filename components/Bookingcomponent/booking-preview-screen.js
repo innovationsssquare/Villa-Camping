@@ -152,7 +152,6 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     setIsBookingDetailsOpen(true);
   };
 
-  
   const handleProceedToPayment = async () => {
     setloading(true);
     // if (!agreed) {
@@ -183,6 +182,22 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     // const decodedUserData = decodeURIComponent(encodedUserData);
     // const userData = JSON.parse(decodedUserData);
 
+    let items = [];
+
+    if (propertyType === "Villa") {
+      items = [
+        {
+          unitType: "VillaUnit",
+          unitId: propertyId,
+          unitName: property?.name,
+          quantity: 1,
+          pricePerNight: Number(property?.pricing?.weekdayPrice),
+          nights: nights,
+          totalPrice: Number(property?.pricing?.weekdayPrice) * nights,
+        },
+      ];
+    }
+
     const bookingData = {
       propertyType,
       propertyId,
@@ -196,20 +211,23 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         children: guestCounts.children,
         infants: guestCounts.infants,
       },
-      // items,
+      items,
       paymentAmount: Number(finalTotal || 0),
-      // You can also send appliedCoupon if server uses it for validation
-      // appliedCoupon: appliedCoupon?.code || null,
+      couponCode: "",
+      paymentType: "full",
+      partialPercentage: 30,
+      taxRate: 5,
     };
     setIsBookingDetailsOpen(false);
     try {
       const response = await Createbooking(bookingData);
       setOpen(!open);
       if (response?.success === true) {
-        const Bookingid = response?.data?._id;
+       const Bookingid = response?.data?.booking._id;
+        const orderData = response.data.order;
         var razorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
-          amount: response.order?.amount,
+          amount: orderData?.amount,
           currency: "INR",
           name: "THE VILLA CAMP",
           description: `Booking for  THE VILLA CAMP`,
@@ -219,7 +237,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           // },
           image:
             "https://res.cloudinary.com/db60uwvhk/image/upload/v1755287276/My%20Brand/Logo2_wkqqgs.png",
-          order_id: response.order?.id,
+          order_id: orderData?.id,
           handler: async function (response) {
             try {
               const verifyResponse = await Verifybooking({
@@ -455,7 +473,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
                 Discount ({appliedCoupon.code})
               </span>
               <span className="text-green-600 text-xs">
-               - ₹{discountAmount.toLocaleString()} Discount applied!
+                - ₹{discountAmount.toLocaleString()} Discount applied!
               </span>
             </div>
           )}
