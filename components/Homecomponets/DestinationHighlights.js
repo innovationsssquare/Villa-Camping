@@ -48,7 +48,7 @@ function DestinationCard({ destination }) {
         <img
           src={destination.image || "/placeholder.svg"}
           alt={destination.name}
-          fill
+          fill="true"
           className="object-fill w-full h-36 md:h-48  group-hover:scale-110 transition-transform duration-300"
          
         />

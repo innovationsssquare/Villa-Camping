@@ -9,49 +9,67 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import {
-  Heart,
-  Share2,
-  Star,
-  MapPin,
-  Users,
-  Utensils,
-  Wifi,
-  Trees,
-  Waves,
-  Play,
-  BadgeCheck,
-} from "lucide-react";
 import VideoModal from "./VideoModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+
+import { useSelector } from "react-redux";
 import {
-  Bed,
-  Bath,
-  Mountain,
-  Sun,
-  Home,
-  Coffee,
-  Tv,
-  Wind,
-  Baby,
+  Wifi,
   Snowflake,
   AirVent,
-  Building2,
+  BatteryCharging,
   GlassWater,
+  ShieldCheck,
+  Bed,
+  Droplet,
+  Tv as LucideTv,
+  Table,
+  Bath,
+  Waves,
+  Volume2,
+  Utensils as LucideUtensils,
+  Coffee,
+  Trees,
+  Home,
+  Flame,
+  Fire,
+  Lightbulb,
+  Star,
+  MapPin,
+  Users,
+  BadgeCheck,
+  Heart,
+  Share2,
+  FlameKindling,
+  Camera,
+  Mountain,
+  Building2,
 } from "lucide-react";
-import { FaUmbrellaBeach, FaPeopleGroup, FaChild, FaTv } from "react-icons/fa6";
-import { FaFilePdf } from "react-icons/fa6";
-import { useSelector } from "react-redux";
+
+// react-icons for items lucide doesn't provide (or where a better semantic icon exists)
+import {
+  FaSquareParking,
+  FaTv,
+  FaFilePdf,
+  FaPeopleGroup,
+  FaChild,
+  FaUmbrellaBeach,
+} from "react-icons/fa6";
+import {
+  MdKitchen,
+  MdOutlineLocalDining,
+  MdOutlineFreeBreakfast,
+  MdOutlineSpeaker ,
+  MdPool 
+} from "react-icons/md";
 
 const PropertyCardnew = ({ property }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState();
-  const {
-    selectedCategoryName,
-  } = useSelector((state) => state.booking);
+  const { selectedCategoryName } = useSelector((state) => state.booking);
 
   useEffect(() => {
     if (!api) return;
@@ -64,15 +82,46 @@ const PropertyCardnew = ({ property }) => {
   }, [api]);
 
   const amenitiesIcons = {
-    "AC": <Wind className="w-6 h-6 text-gray-600" />,
     WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
+    Heating: <Snowflake className="w-6 h-6 text-gray-600" />,
+    AC: <AirVent className="w-6 h-6 text-gray-600" />,
+    "Power Backup": <BatteryCharging className="w-6 h-6 text-gray-600" />,
+    "Water Supply": <GlassWater className="w-6 h-6 text-gray-600" />,
+    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
+    CCTV: <Camera className="w-6 h-6 text-gray-600" />, // If you don't have Camera from lucide, use another (see note below)
+    Parking: <FaSquareParking className="w-6 h-6 text-gray-600" />,
+    "AC Bedrooms/Hall": <AirVent className="w-6 h-6 text-gray-600" />,
+    "Aquagaurd for drinking water": (
+      <Droplet className="w-6 h-6 text-gray-600" />
+    ),
+    "Extra mattresses": <Bed className="w-6 h-6 text-gray-600" />,
+
+    "LED TV Mobile Connect": <FaTv className="w-6 h-6 text-gray-600" />,
+    "Board Games": <Star className="w-6 h-6 text-gray-600" />, // fallback to star if no specific game icon
+    "Sunset Point": <Star className="w-6 h-6 text-gray-600" />,
+    "Table & Chairs": <Table className="w-6 h-6 text-gray-600" />,
+    "Geyser in all Bathrooms": <Bath className="w-6 h-6 text-gray-600" />,
+
+    "Swimming Pool": <MdPool  className="w-6 h-6 text-gray-600" />,
+    "Sound System": <MdOutlineSpeaker  className="w-6 h-6 text-gray-600" />,
+    Refrigerator: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    Kitchen: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    "Coffee Maker": <Coffee className="w-6 h-6 text-gray-600" />,
+    Microwave: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    Oven: <MdKitchen className="w-6 h-6 text-gray-600" />,
+
+    "Outdoor Dining Area": <Trees className="w-6 h-6 text-gray-600" />,
+    "Dining Area": <MdOutlineLocalDining className="w-6 h-6 text-gray-600" />,
+    "BBQ Grill": <FlameKindling className="w-6 h-6 text-gray-600" />,
     Balcony: <Home className="w-6 h-6 text-gray-600" />,
-    TV: <FaTv className="w-6 h-6 text-gray-600" />,
-    "Breakfast Included": <Utensils className="w-6 h-6 text-gray-600" />,
-    "BBQ Grill": <Waves className="w-6 h-6 text-gray-600" />,
-    Jacuzzi: <Coffee className="w-6 h-6 text-gray-600" />,
-    "Mini Bar": <GlassWater className="w-6 h-6 text-gray-600" />,
-    Heater: <Snowflake className="w-6 h-6 text-gray-600" />,
+    Garden: <Trees className="w-6 h-6 text-gray-600" />,
+    "Terrace / Patio": <Home className="w-6 h-6 text-gray-600" />,
+
+    "Fire Extinguisher": <Flame className="w-6 h-6 text-gray-600" />,
+    "Daily Breakfast": (
+      <MdOutlineFreeBreakfast className="w-6 h-6 text-gray-600" />
+    ),
+    "Smart Lighting": <Lightbulb className="w-6 h-6 text-gray-600" />,
   };
 
   const greatForIcons = {
@@ -83,6 +132,26 @@ const PropertyCardnew = ({ property }) => {
     "Nature Retreat": <Trees className="w-4 h-4 text-gray-600" />,
     "Romantic Getaway": <Heart className="w-4 h-4 text-gray-600" />,
   };
+
+  function isWeekendInIndia(date = new Date()) {
+    const dt = typeof date === "string" ? new Date(date) : date;
+    // weekday short like "Sat", "Sun", "Mon" etc in the Asia/Kolkata timezone
+    const weekdayShort = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      weekday: "short",
+    }).format(dt);
+
+    return weekdayShort === "Sat" || weekdayShort === "Sun";
+  }
+
+  function formatRupee(amount) {
+    if (amount == null || Number.isNaN(Number(amount))) return "₹0";
+    // no decimal places - change maximumFractionDigits if needed
+    const formatted = new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(Number(amount));
+    return `₹${formatted}`;
+  }
 
   return (
     <Card
@@ -127,10 +196,10 @@ const PropertyCardnew = ({ property }) => {
 
           <div className="absolute top-4 right-4 flex gap-2">
             <Button
-              variant="ghost"
+              variant="light"
               size="icon"
-              className="bg-white/50 hover:bg-white text-black"
-              onClick={() => setIsWishlisted(!isWishlisted)}
+              className=" hover:bg-transparent text-white"
+              onPress={() => setIsWishlisted(!isWishlisted)}
             >
               <Heart
                 className={`w-4 h-4 ${
@@ -139,9 +208,9 @@ const PropertyCardnew = ({ property }) => {
               />
             </Button>
             <Button
-              variant="ghost"
+              variant="light"
               size="icon"
-              className="bg-white/50 hover:bg-white text-black"
+              className=" hover:bg-transparent text-white"
             >
               <Share2 className="w-4 h-4" />
             </Button>
@@ -177,7 +246,6 @@ const PropertyCardnew = ({ property }) => {
                     <MapPin className="w-3 h-3" />
                     {property?.address?.addressLine}, {property?.address?.city}
                   </span>
-                  <span className="text-location-blue">23km</span>
                 </div>
               </div>
               <div className="text-right">
@@ -225,7 +293,7 @@ const PropertyCardnew = ({ property }) => {
               {property?.topamenities.map((amenity, index) => (
                 <div
                   key={index}
-                  className="flex flex-col items-center gap-1 text-xs text-muted-foreground"
+                  className="flex flex-col justify-center items-center gap-1 text-xs text-muted-foreground"
                 >
                   <div>
                     {amenitiesIcons[amenity] || (
@@ -239,7 +307,7 @@ const PropertyCardnew = ({ property }) => {
                       </div>
                     )}
                   </div>
-                  <p className="text-xs">{amenity}</p>
+                  <p className="text-xs text-center ">{amenity}</p>
                 </div>
               ))}
             </div>
@@ -253,7 +321,27 @@ const PropertyCardnew = ({ property }) => {
               Min 1 Nights
             </div>
             <div className="text-2xl font-bold text-price-text mb-2">
-              {property?.pricing?.weekdayPrice}{" "}
+                {(() => {
+                const useDate =
+                  typeof selectedDate !== "undefined"
+                    ? selectedDate
+                    : new Date();
+                const weekend = isWeekendInIndia(useDate);
+                const weekdayPrice =
+                  property?.pricing?.weekdayPrice ??
+                  property?.pricing?.basePrice ??
+                  0;
+                const weekendPrice =
+                  property?.pricing?.weekendPrice ?? weekdayPrice;
+
+                const displayPrice = weekend ? weekendPrice : weekdayPrice;
+
+                return (
+                  <div className="text-xl font-bold text-price-text">
+                    {formatRupee(displayPrice)}
+                  </div>
+                );
+              })()}
             </div>
             <div className="text-xs text-muted-foreground">
               for 1 Nights + Taxes
@@ -334,7 +422,6 @@ const PropertyCardnew = ({ property }) => {
             </Button>
             <Button
               variant="ghost"
-              
               size="icon"
               className="bg-white/80 hover:bg-card text-foreground rounded-md h-8 w-8"
             >
@@ -369,7 +456,6 @@ const PropertyCardnew = ({ property }) => {
                   <MapPin className="w-3 h-3 text-red-500" />
                   {property?.address?.addressLine}, {property?.address?.city}
                 </span>
-                <span className="text-blue-500">5km</span>
               </div>
             </div>
             <div className="text-right">
@@ -425,11 +511,11 @@ const PropertyCardnew = ({ property }) => {
             {property?.topamenities.map((amenity, index) => (
               <div
                 key={index}
-                className="flex flex-col  items-center gap-1 text-xs text-muted-foreground w-full px-2"
+                className="flex flex-col  items-center gap-1 text-xs text-muted-foreground w-full "
               >
                 <div>
                   {amenitiesIcons[amenity] || (
-                    <Building2 className="w-6 h-6 text-gray-600" />
+                    <Building2 className="w-5 h-5 text-gray-600" />
                   )}
                   {index === 5 && villa.topamenities.length > 6 && (
                     <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
@@ -439,7 +525,7 @@ const PropertyCardnew = ({ property }) => {
                     </div>
                   )}
                 </div>
-                <p className="text-xs">{amenity}</p>
+                <p className="text-[0.5rem] text-center w-full">{amenity}</p>
               </div>
             ))}
           </div>
@@ -455,9 +541,29 @@ const PropertyCardnew = ({ property }) => {
                   for 1 Nights + Taxes
                 </div>
               </div>
-              <div className="text-xl font-bold text-price-text">
-                {property?.pricing?.weekdayPrice}
-              </div>
+
+              {/* choose date: use `selectedDate` if you have one, else current date */}
+              {(() => {
+                const useDate =
+                  typeof selectedDate !== "undefined"
+                    ? selectedDate
+                    : new Date();
+                const weekend = isWeekendInIndia(useDate);
+                const weekdayPrice =
+                  property?.pricing?.weekdayPrice ??
+                  property?.pricing?.basePrice ??
+                  0;
+                const weekendPrice =
+                  property?.pricing?.weekendPrice ?? weekdayPrice;
+
+                const displayPrice = weekend ? weekendPrice : weekdayPrice;
+
+                return (
+                  <div className="text-xl font-bold text-price-text">
+                    {formatRupee(displayPrice)}
+                  </div>
+                );
+              })()}
             </div>
             <div className="space-y-3">
               <Button

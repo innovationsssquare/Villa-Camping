@@ -148,6 +148,28 @@ export default function BookingDialog({
     });
   };
 
+  function isWeekendInIndia(date = new Date()) {
+    const dt = typeof date === "string" ? new Date(date) : date;
+    // weekday short like "Sat", "Sun", "Mon" etc in the Asia/Kolkata timezone
+    const weekdayShort = new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata",
+      weekday: "short",
+    }).format(dt);
+
+    return weekdayShort === "Sat" || weekdayShort === "Sun";
+  }
+
+  function formatRupee(amount) {
+    if (amount == null || Number.isNaN(Number(amount))) return "₹0";
+    // no decimal places - change maximumFractionDigits if needed
+    const formatted = new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(Number(amount));
+    return `₹${formatted}`;
+  }
+
+
+
   return (
     <>
       <Drawer
@@ -220,11 +242,11 @@ export default function BookingDialog({
                 <div className="px-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-black">
-                      ₹{price}
+                      {formatRupee(price)}
                     </span>
                     {originalPrice && (
                       <span className="text-gray-500 line-through">
-                        ₹{originalPrice.toLocaleString()}
+                        {formatRupee(originalPrice)}
                       </span>
                     )}
                   </div>
@@ -287,7 +309,7 @@ export default function BookingDialog({
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-sm text-black">
                         {guestCounts?.adults} Guest | {guestCounts?.children}{" "}
-                        children
+                        Children
                       </span>
                       <span className="font-semibold text-sm text-black">
                         {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}

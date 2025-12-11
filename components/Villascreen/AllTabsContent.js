@@ -148,7 +148,7 @@ const AllTabsContent = ({ refs }) => {
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <div className="text-center text-white">
-                      <h4 className="text-lg font-bold">FULLY-SERVICED</h4>
+                      <h4 className="text-md font-bold">FULLY-SERVICED</h4>
                       <p className="text-sm">VILLAS</p>
                     </div>
                   </div>
@@ -163,7 +163,7 @@ const AllTabsContent = ({ refs }) => {
                   />
                   <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                     <div className="text-center text-white">
-                      <h4 className="text-lg font-bold">FOUR COURSE</h4>
+                      <h4 className="text-md font-bold">FOUR COURSE</h4>
                       <p className="text-sm">MEALS</p>
                     </div>
                   </div>

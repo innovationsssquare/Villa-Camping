@@ -1,28 +1,53 @@
 import React from "react";
 import {
-  Star,
-  Users,
-  Bed,
-  Bath,
-  Mountain,
-  Sun,
-  Home,
-  Waves,
-  Coffee,
   Wifi,
-  Tv,
-  Wind,
-  Utensils,
-  Heart,
-  Baby,
-  Trees,
   Snowflake,
   AirVent,
-  Building2,
+  BatteryCharging,
   GlassWater,
+  ShieldCheck,
+  Bed,
+  Droplet,
+  Tv as LucideTv,
+  Table,
+  Bath,
+  Waves,
+  Volume2,
+  Utensils as LucideUtensils,
+  Coffee,
+  Trees,
+  Home,
+  Flame,
+  Fire,
+  Lightbulb,
+  Star,
+  MapPin,
+  Users,
+  BadgeCheck,
+  Heart,
+  Share2,
+  FlameKindling,
+  Camera,
+  Mountain,
+  Building2,
 } from "lucide-react";
-import { FaUmbrellaBeach, FaPeopleGroup, FaChild, FaTv } from "react-icons/fa6";
-import { FaFilePdf } from "react-icons/fa6";
+
+// react-icons for items lucide doesn't provide (or where a better semantic icon exists)
+import {
+  FaSquareParking,
+  FaTv,
+  FaFilePdf,
+  FaPeopleGroup,
+  FaChild,
+  FaUmbrellaBeach,
+} from "react-icons/fa6";
+import {
+  MdKitchen,
+  MdOutlineLocalDining,
+  MdOutlineFreeBreakfast,
+  MdOutlineSpeaker ,
+  MdPool 
+} from "react-icons/md";
 import { useVilla } from "@/lib/context/VillaContext";
 import { Button } from "@heroui/react";
 import Link from "next/link";
@@ -40,15 +65,46 @@ const VillaDetails = () => {
   };
 
   const amenitiesIcons = {
-    "AC": <Wind className="w-6 h-6 text-gray-600" />,
     WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
+    Heating: <Snowflake className="w-6 h-6 text-gray-600" />,
+    AC: <AirVent className="w-6 h-6 text-gray-600" />,
+    "Power Backup": <BatteryCharging className="w-6 h-6 text-gray-600" />,
+    "Water Supply": <GlassWater className="w-6 h-6 text-gray-600" />,
+    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
+    CCTV: <Camera className="w-6 h-6 text-gray-600" />, // If you don't have Camera from lucide, use another (see note below)
+    Parking: <FaSquareParking className="w-6 h-6 text-gray-600" />,
+    "AC Bedrooms/Hall": <AirVent className="w-6 h-6 text-gray-600" />,
+    "Aquagaurd for drinking water": (
+      <Droplet className="w-6 h-6 text-gray-600" />
+    ),
+    "Extra mattresses": <Bed className="w-6 h-6 text-gray-600" />,
+
+    "LED TV Mobile Connect": <FaTv className="w-6 h-6 text-gray-600" />,
+    "Board Games": <Star className="w-6 h-6 text-gray-600" />, // fallback to star if no specific game icon
+    "Sunset Point": <Star className="w-6 h-6 text-gray-600" />,
+    "Table & Chairs": <Table className="w-6 h-6 text-gray-600" />,
+    "Geyser in all Bathrooms": <Bath className="w-6 h-6 text-gray-600" />,
+
+    "Swimming Pool": <MdPool  className="w-6 h-6 text-gray-600" />,
+    "Sound System": <MdOutlineSpeaker  className="w-6 h-6 text-gray-600" />,
+    Refrigerator: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    Kitchen: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    "Coffee Maker": <Coffee className="w-6 h-6 text-gray-600" />,
+    Microwave: <MdKitchen className="w-6 h-6 text-gray-600" />,
+    Oven: <MdKitchen className="w-6 h-6 text-gray-600" />,
+
+    "Outdoor Dining Area": <Trees className="w-6 h-6 text-gray-600" />,
+    "Dining Area": <MdOutlineLocalDining className="w-6 h-6 text-gray-600" />,
+    "BBQ Grill": <FlameKindling className="w-6 h-6 text-gray-600" />,
     Balcony: <Home className="w-6 h-6 text-gray-600" />,
-    TV: <FaTv className="w-6 h-6 text-gray-600" />,
-    "Breakfast Included": <Utensils className="w-6 h-6 text-gray-600" />,
-    "BBQ Grill": <Waves className="w-6 h-6 text-gray-600" />,
-    Jacuzzi: <Coffee className="w-6 h-6 text-gray-600" />,
-    "Mini Bar": <GlassWater className="w-6 h-6 text-gray-600" />,
-    Heater: <Snowflake className="w-6 h-6 text-gray-600" />,
+    Garden: <Trees className="w-6 h-6 text-gray-600" />,
+    "Terrace / Patio": <Home className="w-6 h-6 text-gray-600" />,
+
+    "Fire Extinguisher": <Flame className="w-6 h-6 text-gray-600" />,
+    "Daily Breakfast": (
+      <MdOutlineFreeBreakfast className="w-6 h-6 text-gray-600" />
+    ),
+    "Smart Lighting": <Lightbulb className="w-6 h-6 text-gray-600" />,
   };
 
   return (
@@ -149,7 +205,7 @@ const VillaDetails = () => {
                   </div>
                 )}
               </div>
-              <p className="text-xs">{amenity}</p>
+              <p className="text-[0.67rem] text-center">{amenity}</p>
             </div>
           ))}
         </div>

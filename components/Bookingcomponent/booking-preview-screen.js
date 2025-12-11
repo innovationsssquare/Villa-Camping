@@ -75,6 +75,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
   const { addToast } = useToast();
   const router = useRouter();
+
   const checkInDate = checkin ? new Date(checkin) : new Date();
   const checkOutDate = checkout
     ? new Date(checkout)
@@ -223,7 +224,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       const response = await Createbooking(bookingData);
       setOpen(!open);
       if (response?.success === true) {
-       const Bookingid = response?.data?.booking._id;
+        const Bookingid = response?.data?.booking._id;
         const orderData = response.data.order;
         var razorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,

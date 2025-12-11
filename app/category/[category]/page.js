@@ -5,7 +5,7 @@ const page = () => {
   return (
     <div className="md:pt-40 ">
       {/* <ShopbyCategory/> */}
-      <ProductListing />
+      <ProductListing/>
     </div>
   );
 };
