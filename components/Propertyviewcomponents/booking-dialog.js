@@ -43,6 +43,9 @@ export default function BookingDialog({
   propertyName,
   price,
   originalPrice,
+  propertyId,
+  ownerId,
+  propertyType,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
@@ -168,8 +171,6 @@ export default function BookingDialog({
     return `₹${formatted}`;
   }
 
-
-
   return (
     <>
       <Drawer
@@ -196,7 +197,6 @@ export default function BookingDialog({
                   >
                     <X size={15} className=" text-black" />
                   </Button>
-                 
                 </>
               ) : (
                 <>
@@ -250,7 +250,7 @@ export default function BookingDialog({
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm">Per night + taxes</p>
+                  <p className="text-gray-600 text-sm">Per night</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 px-2">
@@ -397,6 +397,12 @@ export default function BookingDialog({
         onClose={() => setIsCouponsDrawerOpen(false)}
         onApplyCoupon={handleApplyCoupon}
         appliedCoupon={appliedCoupon}
+        propertyId={propertyId}
+        propertyType={propertyType}
+        subtotal={price * nights} // <<< pass subtotal so backend can calculate discount
+        checkIn={checkinISO}
+        checkOut={checkoutISO}
+        nights={nights}
       />
 
       <GuestSelectionDrawer

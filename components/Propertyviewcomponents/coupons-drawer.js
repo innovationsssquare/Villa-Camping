@@ -1,8 +1,8 @@
+// components/CouponsDrawer.jsx
 "use client";
 
-import React from "react";
-import { useState } from "react";
-import { FaTimes, FaTicketAlt } from "react-icons/fa";
+import React, { useEffect, useMemo, useState } from "react";
+import { FaTicketAlt } from "react-icons/fa";
 import {
   Drawer,
   DrawerContent,
@@ -10,54 +10,235 @@ import {
   DrawerTitle,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { Button } from "@heroui/react";
+import { Button, addToast } from "@heroui/react";
 import { X } from "lucide-react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  fetchCouponsByProperty,
+  applyCoupon,
+  clearApplyState,
+} from "@/Redux/Slices/couponsSlice";
+import { getDeviceId } from "@/lib/deviceId";
 
-const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
+const CouponsDrawer = ({
+  isOpen,
+  onClose,
+  onApplyCoupon,
+  appliedCoupon,
+  propertyId,
+  propertyType,
+  subtotal = 0,
+  checkIn = null,
+  checkOut = null,
+  nights = null,
+}) => {
+  const dispatch = useDispatch();
   const [couponCode, setCouponCode] = useState("");
+  console.log(appliedCoupon);
+  // NEW: separate loading states
+  const [isApplyingManual, setIsApplyingManual] = useState(false);
+  const [applyingCode, setApplyingCode] = useState(null); // string => coupon code being applied from cards
 
-  const availableCoupons = [
-    {
-      code: "THEVILLA",
-      title: "Book your dreamy getaway",
-      description:
-        "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
-      discount: 10,
-      maxDiscount: 3000,
-      validTill: "31 December 2025",
-    },
-    {
-      code: "VILACAMP2025",
-      title: "Get an instant 10% off",
-      description:
-        "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
-      discount: 10,
-      maxDiscount: 4000,
-      validTill: "31 December 2025",
-      minNights: 3,
-    },
-    {
-      code: "ESCAPE5",
-      title: "Get 5% off your next getaway",
-      description: "Get 5% upto 1500 off on your next getaway!",
-      discount: 5,
-      maxDiscount: 1500,
-      validTill: "31 December 2025",
-    },
-  ];
+  // redux slice state
+  const {
+    list = [],
+    fetchStatus = "idle",
+    fetchError = null,
+    applyStatus = "idle",
+    applyError = null,
+  } = useSelector((s) => s.coupons ?? {});
 
-  const handleManualApply = () => {
-    const foundCoupon = availableCoupons.find(
-      (coupon) => coupon.code.toLowerCase() === couponCode.toLowerCase()
-    );
-    if (foundCoupon) {
-      onApplyCoupon(foundCoupon);
+  useEffect(() => {
+    if (isOpen && propertyId) {
+      dispatch(fetchCouponsByProperty(propertyId));
+    }
+    if (!isOpen) {
       setCouponCode("");
+      dispatch(clearApplyState());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, propertyId]);
+
+  const getUserId = () => {
+    try {
+      if (typeof window === "undefined") return null;
+      return localStorage.getItem("thevilla_user_id");
+    } catch {
+      return null;
     }
   };
 
-  const handleCouponApply = (coupon) => {
-    onApplyCoupon(coupon);
+  const parseValidTill = (validTill) => {
+    if (!validTill) return null;
+    if (typeof validTill === "string") return new Date(validTill);
+    if (validTill?.$date) return new Date(validTill.$date);
+    if (validTill?.$numberLong) return new Date(Number(validTill.$numberLong));
+    return new Date(validTill);
+  };
+
+  const formatDateReadable = (d) => {
+    try {
+      if (!d) return "—";
+      const dt = parseValidTill(d);
+      if (!dt || Number.isNaN(dt.getTime())) return "—";
+      return dt.toLocaleDateString();
+    } catch {
+      return "—";
+    }
+  };
+
+  const normalizeCouponForUI = (c) => {
+    return {
+      ...c,
+      code: (c.code || "").toUpperCase(),
+      description: c.description || c.title || "",
+      validTillReadable: formatDateReadable(c.validTill),
+      minNights: c.minNights ?? c.minNights ?? null,
+      discountAmount:
+        (c.discount && (c.discount.amount ?? 0)) ||
+        c.discountAmount ||
+        c.amount ||
+        0,
+      discountType:
+        (c.discount && c.discount.type) || c.discountType || "percentage",
+      maxDiscount: c.maxDiscount ?? c.maxDiscountAmount ?? 0,
+    };
+  };
+
+  const couponsToRender = useMemo(() => {
+    return (list || []).map((c) => normalizeCouponForUI(c));
+  }, [list]);
+
+  const normalizeApplyResponse = (apiResponse) => {
+    const payload = apiResponse?.data ?? apiResponse ?? {};
+    const backendCoupon = payload?.coupon ?? payload;
+    const discountAmount =
+      payload?.discountAmount ?? payload?.discountValue ?? 0;
+
+    return {
+      applied: true,
+      code: backendCoupon?.code ?? "",
+      couponId: backendCoupon?._id ?? backendCoupon?.couponId ?? null,
+      discountType:
+        (backendCoupon?.discount && backendCoupon.discount.type) ||
+        "percentage",
+      discountValue:
+        (backendCoupon?.discount && backendCoupon.discount.amount) ||
+        backendCoupon?.discountValue ||
+        0,
+      discountAmount: Number(discountAmount),
+      maxDiscount:
+        backendCoupon?.maxDiscount ??
+        backendCoupon?.maxDiscountAmount ??
+        backendCoupon?.maxDiscountValue ??
+        0,
+      appliedAt: new Date().toISOString(),
+      couponType: backendCoupon?.type ?? "coupon",
+      title: backendCoupon?.title ?? backendCoupon?.name ?? "",
+    };
+  };
+
+  // CORE: apply via thunk, but use separate loading flags depending on source
+  const callApply = async ({ code, source = "card" }) => {
+    // source: "manual" | "card"
+    try {
+      if (source === "manual") setIsApplyingManual(true);
+      else setApplyingCode(code);
+
+      const deviceId = await getDeviceId();
+      const userId = getUserId();
+
+      const payload = {
+        couponCode: code,
+        orderValue: subtotal ?? 0,
+        userId,
+        deviceId,
+        propertyType,
+        propertyId,
+        checkIn,
+        checkOut,
+      };
+
+      const res = await dispatch(applyCoupon(payload)).unwrap();
+
+      const normalized = normalizeApplyResponse(res);
+
+      if (typeof onApplyCoupon === "function") {
+        onApplyCoupon(normalized);
+      }
+
+      addToast?.({
+        title: "Coupon applied",
+        description: `${normalized.code} applied successfully`,
+        color: "success",
+      });
+
+      onClose();
+      return normalized;
+    } catch (err) {
+      const msg = err?.message || applyError || "Failed to apply coupon";
+      addToast?.({
+        title: "Apply failed",
+        description: msg,
+        color: "danger",
+      });
+      console.error("apply coupon error:", err);
+      throw err;
+    } finally {
+      if (source === "manual") setIsApplyingManual(false);
+      else setApplyingCode(null);
+    }
+  };
+
+  // Manual apply: uses its own loading state
+  const handleManualApply = async () => {
+    const code = couponCode?.trim();
+    if (!code) return;
+    const found = (couponsToRender || []).find(
+      (c) => (c.code || "").toUpperCase() === code.toUpperCase()
+    );
+    if (found) {
+      if (
+        found.minNights &&
+        nights != null &&
+        nights < Number(found.minNights)
+      ) {
+        addToast?.({
+          title: "Minimum nights required",
+          description: `This coupon requires at least ${found.minNights} nights.`,
+          color: "danger",
+        });
+        return;
+      }
+    }
+    try {
+      await callApply({ code: code.toUpperCase(), source: "manual" });
+      setCouponCode("");
+    } catch {
+      // error handled inside callApply
+    }
+  };
+
+  // Card apply: sets applyingCode to that coupon code
+  const handleCouponApply = async (coupon) => {
+    if (!coupon?.code) return;
+    if (
+      coupon.minNights &&
+      nights != null &&
+      Number(nights) < Number(coupon.minNights)
+    ) {
+      addToast?.({
+        title: "Minimum nights required",
+        description: `This coupon requires at least ${coupon.minNights} nights.`,
+        color: "danger",
+      });
+      return;
+    }
+    try {
+      await callApply({ code: coupon.code, source: "card" });
+    } catch {
+      // handled
+    }
   };
 
   return (
@@ -79,7 +260,6 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
           </DrawerClose>
         </DrawerHeader>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
           {/* Manual Coupon Entry */}
           <div className="space-y-3">
@@ -92,14 +272,14 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
             />
             <Button
               onPress={handleManualApply}
-              disabled={!couponCode.trim()}
+              disabled={!couponCode.trim() || isApplyingManual}
               className="w-full bg-black text-white py-3 rounded-lg font-medium disabled:bg-black disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
             >
-              APPLY
+              {isApplyingManual ? "Applying..." : "APPLY"}
             </Button>
           </div>
 
-          {/* Available Offers */}
+          {/* Offers header */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-medium text-gray-600">
@@ -108,38 +288,78 @@ const CouponsDrawer = ({ isOpen, onClose, onApplyCoupon, appliedCoupon }) => {
               <span className="text-xs text-gray-400">T&C</span>
             </div>
 
-            {/* Coupon Cards */}
-            {availableCoupons.map((coupon) => (
-              <div
-                key={coupon.code}
-                className="border border-white bg-gray-200 rounded-lg p-4 space-y-3"
-              >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <p className="text-xs text-gray-500 mb-1">
-                      valid till: {coupon.validTill}
-                    </p>
-                    <p className="text-sm text-gray-700 mb-2">
-                      {coupon.description}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <FaTicketAlt className="w-4 h-4 text-gray-600" />
-                      <span className="font-bold text-black text-lg">
-                        {coupon.code}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleCouponApply(coupon)}
-                    disabled={appliedCoupon?.code === coupon.code}
-                    className="bg-black text-white px-4 py-2 rounded-lg text-sm font-medium disabled:bg-gray-300 disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
-                  >
-                    {appliedCoupon?.code === coupon.code ? "APPLIED" : "APPLY"}
-                  </button>
-                </div>
+            {fetchStatus === "loading" && (
+              <div className="text-sm">Loading offers...</div>
+            )}
+            {fetchStatus === "failed" && (
+              <div className="text-sm text-red-500">
+                Failed to load offers: {fetchError}
               </div>
-            ))}
+            )}
+
+            {/* Coupon cards */}
+            {(couponsToRender || []).map((coupon) => {
+              const isThisApplying = applyingCode === coupon.code;
+              const isApplied = appliedCoupon?.code === coupon.code;
+              return (
+                <div
+                  key={coupon.code}
+                  className="border border-white bg-gray-200 rounded-lg p-4 space-y-3"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <p className="text-xs text-gray-500 mb-1">
+                        valid till: {coupon.validTillReadable}
+                      </p>
+                      <p className="text-sm text-gray-700 mb-2">
+                        {coupon.description}
+                      </p>
+                      {coupon.minNights && (
+                        <p className="text-xs text-orange-600 mb-1">
+                          Min nights: {coupon.minNights}
+                        </p>
+                      )}
+                      <div className="flex items-center gap-2">
+                        <FaTicketAlt className="w-4 h-4 text-gray-600" />
+                        <span className="font-bold text-black text-lg">
+                          {coupon.code}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => handleCouponApply(coupon)}
+                      disabled={isThisApplying || isApplied}
+                      className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                        isApplied
+                          ? "bg-gray-300 text-gray-700 cursor-not-allowed"
+                          : "bg-black text-white hover:bg-gray-800"
+                      }`}
+                    >
+                      {isApplied
+                        ? "APPLIED"
+                        : isThisApplying
+                        ? "Applying..."
+                        : "APPLY"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+
+            {(couponsToRender || []).length === 0 &&
+              fetchStatus === "succeeded" && (
+                <div className="text-sm text-gray-500">
+                  No coupons available for this property
+                </div>
+              )}
           </div>
+
+          {applyStatus === "failed" && (
+            <div className="text-sm text-red-500">
+              Apply failed: {applyError}
+            </div>
+          )}
         </div>
       </DrawerContent>
     </Drawer>

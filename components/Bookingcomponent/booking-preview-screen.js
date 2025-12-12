@@ -49,6 +49,8 @@ import {
   useDisclosure,
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
+import { getDeviceId } from "@/lib/deviceId";
+import { calculateBasePriceForRange } from "@/lib/datePricing";
 
 export default function BookingPreviewScreen({ isOpen, onClose }) {
   const {
@@ -105,11 +107,32 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     if (!categoryId & !propertyId) {
       setopenmodal(true);
     }
-  }, []);
+  }, [categoryId, propertyId]);
 
+  const getCustomerId = () => {
+    try {
+      if (typeof window === "undefined") return null;
+      // adjust key if you use a different key
+      const id =
+        localStorage.getItem("thevilla_user_id") ||
+        localStorage.getItem("customer_id") ||
+        null;
+      return id;
+    } catch {
+      return null;
+    }
+  };
+
+  const basePrice = calculateBasePriceForRange(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    property?.pricing ?? {}
+  );
+
+  // Pass the precomputed basePrice into calculateBookingPrice (keeps your existing function)
   const { discountAmount, finalTotal } = calculateBookingPrice(
-    property?.pricing?.weekdayPrice,
-    nights,
+    basePrice,
+    1,
     appliedCoupon
   );
 
@@ -155,16 +178,8 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
 
   const handleProceedToPayment = async () => {
     setloading(true);
-    // if (!agreed) {
-    //   toast({
-    //     title: "Accept All The Conditions",
-    //     description: "Please agree to the conditions before proceeding.",
-    //     action: <ToastAction altText="Dismiss">Dismiss</ToastAction>,
-    //   });
-    //   setloading(false);
-    //   return;
-    // }
-    if (finalTotal === null) {
+
+    if (finalTotal === null || finalTotal === undefined) {
       addToast({
         title: "Total Amount is required",
         description: "Please check  the amount before proceeding.",
@@ -174,14 +189,6 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       setloading(false);
       return;
     }
-
-    // const encodedUserData = Cookies.get("User");
-
-    // if (!encodedUserData) {
-    //   return null;
-    // }
-    // const decodedUserData = decodeURIComponent(encodedUserData);
-    // const userData = JSON.parse(decodedUserData);
 
     let items = [];
 
@@ -199,11 +206,36 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       ];
     }
 
+    const customerId =
+      getCustomerId() ||
+      customerDetails?.id ||
+      customerDetails?.customerId ||
+      customerDetails?._id ||
+      null;
+
+    // get device id
+    let deviceId = null;
+    try {
+      deviceId = await getDeviceId();
+    } catch (err) {
+      console.warn("Unable to get device id", err);
+      deviceId = null;
+    }
+
+    // coupon info
+    const couponCode = appliedCoupon?.code || "";
+    const couponId =
+      appliedCoupon?.couponId ||
+      appliedCoupon?._id ||
+      appliedCoupon?.couponId ||
+      appliedCoupon?.id ||
+      null;
+
     const bookingData = {
       propertyType,
       propertyId,
       ownerId,
-      customerId: "6833656360ed0e90157dd2e1",
+      customerId: customerId,
       customerDetails: customerDetails,
       checkIn: checkInDate?.toISOString(),
       checkOut: checkOutDate?.toISOString(),
@@ -214,10 +246,15 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       },
       items,
       paymentAmount: Number(finalTotal || 0),
-      couponCode: "",
+      couponCode: couponCode,
       paymentType: "full",
       partialPercentage: 30,
       taxRate: 5,
+      deviceId,
+      couponId,
+      paymentType: "full",
+      partialPercentage: 30,
+      taxRate: 18, // keep consistent with frontend calc (we used 18%)
     };
     setIsBookingDetailsOpen(false);
     try {

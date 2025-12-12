@@ -22,6 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import Logoicon from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
 import { addToast, Button } from "@heroui/react";
+import { getDeviceId } from "@/lib/deviceId";
 
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -61,6 +62,10 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
       });
       if (!res.ok) throw new Error("Login failed");
       const data = await res.json();
+      const deviceId = await getDeviceId();
+      if (data.user?._id) {
+        localStorage.setItem("thevilla_user_id", data.user._id);
+      }
       Cookies.set("token", data.token, { expires: 7 });
       setOpen(false);
       setTimeout(() => {

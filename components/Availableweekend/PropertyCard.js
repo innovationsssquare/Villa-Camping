@@ -525,7 +525,7 @@ const PropertyCardnew = ({ property }) => {
                     </div>
                   )}
                 </div>
-                <p className="text-[0.5rem] text-center w-full">{amenity}</p>
+                <p className="text-[0.67rem] text-center w-full">{amenity}</p>
               </div>
             ))}
           </div>
