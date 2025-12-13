@@ -60,9 +60,10 @@ import {
   MdKitchen,
   MdOutlineLocalDining,
   MdOutlineFreeBreakfast,
-  MdOutlineSpeaker ,
-  MdPool 
+  MdOutlineSpeaker,
+  MdPool,
 } from "react-icons/md";
+import { calculateBasePriceForRange } from "@/lib/datePricing";
 
 const PropertyCardnew = ({ property }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -70,7 +71,11 @@ const PropertyCardnew = ({ property }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState();
   const { selectedCategoryName } = useSelector((state) => state.booking);
-
+  const { checkin, checkout } = useSelector((state) => state.booking);
+  const checkInDate = checkin ? new Date(checkin) : new Date();
+  const checkOutDate = checkout
+    ? new Date(checkout)
+    : new Date(Date.now() + 24 * 60 * 60 * 1000);
   useEffect(() => {
     if (!api) return;
 
@@ -102,8 +107,8 @@ const PropertyCardnew = ({ property }) => {
     "Table & Chairs": <Table className="w-6 h-6 text-gray-600" />,
     "Geyser in all Bathrooms": <Bath className="w-6 h-6 text-gray-600" />,
 
-    "Swimming Pool": <MdPool  className="w-6 h-6 text-gray-600" />,
-    "Sound System": <MdOutlineSpeaker  className="w-6 h-6 text-gray-600" />,
+    "Swimming Pool": <MdPool className="w-6 h-6 text-gray-600" />,
+    "Sound System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
     Refrigerator: <MdKitchen className="w-6 h-6 text-gray-600" />,
     Kitchen: <MdKitchen className="w-6 h-6 text-gray-600" />,
     "Coffee Maker": <Coffee className="w-6 h-6 text-gray-600" />,
@@ -152,6 +157,12 @@ const PropertyCardnew = ({ property }) => {
     }).format(Number(amount));
     return `₹${formatted}`;
   }
+
+  const basePrice = calculateBasePriceForRange(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    property?.pricing ?? {}
+  );
 
   return (
     <Card
@@ -321,27 +332,7 @@ const PropertyCardnew = ({ property }) => {
               Min 1 Nights
             </div>
             <div className="text-2xl font-bold text-price-text mb-2">
-                {(() => {
-                const useDate =
-                  typeof selectedDate !== "undefined"
-                    ? selectedDate
-                    : new Date();
-                const weekend = isWeekendInIndia(useDate);
-                const weekdayPrice =
-                  property?.pricing?.weekdayPrice ??
-                  property?.pricing?.basePrice ??
-                  0;
-                const weekendPrice =
-                  property?.pricing?.weekendPrice ?? weekdayPrice;
-
-                const displayPrice = weekend ? weekendPrice : weekdayPrice;
-
-                return (
-                  <div className="text-xl font-bold text-price-text">
-                    {formatRupee(displayPrice)}
-                  </div>
-                );
-              })()}
+              {basePrice}
             </div>
             <div className="text-xs text-muted-foreground">
               for 1 Nights + Taxes
@@ -542,28 +533,9 @@ const PropertyCardnew = ({ property }) => {
                 </div>
               </div>
 
-              {/* choose date: use `selectedDate` if you have one, else current date */}
-              {(() => {
-                const useDate =
-                  typeof selectedDate !== "undefined"
-                    ? selectedDate
-                    : new Date();
-                const weekend = isWeekendInIndia(useDate);
-                const weekdayPrice =
-                  property?.pricing?.weekdayPrice ??
-                  property?.pricing?.basePrice ??
-                  0;
-                const weekendPrice =
-                  property?.pricing?.weekendPrice ?? weekdayPrice;
-
-                const displayPrice = weekend ? weekendPrice : weekdayPrice;
-
-                return (
-                  <div className="text-xl font-bold text-price-text">
-                    {formatRupee(displayPrice)}
-                  </div>
-                );
-              })()}
+              <div className="text-xl font-bold text-price-text">
+                {formatRupee(basePrice)}
+              </div>
             </div>
             <div className="space-y-3">
               <Button

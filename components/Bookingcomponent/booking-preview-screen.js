@@ -136,6 +136,15 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     appliedCoupon
   );
 
+  function formatRupee(amount) {
+    if (amount == null || Number.isNaN(Number(amount))) return "₹0";
+    // no decimal places - change maximumFractionDigits if needed
+    const formatted = new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(Number(amount));
+    return `₹${formatted}`;
+  }
+
   const handleNext = () => {
     if (currentStep === "overview") {
       setCurrentStep("policy");
@@ -501,7 +510,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
               <FaInfoCircle className="w-4 h-4 text-gray-400" />
             </div>
             <span className="font-medium text-black">
-              ₹{property?.pricing?.weekdayPrice}
+              {formatRupee(basePrice)}
             </span>
           </div>
 
@@ -523,7 +532,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
                 (As per government guidelines)
               </span>
             </div>
-            <span className="font-medium text-black">₹{finalTotal}</span>
+            <span className="font-medium text-black">{formatRupee(finalTotal)}</span>
           </div>
         </div>
 
@@ -568,7 +577,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             Total Payable
           </span>
           <span className="text-md font-semibold text-black">
-            ₹{finalTotal}
+            {formatRupee(finalTotal)}
           </span>
         </div>
       </div>
@@ -720,9 +729,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             {currentStep === "price" ? (
               <>
                 <div>
-                  <p className="text-xl font-bold text-black">₹{finalTotal}</p>
+                  <p className="text-xl font-bold text-black">{formatRupee(finalTotal)}</p>
                   <p className="text-sm text-gray-600">
-                    ( For 2 nights,2 guests )
+                    ( For {nights} nights, {totalGuests} guests )
                   </p>
                 </div>
                 <Button
@@ -735,7 +744,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             ) : (
               <>
                 <div>
-                  <p className="text-xl font-bold text-black">₹{finalTotal}</p>
+                  <p className="text-xl font-bold text-black">{formatRupee(finalTotal)}</p>
                   <p className="text-sm text-gray-600">
                     ( For {nights} nights, {totalGuests} guests )
                   </p>

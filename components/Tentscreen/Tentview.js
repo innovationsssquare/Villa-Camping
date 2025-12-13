@@ -6,6 +6,7 @@ import FixedBookingBar from "./FixedBookingBar";
 import TentHeader from "./TentHeader";
 import TentHero from "./TentHero";
 import TentDetails from "./TentDetails";
+import { CampingProvider } from "@/lib/context/CampingContext";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
@@ -103,6 +104,8 @@ const [tents, setTents] = useState([]);
   };
 
   return (
+    <CampingProvider >
+
     <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
       <TentHeader />
       <TentHero />
@@ -147,6 +150,7 @@ const [tents, setTents] = useState([]);
 
       <FixedBookingBar />
     </div>
+    </CampingProvider>
   );
 };
 

@@ -10,6 +10,7 @@ import {
   setPropertyType,
 } from "@/Redux/Slices/bookingSlice";
 import { useDispatch, useSelector } from "react-redux";
+import { calculateBasePriceForRange } from "@/lib/datePricing";
 
 const FixedBookingBar = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,11 @@ const FixedBookingBar = () => {
 
   const villa = useVilla();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const { checkin, checkout } = useSelector((state) => state.booking);
+  const checkInDate = checkin ? new Date(checkin) : new Date();
+  const checkOutDate = checkout
+    ? new Date(checkout)
+    : new Date(Date.now() + 24 * 60 * 60 * 1000);
 
   const guestCounts = {
     adults: Number(selectedGuest?.adults ?? 2),
@@ -28,6 +34,12 @@ const FixedBookingBar = () => {
 
   const totalGuests =
     guestCounts.adults + guestCounts.children + guestCounts.infants;
+
+  const basePrice = calculateBasePriceForRange(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    villa?.pricing ?? {}
+  );
 
   function isWeekendInIndia(date = new Date()) {
     const dt = typeof date === "string" ? new Date(date) : date;
@@ -56,30 +68,12 @@ const FixedBookingBar = () => {
           <div>
             <div className="flex items-center space-x-2">
               <span className="text-sm text-price-original line-through">
-                {formatRupee(villa.pricing.weekdayPrice + 3000)}
+                {formatRupee(basePrice + 3000)}
               </span>
               <span className="text-lg font-bold text-price-current">
-                {(() => {
-                  const useDate =
-                    typeof selectedDate !== "undefined"
-                      ? selectedDate
-                      : new Date();
-                  const weekend = isWeekendInIndia(useDate);
-                  const weekdayPrice =
-                    villa?.pricing?.weekdayPrice ??
-                    villa?.pricing?.basePrice ??
-                    0;
-                  const weekendPrice =
-                    villa?.pricing?.weekendPrice ?? weekdayPrice;
-
-                  const displayPrice = weekend ? weekendPrice : weekdayPrice;
-
-                  return (
-                    <div className="text-xl font-bold text-price-text">
-                      {formatRupee(displayPrice)}
-                    </div>
-                  );
-                })()}
+                <div className="text-xl font-bold text-price-text">
+                  {formatRupee(basePrice)}
+                </div>
               </span>
             </div>
             <div className="flex items-center space-x-1 text-xs text-villa-text-light">
@@ -126,8 +120,8 @@ const FixedBookingBar = () => {
         Setopen={setIsBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         propertyName={villa?.name}
-        price={villa?.pricing?.weekdayPrice}
-        originalPrice={villa?.pricing?.weekdayPrice + 3000}
+        price={basePrice}
+        originalPrice={basePrice + 3000}
         propertyId={villa?._id}
         ownerId={villa?.owner}
         propertyType="Villa"
