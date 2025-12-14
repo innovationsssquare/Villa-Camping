@@ -45,6 +45,7 @@ import {
   Camera,
   Mountain,
   Building2,
+  Sun,
 } from "lucide-react";
 
 // react-icons for items lucide doesn't provide (or where a better semantic icon exists)
@@ -64,6 +65,14 @@ import {
   MdPool,
 } from "react-icons/md";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
+// lucide-react
+import { Tent, Backpack, Music, Footprints} from "lucide-react";
+import { TbKayak } from "react-icons/tb";
+import { MdKayaking } from "react-icons/md";
+
+// react-icons (better semantics for some amenities)
+import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
+import { MdOutlineLocalDrink } from "react-icons/md";
 
 const PropertyCardnew = ({ property }) => {
   const [isWishlisted, setIsWishlisted] = useState(false);
@@ -127,6 +136,34 @@ const PropertyCardnew = ({ property }) => {
       <MdOutlineFreeBreakfast className="w-6 h-6 text-gray-600" />
     ),
     "Smart Lighting": <Lightbulb className="w-6 h-6 text-gray-600" />,
+    "Tent Stay": <Tent className="w-6 h-6 text-gray-600" />,
+    "Sleeping Bags": <Backpack className="w-6 h-6 text-gray-600" />,
+    Blankets: <Bed className="w-6 h-6 text-gray-600" />,
+    Mattresses: <Bed className="w-6 h-6 text-gray-600" />,
+
+    // Utilities
+    "Drinking Water": <MdOutlineLocalDrink className="w-6 h-6 text-gray-600" />,
+    "Charging Point": <BatteryCharging className="w-6 h-6 text-gray-600" />,
+    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
+    "Private Parking": <FaParking className="w-6 h-6 text-gray-600" />,
+
+    // Activities
+    Barbeque: <FlameKindling className="w-6 h-6 text-gray-600" />,
+    Bonfire: <FaFireAlt className="w-6 h-6 text-gray-600" />,
+    Trekking: <Footprints className="w-6 h-6 text-gray-600" />,
+
+    // Views
+    "Mountain View": <Mountain className="w-6 h-6 text-gray-600" />,
+    "Lake View": <Waves className="w-6 h-6 text-gray-600" />,
+
+    // Common areas
+    "Outdoor Seating": <Table className="w-6 h-6 text-gray-600" />,
+    "Garden Area": <Trees className="w-6 h-6 text-gray-600" />,
+    "Play Area": <FaChild className="w-6 h-6 text-gray-600" />,
+    "Music System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
+    "Rain Dance Area": <Droplet className="w-6 h-6 text-gray-600" />,
+    "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
+    Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
   };
 
   const greatForIcons = {

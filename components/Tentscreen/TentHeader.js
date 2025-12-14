@@ -1,16 +1,26 @@
 import React from "react";
 import { ArrowLeft, Share, Bell, User } from "lucide-react";
+import { useCamping } from "@/lib/context/CampingContext";
+import { Button } from "@heroui/react";
+import { useRouter } from "next/navigation";
 
 const TentHeader = () => {
+    const camping = useCamping();
+    const router = useRouter();
   return (
     <div className="flex items-center  justify-between p-2 bg-background w-full  overflow-hidden">
       <div className="flex items-center w-2/3">
-        <button className="p-2 -ml-2">
+       <Button
+          isIconOnly
+          variant="light"
+          onPress={() => router.back()}
+          className="p-2 -ml-2"
+        >
           <ArrowLeft className="w-6 h-6" />
-        </button>
+        </Button>
         <div className="ml-2 flex items-center truncate ">
           <span className="text-md font-medium truncate">
-            Vatalya vila - Malawali,lonavala
+            {camping?.name} - {camping?.address?.addressLine},{camping?.address?.city}
           </span>
         </div>
       </div>

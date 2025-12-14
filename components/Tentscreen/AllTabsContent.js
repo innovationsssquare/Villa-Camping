@@ -41,16 +41,21 @@ import ReviewsTab from "./ReviewsTab";
 import ExperiencesTab from "./ExperiencesTab";
 import HighlightsTab from "./HighlightsTab";
 import SpacesTab from "./SpacesTab";
+import { useCamping } from "@/lib/context/CampingContext";
 
-const AllTabsContent = ({ refs ,tents,onBookTent}) => {
+const AllTabsContent = ({ refs, tents, onBookTent }) => {
   const [expandedDescription, setExpandedDescription] = useState(false);
-
+  const camping = useCamping();
 
   return (
     <div className="pb-20">
       {/* Highlights Section */}
-     <section ref={refs.highlightsRef} id="highlights" className="scroll-mt-16">
-        <HighlightsTab/>
+      <section
+        ref={refs.highlightsRef}
+        id="highlights"
+        className="scroll-mt-16"
+      >
+        <HighlightsTab />
       </section>
 
       {/* Refund Policy Section */}
@@ -67,31 +72,32 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
           <div className="space-y-4 text-sm">
             <div>
               <h4 className="font-medium mb-2">Cancellation Policy</h4>
-              <ul className="space-y-1 text-villa-text-light">
-                <li>• Free cancellation up to 7 days before check-in</li>
-                <li>• 50% refund for cancellations 3-7 days before</li>
-                <li>• No refund for cancellations within 3 days</li>
-              </ul>
+              {camping?.cancellationPolicy &&
+                camping?.cancellationPolicy.map((policy, index) => (
+                  <ul key={index} className="space-y-1 text-villa-text-light">
+                    <li>• {policy}</li>
+                  </ul>
+                ))}
             </div>
 
             <div>
-              <h4 className="font-medium mb-2">House Rules</h4>
-              <ul className="space-y-1 text-villa-text-light">
-                <li>• Check-in: 2:00 PM - 8:00 PM</li>
-                <li>• Check-out: 11:00 AM</li>
-                <li>• No smoking inside the property</li>
-                <li>• No pets allowed</li>
-                <li>• No parties or events</li>
-              </ul>
+              <h4 className="font-medium mb-2">Camping Rules</h4>
+              {camping?.CampingRules &&
+                camping?.CampingRules.map((rules, index) => (
+                  <ul key={index} className="space-y-1 text-villa-text-light">
+                    <li>• {rules}</li>
+                  </ul>
+                ))}
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Payment Terms</h4>
-              <ul className="space-y-1 text-villa-text-light">
-                <li>• 25% advance payment required at booking</li>
-                <li>• Remaining amount due at check-in</li>
-                <li>• Security deposit: ₹10,000 (refundable)</li>
-              </ul>
+              {camping?.paymentTerms &&
+                camping?.paymentTerms.map((rules, index) => (
+                  <ul key={index} className="space-y-1 text-villa-text-light">
+                    <li>• {rules}</li>
+                  </ul>
+                ))}
             </div>
           </div>
         </div>
@@ -104,7 +110,7 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
 
       {/* Reviews Section */}
       <section ref={refs.reviewsRef} id="reviews" className="scroll-mt-16">
-        <ReviewsTab/>
+        <ReviewsTab />
       </section>
 
       {/* Amenities Section */}
@@ -170,27 +176,32 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
         id="location"
         className="p-3 space-y-6 scroll-mt-16"
       >
-        <div >
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">Location</h3>
+        <div>
+          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
+            Location
+          </h3>
 
           <div className="bg-gray-100 border border-gray-200 p-2 h-auto  rounded-lg flex items-center justify-center mb-4">
-           <GoogleMap/>
+            <GoogleMap address={camping?.coordinates} />
           </div>
 
           <div className="space-y-3">
             <div>
               <h4 className="font-medium mb-2">Address</h4>
               <p className="text-sm text-villa-text-light">
-                RMalawali,Lonavala,Pune India
+                {camping?.address.addressLine},{camping?.address.area},
+                {camping?.address.city}
               </p>
             </div>
 
             <div>
               <h4 className="font-medium mb-2">Nearby Attractions</h4>
               <ul className="space-y-1 text-sm text-villa-text-light">
-                <li>• Pawana Lake - 15 km</li>
-                <li>• Tiger point - 12 km</li>
-                <li>• Lohgad Fort - 18 km</li>
+                {camping?.nearbyattractions?.map((loc, index) => (
+                  <li key={index}>
+                    • {loc?.nearbylocation} - {loc?.distance} km
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
@@ -198,8 +209,12 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
       </section>
 
       {/* Experiences Section */}
-    <section ref={refs.experiencesRef} id="experiences" className="scroll-mt-16">
-        <ExperiencesTab/>
+      <section
+        ref={refs.experiencesRef}
+        id="experiences"
+        className="scroll-mt-16"
+      >
+        <ExperiencesTab experiences={camping?.experiences} />
       </section>
 
       {/* FAQ Section */}
@@ -213,9 +228,9 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
         </button> */}
 
         {/* FAQ Section */}
-        <div >
+        <div>
           <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-           {` FAQ's related to Vastalya Villa - Malwali - Lonavala`}
+            {` FAQ's related to Vastalya Villa - Malwali - Lonavala`}
           </h3>
           <Accordion type="single" collapsible className="space-y-3">
             <AccordionItem
@@ -259,57 +274,40 @@ const AllTabsContent = ({ refs ,tents,onBookTent}) => {
         </div>
 
         {/* Explore Your Stay */}
-        <div >
-          <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">Explore Your Stay</h3>
-          <Accordion type="single" collapsible className="space-y-3">
-            <AccordionItem
-              value="explore-1"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Villa Tour & Facilities
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Take a virtual tour of our spacious villa with modern amenities
-                and beautiful mountain views.
-              </AccordionContent>
-            </AccordionItem>
+        <div className=" space-y-6">
+          <div>
+            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
+              Explore Your Stay
+            </h3>
 
-            <AccordionItem
-              value="explore-2"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Local Attractions & Activities
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Discover nearby attractions, adventure activities, and cultural
-                experiences in Nainital.
-              </AccordionContent>
-            </AccordionItem>
-
-            <AccordionItem
-              value="explore-3"
-              className="bg-gray-100 rounded-lg px-4 border-0"
-            >
-              <AccordionTrigger className="font-medium hover:no-underline">
-                Food & Dining Options
-              </AccordionTrigger>
-              <AccordionContent className="text-sm text-villa-text-light">
-                Enjoy home-cooked meals, local cuisine, and nearby restaurant
-                recommendations.
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
+            {camping?.exploreStay?.length > 0 ? (
+              <Accordion type="single" collapsible className="space-y-3">
+                {camping?.exploreStay?.map((item, index) => (
+                  <AccordionItem
+                    key={item._id || index}
+                    value={`explore-${index}`}
+                    className="bg-gray-100 rounded-lg px-4 border-0"
+                  >
+                    <AccordionTrigger className="font-medium hover:no-underline">
+                      {item.title}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-sm text-villa-text-light">
+                      {item.description}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            ) : (
+              <p className="text-sm text-gray-400">No details available</p>
+            )}
+          </div>
         </div>
 
         {/* Nearby Villas */}
-        <div >
+        <div>
           <div className="flex items-center justify-between mb-4 border-l-3 border-orange-500 pl-2">
             <h3 className="text-lg font-semibold">Nearby Villas</h3>
-            <div className="flex items-center space-x-2 text-sm text-villa-text-light">
-            
-            </div>
+            <div className="flex items-center space-x-2 text-sm text-villa-text-light"></div>
           </div>
 
           <Carousel className="w-full">

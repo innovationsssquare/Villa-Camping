@@ -7,6 +7,12 @@ import TentHeader from "./TentHeader";
 import TentHero from "./TentHero";
 import TentDetails from "./TentDetails";
 import { CampingProvider } from "@/lib/context/CampingContext";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useRouter } from "next/navigation";
+import { fetchCampingById } from "@/Redux/Slices/campingSlice";
+import ButtonLoader from "../Loadercomponents/button-loader";
+import { XCircle } from "lucide-react";
+import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
@@ -25,6 +31,14 @@ const Tentview = () => {
   const tabsRef = useRef(null);
 const [tents, setTents] = useState([]);
 
+  const dispatch = useDispatch();
+  const params = useParams();
+  const { id } = params;
+  const { camping, loading, error } = useSelector((state) => state.camping);
+  const router = useRouter();
+  useEffect(() => {
+    dispatch(fetchCampingById(id));
+  }, [id]);
 
   const handleBookTent = (tentId, tentType, price) => {
     console.log('Booking tent:', { tentId, tentType, price });
@@ -103,8 +117,35 @@ const [tents, setTents] = useState([]);
     }
   };
 
+if (loading) {
+    return <VillaScreenSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-500">Error loading camping details</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!camping) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black/10">
+        <div className="bg-black rounded-full flex justify-center items-center">
+          <ButtonLoader />
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
-    <CampingProvider >
+    <CampingProvider  camping={camping}>
 
     <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
       <TentHeader />

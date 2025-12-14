@@ -142,7 +142,7 @@ const VillaDetails = () => {
           scroll={true}
           className="text-blue-500 text-sm underline"
         >
-          67 Reviews
+          {villa?.totalReviews} Reviews
         </Link>
       </div>
 

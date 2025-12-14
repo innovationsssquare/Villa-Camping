@@ -15,8 +15,11 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Users, Bed, Wifi, Coffee, Mountain } from "lucide-react";
+import { useCamping } from "@/lib/context/CampingContext";
 
 const SpacesTab = ({ tents = [], onBookTent }) => {
+    const camping = useCamping();
+  
   const getAmenityIcon = (amenity) => {
     const lowerAmenity = amenity.toLowerCase();
     if (lowerAmenity.includes("wifi")) return <Wifi className="w-4 h-4" />;
@@ -133,22 +136,20 @@ const SpacesTab = ({ tents = [], onBookTent }) => {
           Meal Plan of Campsite
         </h3>
         <ul className="space-y-2 text-sm text-muted-foreground">
-          <li>• Welcome drink</li>
+         
           <li>
-            • Snacks: tea and <em>pakoda</em>
+            • Snacks: {camping?.meals?.eveningSnacks}
           </li>
-          <li>• Veg-BBQ: marinated paneer and assorted veggies</li>
-          <li>• NonVeg-BBQ: marinated chicken with assorted veggies</li>
+          <li>• Veg-BBQ: {camping?.meals?.bbq?.veg}</li>
+          <li>• NonVeg-BBQ: {camping?.meals?.bbq?.nonVeg}</li>
           <li>
-            • Veg-dinner: dal tadka, mix-veg or paneer, chapati, steamed rice,
-            salad and sweet
+            • Veg-dinner: {camping?.meals?.dinner?.veg}
           </li>
           <li>
-            • Nonveg-dinner: chicken curry, chicken dry masala, chapati, steamed
-            rice, salad and sweet
+            • Nonveg-dinner: {camping?.meals?.dinner?.nonVeg}
           </li>
-          <li>• Midnight tea</li>
-          <li>• Breakfast: tea, poha, anda bhurji, bread, jam</li>
+          <li> Next Day Breakfast</li>
+          <li>• Breakfast: {camping?.meals?.nextDayBreakfast}</li>
         </ul>
       </div>
 
