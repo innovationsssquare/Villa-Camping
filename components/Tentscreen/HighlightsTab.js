@@ -60,7 +60,7 @@ const HighlightsTab = () => {
         {camping?.highlights?.scheduleInfo &&
           camping?.highlights?.scheduleInfo.map(
             (highlights, index) => (
-              <div className="space-y-2 text-sm">
+              <div key={index} className="space-y-2 text-sm">
                 <p className="text-muted-foreground">
                   • {highlights?.label} {highlights?.time}
                 </p>

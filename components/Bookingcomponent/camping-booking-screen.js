@@ -51,9 +51,8 @@ import {
 import { useRouter } from "next/navigation";
 import { getDeviceId } from "@/lib/deviceId";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
-import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
 
-export default function BookingPreviewScreen({ isOpen, onClose }) {
+export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   const {
     checkin,
     checkout,
@@ -78,12 +77,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
   const { addToast } = useToast();
   const router = useRouter();
-  const reduxSelectedTents = useSelector(
-    (state) => state.booking.selectedTents
-  );
-  const dayTents = useSelector(
-    (state) => state.camping.dayDetails?.tents || []
-  );
+
   const checkInDate = checkin ? new Date(checkin) : new Date();
   const checkOutDate = checkout
     ? new Date(checkout)
@@ -129,41 +123,18 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     }
   };
 
-  // const basePrice = calculateBasePriceForRange(
-  //   checkInDate?.toISOString(),
-  //   checkOutDate?.toISOString(),
-  //   property?.pricing ?? {}
-  // );
+  const basePrice = calculateBasePriceForRange(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    property?.pricing ?? {}
+  );
 
-  // // Pass the precomputed basePrice into calculateBookingPrice (keeps your existing function)
-  // const { discountAmount, finalTotal } = calculateBookingPrice(
-  //   basePrice,
-  //   1,
-  //   appliedCoupon
-  // );
-
-  let baseAmountForCoupon = 0;
-  let nightsForCoupon = nights;
-
-  if (propertyType === "Camping") {
-    baseAmountForCoupon = calculateCampingTentTotal(
-      reduxSelectedTents,
-      dayTents,
-      checkin,
-      checkout
-    );
-
-    nightsForCoupon = 1; // 🔥 CRITICAL
-  } else {
-    baseAmountForCoupon = calculateBasePriceForRange(
-      checkInDate?.toISOString(),
-      checkOutDate?.toISOString(),
-      property?.pricing ?? {}
-    );
-  }
-
-  const { basePrice, discountAmount, taxAmount, finalTotal } =
-    calculateBookingPrice(baseAmountForCoupon, nightsForCoupon, appliedCoupon);
+  // Pass the precomputed basePrice into calculateBookingPrice (keeps your existing function)
+  const { discountAmount, finalTotal } = calculateBookingPrice(
+    basePrice,
+    1,
+    appliedCoupon
+  );
 
   function formatRupee(amount) {
     if (amount == null || Number.isNaN(Number(amount))) return "₹0";
@@ -242,21 +213,6 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           totalPrice: Number(property?.pricing?.weekdayPrice) * nights,
         },
       ];
-    }
-    if (propertyType === "Camping") {
-      items = Object.entries(reduxSelectedTents).map(([tentType, t]) => ({
-        unitType: "Tent",
-        unitId: t.unitId,
-        typeName: tentType,
-        quantity: t.quantity,
-        pricePerNight: t.weekdayPrice, // optional (for reference)
-        totalPrice:
-          t.quantity *
-          calculateBasePriceForRange(checkin, checkout, {
-            weekdayPrice: t.weekdayPrice,
-            weekendPrice: t.weekendPrice,
-          }),
-      }));
     }
 
     const customerId =
@@ -576,9 +532,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
                 (As per government guidelines)
               </span>
             </div>
-            <span className="font-medium text-black">
-              {formatRupee(finalTotal)}
-            </span>
+            <span className="font-medium text-black">{formatRupee(finalTotal)}</span>
           </div>
         </div>
 
@@ -775,9 +729,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             {currentStep === "price" ? (
               <>
                 <div>
-                  <p className="text-xl font-bold text-black">
-                    {formatRupee(finalTotal)}
-                  </p>
+                  <p className="text-xl font-bold text-black">{formatRupee(finalTotal)}</p>
                   <p className="text-sm text-gray-600">
                     ( For {nights} nights, {totalGuests} guests )
                   </p>
@@ -792,9 +744,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             ) : (
               <>
                 <div>
-                  <p className="text-xl font-bold text-black">
-                    {formatRupee(finalTotal)}
-                  </p>
+                  <p className="text-xl font-bold text-black">{formatRupee(finalTotal)}</p>
                   <p className="text-sm text-gray-600">
                     ( For {nights} nights, {totalGuests} guests )
                   </p>

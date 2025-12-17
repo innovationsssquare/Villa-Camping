@@ -5,14 +5,14 @@ import { useEffect, useRef, useState } from "react";
 export default function GoogleMap({
   center = { lat: 18.7645, lng: 73.4084 },
 
-  zoom = 14,
+  zoom = 8,
   className = "w-full h-64 rounded-lg",
-  address,
+  coordinates,
 }) {
   const mapRef = useRef(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState(null);
-  console.log(address);
+  console.log(coordinates);
   useEffect(() => {
     const loadGoogleMaps = async () => {
       try {
@@ -47,7 +47,7 @@ export default function GoogleMap({
       if (!mapRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapRef.current, {
-        center: { lat: address[1], lng: address[0] },
+        center: { lat: coordinates[0], lng: coordinates[1] },
         zoom,
         // styles: [
         //   {
@@ -70,17 +70,10 @@ export default function GoogleMap({
 
       // Add marker for the property
       new window.google.maps.Marker({
-        position: { lat: address[1], lng: address[0] },
+        position: { lat: coordinates[0], lng: coordinates[1] },
         map,
         title: "Vastalya Villa - Malawali",
-        icon: {
-          path: window.google.maps.SymbolPath.CIRCLE,
-          scale: 8,
-          fillColor: "#000000",
-          fillOpacity: 1,
-          strokeColor: "#ffffff",
-          strokeWeight: 2,
-        },
+        
       });
     };
 

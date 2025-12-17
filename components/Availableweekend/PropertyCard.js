@@ -57,6 +57,7 @@ import {
   FaChild,
   FaUmbrellaBeach,
 } from "react-icons/fa6";
+import { BiBlanket } from "react-icons/bi";
 import {
   MdKitchen,
   MdOutlineLocalDining,

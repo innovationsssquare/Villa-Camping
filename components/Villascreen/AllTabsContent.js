@@ -407,7 +407,7 @@ const AllTabsContent = ({ refs }) => {
           </h3>
 
           <div className="bg-gray-100 border border-gray-200 p-2 h-auto  rounded-lg flex items-center justify-center mb-4">
-            <GoogleMap address={villa?.coordinates} />
+            <GoogleMap coordinates={villa?.coordinates} />
           </div>
 
           <div className="space-y-3">

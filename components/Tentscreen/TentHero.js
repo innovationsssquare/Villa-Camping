@@ -102,7 +102,7 @@ const TentHero = () => {
           </div>
 
           {/* Carousel Dots */}
-          <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
+          <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
             {camping?.images.map((_, index) => (
               <button
                 key={index}

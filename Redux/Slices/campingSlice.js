@@ -1,6 +1,9 @@
 // src/redux/slices/villaSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { GetCampingbyid } from "@/lib/API/category/Camping/Camping"; 
+import {
+  GetCampingbyid,
+  Getcampingdaydetails,
+} from "@/lib/API/category/Camping/Camping";
 
 // Thunk for fetching villa by id
 export const fetchCampingById = createAsyncThunk(
@@ -15,12 +18,28 @@ export const fetchCampingById = createAsyncThunk(
   }
 );
 
+export const getCampingDayDetailsThunk = createAsyncThunk(
+  "Camping/getDayDetailsThunk",
+  async ({ id, date }, thunkAPI) => {
+    try {
+      const response = await Getcampingdaydetails(id, date);
+      return response.data;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.message);
+    }
+  }
+);
+
 const campingSlice = createSlice({
   name: "camping",
   initialState: {
     camping: null,
     loading: false,
     error: null,
+
+    dayDetails: null,
+    dayDetailsLoading: false,
+    dayDetailsError: null,
   },
   reducers: {
     clearCamping: (state) => {
@@ -42,6 +61,18 @@ const campingSlice = createSlice({
       .addCase(fetchCampingById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload || "Failed to fetch camping";
+      })
+      .addCase(getCampingDayDetailsThunk.pending, (state) => {
+        state.dayDetailsLoading = true;
+        state.dayDetailsError = null;
+      })
+      .addCase(getCampingDayDetailsThunk.fulfilled, (state, action) => {
+        state.dayDetailsLoading = false;
+        state.dayDetails = action.payload;
+      })
+      .addCase(getCampingDayDetailsThunk.rejected, (state, action) => {
+        state.dayDetailsLoading = false;
+        state.dayDetailsError = action.payload;
       });
   },
 });

@@ -35,6 +35,8 @@ import {
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { X } from "lucide-react";
+import TentSelectionDrawer from "../Tentscreen/tent-selection-drawer";
+import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
 
 export default function BookingDialog({
   isOpen,
@@ -46,11 +48,13 @@ export default function BookingDialog({
   propertyId,
   ownerId,
   propertyType,
+  tents,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
+  const [isTentDrawerOpen, setIsTentDrawerOpen] = useState(false);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState("checkin");
@@ -62,11 +66,21 @@ export default function BookingDialog({
   const checkoutISO = booking?.checkout;
   const router = useRouter();
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
+  const reduxSelectedTents = useSelector(
+    (state) => state.booking.selectedTents
+  );
+
+  const dayTents = useSelector(
+    (state) => state.camping.dayDetails?.tents || []
+  );
+
   // Convert ISO strings to Date for UI
   const checkInDate = checkinISO ? new Date(checkinISO) : new Date();
   const checkOutDate = checkoutISO
     ? new Date(checkoutISO)
     : new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const [selectedTents, setSelectedTents] = useState({});
+  const [tentError, setTentError] = useState("");
 
   const guestCounts = {
     adults: Number(selectedGuest?.adults ?? 2),
@@ -87,9 +101,24 @@ export default function BookingDialog({
 
   const basePrice = price * nights;
 
+  let baseAmountForCoupon = 0;
+  let nightsForCoupon = nights;
+
+  if (propertyType === "Camping") {
+    baseAmountForCoupon = calculateCampingTentTotal(
+      reduxSelectedTents,
+      dayTents,
+      checkinISO,
+      checkoutISO
+    );
+    nightsForCoupon = 1; // 🔑 prevent double multiplication
+  } else {
+    baseAmountForCoupon = price;
+  }
+
   const { discountAmount, finalTotal } = calculateBookingPrice(
-    price,
-    nights,
+    baseAmountForCoupon,
+    nightsForCoupon,
     appliedCoupon
   );
 
@@ -151,16 +180,45 @@ export default function BookingDialog({
     });
   };
 
-  function isWeekendInIndia(date = new Date()) {
-    const dt = typeof date === "string" ? new Date(date) : date;
-    // weekday short like "Sat", "Sun", "Mon" etc in the Asia/Kolkata timezone
-    const weekdayShort = new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Kolkata",
-      weekday: "short",
-    }).format(dt);
+  const handleTentQtyChange = (tentId, qty, available) => {
+    if (qty < 0 || qty > available) return;
 
-    return weekdayShort === "Sat" || weekdayShort === "Sun";
-  }
+    setSelectedTents((prev) => ({
+      ...prev,
+      [tentId]: qty,
+    }));
+
+    if (tentError) setTentError("");
+  };
+
+  const validateTents = () => {
+    const totalSelected = Object.values(selectedTents).reduce(
+      (s, q) => s + q,
+      0
+    );
+
+    if (totalSelected === 0) {
+      setTentError("Please select at least one tent");
+      return false;
+    }
+
+    const totalCapacity = Object.entries(selectedTents).reduce(
+      (sum, [tentId, qty]) => {
+        const tent = tents.find((t) => t._id === tentId);
+        return sum + (tent?.maxCapacity || 0) * qty;
+      },
+      0
+    );
+
+    if (totalGuests > totalCapacity) {
+      setTentError(
+        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
+      );
+      return false;
+    }
+
+    return true;
+  };
 
   function formatRupee(amount) {
     if (amount == null || Number.isNaN(Number(amount))) return "₹0";
@@ -170,6 +228,30 @@ export default function BookingDialog({
     }).format(Number(amount));
     return `₹${formatted}`;
   }
+
+  const handleTentSelectionChange = (newSelectedTents) => {
+    setSelectedTents(newSelectedTents);
+  };
+  const totalSelectedTents = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t.quantity || 0),
+    0
+  );
+
+
+let subtotalForCoupon = 0;
+
+if (propertyType === "Camping") {
+  subtotalForCoupon = calculateCampingTentTotal(
+    reduxSelectedTents, // { Single: { quantity: 2, ... }, or mapped version }
+    dayTents,
+    checkinISO,
+    checkoutISO
+  );
+} else {
+  subtotalForCoupon = price * nights;
+}
+
+
 
   return (
     <>
@@ -250,7 +332,11 @@ export default function BookingDialog({
                       </span>
                     )}
                   </div>
-                  <p className="text-gray-600 text-sm">Per night</p>
+                  {tents?.length > 0 && tents ? (
+                    <p className="text-gray-600 text-sm">Starts from</p>
+                  ) : (
+                    <p className="text-gray-600 text-sm">Per night</p>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 px-2">
@@ -318,6 +404,30 @@ export default function BookingDialog({
                     </div>
                   </Button>
                 </div>
+
+                {tents?.length > 0 && tents && (
+                  <div className="px-2">
+                    <label className="text-sm text-gray-500 mb-1 block">
+                      Tents
+                    </label>
+                    <Button
+                      size=""
+                      onPress={() => setIsTentDrawerOpen(true)}
+                      className="w-full border bg-white rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-sm text-black">
+                          {totalSelectedTents === 0
+                            ? "Select Tents"
+                            : `${totalSelectedTents} ${
+                                totalSelectedTents === 1 ? "Tent" : "Tents"
+                              } Selected`}
+                        </span>
+                        <FaChevronDown size={12} className="text-black" />
+                      </div>
+                    </Button>
+                  </div>
+                )}
 
                 {appliedCoupon && (
                   <div className="px-2">
@@ -399,7 +509,7 @@ export default function BookingDialog({
         appliedCoupon={appliedCoupon}
         propertyId={propertyId}
         propertyType={propertyType}
-        subtotal={price * nights} // <<< pass subtotal so backend can calculate discount
+        subtotal={subtotalForCoupon}
         checkIn={checkinISO}
         checkOut={checkoutISO}
         nights={nights}
@@ -410,6 +520,17 @@ export default function BookingDialog({
         onClose={() => setIsGuestDrawerOpen(false)}
         guestCounts={guestCounts}
         onGuestCountsChange={handleGuestCountsChange}
+      />
+
+      <TentSelectionDrawer
+        isOpen={isTentDrawerOpen}
+        onClose={() => setIsTentDrawerOpen(false)}
+        tents={tents}
+        selectedTents={selectedTents}
+        onTentSelectionChange={handleTentSelectionChange}
+        totalGuests={totalGuests}
+        id={propertyId}
+        dateStr={checkInDate}
       />
     </>
   );

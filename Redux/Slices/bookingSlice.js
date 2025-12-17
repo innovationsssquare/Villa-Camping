@@ -32,7 +32,7 @@ const initialState = {
     email: "",
     city: "",
   },
-
+  selectedTents: {},
   appliedCoupon: null,
   specialRequests: "",
   acceptedTerms: false,
@@ -105,7 +105,22 @@ const bookingSlice = createSlice({
     setAcceptedTerms: (state, action) => {
       state.acceptedTerms = action.payload;
     },
+    setSelectedTents: (state, action) => {
+      state.selectedTents = action.payload;
+    },
 
+    updateTentQuantity: (state, action) => {
+      const { tentType, tentData } = action.payload;
+      state.selectedTents[tentType] = tentData;
+    },
+
+    removeTent: (state, action) => {
+      delete state.selectedTents[action.payload];
+    },
+
+    clearSelectedTents: (state) => {
+      state.selectedTents = {};
+    },
     resetBooking: (state) => {
       return initialState;
     },
@@ -133,6 +148,11 @@ export const {
   setSpecialRequests,
   setAcceptedTerms,
   setSelectedCategoryImage,
+
+  setSelectedTents,
+  updateTentQuantity,
+  removeTent,
+  clearSelectedTents,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
