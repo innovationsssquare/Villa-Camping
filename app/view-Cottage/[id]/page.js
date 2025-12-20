@@ -5,8 +5,8 @@ import PropertyDetails from "@/components/Propertyviewcomponents/property-detail
 export default function Home() {
   return (
     <div className="min-h-screen">
-      <Cottageview />
-      <PropertyDetails />
+      <Cottageview/>
+      {/* <PropertyDetails /> */}
     </div>
   );
 }

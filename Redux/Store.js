@@ -6,6 +6,7 @@ import bookingSlice from "@/Redux/Slices/bookingSlice";
 import villaSlice from "@/Redux/Slices/villaSlice";
 import couponSlice from "@/Redux/Slices/couponsSlice";
 import campingSlice from "@/Redux/Slices/campingSlice";
+import cottageSlice from "@/Redux/Slices/cottageSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ export const store = configureStore({
     booking: bookingSlice,
     villa: villaSlice,
     camping: campingSlice,
+    cottage: cottageSlice,
     coupons:couponSlice
   },
 });

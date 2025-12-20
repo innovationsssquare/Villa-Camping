@@ -13,7 +13,7 @@ import VideoModal from "./VideoModal";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Wifi,
   Snowflake,
@@ -67,15 +67,17 @@ import {
 } from "react-icons/md";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
 // lucide-react
-import { Tent, Backpack, Music, Footprints} from "lucide-react";
+import { Tent, Backpack, Music, Footprints } from "lucide-react";
 import { TbKayak } from "react-icons/tb";
 import { MdKayaking } from "react-icons/md";
 
 // react-icons (better semantics for some amenities)
 import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
 import { MdOutlineLocalDrink } from "react-icons/md";
+import { clearSelectedTents, removeCoupon } from "@/Redux/Slices/bookingSlice";
 
 const PropertyCardnew = ({ property }) => {
+  const dispatch =useDispatch()
   const [isWishlisted, setIsWishlisted] = useState(false);
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -377,7 +379,13 @@ const PropertyCardnew = ({ property }) => {
             </div>
           </div>
           <div className="space-y-3">
-            <Button className="w-full bg-black hover:bg-black text-primary-foreground font-semibold">
+            <Button
+              onPress={() => {
+                dispatch(removeCoupon());
+                dispatch(clearSelectedTents());
+              }}
+              className="w-full bg-black hover:bg-black text-primary-foreground font-semibold"
+            >
               View →
             </Button>
           </div>
@@ -577,9 +585,11 @@ const PropertyCardnew = ({ property }) => {
             </div>
             <div className="space-y-3">
               <Button
-                onPress={() =>
-                  router.push(`/view-${selectedCategoryName}/${property?._id}`)
-                }
+                onPress={() => {
+                  router.push(`/view-${selectedCategoryName}/${property?._id}`);
+                  dispatch(removeCoupon());
+                  dispatch(clearSelectedTents());
+                }}
                 className="w-full bg-black  text-primary-foreground font-semibold"
               >
                 Book Now →

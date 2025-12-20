@@ -845,6 +845,12 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         onClose={() => setIsCouponsDrawerOpen(false)}
         onApplyCoupon={handleApplyCoupon}
         appliedCoupon={appliedCoupon}
+        propertyId={propertyId}
+        propertyType={propertyType}
+        subtotal={baseAmountForCoupon}
+        checkIn={checkin}
+        checkOut={checkout}
+        nights={nights}
       />
 
       <BookingDetailsDrawer

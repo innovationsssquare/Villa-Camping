@@ -184,7 +184,7 @@ if (loading) {
             experiencesRef,
             faqsRef,
           }}
-          tents={tents}
+         
           onBookTent={handleBookTent}
         />
       </div>

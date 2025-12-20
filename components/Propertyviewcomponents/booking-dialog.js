@@ -32,12 +32,14 @@ import {
   setSelectedGuest,
   setAppliedCoupon,
   removeCoupon,
+  clearSelectedTents,
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { X } from "lucide-react";
 import TentSelectionDrawer from "../Tentscreen/tent-selection-drawer";
 import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
-
+import { addToast } from "@heroui/react";
+import { Getcampingavability } from "../../lib/API/category/Camping/Camping";
 export default function BookingDialog({
   isOpen,
   Setopen,
@@ -122,16 +124,109 @@ export default function BookingDialog({
     appliedCoupon
   );
 
-  const handleBooking = () => {
-    setIsLoading(true);
-    // Simulate booking process
-    setTimeout(() => {
-      setIsLoading(false);
-      router.push("/checkout");
-    }, 3000);
+  console.log("reduxSelectedTents RAW 👉", reduxSelectedTents);
+
+  const validateTents = () => {
+    const totalSelected = Object.values(reduxSelectedTents).reduce(
+      (s, q) => s + q,
+      0
+    );
+
+    if (totalSelected === 0) {
+      setTentError("Please select at least one tent");
+      return false;
+    }
+
+    const totalCapacity = Object.entries(reduxSelectedTents).reduce(
+      (sum, [tentId, qty]) => {
+        const tent = tents.find((t) => t._id === tentId);
+        return sum + (tent?.maxCapacity || 0) * qty;
+      },
+      0
+    );
+
+    if (totalGuests > totalCapacity) {
+      setTentError(
+        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
+      );
+      return false;
+    }
+
+    return true;
   };
 
+  const buildRequestedTentsByType = () => {
+    const result = {};
+
+    Object.entries(reduxSelectedTents || {}).forEach(([type, data]) => {
+      if (!data?.quantity) return;
+      result[type] = data.quantity;
+    });
+
+    console.log("requestedTentsByType", result);
+    return result;
+  };
+
+  const handleBooking = async () => {
+    if (propertyType === "Camping") {
+      if (!validateTents()) return;
+
+      const requestedTents = buildRequestedTentsByType();
+      setIsLoading(true);
+
+      const availabilityRes = await Getcampingavability({
+        propertyId,
+        checkIn: checkinISO,
+        checkOut: checkoutISO,
+        tents: requestedTents,
+      });
+      if (!availabilityRes?.success || availabilityRes?.available === false) {
+        setIsLoading(false);
+        setTentError(
+          availabilityRes?.message ||
+            "Selected tents are not available for all dates"
+        );
+        return;
+      }
+    }
+
+    setIsLoading(false);
+    router.push("/checkout");
+  };
+
+  // const handleBooking = () => {
+  //   if (propertyType === "Camping") {
+  //     if (!validateTents()) return;
+  //   }
+
+  //   setIsLoading(true);
+  //   // Simulate booking process
+  //   setTimeout(() => {
+  //     setIsLoading(false);
+  //     router.push("/checkout");
+  //   }, 3000);
+  // };
+
+  const totalTentQty = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t?.quantity || 0),
+    0
+  );
+
+  const isProceedDisabled =
+    isLoading ||
+    finalTotal <= 0 ||
+    (propertyType === "Camping" && totalTentQty === 0);
+
   const handleApplyCoupon = (coupon) => {
+    if (subtotalForCoupon <= 0) {
+      addToast?.({
+        title: "Coupon applied failed!",
+        description: `Please select dates/tents before applying a coupon`,
+        color: "success",
+      });
+      return;
+    }
+
     dispatch(setAppliedCoupon(coupon));
     setIsCouponsDrawerOpen(false);
     confetti({ particleCount: 100, spread: 70, origin: { y: 1.2 } });
@@ -153,6 +248,9 @@ export default function BookingDialog({
 
   const handleDateSelect = (date) => {
     if (!date) return;
+    dispatch(clearSelectedTents());
+    setTentError("");
+    dispatch(removeCoupon());
     if (datePickerType === "checkin") {
       // If check-in >= current check-out, push check-out by +1 day
       const nextCheckout =
@@ -191,35 +289,6 @@ export default function BookingDialog({
     if (tentError) setTentError("");
   };
 
-  const validateTents = () => {
-    const totalSelected = Object.values(selectedTents).reduce(
-      (s, q) => s + q,
-      0
-    );
-
-    if (totalSelected === 0) {
-      setTentError("Please select at least one tent");
-      return false;
-    }
-
-    const totalCapacity = Object.entries(selectedTents).reduce(
-      (sum, [tentId, qty]) => {
-        const tent = tents.find((t) => t._id === tentId);
-        return sum + (tent?.maxCapacity || 0) * qty;
-      },
-      0
-    );
-
-    if (totalGuests > totalCapacity) {
-      setTentError(
-        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
-      );
-      return false;
-    }
-
-    return true;
-  };
-
   function formatRupee(amount) {
     if (amount == null || Number.isNaN(Number(amount))) return "₹0";
     // no decimal places - change maximumFractionDigits if needed
@@ -237,21 +306,18 @@ export default function BookingDialog({
     0
   );
 
+  let subtotalForCoupon = 0;
 
-let subtotalForCoupon = 0;
-
-if (propertyType === "Camping") {
-  subtotalForCoupon = calculateCampingTentTotal(
-    reduxSelectedTents, // { Single: { quantity: 2, ... }, or mapped version }
-    dayTents,
-    checkinISO,
-    checkoutISO
-  );
-} else {
-  subtotalForCoupon = price * nights;
-}
-
-
+  if (propertyType === "Camping") {
+    subtotalForCoupon = calculateCampingTentTotal(
+      reduxSelectedTents, // { Single: { quantity: 2, ... }, or mapped version }
+      dayTents,
+      checkinISO,
+      checkoutISO
+    );
+  } else {
+    subtotalForCoupon = price * nights;
+  }
 
   return (
     <>
@@ -394,8 +460,9 @@ if (propertyType === "Camping") {
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-medium text-sm text-black">
-                        {guestCounts?.adults} Guest | {guestCounts?.children}{" "}
-                        Children
+                        {guestCounts.adults}{" "}
+                        {guestCounts.adults === 1 ? "Guest" : "Guests"} |{" "}
+                        {guestCounts.children} Children
                       </span>
                       <span className="font-semibold text-sm text-black">
                         {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
@@ -492,7 +559,7 @@ if (propertyType === "Camping") {
                 <Button
                   className="w-full h-12 text-lg font-semibold bg-black hover:bg-gray-800 text-white rounded-lg"
                   onPress={handleBooking}
-                  disabled={isLoading}
+                  disabled={isProceedDisabled}
                 >
                   {isLoading ? <ButtonLoader /> : "Proceed"}
                 </Button>

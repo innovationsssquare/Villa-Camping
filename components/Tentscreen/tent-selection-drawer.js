@@ -14,6 +14,7 @@ import { MinusIcon, PlaneIcon, PlusIcon, X } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCampingDayDetailsThunk } from "@/Redux/Slices/campingSlice";
 import { setSelectedTents } from "@/Redux/Slices/bookingSlice";
+import ButtonLoader from "../Loadercomponents/button-loader";
 
 export default function TentSelectionDrawer({
   isOpen,
@@ -30,10 +31,9 @@ export default function TentSelectionDrawer({
     (state) => state.camping
   );
 
-   const reduxSelectedTents = useSelector(
+  const reduxSelectedTents = useSelector(
     (state) => state.booking.selectedTents
   );
-
 
   const [tentError, setTentError] = useState("");
   const [localSelected, setLocalSelected] = useState({});
@@ -41,18 +41,17 @@ export default function TentSelectionDrawer({
   /* --------------------------------------------------
    * 1️⃣ Stabilize date (PREVENTS useEffect LOOP)
    * -------------------------------------------------- */
-const formattedDate = useMemo(() => {
-  if (!dateStr) return null;
+  const formattedDate = useMemo(() => {
+    if (!dateStr) return null;
 
-  const d = new Date(dateStr);
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Kolkata",
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  }).format(d); // en-CA gives YYYY-MM-DD
-}, [dateStr]);
-
+    const d = new Date(dateStr);
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d); // en-CA gives YYYY-MM-DD
+  }, [dateStr]);
 
   /* --------------------------------------------------
    * 2️⃣ Fetch day details ONCE per date
@@ -83,20 +82,15 @@ const formattedDate = useMemo(() => {
     setTentError("");
   }, [isOpen, reduxSelectedTents]);
 
-
-
   const tentsForDay = useMemo(() => {
-  return dayDetails?.tents || [];
-}, [dayDetails]);
+    return dayDetails?.tents || [];
+  }, [dayDetails]);
 
-const getTentConfig = (tentType) =>
+  const getTentConfig = (tentType) =>
     tents.find((t) => t.tentType === tentType);
 
   const getTentCapacity = (tentType) =>
     getTentConfig(tentType)?.maxCapacity || 0;
-
-
-
 
   /* --------------------------------------------------
    * 4️⃣ Availability from dayDetails (SOURCE OF TRUTH)
@@ -129,7 +123,7 @@ const getTentConfig = (tentType) =>
   /* --------------------------------------------------
    * 5️⃣ Quantity handler
    * -------------------------------------------------- */
-   const handleTentQtyChange = (tentType, qty, available) => {
+  const handleTentQtyChange = (tentType, qty, available) => {
     if (qty < 0 || qty > available) return;
 
     setLocalSelected((prev) => ({
@@ -143,7 +137,7 @@ const getTentConfig = (tentType) =>
   /* --------------------------------------------------
    * 6️⃣ Validation + Apply
    * -------------------------------------------------- */
- const validateAndApply = () => {
+  const validateAndApply = () => {
     const totalSelected = Object.values(localSelectedTents).reduce(
       (s, q) => s + q,
       0
@@ -155,8 +149,7 @@ const getTentConfig = (tentType) =>
     }
 
     const totalCapacity = Object.entries(localSelectedTents).reduce(
-      (sum, [tentType, qty]) =>
-        sum + getTentCapacity(tentType) * qty,
+      (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * qty,
       0
     );
 
@@ -180,8 +173,7 @@ const getTentConfig = (tentType) =>
       maximumFractionDigits: 0,
     }).format(amount || 0)}`;
 
-
- const applySelection = () => {
+  const applySelection = () => {
     const totalSelected = Object.values(localSelected).reduce(
       (s, q) => s + q,
       0
@@ -226,18 +218,13 @@ const getTentConfig = (tentType) =>
     onClose();
   };
 
-
-
-
-
-const totalSelectedTents = Object.values(localSelected).reduce(
+  const totalSelectedTents = Object.values(localSelected).reduce(
     (s, q) => s + q,
     0
   );
 
   const totalCapacity = Object.entries(localSelected).reduce(
-    (sum, [tentType, qty]) =>
-      sum + getTentCapacity(tentType) * qty,
+    (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * qty,
     0
   );
 
@@ -258,126 +245,135 @@ const totalSelectedTents = Object.values(localSelected).reduce(
           </div>
         </DrawerHeader>
 
-        <div className="p-4 space-y-4 overflow-y-auto flex-1">
-          {/* SUMMARY */}
-          <Card className="p-3 bg-blue-50 border-blue-200 shadow-none">
-            <div className="flex justify-between text-sm">
-              <span>Total Guests</span>
-              <span className="font-semibold">{totalGuests}</span>
+        {dayDetailsLoading ? (
+          <div className="flex justify-center items-center h-[30vh] bg-white">
+            <div className="bg-black rounded-full flex justify-center items-center">
+              <ButtonLoader />
             </div>
-            <div className="flex justify-between text-sm">
-              <span>Selected Tents</span>
-              <span className="font-semibold">{totalSelectedTents}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Total Capacity</span>
-              <span
-                className={`font-semibold ${
-                  totalCapacity >= totalGuests
-                    ? "text-green-600"
-                    : "text-red-600"
-                }`}
-              >
-                {totalCapacity}
-              </span>
-            </div>
-          </Card>
-
-          {tentError && (
-            <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {tentError}
-            </div>
-          )}
-
-          {/* TENTS FROM BACKEND */}
-          {tentsForDay.map((tent) => {
-            const selectedQty = localSelected[tent.tentType] || 0;
-            const maxCapacity = getTentCapacity(tent.tentType);
-
-            return (
-              <div
-                key={tent.tentType}
-                className={`p-2 border shadow-none rounded-2xl ${
-                  selectedQty > 0
-                    ? "border-blue-500 bg-blue-50"
-                    : "border-gray-300"
-                }`}
-              >
-                <p className="font-semibold text-md">{tent.tentType}</p>
-
-                <p className="text-sm text-gray-600">
-                  {formatRupee(tent.price.weekday)} / night (weekday)
-                </p>
-                <p className="text-xs text-gray-500">
-                  Weekend: {formatRupee(tent.price.weekend)}
-                </p>
-
-                <div className="flex gap-2 mt-2 text-xs">
-                  <span className="bg-red-100 px-2 py-1 rounded">
-                    Booked: {tent.booked}
-                  </span>
-                  <span className="bg-green-100 px-2 py-1 rounded">
-                    Available: {tent.available}
-                  </span>
-                  <span className="bg-gray-100 px-2 py-1 rounded">
-                    Total: {tent.total}
-                  </span>
-                 
+          </div>
+        ) : (
+          <>
+            <div className="p-4 space-y-4 overflow-y-auto flex-1">
+              {/* SUMMARY */}
+              <Card className="p-3 bg-blue-50 border-blue-200 shadow-none">
+                <div className="flex justify-between text-sm">
+                  <span>Total Guests</span>
+                  <span className="font-semibold">{totalGuests}</span>
                 </div>
-
-                <div className="flex items-center justify-between mt-4">
-                  <Button
-                    isIconOnly
-                    variant="bordered"
-                    size="sm"
-                    disabled={selectedQty <= 0}
-                    onPress={() =>
-                      handleTentQtyChange(
-                        tent.tentType,
-                        selectedQty - 1,
-                        tent.available
-                      )
-                    }
+                <div className="flex justify-between text-sm">
+                  <span>Selected Tents</span>
+                  <span className="font-semibold">{totalSelectedTents}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span>Total Capacity</span>
+                  <span
+                    className={`font-semibold ${
+                      totalCapacity >= totalGuests
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
                   >
-                    <MinusIcon size={12} />
-                  </Button>
+                    {totalCapacity}
+                  </span>
+                </div>
+              </Card>
 
-                  <div className="text-center">
-                    <span className="font-bold text-lg">{selectedQty}</span>
-                    <p className="text-xs text-gray-500">
-                      {selectedQty * maxCapacity} guests capacity
+              {tentError && (
+                <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+                  {tentError}
+                </div>
+              )}
+
+              {/* TENTS FROM BACKEND */}
+              {tentsForDay.map((tent) => {
+                const selectedQty = localSelected[tent.tentType] || 0;
+                const maxCapacity = getTentCapacity(tent.tentType);
+
+                return (
+                  <div
+                    key={tent.tentType}
+                    className={`p-2 border shadow-none rounded-2xl ${
+                      selectedQty > 0
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-300"
+                    }`}
+                  >
+                    <p className="font-semibold text-md">{tent.tentType}</p>
+
+                    <p className="text-sm text-gray-600">
+                      {formatRupee(tent.price.weekday)} / night (weekday)
                     </p>
+                    <p className="text-xs text-gray-500">
+                      Weekend: {formatRupee(tent.price.weekend)}
+                    </p>
+
+                    <div className="flex gap-2 mt-2 text-xs">
+                      <span className="bg-red-100 px-2 py-1 rounded">
+                        Booked: {tent.booked}
+                      </span>
+                      <span className="bg-green-100 px-2 py-1 rounded">
+                        Available: {tent.available}
+                      </span>
+                      <span className="bg-gray-100 px-2 py-1 rounded">
+                        Total: {tent.total}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-4">
+                      <Button
+                        isIconOnly
+                        variant="bordered"
+                        size="sm"
+                        disabled={selectedQty <= 0}
+                        onPress={() =>
+                          handleTentQtyChange(
+                            tent.tentType,
+                            selectedQty - 1,
+                            tent.available
+                          )
+                        }
+                      >
+                        <MinusIcon size={12} />
+                      </Button>
+
+                      <div className="text-center">
+                        <span className="font-bold text-lg">{selectedQty}</span>
+                        <p className="text-xs text-gray-500">
+                          {selectedQty * maxCapacity} guests capacity
+                        </p>
+                      </div>
+
+                      <Button
+                        isIconOnly
+                        variant="bordered"
+                        size="sm"
+                        disabled={selectedQty >= tent.available}
+                        onPress={() =>
+                          handleTentQtyChange(
+                            tent.tentType,
+                            selectedQty + 1,
+                            tent.available
+                          )
+                        }
+                      >
+                        <PlusIcon size={12} />
+                      </Button>
+                    </div>
                   </div>
+                );
+              })}
+            </div>
 
-                  <Button
-                    isIconOnly
-                    variant="bordered"
-                    size="sm"
-                    disabled={selectedQty >= tent.available}
-                    onPress={() =>
-                      handleTentQtyChange(
-                        tent.tentType,
-                        selectedQty + 1,
-                        tent.available
-                      )
-                    }
-                  >
-                    <PlusIcon size={12} />
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="p-4 border-t">
-          <Button
-            className="w-full h-12 bg-black text-white"
-            onPress={applySelection}
-          >
-            Apply Selection ({totalSelectedTents})
-          </Button>
-        </div>
+            <div className="p-4 border-t">
+              <Button
+                className="w-full h-12 bg-black text-white"
+                onPress={applySelection}
+              >
+                Apply Selection ({totalSelectedTents})
+              </Button>
+            </div>
+          </>
+        )}
       </DrawerContent>
     </Drawer>
   );
