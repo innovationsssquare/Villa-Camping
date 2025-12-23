@@ -33,6 +33,7 @@ import {
   setAppliedCoupon,
   removeCoupon,
   clearSelectedTents,
+  clearSelectedCottages,
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { X } from "lucide-react";
@@ -40,6 +41,10 @@ import TentSelectionDrawer from "../Tentscreen/tent-selection-drawer";
 import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
 import { addToast } from "@heroui/react";
 import { Getcampingavability } from "../../lib/API/category/Camping/Camping";
+import { Getcottageavability } from "../../lib/API/category/Cottage/Cottage";
+import CottageSelectionDrawer from "../Cottagescreen/cottage-selection-drawer";
+import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
+
 export default function BookingDialog({
   isOpen,
   Setopen,
@@ -51,12 +56,14 @@ export default function BookingDialog({
   ownerId,
   propertyType,
   tents,
+  cottages,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
   const [isTentDrawerOpen, setIsTentDrawerOpen] = useState(false);
+  const [isCottageDrawerOpen, setIsCottageDrawerOpen] = useState(false);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState("checkin");
@@ -71,9 +78,16 @@ export default function BookingDialog({
   const reduxSelectedTents = useSelector(
     (state) => state.booking.selectedTents
   );
+  const reduxSelectedCottages = useSelector(
+    (state) => state.booking.selectedCottages
+  );
 
   const dayTents = useSelector(
     (state) => state.camping.dayDetails?.tents || []
+  );
+
+  const dayCottages = useSelector(
+    (state) => state.cottage.dayDetails?.cottages || []
   );
 
   // Convert ISO strings to Date for UI
@@ -83,6 +97,8 @@ export default function BookingDialog({
     : new Date(Date.now() + 24 * 60 * 60 * 1000);
   const [selectedTents, setSelectedTents] = useState({});
   const [tentError, setTentError] = useState("");
+
+  const [selectedCottages, setSelectedCottages] = useState({});
 
   const guestCounts = {
     adults: Number(selectedGuest?.adults ?? 2),
@@ -113,7 +129,15 @@ export default function BookingDialog({
       checkinISO,
       checkoutISO
     );
-    nightsForCoupon = 1; // 🔑 prevent double multiplication
+    nightsForCoupon = 1;
+  } else if (propertyType === "Cottage") {
+    baseAmountForCoupon = calculateCottageTotal(
+      reduxSelectedCottages,
+      dayCottages,
+      checkinISO,
+      checkoutISO
+    );
+    nightsForCoupon = 1;
   } else {
     baseAmountForCoupon = price;
   }
@@ -123,8 +147,6 @@ export default function BookingDialog({
     nightsForCoupon,
     appliedCoupon
   );
-
-  console.log("reduxSelectedTents RAW 👉", reduxSelectedTents);
 
   const validateTents = () => {
     const totalSelected = Object.values(reduxSelectedTents).reduce(
@@ -155,6 +177,47 @@ export default function BookingDialog({
     return true;
   };
 
+  const validateCottages = () => {
+    const totalSelected = Object.values(reduxSelectedCottages || {}).reduce(
+      (s, c) => s + (c?.quantity || 0),
+      0
+    );
+
+    if (totalSelected === 0) {
+      setTentError("Please select at least one cottage");
+      return false;
+    }
+
+    const totalCapacity = Object.entries(reduxSelectedCottages || {}).reduce(
+      (sum, [cottageType, data]) => {
+        const cottage = cottages.find((c) => c.cottageType === cottageType);
+        return sum + (cottage?.maxCapacity || 0) * (data?.quantity || 0);
+      },
+      0
+    );
+
+    if (totalGuests > totalCapacity) {
+      setTentError(
+        `Selected cottages allow ${totalCapacity} guests, but you selected ${totalGuests}`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const buildRequestedCottagesByType = () => {
+    const result = {};
+
+    Object.entries(reduxSelectedCottages || {}).forEach(([type, data]) => {
+      if (!data?.quantity) return;
+      result[type] = data.quantity;
+    });
+
+    console.log("requestedCottagesByType", result);
+    return result;
+  };
+
   const buildRequestedTentsByType = () => {
     const result = {};
 
@@ -167,7 +230,37 @@ export default function BookingDialog({
     return result;
   };
 
+  // const handleBooking = async () => {
+  //   if (propertyType === "Camping") {
+  //     if (!validateTents()) return;
+
+  //     const requestedTents = buildRequestedTentsByType();
+  //     setIsLoading(true);
+
+  //     const availabilityRes = await Getcampingavability({
+  //       propertyId,
+  //       checkIn: checkinISO,
+  //       checkOut: checkoutISO,
+  //       tents: requestedTents,
+  //     });
+  //     if (!availabilityRes?.success || availabilityRes?.available === false) {
+  //       setIsLoading(false);
+  //       setTentError(
+  //         availabilityRes?.message ||
+  //           "Selected tents are not available for all dates"
+  //       );
+  //       return;
+  //     }
+  //   }
+
+  //   setIsLoading(false);
+  //   router.push("/checkout");
+  // };
+
   const handleBooking = async () => {
+    setTentError("");
+
+    // 🏕 CAMPING
     if (propertyType === "Camping") {
       if (!validateTents()) return;
 
@@ -180,6 +273,7 @@ export default function BookingDialog({
         checkOut: checkoutISO,
         tents: requestedTents,
       });
+
       if (!availabilityRes?.success || availabilityRes?.available === false) {
         setIsLoading(false);
         setTentError(
@@ -190,24 +284,39 @@ export default function BookingDialog({
       }
     }
 
+    // 🏡 COTTAGE
+    if (propertyType === "Cottage") {
+      if (!validateCottages()) return;
+
+      const requestedCottages = buildRequestedCottagesByType();
+      setIsLoading(true);
+
+      const availabilityRes = await Getcottageavability({
+        propertyId,
+        checkIn: checkinISO,
+        checkOut: checkoutISO,
+        cottages: requestedCottages,
+      });
+
+      if (!availabilityRes?.success || availabilityRes?.available === false) {
+        setIsLoading(false);
+        setTentError(
+          availabilityRes?.message ||
+            "Selected cottages are not available for all dates"
+        );
+        return;
+      }
+    }
+
     setIsLoading(false);
     router.push("/checkout");
   };
 
-  // const handleBooking = () => {
-  //   if (propertyType === "Camping") {
-  //     if (!validateTents()) return;
-  //   }
-
-  //   setIsLoading(true);
-  //   // Simulate booking process
-  //   setTimeout(() => {
-  //     setIsLoading(false);
-  //     router.push("/checkout");
-  //   }, 3000);
-  // };
-
   const totalTentQty = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t?.quantity || 0),
+    0
+  );
+  const totalCottageQty = Object.values(reduxSelectedCottages || {}).reduce(
     (sum, t) => sum + (t?.quantity || 0),
     0
   );
@@ -215,7 +324,8 @@ export default function BookingDialog({
   const isProceedDisabled =
     isLoading ||
     finalTotal <= 0 ||
-    (propertyType === "Camping" && totalTentQty === 0);
+    (propertyType === "Camping" && totalTentQty === 0) ||
+    (propertyType === "Cottage" && totalCottageQty === 0);
 
   const handleApplyCoupon = (coupon) => {
     if (subtotalForCoupon <= 0) {
@@ -249,6 +359,7 @@ export default function BookingDialog({
   const handleDateSelect = (date) => {
     if (!date) return;
     dispatch(clearSelectedTents());
+    dispatch(clearSelectedCottages());
     setTentError("");
     dispatch(removeCoupon());
     if (datePickerType === "checkin") {
@@ -301,17 +412,33 @@ export default function BookingDialog({
   const handleTentSelectionChange = (newSelectedTents) => {
     setSelectedTents(newSelectedTents);
   };
+
+  const handleCottageSelectionChange = (newSelectedCottages) => {
+    setSelectedCottages(newSelectedCottages);
+  };
+
   const totalSelectedTents = Object.values(reduxSelectedTents || {}).reduce(
     (sum, t) => sum + (t.quantity || 0),
     0
   );
 
+  const totalSelectedCottages = Object.values(
+    reduxSelectedCottages || {}
+  ).reduce((sum, t) => sum + (t.quantity || 0), 0);
+
   let subtotalForCoupon = 0;
 
   if (propertyType === "Camping") {
     subtotalForCoupon = calculateCampingTentTotal(
-      reduxSelectedTents, // { Single: { quantity: 2, ... }, or mapped version }
+      reduxSelectedTents,
       dayTents,
+      checkinISO,
+      checkoutISO
+    );
+  } else if (propertyType === "Cottages") {
+    subtotalForCoupon = calculateCottageTotal(
+      reduxSelectedCottages,
+      dayCottages,
       checkinISO,
       checkoutISO
     );
@@ -495,6 +622,31 @@ export default function BookingDialog({
                     </Button>
                   </div>
                 )}
+                {cottages?.length > 0 && cottages && (
+                  <div className="px-2">
+                    <label className="text-sm text-gray-500 mb-1 block">
+                      Cottages
+                    </label>
+                    <Button
+                      size=""
+                      onPress={() => setIsCottageDrawerOpen(true)}
+                      className="w-full border bg-white rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-sm text-black">
+                          {totalSelectedCottages === 0
+                            ? "Select Cottages"
+                            : `${totalSelectedCottages} ${
+                                totalSelectedCottages === 1
+                                  ? "Cottage"
+                                  : "Cottages"
+                              } Selected`}
+                        </span>
+                        <FaChevronDown size={12} className="text-black" />
+                      </div>
+                    </Button>
+                  </div>
+                )}
 
                 {appliedCoupon && (
                   <div className="px-2">
@@ -537,7 +689,7 @@ export default function BookingDialog({
                     <FaArrowRight className="h-4 w-4 ml-2" />
                   </Button>
                 </div>
-
+                {tentError}
                 {/* Total */}
                 <div className="border-t pt-2 border-gray-200 px-3">
                   <div className="flex items-center justify-between mb-2">
@@ -595,6 +747,17 @@ export default function BookingDialog({
         tents={tents}
         selectedTents={selectedTents}
         onTentSelectionChange={handleTentSelectionChange}
+        totalGuests={totalGuests}
+        id={propertyId}
+        dateStr={checkInDate}
+      />
+
+      <CottageSelectionDrawer
+        isOpen={isCottageDrawerOpen}
+        onClose={() => setIsCottageDrawerOpen(false)}
+        cottages={cottages}
+        selectedCottages={selectedCottages}
+        onCottageSelectionChange={handleCottageSelectionChange}
         totalGuests={totalGuests}
         id={propertyId}
         dateStr={checkInDate}

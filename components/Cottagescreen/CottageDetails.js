@@ -185,7 +185,7 @@ const CottageDetails = () => {
       <div className="flex items-center w-full space-x-3 text-xs">
         <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
           <Tent className="w-4 h-4 font-light" />
-          <span>{cottage?.tents?.length} tents</span>
+          <span>{cottage?.cottages?.length} cottages</span>
         </div>
         {/* <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
           <Bed className="w-4 h-4 text-villa-text-light" />

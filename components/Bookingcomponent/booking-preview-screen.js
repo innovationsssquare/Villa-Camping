@@ -52,6 +52,7 @@ import { useRouter } from "next/navigation";
 import { getDeviceId } from "@/lib/deviceId";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
 import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
+import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 
 export default function BookingPreviewScreen({ isOpen, onClose }) {
   const {
@@ -81,9 +82,18 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const reduxSelectedTents = useSelector(
     (state) => state.booking.selectedTents
   );
+  const reduxSelectedCottages = useSelector(
+    (state) => state.booking.selectedCottages
+  );
+
   const dayTents = useSelector(
     (state) => state.camping.dayDetails?.tents || []
   );
+
+  const dayCottages = useSelector(
+    (state) => state.cottage.dayDetails?.cottages || []
+  );
+
   const checkInDate = checkin ? new Date(checkin) : new Date();
   const checkOutDate = checkout
     ? new Date(checkout)
@@ -152,8 +162,15 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       checkin,
       checkout
     );
-
-    nightsForCoupon = 1; // 🔥 CRITICAL
+    nightsForCoupon = 1;
+  } else if (propertyType === "Cottage") {
+    baseAmountForCoupon = calculateCottageTotal(
+      reduxSelectedCottages,
+      dayCottages,
+      checkin,
+      checkout
+    );
+    nightsForCoupon = 1; // 🔑 same rule as camping
   } else {
     baseAmountForCoupon = calculateBasePriceForRange(
       checkInDate?.toISOString(),
@@ -259,6 +276,22 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       }));
     }
 
+    if (propertyType === "Cottage") {
+      items = Object.entries(reduxSelectedCottages).map(([cottageType, c]) => ({
+        unitType: "CottageUnit",
+        unitId: c.unitId,
+        typeName: cottageType,
+        quantity: c.quantity,
+        pricePerNight: c.weekdayPrice, // reference
+        totalPrice:
+          c.quantity *
+          calculateBasePriceForRange(checkin, checkout, {
+            weekdayPrice: c.weekdayPrice,
+            weekendPrice: c.weekendPrice,
+          }),
+      }));
+    }
+
     const customerId =
       getCustomerId() ||
       customerDetails?.id ||
@@ -284,8 +317,12 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       appliedCoupon?.id ||
       null;
 
+const normalizedPropertyType =
+  propertyType === "Cottage" ? "Cottages" : propertyType;
+
+
     const bookingData = {
-      propertyType,
+      propertyType:normalizedPropertyType,
       propertyId,
       ownerId,
       customerId: customerId,

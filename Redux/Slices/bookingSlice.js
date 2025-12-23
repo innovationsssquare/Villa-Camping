@@ -36,6 +36,7 @@ const initialState = {
   appliedCoupon: null,
   specialRequests: "",
   acceptedTerms: false,
+  selectedCottages: {},
 };
 
 const bookingSlice = createSlice({
@@ -121,6 +122,25 @@ const bookingSlice = createSlice({
     clearSelectedTents: (state) => {
       state.selectedTents = {};
     },
+
+    // ------------------ 🆕 COTTAGE ------------------
+    setSelectedCottages: (state, action) => {
+      state.selectedCottages = action.payload;
+    },
+
+    updateCottageQuantity: (state, action) => {
+      const { cottageId, cottageData } = action.payload;
+      state.selectedCottages[cottageId] = cottageData;
+    },
+
+    removeCottage: (state, action) => {
+      delete state.selectedCottages[action.payload];
+    },
+
+    clearSelectedCottages: (state) => {
+      state.selectedCottages = {};
+    },
+
     resetBooking: (state) => {
       return initialState;
     },
@@ -153,6 +173,11 @@ export const {
   updateTentQuantity,
   removeTent,
   clearSelectedTents,
+
+  setSelectedCottages,
+  updateCottageQuantity,
+  removeCottage,
+  clearSelectedCottages,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;
