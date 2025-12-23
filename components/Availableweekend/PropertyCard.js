@@ -46,6 +46,7 @@ import {
   Mountain,
   Building2,
   Sun,
+  Utensils,
 } from "lucide-react";
 
 // react-icons for items lucide doesn't provide (or where a better semantic icon exists)
@@ -75,6 +76,7 @@ import { MdKayaking } from "react-icons/md";
 import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
 import { MdOutlineLocalDrink } from "react-icons/md";
 import { clearSelectedTents, removeCoupon } from "@/Redux/Slices/bookingSlice";
+import { MdOutlineLocalLaundryService } from "react-icons/md";
 
 const PropertyCardnew = ({ property }) => {
   const dispatch =useDispatch()
@@ -167,6 +169,9 @@ const PropertyCardnew = ({ property }) => {
     "Rain Dance Area": <Droplet className="w-6 h-6 text-gray-600" />,
     "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
     Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
+    Restaurant: <Utensils className="w-6 h-6 text-gray-600" />,
+    "Laundry Service": <MdOutlineLocalLaundryService className="w-6 h-6 text-gray-600" />,
+    "Walking Area": <Footprints  className="w-6 h-6 text-gray-600" />,
   };
 
   const greatForIcons = {
@@ -315,10 +320,10 @@ const PropertyCardnew = ({ property }) => {
                 <Users className="w-4 h-4" />
                 Upto {property?.maxCapacity} Guests
               </span>
-              <span className="flex items-center gap-1">
+              {/* <span className="flex items-center gap-1">
                 <Home className="w-4 h-4" />
                 {property?.rooms} Rooms
-              </span>
+              </span> */}
               <span className="flex items-center gap-1">
                 <Bath className="w-4 h-4" />
                 {property?.baths} Baths
@@ -511,10 +516,10 @@ const PropertyCardnew = ({ property }) => {
               <Users className="w-4 h-4" />
               Upto {property?.maxCapacity} Guests
             </span>
-            <span className="flex items-center gap-1">
+            {/* <span className="flex items-center gap-1">
               <Home className="w-4 h-4" />
               {property?.rooms} Rooms
-            </span>
+            </span> */}
             <span className="flex items-center gap-1">
               <Bath className="w-4 h-4" />
               {property?.baths} Baths
