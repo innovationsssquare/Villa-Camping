@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Viewhotel/>
-      <PropertyDetails />
+      {/* <PropertyDetails /> */}
     </div>
   );
 }

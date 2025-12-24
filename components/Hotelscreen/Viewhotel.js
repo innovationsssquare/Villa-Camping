@@ -6,6 +6,13 @@ import FixedBookingBar from "./FixedBookingBar";
 import HotelHeader from "./HotelHeader";
 import HotelHero from "./HotelHero";
 import HotelDetails from "./HotelDetails";
+import { HotelProvider } from "@/lib/context/HotelContext";
+import { useDispatch, useSelector } from "react-redux";
+import { useParams, useRouter } from "next/navigation";
+import { fetchHotelById } from "@/Redux/Slices/hotelSlice";
+import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
+import { XCircle } from "lucide-react";
+import ButtonLoader from "../Loadercomponents/button-loader";
 
 
 const tabs = [
@@ -23,6 +30,18 @@ const Viewhotel = () => {
   const [activeTab, setActiveTab] = useState("highlights");
   const [showStickyTabs, setShowStickyTabs] = useState(false);
   const tabsRef = useRef(null);
+
+ const dispatch = useDispatch();
+  const params = useParams();
+  const { id } = params;
+  const { hotel, loading, error } = useSelector((state) => state.hotel);
+  const router = useRouter();
+  
+  useEffect(() => {
+    dispatch(fetchHotelById(id));
+  }, [id]);
+
+
 
   // Intersection Observer for each section
   const { ref: highlightsRef, inView: highlightsInView } = useInView({
@@ -96,7 +115,36 @@ const Viewhotel = () => {
     }
   };
 
+ if (loading) {
+    return <VillaScreenSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <XCircle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-red-500">Error loading villa details</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!hotel) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-black/10">
+        <div className="bg-black rounded-full flex justify-center items-center">
+          <ButtonLoader/>
+        </div>
+      </div>
+    );
+  }
+
+
+
   return (
+    <HotelProvider hotel={hotel}>
+
     <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
       <HotelHeader />
       <HotelHero />
@@ -139,6 +187,7 @@ const Viewhotel = () => {
 
       <FixedBookingBar />
     </div>
+    </HotelProvider>
   );
 };
 
