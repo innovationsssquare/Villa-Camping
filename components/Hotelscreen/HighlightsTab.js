@@ -6,19 +6,19 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 
-const ExperiencesTab = ({ experiences}) => {
+const HighlightssTab = ({ highlights}) => {
   return (
     <div className="p-3 space-y-6">
       <div>
         <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-          Experiences
+          Highlights
         </h3>
 
-        {experiences.length > 0 ? (
+        {highlights.length > 0 ? (
           <div className="relative">
             <Carousel className="w-full">
               <CarouselContent>
-                {experiences.map((exp, index) => (
+                {highlights.map((exp, index) => (
                   <CarouselItem key={exp._id || index} className="md:basis-1/2">
                     <div className="aspect-video bg-villa-grey/30 rounded-lg overflow-hidden">
                       <Image
@@ -48,4 +48,4 @@ const ExperiencesTab = ({ experiences}) => {
   );
 };
 
-export default ExperiencesTab;
+export default HighlightssTab;

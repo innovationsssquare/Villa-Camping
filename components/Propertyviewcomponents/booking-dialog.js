@@ -34,6 +34,7 @@ import {
   removeCoupon,
   clearSelectedTents,
   clearSelectedCottages,
+  clearSelectedRooms,
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { X } from "lucide-react";
@@ -44,6 +45,9 @@ import { Getcampingavability } from "../../lib/API/category/Camping/Camping";
 import { Getcottageavability } from "../../lib/API/category/Cottage/Cottage";
 import CottageSelectionDrawer from "../Cottagescreen/cottage-selection-drawer";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
+import RoomSelectionDrawer from "../Hotelscreen/RoomSelectionDrawer";
+import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
+import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
 
 export default function BookingDialog({
   isOpen,
@@ -57,6 +61,7 @@ export default function BookingDialog({
   propertyType,
   tents,
   cottages,
+  rooms,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
@@ -64,6 +69,7 @@ export default function BookingDialog({
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
   const [isTentDrawerOpen, setIsTentDrawerOpen] = useState(false);
   const [isCottageDrawerOpen, setIsCottageDrawerOpen] = useState(false);
+  const [isRoomDrawerOpen, setIsRoomDrawerOpen] = useState(false);
 
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [datePickerType, setDatePickerType] = useState("checkin");
@@ -82,12 +88,20 @@ export default function BookingDialog({
     (state) => state.booking.selectedCottages
   );
 
+  const reduxSelectedRooms = useSelector(
+    (state) => state.booking.selectedRooms
+  );
+
   const dayTents = useSelector(
     (state) => state.camping.dayDetails?.tents || []
   );
 
   const dayCottages = useSelector(
     (state) => state.cottage.dayDetails?.cottages || []
+  );
+
+  const dayRooms = useSelector(
+    (state) => state.hotel.dayDetails?.rooms || []
   );
 
   // Convert ISO strings to Date for UI
@@ -99,6 +113,7 @@ export default function BookingDialog({
   const [tentError, setTentError] = useState("");
 
   const [selectedCottages, setSelectedCottages] = useState({});
+  const [selectedRooms, setSelectedRooms] = useState({});
 
   const guestCounts = {
     adults: Number(selectedGuest?.adults ?? 2),
@@ -138,7 +153,16 @@ export default function BookingDialog({
       checkoutISO
     );
     nightsForCoupon = 1;
-  } else {
+  } else if (propertyType === "Hotel") {
+    baseAmountForCoupon = calculateHotelTotal(
+      reduxSelectedRooms,
+      dayRooms,
+      checkinISO,
+      checkoutISO
+    );
+    nightsForCoupon = 1;
+  } 
+  else {
     baseAmountForCoupon = price;
   }
 
@@ -206,6 +230,35 @@ export default function BookingDialog({
     return true;
   };
 
+  const validateRooms = () => {
+    const totalSelected = Object.values(reduxSelectedRooms || {}).reduce(
+      (s, c) => s + (c?.quantity || 0),
+      0
+    );
+
+    if (totalSelected === 0) {
+      setTentError("Please select at least one room");
+      return false;
+    }
+
+    const totalCapacity = Object.entries(reduxSelectedRooms || {}).reduce(
+      (sum, [roomType, data]) => {
+        const room = rooms.find((c) => c.roomType === roomType);
+        return sum + (room?.maxCapacity || 0) * (data?.quantity || 0);
+      },
+      0
+    );
+
+    if (totalGuests > totalCapacity) {
+      setTentError(
+        `Selected cottages allow ${totalCapacity} guests, but you selected ${totalGuests}`
+      );
+      return false;
+    }
+
+    return true;
+  };
+
   const buildRequestedCottagesByType = () => {
     const result = {};
 
@@ -218,6 +271,17 @@ export default function BookingDialog({
     return result;
   };
 
+  const buildRequestedRoomsByType = () => {
+    const result = {};
+
+    Object.entries(reduxSelectedRooms || {}).forEach(([type, data]) => {
+      if (!data?.quantity) return;
+      result[type] = data.quantity;
+    });
+
+    return result;
+  };
+
   const buildRequestedTentsByType = () => {
     const result = {};
 
@@ -226,7 +290,6 @@ export default function BookingDialog({
       result[type] = data.quantity;
     });
 
-    console.log("requestedTentsByType", result);
     return result;
   };
 
@@ -308,6 +371,29 @@ export default function BookingDialog({
       }
     }
 
+    //ROOM
+     if (propertyType === "Hotel") {
+      if (!validateRooms()) return;
+
+      const requestedRooms = buildRequestedRoomsByType();
+      setIsLoading(true);
+
+      const availabilityRes = await Gethotelavability({
+        propertyId,
+        checkIn: checkinISO,
+        checkOut: checkoutISO,
+        rooms: requestedRooms,
+      });
+
+      if (!availabilityRes?.success || availabilityRes?.available === false) {
+        setIsLoading(false);
+        setTentError(
+          availabilityRes?.message ||
+            "Selected rooms are not available for all dates"
+        );
+        return;
+      }
+    }
     setIsLoading(false);
     router.push("/checkout");
   };
@@ -320,11 +406,16 @@ export default function BookingDialog({
     (sum, t) => sum + (t?.quantity || 0),
     0
   );
+  const totalRoomQty = Object.values(reduxSelectedRooms || {}).reduce(
+    (sum, t) => sum + (t?.quantity || 0),
+    0
+  );
 
   const isProceedDisabled =
     isLoading ||
     finalTotal <= 0 ||
     (propertyType === "Camping" && totalTentQty === 0) ||
+    (propertyType === "Hotel" && totalRoomQty === 0) ||
     (propertyType === "Cottage" && totalCottageQty === 0);
 
   const handleApplyCoupon = (coupon) => {
@@ -360,6 +451,7 @@ export default function BookingDialog({
     if (!date) return;
     dispatch(clearSelectedTents());
     dispatch(clearSelectedCottages());
+    dispatch(clearSelectedRooms());
     setTentError("");
     dispatch(removeCoupon());
     if (datePickerType === "checkin") {
@@ -417,6 +509,10 @@ export default function BookingDialog({
     setSelectedCottages(newSelectedCottages);
   };
 
+  const handleRoomSelectionChange = (newSelectedRoomss) => {
+    setSelectedRooms(newSelectedRoomss);
+  };
+
   const totalSelectedTents = Object.values(reduxSelectedTents || {}).reduce(
     (sum, t) => sum + (t.quantity || 0),
     0
@@ -425,6 +521,11 @@ export default function BookingDialog({
   const totalSelectedCottages = Object.values(
     reduxSelectedCottages || {}
   ).reduce((sum, t) => sum + (t.quantity || 0), 0);
+
+  const totalSelectedRooms = Object.values(
+    reduxSelectedRooms || {}
+  ).reduce((sum, t) => sum + (t.quantity || 0), 0);
+
 
   let subtotalForCoupon = 0;
 
@@ -435,10 +536,17 @@ export default function BookingDialog({
       checkinISO,
       checkoutISO
     );
-  } else if (propertyType === "Cottages") {
+  } else if (propertyType === "Cottage") {
     subtotalForCoupon = calculateCottageTotal(
       reduxSelectedCottages,
       dayCottages,
+      checkinISO,
+      checkoutISO
+    );
+  } else if (propertyType === "Hotel") {
+    subtotalForCoupon = calculateHotelTotal(
+      reduxSelectedRooms,
+      dayRooms,
       checkinISO,
       checkoutISO
     );
@@ -647,6 +755,29 @@ export default function BookingDialog({
                     </Button>
                   </div>
                 )}
+                {rooms?.length > 0 && rooms && (
+                  <div className="px-2">
+                    <label className="text-sm text-gray-500 mb-1 block">
+                      Rooms
+                    </label>
+                    <Button
+                      size=""
+                      onPress={() => setIsRoomDrawerOpen(true)}
+                      className="w-full border bg-white rounded-lg p-3 border-gray-300 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="flex items-center justify-between w-full">
+                        <span className="font-medium text-sm text-black">
+                          {totalSelectedRooms === 0
+                            ? "Select Rooms"
+                            : `${totalSelectedRooms} ${
+                                totalSelectedRooms === 1 ? "Room" : "Rooms"
+                              } Selected`}
+                        </span>
+                        <FaChevronDown size={12} className="text-black" />
+                      </div>
+                    </Button>
+                  </div>
+                )}
 
                 {appliedCoupon && (
                   <div className="px-2">
@@ -758,6 +889,16 @@ export default function BookingDialog({
         cottages={cottages}
         selectedCottages={selectedCottages}
         onCottageSelectionChange={handleCottageSelectionChange}
+        totalGuests={totalGuests}
+        id={propertyId}
+        dateStr={checkInDate}
+      />
+      <RoomSelectionDrawer
+        isOpen={isRoomDrawerOpen}
+        onClose={() => setIsRoomDrawerOpen(false)}
+        rooms={rooms}
+        selectedRooms={selectedRooms}
+        onRoomSelectionChange={handleRoomSelectionChange}
         totalGuests={totalGuests}
         id={propertyId}
         dateStr={checkInDate}

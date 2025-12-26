@@ -18,7 +18,7 @@ import ButtonLoader from "../Loadercomponents/button-loader";
 const tabs = [
   { id: "highlights", label: "Highlights" },
   { id: "refund-policy", label: "Refund Policy" },
-  { id: "spaces", label: "Spaces" },
+  // { id: "spaces", label: "Spaces" },
   { id: "reviews", label: "Reviews" },
   { id: "amenities", label: "Amenities" },
   { id: "location", label: "Location" },
@@ -50,9 +50,9 @@ const Viewhotel = () => {
   const { ref: refundRef, inView: refundInView } = useInView({
     threshold: 0.3,
   });
-  const { ref: spacesRef, inView: spacesInView } = useInView({
-    threshold: 0.3,
-  });
+  // const { ref: spacesRef, inView: spacesInView } = useInView({
+  //   threshold: 0.3,
+  // });
   const { ref: reviewsRef, inView: reviewsInView } = useInView({
     threshold: 0.3,
   });
@@ -71,7 +71,7 @@ const Viewhotel = () => {
   useEffect(() => {
     if (highlightsInView) setActiveTab("highlights");
     else if (refundInView) setActiveTab("refund-policy");
-    else if (spacesInView) setActiveTab("spaces");
+    // else if (spacesInView) setActiveTab("spaces");
     else if (reviewsInView) setActiveTab("reviews");
     else if (amenitiesInView) setActiveTab("amenities");
     else if (locationInView) setActiveTab("location");
@@ -80,7 +80,7 @@ const Viewhotel = () => {
   }, [
     highlightsInView,
     refundInView,
-    spacesInView,
+    // spacesInView,
     reviewsInView,
     amenitiesInView,
     locationInView,
@@ -175,7 +175,7 @@ const Viewhotel = () => {
           refs={{
             highlightsRef,
             refundRef,
-            spacesRef,
+            // spacesRef,
             reviewsRef,
             amenitiesRef,
             locationRef,

@@ -44,7 +44,7 @@ const StickyTabs = ({ tabs, activeTab, onTabChange, isSticky }) => {
             className={cn(
               "px-3 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors",
               activeTab === tab.id
-                ? "text-orange-500 border-orange-500"
+                ? "text-orange-500 border-b-2 border-orange-500"
                 : "text-villa-text-light border-transparent hover:text-villa-text-dark"
             )}
           >

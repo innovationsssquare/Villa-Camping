@@ -37,6 +37,7 @@ const initialState = {
   specialRequests: "",
   acceptedTerms: false,
   selectedCottages: {},
+  selectedRooms: {},
 };
 
 const bookingSlice = createSlice({
@@ -141,6 +142,25 @@ const bookingSlice = createSlice({
       state.selectedCottages = {};
     },
 
+//--------------roooms--------------------
+  setSelectedRooms: (state, action) => {
+      state.selectedRooms = action.payload;
+    },
+
+    updateRoomQuantity: (state, action) => {
+      const { roomId, roomData } = action.payload;
+      state.selectedRooms[roomId] = roomData;
+    },
+
+    removeRoom: (state, action) => {
+      delete state.selectedRooms[action.payload];
+    },
+
+    clearSelectedRooms: (state) => {
+      state.selectedRooms = {};
+    },
+
+
     resetBooking: (state) => {
       return initialState;
     },
@@ -178,6 +198,13 @@ export const {
   updateCottageQuantity,
   removeCottage,
   clearSelectedCottages,
+
+  setSelectedRooms,
+  updateRoomQuantity,
+  removeRoom,
+  clearSelectedRooms,
+
+
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

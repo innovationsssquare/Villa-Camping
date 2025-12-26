@@ -63,6 +63,7 @@ import {
   Droplet,
   Users,
   Bed,
+  BicepsFlexed,
 } from "lucide-react";
 import { FaUmbrellaBeach, FaPeopleRoof, FaBroom } from "react-icons/fa6";
 import { Button } from "@heroui/react";
@@ -94,7 +95,14 @@ import { calculateBasePriceForRange } from "@/lib/datePricing";
 import { useSelector } from "react-redux";
 import { useHotel } from "@/lib/context/HotelContext";
 import HotelDetailsDrawer from "./HotelDetailsDrawer";
+import HighlightssTab from "./HighlightsTab";
 // import TentDetailsDrawer from "./TentDetailsDrawer";
+import { IoRoseOutline } from "react-icons/io5";
+import { GiVideoConference } from "react-icons/gi";
+import { CgGym } from "react-icons/cg";
+import { IoCafeOutline } from "react-icons/io5";
+import { LuFireExtinguisher } from "react-icons/lu";
+import { IoBonfireOutline } from "react-icons/io5";
 
 const AllTabsContent = ({ refs, tents, onBookTent }) => {
   const [expandedDescription, setExpandedDescription] = useState(false);
@@ -170,6 +178,15 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
     "Tent Stay": <Tent className="w-6 h-6 text-gray-600" />,
     Blankets: <BiBlanket className="w-6 h-6 text-gray-600" />,
     "Sleeping Bags": <GiSleepingBag className="w-6 h-6 text-gray-600" />,
+    "Water Sports (Boating, Kayaking)": <MdKayaking className="w-6 h-6 text-gray-600" />,
+    "Banquet Hall": <IoRoseOutline className="w-6 h-6 text-gray-600" />,
+    "Conference Room": <GiVideoConference className="w-6 h-6 text-gray-600" />,
+    "Restaurant": <Utensils className="w-6 h-6 text-gray-600" />,
+    "Gym / Fitness Center": <CgGym className="w-6 h-6 text-gray-600" />,
+    "Spa / Wellness Center": <BicepsFlexed className="w-6 h-6 text-gray-600" />,
+    "In-house Cafe": <IoCafeOutline className="w-6 h-6 text-gray-600" />,
+    "Fire Safety": <LuFireExtinguisher className="w-6 h-6 text-gray-600" />,
+    "Bonfire Area": <IoBonfireOutline className="w-6 h-6 text-gray-600" />,
   };
 
   const displayedAmenities = showAll
@@ -185,51 +202,6 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
           id="highlights"
           className="p-3 space-y-6 scroll-mt-16"
         >
-          {/* The StayVista Experience */}
-          <div className="">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold border-l-3 border-orange-500 pl-2">
-                The Villacamp Experience
-              </h3>
-              <div className="flex space-x-2"></div>
-            </div>
-
-            <Carousel className="w-full">
-              <CarouselContent className="-ml-2 md:-ml-4">
-                <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                  <div className="min-w-48 relative rounded-lg overflow-hidden">
-                    <Image
-                      src={fullyServicedImage}
-                      alt="Fully-Serviced Villas"
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <h4 className="text-md font-bold">FULLY-SERVICED</h4>
-                        <p className="text-sm">COTTAGES</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-                <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                  <div className="min-w-48 relative rounded-lg overflow-hidden">
-                    <Image
-                      src={fourCourseMealImage}
-                      alt="Four Course Meals"
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <h4 className="text-md font-bold">FOUR COURSE</h4>
-                        <p className="text-sm">MEALS</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-              </CarouselContent>
-            </Carousel>
-          </div>
-
           {/* Villa Description */}
           <div className="">
             <h3 className="text-lg font-semibold mb-3 border-l-3 border-orange-500 pl-2">
@@ -246,6 +218,7 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
               {expandedDescription ? "Read Less" : "Read More"}
             </button>
           </div>
+          <HighlightssTab highlights={hotel?.highlights} />
 
           {/* Action Buttons */}
           <div className="flex space-x-4">

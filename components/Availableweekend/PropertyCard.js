@@ -79,7 +79,7 @@ import { clearSelectedTents, removeCoupon } from "@/Redux/Slices/bookingSlice";
 import { MdOutlineLocalLaundryService } from "react-icons/md";
 
 const PropertyCardnew = ({ property }) => {
-  const dispatch =useDispatch()
+  const dispatch = useDispatch();
   const [isWishlisted, setIsWishlisted] = useState(false);
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -170,8 +170,10 @@ const PropertyCardnew = ({ property }) => {
     "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
     Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
     Restaurant: <Utensils className="w-6 h-6 text-gray-600" />,
-    "Laundry Service": <MdOutlineLocalLaundryService className="w-6 h-6 text-gray-600" />,
-    "Walking Area": <Footprints  className="w-6 h-6 text-gray-600" />,
+    "Laundry Service": (
+      <MdOutlineLocalLaundryService className="w-6 h-6 text-gray-600" />
+    ),
+    "Walking Area": <Footprints className="w-6 h-6 text-gray-600" />,
   };
 
   const greatForIcons = {
@@ -208,6 +210,18 @@ const PropertyCardnew = ({ property }) => {
     checkOutDate?.toISOString(),
     property?.pricing ?? {}
   );
+
+
+const nights =
+  Math.max(
+    1,
+    Math.ceil(
+      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
+    )
+  );
+
+
+
 
   return (
     <Card
@@ -577,10 +591,10 @@ const PropertyCardnew = ({ property }) => {
             <div className="flex items-end justify-between mb-3">
               <div>
                 <div className="text-sm text-muted-foreground">
-                  Min 1 Nights
+                   {nights} Nights
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  for 1 Nights + Taxes
+                  for {nights} Nights + Taxes
                 </div>
               </div>
 

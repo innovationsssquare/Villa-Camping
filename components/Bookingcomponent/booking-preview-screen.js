@@ -53,6 +53,7 @@ import { getDeviceId } from "@/lib/deviceId";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
 import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
+import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
 
 export default function BookingPreviewScreen({ isOpen, onClose }) {
   const {
@@ -85,6 +86,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const reduxSelectedCottages = useSelector(
     (state) => state.booking.selectedCottages
   );
+  const reduxSelectedRooms = useSelector(
+    (state) => state.booking.selectedRooms
+  );
 
   const dayTents = useSelector(
     (state) => state.camping.dayDetails?.tents || []
@@ -92,6 +96,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
 
   const dayCottages = useSelector(
     (state) => state.cottage.dayDetails?.cottages || []
+  );
+  const dayRooms = useSelector(
+    (state) => state.cottage.dayDetails?.rooms || []
   );
 
   const checkInDate = checkin ? new Date(checkin) : new Date();
@@ -138,7 +145,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       return null;
     }
   };
-
+  console.log("rooms", reduxSelectedRooms);
   // const basePrice = calculateBasePriceForRange(
   //   checkInDate?.toISOString(),
   //   checkOutDate?.toISOString(),
@@ -167,6 +174,14 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     baseAmountForCoupon = calculateCottageTotal(
       reduxSelectedCottages,
       dayCottages,
+      checkin,
+      checkout
+    );
+    nightsForCoupon = 1; // 🔑 same rule as camping
+  } else if (propertyType === "Hotel") {
+    baseAmountForCoupon = calculateHotelTotal(
+      reduxSelectedRooms,
+      dayRooms,
       checkin,
       checkout
     );
@@ -291,6 +306,21 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           }),
       }));
     }
+    if (propertyType === "hotel") {
+      items = Object.values(reduxSelectedRooms).map((room) => ({
+        unitType: "RoomUnit",
+        unitId: room.unitId,
+        typeName: room.typeName, // ✅ use stored value
+        quantity: Number(room.quantity),
+        pricePerNight: Number(room.weekdayPrice),
+        totalPrice:
+          Number(room.quantity) *
+          calculateBasePriceForRange(checkin, checkout, {
+            weekdayPrice: room.weekdayPrice,
+            weekendPrice: room.weekendPrice,
+          }),
+      }));
+    }
 
     const customerId =
       getCustomerId() ||
@@ -317,12 +347,15 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       appliedCoupon?.id ||
       null;
 
-const normalizedPropertyType =
-  propertyType === "Cottage" ? "Cottages" : propertyType;
-
+    const normalizedPropertyType =
+      propertyType === "Cottage"
+        ? "Cottages"
+        : propertyType === "hotel"
+        ? "Hotels"
+        : propertyType;
 
     const bookingData = {
-      propertyType:normalizedPropertyType,
+      propertyType: normalizedPropertyType,
       propertyId,
       ownerId,
       customerId: customerId,
