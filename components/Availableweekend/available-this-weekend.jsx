@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { Input } from "@/components/ui/input";
+import { useEffect } from "react";
 import { Button } from "@heroui/react";
 import {
   Carousel,
@@ -11,171 +9,141 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { PropertyCard } from "@/components/Availableweekend/property-card";
-import { cn } from "@/lib/utils";
 import Weekendcard from "./Weekendcard";
-
-const locations = [
-  "All",
-  "Villa",
-  "Camping",
-  "Cottage",
-  "Hotel",
-];
-
-const properties = [
-  {
-    id: 1,
-    name: "The Ganga House",
-    location: "Varanasi, Uttar Pradesh",
-    rating: 4.8,
-    guests: 10,
-    rooms: 4,
-    baths: 2,
-    price: 20847,
-    originalPrice: null,
-     images: [
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    ],
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    bestRated: true,
-  },
-  {
-    id: 2,
-    name: "Barkat Villa - Ramgarh",
-    location: "Nainital, Uttarakhand",
-    rating: 4.8,
-    guests: 15,
-    rooms: 5,
-    baths: 5,
-    price: 50523,
-    originalPrice: 54948,
-     images: [
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    ],
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-    bestRated: true,
-  },
-  {
-    id: 3,
-    name: "Twilight Perch",
-    location: "Mussoorie, Uttarakhand",
-    rating: 4.7,
-    guests: 10,
-    rooms: 4,
-    baths: 4,
-    price: 49018,
-    originalPrice: 53306,
-     images: [
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    ],
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    bestRated: true,
-  },
-  {
-    id: 4,
-    name: "The Kathguni House",
-    location: "Manali, Himachal Pradesh",
-    rating: 4.7,
-    guests: 6,
-    rooms: 3,
-    baths: 4,
-    price: 29429,
-    originalPrice: null,
-    images: [
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    ],
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875532/villas/de028d0f-5543-46e0-95fe-54c0c7bdb93b_jyasht.jpg",
-    bestRated: true,
-  },
-  {
-    id: 5,
-    name: "Riverside Retreat",
-    location: "Rishikesh, Uttarakhand",
-    rating: 4.6,
-    guests: 8,
-    rooms: 3,
-    baths: 3,
-    price: 35000,
-    originalPrice: null,
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875526/villas/905268c2-dc39-4a63-aba7-adf4c217d777_mylulh.jpg",
-    bestRated: false,
-  },
-];
+import { cn } from "@/lib/utils";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
+import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import { fetchPropertiesByWeekend } from "@/Redux/Slices/propertiesSlice";
+import { PropertySkeleton } from "./Property-skeleton";
 
 export function AvailableThisWeekend() {
-  const [selectedLocation, setSelectedLocation] = useState("All");
-  const [searchQuery, setSearchQuery] = useState("Manali");
+  const dispatch = useDispatch();
+
+  const { categories } = useSelector((state) => state.category);
+  const { selectedCategoryId } = useSelector((state) => state.booking);
+  const { weekendData, weekendLoading } = useSelector(
+    (state) => state.properties
+  );
+
+  // Fetch categories once
+  useEffect(() => {
+    dispatch(fetchAllCategories());
+  }, [dispatch]);
+
+  // Fetch weekend properties when category changes
+  useEffect(() => {
+    if (!selectedCategoryId || selectedCategoryId === "all") return;
+
+    dispatch(
+      fetchPropertiesByWeekend({
+        categoryId: selectedCategoryId,
+      })
+    );
+  }, [selectedCategoryId, dispatch]);
+
+
+  const handleSelectCategory = (category) => {
+    dispatch(setSelectedCategory(category._id));
+    dispatch(setSelectedCategoryname(category?.name));
+  };
 
   return (
-    <div className="w-full  mx-auto md:px-4 px-3 md:py-6 py-3 space-y-6 ">
-      {/* Available This Weekend Section */}
-      <div className="space-y-4">
-        <h2 className="md:text-4xl text-center font-medium text-foreground">
-          Available This Weekend
-        </h2>
-
-        {/* Location Filter Tabs */}
-        <div className="flex md:justify-center sm:justify-center  gap-2 overflow-x-auto pb-2 scrollbar-hide">
-          {locations.map((location) => (
-            <Button
-              key={location}
-              variant={selectedLocation === location ? "default" : "outline"}
-              size="sm"
-              onClick={() => setSelectedLocation(location)}
-              className={cn(
-                "whitespace-nowrap transition-all duration-200 cursor-pointer",
-                selectedLocation === location
-                  ? "bg-black text-primary-foreground  hover:bg-black"
-                  : "border-1 border-white relative bg-gray-200"
-              )}
-            >
-              {location}
-            </Button>
-          ))}
-        </div>
-
+    <div className="w-full  mx-auto md:px-4 px-3 md:py-6 py-3 space-y-3 md:space-y-6 ">
+      <h2 className="md:text-4xl text-center font-medium text-foreground">
+        Available This Weekend
+      </h2>
+      {/* Category Carousel */}
+      <div className="relative max-w-4xl md:hidden mx-auto">
         <Carousel
+          className="w-full"
           opts={{
             align: "start",
-           
+            loop: false,
           }}
-          className="w-full"
         >
           <CarouselContent className="-ml-2 md:-ml-4">
-            {properties.map((property) => (
-              <CarouselItem
-                key={property.id}
-                className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
-              >
-                <Weekendcard property={property} />
+            {categories.map((category) => (
+              <CarouselItem key={category._id} className="pl-2 basis-auto">
+                <Button
+                  size="sm"
+                  onClick={() => handleSelectCategory(category)}
+                  className={cn(
+                    "whitespace-nowrap rounded-full px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200",
+                    selectedCategoryId === category._id
+                      ? "bg-black text-white hover:bg-black/90"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  )}
+                >
+                  {category.name}
+                </Button>
               </CarouselItem>
             ))}
           </CarouselContent>
-          {/* <CarouselPrevious className="hidden md:flex -left-12" />
-          <CarouselNext className="hidden md:flex -right-12" /> */}
+          <CarouselPrevious className="hidden md:flex -left-12" />
+          <CarouselNext className="hidden md:flex -right-12" />
         </Carousel>
-
-        {/* Standard Features Section (Mobile) */}
-        <div className="w-full py-2 md:py-4 flex justify-center items-center">
-          <Button size="sm" className="bg-black text-white w-1/2 md:w-60">
-            View All
-          </Button>
-        </div>
       </div>
+  <div className="hidden md:flex justify-center gap-2 overflow-x-auto pb-2">
+        {categories.map((category) => (
+          <Button
+            key={category._id}
+            size="sm"
+            onClick={() => handleSelectCategory(category)}
+            className={cn(
+              "whitespace-nowrap",
+              selectedCategoryId === category._id
+                ? "bg-black text-white"
+                : "bg-gray-200"
+            )}
+          >
+            {category.name}
+          </Button>
+        ))}
+      </div>
+
+
+      {/* Loading State */}
+      {weekendLoading && (
+        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2">
+          {[...Array(4)].map((_, i) => (
+            <div
+              key={i}
+              className=" flex-shrink-0"
+            >
+              <PropertySkeleton />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Properties Carousel */}
+      {!weekendLoading && weekendData.length > 0 && (
+        <div className="relative">
+          <Carousel className="w-full" opts={{ align: "start" }}>
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {weekendData.map((property) => (
+                <CarouselItem
+                  key={property._id}
+                className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
+                >
+                  <Weekendcard property={property} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden lg:flex -left-12" />
+            <CarouselNext className="hidden lg:flex -right-12" />
+          </Carousel>
+        </div>
+      )}
+
+      {/* Empty State */}
+      {!weekendLoading && weekendData.length === 0 && (
+        <div className="text-center text-gray-500 py-10">
+          <p className="text-lg">No properties available this weekend</p>
+          <p className="text-sm mt-2">Try selecting a different category</p>
+        </div>
+      )}
     </div>
   );
 }

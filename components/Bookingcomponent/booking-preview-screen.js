@@ -145,7 +145,6 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       return null;
     }
   };
-  console.log("rooms", reduxSelectedRooms);
   // const basePrice = calculateBasePriceForRange(
   //   checkInDate?.toISOString(),
   //   checkOutDate?.toISOString(),

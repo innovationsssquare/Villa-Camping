@@ -263,7 +263,6 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-4 rounded-lg text-base mt-8"
             onClick={() => {
               // Handle payment logic here
-              console.log("Processing payment...");
             }}
           >
             Pay Now

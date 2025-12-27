@@ -22,7 +22,6 @@ const VillaCamp = () => {
   const [locationProperties, setLocationProperties] = useState([]);
 
   const handleSearch = (query) => {
-    console.log("Search query:", query);
 
     // Simulate location search and auto-select
     const mockLocation = {
@@ -41,7 +40,6 @@ const VillaCamp = () => {
   };
 
   const handleLocationSelect = (location) => {
-    console.log("Location selected:", location);
     setSelectedLocation(location);
 
     // Simulate fetching properties for the selected location
@@ -99,7 +97,6 @@ const VillaCamp = () => {
   };
 
   const handlePropertySelect = (property) => {
-    console.log("Property selected:", property);
   };
 
   const handleApiKeySubmit = (apiKey) => {
