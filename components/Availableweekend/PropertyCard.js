@@ -211,17 +211,24 @@ const PropertyCardnew = ({ property }) => {
     property?.pricing ?? {}
   );
 
-
-const nights =
-  Math.max(
+  const nights = Math.max(
     1,
-    Math.ceil(
-      (checkOutDate - checkInDate) / (1000 * 60 * 60 * 24)
-    )
+    Math.ceil((checkOutDate - checkInDate) / (1000 * 60 * 60 * 24))
   );
 
+  function getDisplayPrice(property, checkInDate) {
+    const isWeekend = (() => {
+      const day = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Kolkata",
+        weekday: "short",
+      }).format(checkInDate);
+      return day === "Sat" || day === "Sun";
+    })();
 
-
+    return isWeekend
+      ? property?.pricing?.weekendPrice
+      : property?.pricing?.weekdayPrice;
+  }
 
   return (
     <Card
@@ -590,16 +597,21 @@ const nights =
           <div className="border-t border-gray-200 pt-4">
             <div className="flex items-end justify-between mb-3">
               <div>
-                <div className="text-sm text-muted-foreground">
-                   {nights} Nights
-                </div>
+                <div className="text-sm text-muted-foreground">Price start</div>
                 <div className="text-xs text-muted-foreground">
-                  for {nights} Nights + Taxes
+                  for 1 Nights
                 </div>
               </div>
-
-              <div className="text-xl font-bold text-price-text">
-                {formatRupee(basePrice)}
+              <div className="flex flex-col justify-center items-end">
+                <div className="text-lg font-bold">
+                  {formatRupee(property.pricing.weekdayPrice)}
+                </div>
+                {property.pricing.weekendPrice >
+                  property.pricing.weekdayPrice && (
+                  <p   className="text-xs">
+                    Weekend ₹{formatRupee(property.pricing.weekendPrice)}
+                  </p>
+                )}
               </div>
             </div>
             <div className="space-y-3">

@@ -48,6 +48,7 @@ import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import RoomSelectionDrawer from "../Hotelscreen/RoomSelectionDrawer";
 import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
 import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
+import { calculateVillaTotal } from "@/lib/calculateVillaBasePrice";
 
 export default function BookingDialog({
   isOpen,
@@ -62,6 +63,7 @@ export default function BookingDialog({
   tents,
   cottages,
   rooms,
+  pricing,
 }) {
   const [isLoading, setIsLoading] = useState(false);
   const [preBookMeals, setPreBookMeals] = useState(false);
@@ -100,9 +102,7 @@ export default function BookingDialog({
     (state) => state.cottage.dayDetails?.cottages || []
   );
 
-  const dayRooms = useSelector(
-    (state) => state.hotel.dayDetails?.rooms || []
-  );
+  const dayRooms = useSelector((state) => state.hotel.dayDetails?.rooms || []);
 
   // Convert ISO strings to Date for UI
   const checkInDate = checkinISO ? new Date(checkinISO) : new Date();
@@ -161,9 +161,11 @@ export default function BookingDialog({
       checkoutISO
     );
     nightsForCoupon = 1;
-  } 
-  else {
-    baseAmountForCoupon = price;
+  } else if (propertyType === "Villa") {
+    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
+    nightsForCoupon = 1;
+  } else {
+    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
   }
 
   const { discountAmount, finalTotal } = calculateBookingPrice(
@@ -293,33 +295,6 @@ export default function BookingDialog({
     return result;
   };
 
-  // const handleBooking = async () => {
-  //   if (propertyType === "Camping") {
-  //     if (!validateTents()) return;
-
-  //     const requestedTents = buildRequestedTentsByType();
-  //     setIsLoading(true);
-
-  //     const availabilityRes = await Getcampingavability({
-  //       propertyId,
-  //       checkIn: checkinISO,
-  //       checkOut: checkoutISO,
-  //       tents: requestedTents,
-  //     });
-  //     if (!availabilityRes?.success || availabilityRes?.available === false) {
-  //       setIsLoading(false);
-  //       setTentError(
-  //         availabilityRes?.message ||
-  //           "Selected tents are not available for all dates"
-  //       );
-  //       return;
-  //     }
-  //   }
-
-  //   setIsLoading(false);
-  //   router.push("/checkout");
-  // };
-
   const handleBooking = async () => {
     setTentError("");
 
@@ -372,7 +347,7 @@ export default function BookingDialog({
     }
 
     //ROOM
-     if (propertyType === "Hotel") {
+    if (propertyType === "Hotel") {
       if (!validateRooms()) return;
 
       const requestedRooms = buildRequestedRoomsByType();
@@ -522,10 +497,10 @@ export default function BookingDialog({
     reduxSelectedCottages || {}
   ).reduce((sum, t) => sum + (t.quantity || 0), 0);
 
-  const totalSelectedRooms = Object.values(
-    reduxSelectedRooms || {}
-  ).reduce((sum, t) => sum + (t.quantity || 0), 0);
-
+  const totalSelectedRooms = Object.values(reduxSelectedRooms || {}).reduce(
+    (sum, t) => sum + (t.quantity || 0),
+    0
+  );
 
   let subtotalForCoupon = 0;
 
@@ -550,6 +525,9 @@ export default function BookingDialog({
       checkinISO,
       checkoutISO
     );
+  } else if (propertyType === "Villa") {
+    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
+    nightsForCoupon = 1;
   } else {
     subtotalForCoupon = price * nights;
   }
@@ -622,7 +600,7 @@ export default function BookingDialog({
             ) : (
               <>
                 {/* Price */}
-                <div className="px-2">
+                {/* <div className="px-2">
                   <div className="flex items-baseline gap-2">
                     <span className="text-xl font-bold text-black">
                       {formatRupee(price)}
@@ -638,7 +616,7 @@ export default function BookingDialog({
                   ) : (
                     <p className="text-gray-600 text-sm">Per night</p>
                   )}
-                </div>
+                </div> */}
 
                 <div className="grid grid-cols-2 gap-4 px-2">
                   <div>
