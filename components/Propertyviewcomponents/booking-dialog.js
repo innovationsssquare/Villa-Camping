@@ -393,20 +393,7 @@ export default function BookingDialog({
     (propertyType === "Hotel" && totalRoomQty === 0) ||
     (propertyType === "Cottage" && totalCottageQty === 0);
 
-  const handleApplyCoupon = (coupon) => {
-    if (subtotalForCoupon <= 0) {
-      addToast?.({
-        title: "Coupon applied failed!",
-        description: `Please select dates/tents before applying a coupon`,
-        color: "success",
-      });
-      return;
-    }
-
-    dispatch(setAppliedCoupon(coupon));
-    setIsCouponsDrawerOpen(false);
-    confetti({ particleCount: 100, spread: 70, origin: { y: 1.2 } });
-  };
+ 
 
   const handleRemoveCouponClick = () => {
     dispatch(removeCoupon());
@@ -526,11 +513,27 @@ export default function BookingDialog({
       checkoutISO
     );
   } else if (propertyType === "Villa") {
-    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
+    subtotalForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
     nightsForCoupon = 1;
   } else {
     subtotalForCoupon = price * nights;
   }
+
+ const handleApplyCoupon = (coupon) => {
+    if (subtotalForCoupon <= 0) {
+      addToast?.({
+        title: "Coupon applied failed!",
+        description: `Please select dates/tents before applying a coupon`,
+        color: "success",
+      });
+      return;
+    }
+
+    dispatch(setAppliedCoupon(coupon));
+    setIsCouponsDrawerOpen(false);
+    confetti({ particleCount: 100, spread: 70, origin: { y: 1.2 } });
+  };
+
 
   return (
     <>

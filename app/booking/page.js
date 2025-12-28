@@ -12,31 +12,30 @@ import {
   Clock,
   CheckCircle2,
   XCircle,
-  ArrowLeft,
   MoreVertical,
+  Receipt,
+  Info,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import Cookies from "js-cookie";
-import { MyBooking } from "@/lib/API/User/User";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, Tab } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
 import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
-import { IoBag } from "react-icons/io5";
-import { IoMdBookmarks } from "react-icons/io";
-import { useRouter } from "next/navigation";
 import { EmptyState } from "./empty-states";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = (status) => {
     switch (status.toLowerCase()) {
       case "booked":
+      case "confirmed":
         return {
           variant: "default",
           icon: CheckCircle2,
@@ -79,49 +78,47 @@ const StatusBadge = ({ status }) => {
 
 const BookingCard = ({ booking }) => {
   const {
-    RoomId,
-    CheckinDate,
-    CheckOutDate,
-    Status,
-    TotalAmount,
-    BookingId,
-    bookingtype,
-    Numberofchildren,
-    Tax,
-    UserInformation,
-    PaymentId,
-    BranchId,
+    propertyId,
+    checkIn,
+    checkOut,
+    status,
+    pricing,
+    _id,
+    bookingMode,
+    guests,
+    customerDetails,
+    payments,
+    items,
   } = booking;
 
-  const hotel = RoomId?.RoomName || "Room";
-  const branchName = BranchId?.Branchname || "Hotel";
-  const checkIn = new Date(CheckinDate).toLocaleDateString();
-  const checkOut = new Date(CheckOutDate).toLocaleDateString();
-  const images = RoomId?.Image || [];
+  const hotel = items?.[0]?.typeName || propertyId?.name || "Room";
+  const branchLocation = propertyId?.name || "Hotel";
+  const checkInDate = new Date(checkIn).toLocaleDateString();
+  const checkOutDate = new Date(checkOut).toLocaleDateString();
+  const images = propertyId?.images || [];
   const nights = Math.ceil(
-    (new Date(CheckOutDate).getTime() - new Date(CheckinDate).getTime()) /
+    (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
       (1000 * 60 * 60 * 24)
   );
 
+  const TotalAmount = pricing?.totalAmount || 0;
+  const Tax = pricing?.taxAmount || 0;
+  const transactionId = payments?.[0]?.transactionId || "N/A";
+  const pricingDetails = pricing || { subtotal: 0, taxAmount: 0, totalAmount: 0, discountAmount: 0 }
   return (
-    <Card className="overflow-hidden shadow-card hover:shadow-hotel transition-all duration-300 border-0 bg-card">
+    <Card className="overflow-hidden p-0 shadow-none hover:shadow-hotel transition-all duration-300 border border-gray-300 bg-card">
       <CardContent className="p-0">
         {/* Hotel Image */}
         <div className="relative">
-          <div className="p-4 bg-gradient-surface">
+          <div className="p-0 bg-gradient-surface">
             {images.length > 0 ? (
               <div className="relative">
                 <img
-                  src={images[0]}
+                  src={images[0] || "/placeholder.svg"}
                   alt={hotel}
-                  className="w-full h-48 object-cover rounded-xl border-2 border-white shadow-card"
+                  className="w-full h-48 object-cover rounded-t-xl border-2 border-white shadow-card"
                 />
-                <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-lg">
-                  <div className="flex items-center gap-1 text-white text-xs">
-                    <Star className="w-3 h-3 fill-hotel-secondary text-hotel-secondary" />
-                    <span>4.8</span>
-                  </div>
-                </div>
+                <div className="absolute top-2 left-2 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-t-lg"></div>
               </div>
             ) : (
               <div className="w-full h-48 bg-gradient-primary rounded-xl flex items-center justify-center">
@@ -129,14 +126,9 @@ const BookingCard = ({ booking }) => {
               </div>
             )}
           </div>
-
-          {/* Status Badge - Floating */}
-          <div className="absolute top-4 right-4">
-            <StatusBadge status={Status} />
-          </div>
         </div>
 
-        <div className="p-6 space-y-4">
+        <div className="p-3 space-y-4">
           {/* Hotel Header */}
           <div className="space-y-2">
             <div className="flex items-start justify-between">
@@ -144,7 +136,7 @@ const BookingCard = ({ booking }) => {
                 <h3 className="text-xl font-bold text-foreground">{hotel}</h3>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
-                  <span className="text-sm">{branchName}</span>
+                  <span className="text-sm">{branchLocation}</span>
                 </div>
               </div>
               <Button variant="ghost" size="icon">
@@ -154,6 +146,33 @@ const BookingCard = ({ booking }) => {
           </div>
 
           <Separator />
+
+          {items && items.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-hotel-primary">
+                <Receipt className="w-4 h-4" />
+                <span>Accommodation Details</span>
+              </div>
+              <div className="bg-gray-50/80 rounded-lg p-3 space-y-2">
+                {items.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex justify-between items-center text-sm"
+                  >
+                    <div className="flex flex-col">
+                      <span className="font-medium">{item.typeName}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {item.quantity} x ₹{item.pricePerNight} per night
+                      </span>
+                    </div>
+                    <span className="font-semibold text-foreground">
+                      ₹{item.totalPrice}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Booking Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -165,7 +184,7 @@ const BookingCard = ({ booking }) => {
               </div>
               <div className="pl-6 space-y-1">
                 <p className="text-sm text-foreground">
-                  {checkIn} - {checkOut}
+                  {checkInDate} - {checkOutDate}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   {nights} night{nights !== 1 ? "s" : ""}
@@ -181,22 +200,18 @@ const BookingCard = ({ booking }) => {
               </div>
               <div className="pl-6 space-y-1">
                 <div className="flex items-center gap-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarFallback className="text-xs bg-hotel-primary text-white">
-                      {UserInformation?.Name?.charAt(0) || "G"}
-                    </AvatarFallback>
-                  </Avatar>
                   <span className="text-sm text-foreground">
-                    {UserInformation?.Name}
+                    {customerDetails?.firstName} {customerDetails?.lastName}
                   </span>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Age {UserInformation?.Age} • {UserInformation?.Phonenumber}
+                  {customerDetails?.mobile} • {customerDetails?.email}
                 </p>
-                {Numberofchildren > 0 && (
+                {guests?.children > 0 && (
                   <p className="text-xs text-muted-foreground">
-                    {Numberofchildren} child
-                    {Numberofchildren !== 1 ? "ren" : ""}
+                    {guests.adults} Adult{guests.adults !== 1 ? "s" : ""},{" "}
+                    {guests.children} child
+                    {guests.children !== 1 ? "ren" : ""}
                   </p>
                 )}
               </div>
@@ -204,14 +219,13 @@ const BookingCard = ({ booking }) => {
           </div>
 
           <Separator />
-
-          {/* Booking Metadata */}
+  {/* Booking Metadata */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Booking ID</p>
-                <p className="font-mono text-xs">{BookingId}</p>
+                <p className="font-mono text-xs">{_id?.slice(-8)}</p>
               </div>
             </div>
 
@@ -219,7 +233,7 @@ const BookingCard = ({ booking }) => {
               <Landmark className="w-4 h-4 text-muted-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">Type</p>
-                <p className="capitalize">{bookingtype}</p>
+                <p className="capitalize">{bookingMode}</p>
               </div>
             </div>
 
@@ -228,16 +242,76 @@ const BookingCard = ({ booking }) => {
               <div>
                 <p className="text-xs text-muted-foreground">Transaction</p>
                 <p className="font-mono text-xs">
-                  {PaymentId?.merchantTransactionId}
+                  {payments?.[0]?.transactionId?.slice(-8) || "N/A"}
                 </p>
               </div>
             </div>
           </div>
 
+
           <Separator />
 
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold text-hotel-primary">
+                <BadgeDollarSign className="w-4 h-4" />
+                <span>Payment Summary</span>
+              </div>
+              <Badge
+                variant="outline"
+                className="text-[10px] uppercase tracking-wider font-bold border-hotel-success/30 text-hotel-success bg-hotel-success/5"
+              >
+                {booking.paymentStatus?.replace("_", " ")}
+              </Badge>
+            </div>
+
+            <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Subtotal</span>
+                <span className="font-medium text-foreground">
+                  ₹{pricingDetails.subtotal}
+                </span>
+              </div>
+              {pricingDetails.discountAmount > 0 && (
+                <div className="flex justify-between text-sm text-hotel-success">
+                  <span className="flex items-center gap-1 italic">
+                    <Info className="w-3 h-3" /> Coupon Discount
+                  </span>
+                  <span className="font-medium">
+                    -₹{pricingDetails.discountAmount}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
+                  Taxes & Service Fees
+                </span>
+                <span className="font-medium text-foreground">
+                  ₹{pricingDetails.taxAmount}
+                </span>
+              </div>
+              <Separator className="my-1 bg-gray-200" />
+              <div className="flex justify-between items-center pt-1">
+                <span className="text-base font-bold text-foreground">
+                  Total Paid Amount
+                </span>
+                <div className="text-right">
+                  <div className="flex items-center justify-end gap-1 text-hotel-success">
+                    <IndianRupee className="w-5 h-5" />
+                    <span className="text-2xl font-black">
+                      ₹{pricingDetails.totalAmount.toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        
+          {/* <Separator /> */}
+
           {/* Pricing & Actions */}
-          <div className="flex items-center justify-between">
+          {/* <div className="flex items-center justify-between">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <IndianRupee className="w-4 h-4 text-hotel-success" />
@@ -251,7 +325,8 @@ const BookingCard = ({ booking }) => {
             </div>
 
             <div className="flex gap-2">
-              {Status === "Booked" && (
+              {(status?.toLowerCase() === "booked" ||
+                status?.toLowerCase() === "confirmed") && (
                 <>
                   <Button variant="outline" size="sm">
                     Modify
@@ -261,13 +336,13 @@ const BookingCard = ({ booking }) => {
                   </Button>
                 </>
               )}
-              {Status === "Completed" && (
+              {status?.toLowerCase() === "completed" && (
                 <Button variant="golden" size="sm">
-                  Review
+                  Write a Review
                 </Button>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>
@@ -275,61 +350,56 @@ const BookingCard = ({ booking }) => {
 };
 
 export default function BookingScreen() {
-  const [bookings, setBookings] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const dispatch = useDispatch();
+  const { bookings, loading } = useSelector((state) => state.myBookings);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-  useEffect(() => {
-    GetMybookingRooms();
-  }, []);
+  const [activeTab, setActiveTab] = useState("Active");
 
-  const GetMybookingRooms = async () => {
+  const getCustomerId = () => {
     try {
-      setLoading(true);
-      const phone = Cookies.get("phone") || "9876543210";
-      const res = await MyBooking(phone);
-      if (res.status) {
-        setBookings(res.data);
-        setFiltered(res.data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch bookings:", error);
-    } finally {
-      setLoading(false);
+      if (typeof window === "undefined") return null;
+      // adjust key if you use a different key
+      const id =
+        localStorage.getItem("thevilla_user_id") ||
+        localStorage.getItem("customer_id") ||
+        null;
+      return id;
+    } catch {
+      return null;
     }
   };
 
-  const handleSearch = (value) => {
-    setSearch(value);
-    const q = value.toLowerCase();
-    const filteredResults = bookings.filter(
-      (b) =>
-        b.BookingId.toLowerCase().includes(q) ||
-        b.Status.toLowerCase().includes(q) ||
-        b.RoomId?.RoomName.toLowerCase().includes(q) ||
-        b.BranchId?.Branchname.toLowerCase().includes(q)
-    );
-    setFiltered(filteredResults);
+  const customerId = getCustomerId();
+
+  useEffect(() => {
+    if (!customerId) return;
+    dispatch(fetchMyBookings(customerId));
+  }, [dispatch, customerId]);
+
+  const getFilteredBookings = () => {
+    const q = search.toLowerCase();
+
+    return bookings?.filter((b) => {
+      const matchesSearch =
+        b._id.toLowerCase().includes(q) ||
+        b.status.toLowerCase().includes(q) ||
+        b.propertyId?.name.toLowerCase().includes(q) ||
+        b.customerDetails?.firstName.toLowerCase().includes(q);
+
+      const isCompleted = b.status?.toLowerCase() === "completed";
+      const isActive = !isCompleted && b.status?.toLowerCase() !== "cancelled";
+
+      if (activeTab === "Active") return matchesSearch && isActive;
+      if (activeTab === "Completed") return matchesSearch && isCompleted;
+
+      return matchesSearch;
+    });
   };
 
-  const getTabCount = (filter) => {
-    switch (filter) {
-      case "upcoming":
-        return filtered.filter((b) => new Date(b.CheckinDate) > new Date())
-          .length;
-      case "completed":
-        return filtered.filter((b) => new Date(b.CheckOutDate) < new Date())
-          .length;
-      default:
-        return filtered.length;
-    }
-  };
-
-  const cartItemCount = 3;
+  const filteredResults = getFilteredBookings();
 
   return (
-    <div className="min-h-screen bg-gradient-surface ">
+    <div className="min-h-screen bg-gradient-surface">
       <header
         className={cn(
           " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
@@ -375,18 +445,20 @@ export default function BookingScreen() {
               placeholder="Search by booking ID, hotel, status..."
               className="pl-10 bg-background/50 backdrop-blur-sm border-gray-300 h-10"
               value={search}
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => setSearch(e.target.value)}
             />
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="w-full mx-auto ">
+      <div className="w-full mx-auto p-2 ">
         <Tabs
-          aria-label="Options"
+          aria-label="Booking Options"
           color="primary"
           variant="bordered"
+          selectedKey={activeTab}
+          onSelectionChange={(key) => setActiveTab(key)}
           className="w-full md:w-1/2"
           classNames={{
             tabList: "w-full z-50  bg-gray-200  rounded-md p-0 mb-2",
@@ -396,82 +468,43 @@ export default function BookingScreen() {
               "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
           }}
         >
-          <Tab
-            key="Active"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Active</span>
-              </div>
-            }
-          >
-           
-            <EmptyState />
+          <Tab key="Active" title="Active">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
+              {loading ? (
+                <div className="col-span-full py-20 text-center text-muted-foreground">
+                  Loading your stays...
+                </div>
+              ) : filteredResults.length > 0 ? (
+                filteredResults.map((booking) => (
+                  <BookingCard key={booking._id} booking={booking} />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState type="active" />
+                </div>
+              )}
+            </div>
           </Tab>
 
-          <Tab
-            key="Completed"
-            title={
-              <div className="flex items-center space-x-2">
-                <span>Completed</span>
-              </div>
-            }
-          >
-            <EmptyState />
+          <Tab key="Completed" title="Completed">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+              {loading ? (
+                <div className="col-span-full py-20 text-center text-muted-foreground">
+                  Loading your history...
+                </div>
+              ) : filteredResults.length > 0 ? (
+                filteredResults.map((booking) => (
+                  <BookingCard key={booking._id} booking={booking} />
+                ))
+              ) : (
+                <div className="col-span-full">
+                  <EmptyState type="completed" />
+                </div>
+              )}
+            </div>
           </Tab>
         </Tabs>
       </div>
     </div>
   );
 }
-
-// {loading ? (
-//   <div className="text-center py-12">
-//     <div className="inline-flex items-center gap-2 text-muted-foreground">
-//       <div className="w-5 h-5 border-2 border-hotel-primary border-t-transparent rounded-full animate-spin" />
-//       Loading your bookings...
-//     </div>
-//   </div>
-// ) : (
-//   <>
-//     <TabsContent value="all" className="space-y-6">
-//       {filtered.length === 0 ? (
-//         <div className="text-center py-16">
-//           <IoMdBookmarks className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-//           <h3 className="text-xl font-semibold mb-2">
-//             No bookings found
-//           </h3>
-//           <p className="text-muted-foreground mb-6">
-//             Start planning your next getaway!
-//           </p>
-//           <Button
-//             onClick={() => router.push("/category/all")}
-//             variant="luxury"
-//             size="lg"
-//             className="bg-black/80 text-white"
-//           >
-//             Explore
-//           </Button>
-//         </div>
-//       ) : (
-//         filtered.map((booking) => (
-//           <BookingCard key={booking._id} booking={booking} />
-//         ))
-//       )}
-//     </TabsContent>
-
-//     <TabsContent value="upcoming" className="space-y-6">
-//       {filtered
-//         .filter((b) => new Date(b.CheckinDate) > new Date())
-//         .map((booking) => (
-//           <BookingCard key={booking._id} booking={booking} />
-//         ))}
-//     </TabsContent>
-
-//     <TabsContent value="completed" className="space-y-6">
-//       {filtered
-//         .filter((b) => new Date(b.CheckOutDate) < new Date())
-//         .map((booking) => (
-//           <BookingCard key={booking._id} booking={booking} />
-//         ))}
-//     </TabsContent>
-//   </>
