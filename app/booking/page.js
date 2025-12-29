@@ -139,7 +139,7 @@ const BookingCard = ({ booking,onWriteReview }) => {
           <div className="space-y-2">
             <div className="flex items-start justify-between">
               <div className="space-y-1">
-                <h3 className="text-xl font-bold text-foreground">{hotel}</h3>
+                <h3 className="text-lg font-bold text-foreground">{hotel}</h3>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm">{branchLocation}</span>

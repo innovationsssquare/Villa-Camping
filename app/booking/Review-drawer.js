@@ -114,13 +114,14 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
       // 2️⃣ Payload
       const reviewPayload = {
         bookingId: booking._id,
+        userId:booking.customerId,
         rating,
         comment,
         categories: selectedCategories,
         images: uploadedImageUrls,
       };
       const result = await Writereview(reviewPayload);
-      if (result) {
+      if (result?.success) {
         addToast({
           title: "Done!",
           description: `Review submitted successfully `,
@@ -167,7 +168,7 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
         <ScrollArea className="px-3 h-[90vh] pb-20">
           <div className="mx-auto w-full max-w-lg flex flex-col h-full">
             <DrawerHeader className="shrink-0">
-              <DrawerTitle className="text-2xl font-bold text-center">
+              <DrawerTitle className="text-lg font-bold text-center">
                 Write a Review
               </DrawerTitle>
               <DrawerDescription className="text-center">
