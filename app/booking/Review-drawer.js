@@ -35,6 +35,8 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
   const [images, setImages] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
 
   const toggleCategory = (category) => {
     setSelectedCategories((prev) =>
@@ -97,51 +99,66 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
     return await Promise.all(uploadPromises);
   };
 
-  const handleSubmit = async () => {
+  const validateForm = () => {
     if (!rating) {
-      addToast({
-        title: "failed",
-        description: `Please select a rating`,
-        color: "danger",
-      });
+      return "Please select a rating";
+    }
+
+    if (!comment.trim() || comment.trim().length < 10) {
+      return "Please write at least 10 characters about your experience";
+    }
+
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    // reset messages
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    const validationError = validateForm();
+    if (validationError) {
+      setErrorMessage(validationError);
       return;
     }
 
     try {
       setLoading(true);
+
+      // 1️⃣ Upload images
       const uploadedImageUrls = await uploadAllImages();
 
       // 2️⃣ Payload
       const reviewPayload = {
         bookingId: booking._id,
-        userId:booking.customerId,
+        userId: booking.customerId,
         rating,
         comment,
         categories: selectedCategories,
         images: uploadedImageUrls,
       };
+
+      // 3️⃣ API call
       const result = await Writereview(reviewPayload);
+
       if (result?.success) {
-        addToast({
-          title: "Done!",
-          description: `Review submitted successfully `,
-          color: "success",
-        });
+        setSuccessMessage("✅ Review submitted successfully");
         resetForm();
-        onClose();
+
+        // small delay so user sees success
+        setTimeout(() => {
+          onClose();
+          setSuccessMessage("");
+        }, 1200);
       } else {
-        addToast({
-          title: "failed",
-          description: `Please select a rating`,
-          color: "danger",
-        });
+        setErrorMessage(result?.message || "Failed to submit review");
       }
     } catch (error) {
       console.error("Review submit failed:", error);
-
-      toast.error(error?.response?.data?.message || "Failed to submit review", {
-        id: "review",
-      });
+      setErrorMessage(
+        error?.response?.data?.message ||
+          "Something went wrong. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -152,8 +169,12 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
     setComment("");
     setSelectedCategories([]);
     setImages([]);
+    setImageFiles([]);
+    setErrorMessage("");
+    setSuccessMessage("");
   };
 
+  console.log(errorMessage);
   return (
     <Drawer
       open={isOpen}
@@ -294,6 +315,18 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
             </div>
 
             <DrawerFooter className="shrink-0 border-t mt-2">
+              {/* Status Messages */}
+              {errorMessage && (
+                <div className="px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                  {errorMessage}
+                </div>
+              )}
+
+              {successMessage && (
+                <div className="px-4 py-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
+                  {successMessage}
+                </div>
+              )}
               <Button
                 size="lg"
                 className="w-full text-lg bg-black text-white h-12"
