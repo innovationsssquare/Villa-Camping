@@ -164,18 +164,18 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
       }}
     >
       <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-lg flex flex-col h-full">
-          <DrawerHeader className="shrink-0">
-            <DrawerTitle className="text-2xl font-bold text-center">
-              Write a Review
-            </DrawerTitle>
-            <DrawerDescription className="text-center">
-              Share your experience at{" "}
-              {booking?.propertyId?.name || "the hotel"}
-            </DrawerDescription>
-          </DrawerHeader>
+        <ScrollArea className="px-3 h-[90vh] pb-20">
+          <div className="mx-auto w-full max-w-lg flex flex-col h-full">
+            <DrawerHeader className="shrink-0">
+              <DrawerTitle className="text-2xl font-bold text-center">
+                Write a Review
+              </DrawerTitle>
+              <DrawerDescription className="text-center">
+                Share your experience at{" "}
+                {booking?.propertyId?.name || "the hotel"}
+              </DrawerDescription>
+            </DrawerHeader>
 
-          <ScrollArea className="flex-1 px-6">
             <div className="py-2 space-y-8">
               {/* Star Rating */}
               <div className="space-y-3 text-center">
@@ -220,7 +220,7 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
                         className={cn(
                           "cursor-pointer px-4 py-2 text-sm transition-all border-2",
                           isSelected
-                            ? "bg-hotel-primary border-hotel-primary text-white"
+                            ? "bg-orange-100 border-orange-300 text-orange-500"
                             : "bg-transparent border-muted-foreground/20 text-muted-foreground hover:border-hotel-primary/40"
                         )}
                         onClick={() => toggleCategory(category)}
@@ -291,25 +291,25 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
                 </p>
               </div>
             </div>
-          </ScrollArea>
 
-          <DrawerFooter className="shrink-0 border-t mt-2">
-            <Button
-              size="lg"
-              className="w-full text-lg h-12"
-              onPress={handleSubmit}
-              disabled={rating === 0 || loading}
-            >
-              {loading ? "Submitting..." : "Submit Review"}
-            </Button>
-
-            <DrawerClose asChild>
-              <Button variant="outline" className="w-full bg-transparent">
-                Cancel
+            <DrawerFooter className="shrink-0 border-t mt-2">
+              <Button
+                size="lg"
+                className="w-full text-lg bg-black text-white h-12"
+                onPress={handleSubmit}
+                disabled={rating === 0 || loading}
+              >
+                {loading ? "Submitting..." : "Submit Review"}
               </Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
+
+              <DrawerClose asChild>
+                <Button variant="outline" className="w-full bg-transparent">
+                  Cancel
+                </Button>
+              </DrawerClose>
+            </DrawerFooter>
+          </div>
+        </ScrollArea>
       </DrawerContent>
     </Drawer>
   );
