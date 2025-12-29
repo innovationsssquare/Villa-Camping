@@ -350,7 +350,7 @@ const AllTabsContent = ({ refs }) => {
 
       {/* Reviews Section */}
       <section ref={refs.reviewsRef} id="reviews" className="scroll-mt-16">
-        <ReviewsTab />
+        <ReviewsTab Reviews={villa?.reviews}/>
       </section>
 
       {/* Amenities Section */}

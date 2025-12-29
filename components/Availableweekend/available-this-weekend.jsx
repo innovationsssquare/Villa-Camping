@@ -72,14 +72,14 @@ export function AvailableThisWeekend() {
               loop: false,
             }}
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
+            <CarouselContent className="-ml-2 md:-ml-4 justify-center">
               {categories?.map((category) => (
                 <CarouselItem key={category._id} className="pl-2 basis-auto">
                   <Button
                     size="sm"
                     onPress={() => handleSelectCategory(category)}
                     className={cn(
-                      "whitespace-nowrap rounded-full px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200",
+                      "whitespace-nowrap rounded-full px-6 py-2 text-xs md:text-sm font-medium transition-all duration-200",
                       selectedCategoryId === category._id
                         ? "bg-black text-white hover:bg-black/90"
                         : "bg-gray-100 text-gray-700 hover:bg-gray-200",
@@ -96,7 +96,7 @@ export function AvailableThisWeekend() {
         )}
       </div>
 
-      <div className="hidden md:flex justify-center gap-2 overflow-x-auto pb-2">
+      <div className="hidden md:flex justify-center gap-8 overflow-x-auto pb-2">
         {loading ? (
           <div className="flex gap-2">
             {[...Array(8)].map((_, i) => (
@@ -124,7 +124,7 @@ export function AvailableThisWeekend() {
 
       {/* Loading State */}
       {(weekendLoading || (loading && !weekendData.length)) && (
-        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2">
+        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2 ">
           {[...Array(4)].map((_, i) => (
             <div key={i} className=" flex-shrink-0">
               <PropertySkeleton />
@@ -137,7 +137,7 @@ export function AvailableThisWeekend() {
       {!weekendLoading &&
         (!loading || weekendData.length > 0) &&
         weekendData.length > 0 && (
-          <div className="relative">
+          <div className="relative py-2">
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2 md:-ml-4">
                 {weekendData.map((property) => (

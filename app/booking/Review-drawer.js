@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Writereview } from "@/lib/API/Booking/Booking";
 import { addToast, Button } from "@heroui/react";
+import ButtonLoader from "@/components/Loadercomponents/button-loader";
 
 const REVIEW_CATEGORIES = [
   "All",
@@ -143,6 +144,11 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
 
       if (result?.success) {
         setSuccessMessage("✅ Review submitted successfully");
+        addToast({
+          title: "Done!",
+          description: `✅ Review submitted successfully`,
+          color: "success",
+        });
         resetForm();
 
         // small delay so user sees success
@@ -154,7 +160,6 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
         setErrorMessage(result?.message || "Failed to submit review");
       }
     } catch (error) {
-      console.error("Review submit failed:", error);
       setErrorMessage(
         error?.response?.data?.message ||
           "Something went wrong. Please try again."
@@ -327,19 +332,24 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
                   {successMessage}
                 </div>
               )}
-              <Button
-                size="lg"
-                className="w-full text-lg bg-black text-white h-12"
-                onPress={handleSubmit}
-                disabled={rating === 0 || loading}
-              >
-                {loading ? "Submitting..." : "Submit Review"}
-              </Button>
 
               <DrawerClose asChild>
-                <Button variant="outline" className="w-full bg-transparent">
-                  Cancel
-                </Button>
+                <div className="flex gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    className="w-full bg-orange-100 ring-1 ring-orange-500 text-orange-500 h-12"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="w-full text-md bg-black text-white h-12"
+                    onPress={handleSubmit}
+                    disabled={rating === 0 || loading}
+                  >
+                    {loading ? <ButtonLoader /> : "Submit Review"}
+                  </Button>
+                </div>
               </DrawerClose>
             </DrawerFooter>
           </div>

@@ -238,7 +238,7 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
 
         {/* Reviews Section */}
         <section ref={refs.reviewsRef} id="reviews" className="scroll-mt-16">
-          <ReviewsTab />
+        <ReviewsTab Reviews={camping?.reviews}/>
         </section>
 
         {/* Amenities Section */}
