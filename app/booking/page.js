@@ -17,10 +17,9 @@ import {
   Info,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, Tab } from "@heroui/react";
+import { Tabs, Tab, Button } from "@heroui/react";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -30,6 +29,7 @@ import { NotificationSheet } from "@/components/Navbarcomponents/Notificationshe
 import { EmptyState } from "./empty-states";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
+import { ReviewDrawer } from "./Review-drawer";
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = (status) => {
@@ -76,7 +76,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const BookingCard = ({ booking }) => {
+const BookingCard = ({ booking,onWriteReview }) => {
   const {
     propertyId,
     checkIn,
@@ -104,7 +104,13 @@ const BookingCard = ({ booking }) => {
   const TotalAmount = pricing?.totalAmount || 0;
   const Tax = pricing?.taxAmount || 0;
   const transactionId = payments?.[0]?.transactionId || "N/A";
-  const pricingDetails = pricing || { subtotal: 0, taxAmount: 0, totalAmount: 0, discountAmount: 0 }
+  const pricingDetails = pricing || {
+    subtotal: 0,
+    taxAmount: 0,
+    totalAmount: 0,
+    discountAmount: 0,
+  };
+
   return (
     <Card className="overflow-hidden p-0 shadow-none hover:shadow-hotel transition-all duration-300 border border-gray-300 bg-card">
       <CardContent className="p-0">
@@ -139,9 +145,29 @@ const BookingCard = ({ booking }) => {
                   <span className="text-sm">{branchLocation}</span>
                 </div>
               </div>
-              <Button variant="ghost" size="icon">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
+              <div className="flex gap-2">
+                {(status?.toLowerCase() === "booked" ||
+                  status?.toLowerCase() === "confirmed") && (
+                  <>
+                    <Button variant="outline" size="sm">
+                      Modify
+                    </Button>
+                    <Button variant="destructive" size="sm">
+                      Cancel
+                    </Button>
+                  </>
+                )}
+                {status?.toLowerCase() === "completed" && (
+                  <Button
+                    onClick={() => onWriteReview(booking)}
+                    variant="golden"
+                    className={"bg-orange-500 text-white"}
+                    size="sm"
+                  >
+                    Write a Review
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
@@ -219,7 +245,7 @@ const BookingCard = ({ booking }) => {
           </div>
 
           <Separator />
-  {/* Booking Metadata */}
+          {/* Booking Metadata */}
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
             <div className="flex items-center gap-2">
               <FileText className="w-4 h-4 text-muted-foreground" />
@@ -248,7 +274,6 @@ const BookingCard = ({ booking }) => {
             </div>
           </div>
 
-
           <Separator />
 
           <div className="space-y-3">
@@ -265,7 +290,7 @@ const BookingCard = ({ booking }) => {
               </Badge>
             </div>
 
-            <div className="bg-gray-50/50 rounded-xl p-4 border border-gray-100 space-y-2">
+            <div className="bg-orange-200/50 rounded-xl p-4 border border-gray-100 space-y-2">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Subtotal</span>
                 <span className="font-medium text-foreground">
@@ -292,13 +317,13 @@ const BookingCard = ({ booking }) => {
               </div>
               <Separator className="my-1 bg-gray-200" />
               <div className="flex justify-between items-center pt-1">
-                <span className="text-base font-bold text-foreground">
+                <span className="text-md font-bold text-foreground">
                   Total Paid Amount
                 </span>
                 <div className="text-right">
                   <div className="flex items-center justify-end gap-1 text-hotel-success">
                     <IndianRupee className="w-5 h-5" />
-                    <span className="text-2xl font-black">
+                    <span className="md:text-lg text-sm font-black">
                       ₹{pricingDetails.totalAmount.toLocaleString()}
                     </span>
                   </div>
@@ -307,7 +332,6 @@ const BookingCard = ({ booking }) => {
             </div>
           </div>
 
-        
           {/* <Separator /> */}
 
           {/* Pricing & Actions */}
@@ -354,6 +378,15 @@ export default function BookingScreen() {
   const { bookings, loading } = useSelector((state) => state.myBookings);
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("Active");
+  const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
+
+  const [selectedBookingForReview, setSelectedBookingForReview] =
+    useState(null);
+
+  const handleWriteReview = (booking) => {
+    setSelectedBookingForReview(booking);
+    setReviewDrawerOpen(true);
+  };
 
   const getCustomerId = () => {
     try {
@@ -376,18 +409,36 @@ export default function BookingScreen() {
     dispatch(fetchMyBookings(customerId));
   }, [dispatch, customerId]);
 
+  const isCompletedByCheckout = (checkOut) => {
+    if (!checkOut) return false;
+
+    const now = new Date(); // IST (local)
+    const checkoutDate = new Date(checkOut); // auto converted to IST
+
+    return checkoutDate < now;
+  };
+
+  const isActiveByCheckout = (checkOut) => {
+    if (!checkOut) return false;
+
+    const now = new Date();
+    const checkoutDate = new Date(checkOut);
+
+    return checkoutDate >= now;
+  };
+
   const getFilteredBookings = () => {
     const q = search.toLowerCase();
 
-    return bookings?.filter((b) => {
+    return bookings.filter((b) => {
       const matchesSearch =
-        b._id.toLowerCase().includes(q) ||
-        b.status.toLowerCase().includes(q) ||
-        b.propertyId?.name.toLowerCase().includes(q) ||
-        b.customerDetails?.firstName.toLowerCase().includes(q);
+        b._id?.toLowerCase().includes(q) ||
+        b.status?.toLowerCase().includes(q) ||
+        b.propertyId?.name?.toLowerCase().includes(q) ||
+        b.customerDetails?.firstName?.toLowerCase().includes(q);
 
-      const isCompleted = b.status?.toLowerCase() === "completed";
-      const isActive = !isCompleted && b.status?.toLowerCase() !== "cancelled";
+      const isCompleted = isCompletedByCheckout(b.checkOut);
+      const isActive = isActiveByCheckout(b.checkOut);
 
       if (activeTab === "Active") return matchesSearch && isActive;
       if (activeTab === "Completed") return matchesSearch && isCompleted;
@@ -399,22 +450,23 @@ export default function BookingScreen() {
   const filteredResults = getFilteredBookings();
 
   return (
-    <div className="min-h-screen bg-gradient-surface">
-      <header
-        className={cn(
-          " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
-        )}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <UserSidebar />
-            My Booking
-          </div>
+    <>
+      <div className="min-h-screen bg-gradient-surface">
+        <header
+          className={cn(
+            " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+          )}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <UserSidebar />
+              My Booking
+            </div>
 
-          <div className="flex items-center gap-2">
-            <NotificationSheet />
+            <div className="flex items-center gap-2">
+              <NotificationSheet />
 
-            {/* <Button
+              {/* <Button
                  onClick={() => router.push("/bag")}
                  variant="outline"
                  size="icon"
@@ -431,80 +483,94 @@ export default function BookingScreen() {
                  )}
                  <span className="sr-only">Shopping cart</span>
                </Button> */}
+            </div>
+          </div>
+        </header>
+
+        {/* Search Bar */}
+        <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-gray-300 shadow-sm">
+          <div className="max-w-6xl mx-auto p-4">
+            <div className="relative">
+              <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search by booking ID, hotel, status..."
+                className="pl-10 bg-background/50 backdrop-blur-sm border-gray-300 h-10"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+              />
+            </div>
           </div>
         </div>
-      </header>
 
-      {/* Search Bar */}
-      <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-gray-300 shadow-sm">
-        <div className="max-w-6xl mx-auto p-4">
-          <div className="relative">
-            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by booking ID, hotel, status..."
-              className="pl-10 bg-background/50 backdrop-blur-sm border-gray-300 h-10"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
+        {/* Content */}
+        <div className="w-full mx-auto p-2 ">
+          <Tabs
+            aria-label="Booking Options"
+            color="primary"
+            variant="bordered"
+            selectedKey={activeTab}
+            onSelectionChange={(key) => setActiveTab(key)}
+            className="w-full md:w-1/2"
+            classNames={{
+              tabList: "w-full z-50  bg-gray-200  rounded-md p-0 mb-2",
+              cursor: "w-full bg-black border border-black",
+              tab: " px-0 md:h-10 ",
+              tabContent:
+                "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
+            }}
+          >
+            <Tab key="Active" title="Active">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
+                {loading ? (
+                  <div className="col-span-full py-20 text-center text-muted-foreground">
+                    Loading your stays...
+                  </div>
+                ) : filteredResults?.length > 0 ? (
+                  filteredResults?.map((booking) => (
+                    <BookingCard
+                      key={booking._id}
+                      booking={booking}
+                      onWriteReview={handleWriteReview}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full">
+                    <EmptyState type="active" />
+                  </div>
+                )}
+              </div>
+            </Tab>
+
+            <Tab key="Completed" title="Completed">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {loading ? (
+                  <div className="col-span-full py-20 text-center text-muted-foreground">
+                    Loading your history...
+                  </div>
+                ) : filteredResults?.length > 0 ? (
+                  filteredResults?.map((booking) => (
+                    <BookingCard
+                      key={booking._id}
+                      booking={booking}
+                      onWriteReview={handleWriteReview}
+                    />
+                  ))
+                ) : (
+                  <div className="col-span-full">
+                    <EmptyState type="completed" />
+                  </div>
+                )}
+              </div>
+            </Tab>
+          </Tabs>
         </div>
       </div>
-
-      {/* Content */}
-      <div className="w-full mx-auto p-2 ">
-        <Tabs
-          aria-label="Booking Options"
-          color="primary"
-          variant="bordered"
-          selectedKey={activeTab}
-          onSelectionChange={(key) => setActiveTab(key)}
-          className="w-full md:w-1/2"
-          classNames={{
-            tabList: "w-full z-50  bg-gray-200  rounded-md p-0 mb-2",
-            cursor: "w-full bg-black border border-black",
-            tab: " px-0 md:h-10 ",
-            tabContent:
-              "group-data-[selected=true]:text-white w-full flex justify-center items-center md:font-semibold",
-          }}
-        >
-          <Tab key="Active" title="Active">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
-              {loading ? (
-                <div className="col-span-full py-20 text-center text-muted-foreground">
-                  Loading your stays...
-                </div>
-              ) : filteredResults.length > 0 ? (
-                filteredResults.map((booking) => (
-                  <BookingCard key={booking._id} booking={booking} />
-                ))
-              ) : (
-                <div className="col-span-full">
-                  <EmptyState type="active" />
-                </div>
-              )}
-            </div>
-          </Tab>
-
-          <Tab key="Completed" title="Completed">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-              {loading ? (
-                <div className="col-span-full py-20 text-center text-muted-foreground">
-                  Loading your history...
-                </div>
-              ) : filteredResults.length > 0 ? (
-                filteredResults.map((booking) => (
-                  <BookingCard key={booking._id} booking={booking} />
-                ))
-              ) : (
-                <div className="col-span-full">
-                  <EmptyState type="completed" />
-                </div>
-              )}
-            </div>
-          </Tab>
-        </Tabs>
-      </div>
-    </div>
+      <ReviewDrawer
+        isOpen={reviewDrawerOpen}
+        onClose={() => setReviewDrawerOpen(false)}
+        booking={selectedBookingForReview}
+      />
+    </>
   );
 }
