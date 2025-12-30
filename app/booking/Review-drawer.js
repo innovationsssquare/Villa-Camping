@@ -149,7 +149,6 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
           description: `✅ Review submitted successfully`,
           color: "success",
         });
-        resetForm();
 
         // small delay so user sees success
         setTimeout(() => {
@@ -166,6 +165,7 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
       );
     } finally {
       setLoading(false);
+      resetForm();
     }
   };
 
@@ -191,7 +191,7 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
       }}
     >
       <DrawerContent className="max-h-[90vh]">
-        <ScrollArea className="px-3 h-[90vh] pb-20">
+        <ScrollArea className="px-3 h-[90vh] pb-24">
           <div className="mx-auto w-full max-w-lg flex flex-col h-full">
             <DrawerHeader className="shrink-0">
               <DrawerTitle className="text-lg font-bold text-center">
@@ -322,20 +322,21 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
             <DrawerFooter className="shrink-0 border-t mt-2">
               {/* Status Messages */}
               {errorMessage && (
-                <div className="px-4 py-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                <div className="px-2 py-2 text-xs text-red-600 bg-red-50 border border-red-200 rounded-md">
                   {errorMessage}
                 </div>
               )}
 
               {successMessage && (
-                <div className="px-4 py-2 text-sm text-green-600 bg-green-50 border border-green-200 rounded-md">
+                <div className="px-2 py-2 text-xs text-green-600 bg-green-50 border border-green-200 rounded-md">
                   {successMessage}
                 </div>
               )}
 
               <DrawerClose asChild>
-                <div className="flex gap-2 items-center">
+                <div className="flex gap-2 items-center ">
                   <Button
+                    onPress={() => onClose()}
                     variant="outline"
                     className="w-full bg-orange-100 ring-1 ring-orange-500 text-orange-500 h-12"
                   >

@@ -56,12 +56,16 @@ export function AvailableThisWeekend() {
       <h2 className="md:text-4xl text-center font-medium text-foreground">
         Available This Weekend
       </h2>
+
       {/* Category Carousel */}
       <div className="relative max-w-4xl md:hidden mx-auto">
         {loading ? (
           <div className="flex gap-2 overflow-hidden px-2 justify-center">
             {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-8 w-24 rounded-full flex-shrink-0" />
+              <Skeleton
+                key={i}
+                className="h-8 w-24 rounded-full flex-shrink-0"
+              />
             ))}
           </div>
         ) : (
@@ -79,10 +83,10 @@ export function AvailableThisWeekend() {
                     size="sm"
                     onPress={() => handleSelectCategory(category)}
                     className={cn(
-                      "whitespace-nowrap rounded-full px-6 py-2 text-xs md:text-sm font-medium transition-all duration-200",
+                      "whitespace-nowrap rounded-full px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200",
                       selectedCategoryId === category._id
                         ? "bg-black text-white hover:bg-black/90"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200",
+                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     )}
                   >
                     {category.name}

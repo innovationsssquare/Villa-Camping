@@ -11,7 +11,7 @@ import { FilterDrawer } from "@/components/Googlemapsearch/FilterDrawer";
 import { PropertiesListDrawer } from "@/components/Googlemapsearch/PropertiesListDrawer";
 import { SearchDrawer } from "@/components/Googlemapsearch/SearchDrawer";
 
-const VillaCamp = () => {
+const Mappropertyview = () => {
   const [isSearchDrawerOpen, setIsSearchDrawerOpen] = useState(false);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
   const [isPropertiesDrawerOpen, setIsPropertiesDrawerOpen] = useState(false);
@@ -175,122 +175,5 @@ const VillaCamp = () => {
   );
 };
 
-export default VillaCamp;
+export default Mappropertyview;
 
-// "use client"
-
-// import { MapContainer } from "@/components/Searchonmap/map-container"
-// import { PropertyDrawer } from "@/components/Searchonmap/property-drawer"
-// import { SearchHeader } from "@/components/Searchonmap/search-header"
-// import { useState, useEffect } from "react"
-
-// // Mock property data for Lonavala/Pune area
-// const mockProperties = [
-//   {
-//     id: "1",
-//     title: "Luxury Villa with Pool",
-//     price: 8500,
-//     location: "Lonavala",
-//     coordinates: { lat: 18.7537, lng: 73.4135 },
-//     beds: 4,
-//     baths: 3,
-//     sqft: 2500,
-//     image: "/luxury-villa-with-pool-lonavala.jpg",
-//     amenities: ["Pool", "WiFi", "AC", "Kitchen"],
-//     rating: 4.8,
-//     reviews: 24,
-//     isHot: true,
-//   },
-//   {
-//     id: "2",
-//     title: "Cozy Mountain Retreat",
-//     price: 6200,
-//     location: "Khandala",
-//     coordinates: { lat: 18.7645, lng: 73.3897 },
-//     beds: 3,
-//     baths: 2,
-//     sqft: 1800,
-//     image: "/mountain-retreat-villa-khandala.jpg",
-//     amenities: ["Mountain View", "Fireplace", "Garden"],
-//     rating: 4.6,
-//     reviews: 18,
-//     isHot: false,
-//   },
-//   {
-//     id: "3",
-//     title: "Modern Villa with Valley View",
-//     price: 12000,
-//     location: "Pune Hills",
-//     coordinates: { lat: 18.5204, lng: 73.8567 },
-//     beds: 5,
-//     baths: 4,
-//     sqft: 3200,
-//     image: "/modern-villa-valley-view-pune.jpg",
-//     amenities: ["Valley View", "Jacuzzi", "BBQ Area", "Parking"],
-//     rating: 4.9,
-//     reviews: 31,
-//     isHot: true,
-//   },
-//   {
-//     id: "4",
-//     title: "Heritage Bungalow",
-//     price: 4800,
-//     location: "Mahabaleshwar",
-//     coordinates: { lat: 17.9334, lng: 73.6582 },
-//     beds: 2,
-//     baths: 2,
-//     sqft: 1500,
-//     image: "/heritage-bungalow-mahabaleshwar.jpg",
-//     amenities: ["Heritage", "Garden", "Peaceful"],
-//     rating: 4.4,
-//     reviews: 12,
-//     isHot: false,
-//   },
-// ]
-
-// export default function VillaCampMap() {
-//   const [selectedProperty, setSelectedProperty] = useState(null)
-//   const [isDrawerOpen, setIsDrawerOpen] = useState(true)
-//   const [searchQuery, setSearchQuery] = useState("")
-//   const [filteredProperties, setFilteredProperties] = useState(mockProperties)
-
-//   useEffect(() => {
-//     if (searchQuery) {
-//       const filtered = mockProperties.filter(
-//         (property) =>
-//           property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-//           property.title.toLowerCase().includes(searchQuery.toLowerCase()),
-//       )
-//       setFilteredProperties(filtered)
-//     } else {
-//       setFilteredProperties(mockProperties)
-//     }
-//   }, [searchQuery])
-
-//   return (
-//     <div className="h-screen flex flex-col bg-background">
-//       <SearchHeader
-//         searchQuery={searchQuery}
-//         onSearchChange={setSearchQuery}
-//         propertyCount={filteredProperties.length}
-//       />
-
-//       <div className="flex-1 relative">
-//         <MapContainer
-//           properties={filteredProperties}
-//           selectedProperty={selectedProperty}
-//           onPropertySelect={setSelectedProperty}
-//         />
-
-//         <PropertyDrawer
-//           properties={filteredProperties}
-//           isOpen={isDrawerOpen}
-//           onToggle={() => setIsDrawerOpen(!isDrawerOpen)}
-//           selectedProperty={selectedProperty}
-//           onPropertySelect={setSelectedProperty}
-//         />
-//       </div>
-
-//     </div>
-//   )
-// }

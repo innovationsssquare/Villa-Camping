@@ -451,10 +451,10 @@ export default function BookingScreen() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-surface">
+      <div className="min-h-screen ">
         <header
           className={cn(
-            " w-full sticky top-0  bg-white  rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+            " w-full sticky top-0 bg-white   rounded-b-2xl px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
           )}
         >
           <div className="flex items-center justify-between">
@@ -466,29 +466,12 @@ export default function BookingScreen() {
             <div className="flex items-center gap-2">
               <NotificationSheet />
 
-              {/* <Button
-                 onClick={() => router.push("/bag")}
-                 variant="outline"
-                 size="icon"
-                 className="rounded-md  border-gray-300 relative bg-[#FFFFFF4D]"
-               >
-                 <IoBag className="h-5 w-5" />
-                 {cartItemCount > 0 && (
-                   <Badge
-                     className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
-                     variant="default"
-                   >
-                     {cartItemCount}
-                   </Badge>
-                 )}
-                 <span className="sr-only">Shopping cart</span>
-               </Button> */}
             </div>
           </div>
         </header>
 
         {/* Search Bar */}
-        <div className="sticky top-0 z-20 bg-card/80 backdrop-blur-md border-b border-gray-300 shadow-sm">
+        <div className="sticky top-12 z-20 bg-card/80 bg-white backdrop-blur-md border-b border-gray-300 shadow-sm">
           <div className="max-w-6xl mx-auto p-4">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />

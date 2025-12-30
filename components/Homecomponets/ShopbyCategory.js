@@ -80,10 +80,7 @@ const ShopbyCategory = () => {
                   key={index}
                   className="pl-4 md:basis-1/8 lg:basis-1/8 basis-4/ flex justify-center"
                 >
-                  <div
-                   
-                    className="group flex flex-col items-center px-2 justify-center"
-                  >
+                  <div className="group flex flex-col items-center px-1 justify-center">
                     <Button
                       onPress={() =>
                         handleselectcategory(category?._id, category?.name)
