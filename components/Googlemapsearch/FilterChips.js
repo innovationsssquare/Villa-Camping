@@ -1,71 +1,90 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
-import { Flame, Plus, Zap, Video, Bed, HouseWifi, Tent, House } from "lucide-react";
+import {
+  Bed,
+  HouseWifi,
+  Tent,
+  House,
+} from "lucide-react";
+import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
+import { setSelectedCategory } from "@/Redux/Slices/bookingSlice";
+
+/**
+ * Optional icon mapper by category name
+ * (You can improve this later)
+ */
+const CATEGORY_ICON_MAP = {
+  villa: <HouseWifi className="h-3 w-3 text-red-500" />,
+  camping: <Tent className="h-3 w-3 text-green-500" />,
+  cottage: <House className="h-3 w-3 text-yellow-500" />,
+  hotel: <Bed className="h-3 w-3 text-purple-500" />,
+};
 
 export const FilterChips = ({ onFilterSelect }) => {
-  const [activeFilters, setActiveFilters] = React.useState(new Set());
+  const dispatch = useDispatch();
 
-  const filters = [
-    {
-      id: "hot",
-      label: "Villa",
-      icon: <HouseWifi className="h-3 w-3 text-red-500" />,
-      active: activeFilters.has("hot"),
-    },
-    {
-      id: "price-20k",
-      label: "Camping",
-      icon: <Tent className="h-3 w-3 text-green-500" />,
-      active: activeFilters.has("price-20k"),
-    },
-    {
-      id: "price-2k",
-      label: "Cottage",
-      icon: <House className="h-3 w-3 text-yellow-500" />,
-      active: activeFilters.has("price-2k"),
-    },
-    {
-      id: "trending",
-      label: "Hotels",
-      icon: <Bed className="h-3 w-3 text-purple-500" />,
-      active: activeFilters.has("trending"),
-    },
-  ];
+  const { categories = [], loading } = useSelector(
+    (state) => state.category
+  );
 
-  const handleFilterClick = (filterId) => {
-    const newActiveFilters = new Set(activeFilters);
-    if (newActiveFilters.has(filterId)) {
-      newActiveFilters.delete(filterId);
-    } else {
-      newActiveFilters.add(filterId);
+  const { selectedCategoryId } = useSelector(
+    (state) => state.booking
+  );
+
+  useEffect(() => {
+    if (!categories.length) {
+      dispatch(fetchAllCategories());
     }
-    setActiveFilters(newActiveFilters);
-    onFilterSelect?.(filterId);
+  }, [dispatch]);
+
+  const handleCategoryClick = (category) => {
+    const categoryId =
+      selectedCategoryId === category._id ? null : category._id;
+
+    // 1️⃣ Save selected category globally
+    dispatch(setSelectedCategory(categoryId));
+
+    // 2️⃣ Notify parent (Mappropertyview)
+    onFilterSelect?.(categoryId);
   };
 
+  if (loading || !categories.length) return null;
+
   return (
-    <div className="px-2 py-3 ">
+    <div className="px-2 py-3">
       <Carousel className="w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
-          {filters.map((filter) => (
-            <CarouselItem key={filter.id} className="pl-2 md:pl-4 basis-auto">
-              <Badge
-                variant="outline"
-                className={`villa-filter-chip cursor-pointer bg-white border border-gray-300 rounded-full px-2 p-2 shadow-2xl whitespace-nowrap flex items-center gap-2 ${
-                  filter.active ? "bg-black text-white" : ""
-                }`}
-                onClick={() => handleFilterClick(filter.id)}
+          {categories.map((category) => {
+            const isActive = selectedCategoryId === category._id;
+
+            return (
+              <CarouselItem
+                key={category._id}
+                className="pl-2 md:pl-4 basis-auto"
               >
-                {filter.icon}
-                {filter.label}
-              </Badge>
-            </CarouselItem>
-          ))}
+                <Badge
+                  variant="outline"
+                  onClick={() => handleCategoryClick(category)}
+                  className={`villa-filter-chip cursor-pointer rounded-full px-3 py-2 shadow-md flex items-center gap-2 whitespace-nowrap
+                    ${
+                      isActive
+                        ? "bg-black text-white border-black"
+                        : "bg-white border-gray-300"
+                    }
+                  `}
+                >
+                  {CATEGORY_ICON_MAP[category.slug] || null}
+                  {category.name}
+                </Badge>
+              </CarouselItem>
+            );
+          })}
         </CarouselContent>
       </Carousel>
     </div>

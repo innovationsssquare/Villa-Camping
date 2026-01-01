@@ -3,8 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Bed, Bath, Square, MapPin, Camera } from "lucide-react";
 import Image from "next/image";
+import { getDisplayPrice } from "./getDisplayPrice";
 
 export const PropertyHoverCard = ({ property, position }) => {
+  console.log("card",property)
+
+  const displayPrice = getDisplayPrice(property.price);
+
   return (
     <div
       className="fixed z-50 pointer-events-none animate-fade-in"
@@ -15,11 +20,14 @@ export const PropertyHoverCard = ({ property, position }) => {
           position.x > window.innerWidth / 2 ? "translateX(-100%)" : "none",
       }}
     >
-      <Card className="w-72 bg-white shadow-xl rounded-xl overflow-hidden border border-gray-200">
+      <Card className="w-72 bg-white p-0 shadow-xl rounded-xl overflow-hidden border border-gray-200">
         <CardContent className="p-0">
-          <div className="relative">
+          <div className="relative p-0">
             <Image
               src={property.image}
+              height={50}
+              width={50}
+              unoptimized
               alt={property.title}
               className="w-full h-32 object-cover"
             />
@@ -47,10 +55,7 @@ export const PropertyHoverCard = ({ property, position }) => {
           <div className="p-4">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xl font-bold text-villa-primary">
-                ₹
-                {property.price >= 1000000
-                  ? `${(property.price / 1000000).toFixed(1)}M`
-                  : `${(property.price / 1000).toFixed(0)}K`}
+                 ₹{ getDisplayPrice(property.price)}
               </span>
               <Badge variant="outline" className="text-xs capitalize">
                 {property.type}
@@ -63,7 +68,7 @@ export const PropertyHoverCard = ({ property, position }) => {
 
             <div className="flex items-center text-xs text-villa-text-muted mb-3">
               <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-              <span className="line-clamp-1">{property.address}</span>
+              <span className="line-clamp-1">{property.location}</span>
             </div>
 
             <div className="flex items-center justify-between text-xs">

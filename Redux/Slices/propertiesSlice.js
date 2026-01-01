@@ -4,6 +4,8 @@ import {
   GetAllproperties,
   Getpropertybyid,
   Getropertiesbyweekend,
+  Getropertiesbymap,
+  Getpropertylocation,
 } from "@/lib/API/properties/Property";
 
 /* ----------------------------------
@@ -48,9 +50,7 @@ export const fetchproperty = createAsyncThunk(
       const response = await Getpropertybyid({ categoryId, propertyId });
 
       if (response?.success === false) {
-        return rejectWithValue(
-          response.message || "Failed to fetch property"
-        );
+        return rejectWithValue(response.message || "Failed to fetch property");
       }
 
       return response;
@@ -69,6 +69,46 @@ export const fetchPropertiesByWeekend = createAsyncThunk(
         categoryId,
         subtype,
       });
+
+      if (response?.success === false) {
+        return rejectWithValue(
+          response.message || "Failed to fetch weekend properties"
+        );
+      }
+
+      return response;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+export const fetchPropertiesBymap = createAsyncThunk(
+  "properties/fetchBymap",
+  async ({ locationId, categoryId }, { rejectWithValue }) => {
+    try {
+      const response = await Getropertiesbymap({
+        locationId,
+        categoryId,
+      });
+
+      if (response?.success === false) {
+        return rejectWithValue(
+          response.message || "Failed to fetch weekend properties"
+        );
+      }
+
+      return response;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const fetchPropertylocation = createAsyncThunk(
+  "properties/fetchBylocation",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await Getpropertylocation();
 
       if (response?.success === false) {
         return rejectWithValue(
@@ -104,8 +144,18 @@ const propertiesSlice = createSlice({
     weekendData: [],
     weekendError: null,
 
+    mapLoading: false,
+    mapData: [],
+    mapError: null,
+
+    locationLoading: false,
+    locationData: [],
+    locationError: null,
+
     // Shared error
     error: null,
+
+    selectedLocationId: null,
   },
   reducers: {
     clearProperties: (state) => {
@@ -164,13 +214,38 @@ const propertiesSlice = createSlice({
         state.weekendLoading = false;
         state.weekendError =
           action.payload || "Failed to load weekend properties";
+      })
+
+      .addCase(fetchPropertiesBymap.pending, (state) => {
+        state.mapLoading = true;
+        state.mapError = null;
+      })
+      .addCase(fetchPropertiesBymap.fulfilled, (state, action) => {
+        state.mapLoading = false;
+        state.mapData = action.payload?.data || [];
+      })
+      .addCase(fetchPropertiesBymap.rejected, (state, action) => {
+        state.mapLoading = false;
+        state.mapError = action.payload || "Failed to load weekend properties";
+      })
+
+      .addCase(fetchPropertylocation.pending, (state) => {
+        state.locationLoading = true;
+        state.locationError = null;
+      })
+      .addCase(fetchPropertylocation.fulfilled, (state, action) => {
+        state.locationLoading = false;
+        state.locationData = action.payload?.data || [];
+      })
+      .addCase(fetchPropertylocation.rejected, (state, action) => {
+        state.locationLoading = false;
+        state.locationError =
+          action.payload || "Failed to load weekend properties";
       });
   },
 });
 
-export const {
-  clearProperties,
-  clearWeekendProperties,
-} = propertiesSlice.actions;
+export const { clearProperties, clearWeekendProperties } =
+  propertiesSlice.actions;
 
 export default propertiesSlice.reducer;

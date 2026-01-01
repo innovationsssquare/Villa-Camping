@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { IoLogoWhatsapp } from "react-icons/io";
+import { getDisplayPrice } from "./getDisplayPrice";
 
 export const PropertyCard = ({ property, onClose, compact = false }) => {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -31,12 +32,13 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
 
   if (compact) {
     return (
-      <Card className="w-full bg-white shadow-none border border-gray-200 rounded-xl overflow-hidden  transition-all duration-300 animate-fade-in">
+      <Card className="w-full p-0 bg-white shadow-none border border-gray-200 rounded-xl overflow-hidden  transition-all duration-300 animate-fade-in">
         <CardContent className="p-0">
           <div className="flex">
             <Image
               height={40}
               width={40}
+              unoptimized
               src={property.image}
               alt={property.title}
               className="w-24 h-24 object-cover"
@@ -89,7 +91,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
   }
 
   return (
-    <Card className="w-full relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[60vh] mx-auto">
+    <Card className="w-full p-0 relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[50vh] mx-auto">
       <CardContent className="p-0">
         {onClose && (
           <button
@@ -120,8 +122,11 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
           ) : (
             <Image
               src={property.image}
+              height={20}
+              width={20}
+              unoptimized
               alt={property.title}
-              className="w-full h-56 object-cover"
+              className="w-full h-44 object-cover"
             />
           )}
 
@@ -145,11 +150,11 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
           </div>
         </div>
 
-        <ScrollArea className="h-80">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-2xl font-bold text-villa-primary">
-                ₹{property.price.toLocaleString()}
+        <ScrollArea className="h-60">
+          <div className="p-3">
+            <div className="flex items-center justify-between ">
+              <span className="text-lg font-bold text-villa-primary">
+                 ₹{getDisplayPrice(property.price)}
               </span>
               <div className="flex items-center gap-2">
                 <Button
@@ -171,7 +176,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
             </div>
 
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xl font-bold text-villa-text">
+              <h3 className="text-md font-bold text-villa-text">
                 {property.title}
               </h3>
               <Badge
@@ -184,19 +189,15 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
 
             <div className="flex items-center text-villa-text-muted mb-4">
               <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span className="text-sm">{property.address}</span>
+              <span className="text-sm">{property.location}</span>
             </div>
 
-          
             <div className="flex gap-2">
-              <Button className="flex-1 bg-black hover:bg-villa-primary/90">
+              <Button  className="flex-1 bg-black hover:bg-villa-primary/90">
                 <Eye className="w-4 h-4 mr-2" />
                 View Details
               </Button>
-              <Button variant="outline">
-                <IoLogoWhatsapp className="text-green-600"/>
-                Chat
-              </Button>
+             
             </div>
           </div>
         </ScrollArea>

@@ -8,80 +8,15 @@ import villa1 from "@/public/Productasset/Villaimg.png";
 import villa2 from "@/public/Productasset/Campimg.png";
 import house1 from "@/public/Productasset/Villaimg.png";
 import villa3 from "@/public/Productasset/Campimg.png";
+import { getDisplayPrice } from "./getDisplayPrice";
 
-const SAMPLE_PROPERTIES = [
-  {
-    id: "1",
-    price: 785000,
-    title: "Luxury Villa in Lonavala",
-    address: "Lonavala Hills, Maharashtra 410403",
-    beds: 4,
-    baths: 4,
-    sqft: 2819,
-    coordinates: [73.4062, 18.7537],
-    image: villa1,
-    type: "villa",
-    features: ["Pool", "Garden", "Mountain View"],
-    isHot: true,
-    has3DTour: true,
-    images: [villa1, villa2, villa3],
-    description:
-      "Beautiful luxury villa with stunning mountain views and modern amenities. Perfect for weekend getaways with family and friends.",
-  },
-  {
-    id: "2",
-    price: 332000,
-    title: "Cozy Retreat Villa",
-    address: "Pune Hills, Maharashtra 411057",
-    beds: 3,
-    baths: 2,
-    sqft: 1850,
-    coordinates: [73.8567, 18.5204],
-    image: villa2,
-    type: "villa",
-    features: ["Garden", "Parking"],
-    isHot: true,
-    images: [villa2, house1],
-    description:
-      "Perfect cozy retreat for weekend getaways. Features beautiful garden and secure parking.",
-  },
-  {
-    id: "3",
-    price: 170000,
-    title: "Modern Villa Camp",
-    address: "Khandala Valley, Maharashtra 410301",
-    beds: 2,
-    baths: 2,
-    sqft: 1200,
-    coordinates: [73.3931, 18.7322],
-    image: house1,
-    type: "house",
-    isDeal: true,
-    has3DTour: true,
-    images: [house1, villa3],
-    description:
-      "Modern villa camp with contemporary design and valley views. Great deal for young couples.",
-  },
-  {
-    id: "4",
-    price: 339000,
-    title: "Premium Mountain Villa",
-    address: "Karjat Hills, Maharashtra 410201",
-    beds: 5,
-    baths: 3,
-    sqft: 3200,
-    coordinates: [73.3228, 18.9109],
-    image: villa3,
-    type: "villa",
-    features: ["Pool", "Garden", "Valley View"],
-    isDeal: true,
-    images: [villa3, villa1, villa2],
-    description:
-      "Premium mountain villa with breathtaking valley views. Spacious 5-bedroom property with private pool and landscaped garden.",
-  },
-];
-
-const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
+const MapView = ({
+  googleMapsApiKey,
+  onPropertySelect,
+  selectedLocation,
+  properties,
+  loading,
+}) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const [selectedProperty, setSelectedProperty] = useState(null);
@@ -89,6 +24,7 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
   const [hoverPosition, setHoverPosition] = useState(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
+  console.log(properties);
   useEffect(() => {
     if (!googleMapsApiKey) return;
 
@@ -115,11 +51,11 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
 
     // Initialize Google Map
     map.current = new window.google.maps.Map(mapContainer.current, {
-      center: { lat: 18.7537, lng: 73.4062 }, 
+      center: { lat: 18.7537, lng: 73.4062 },
       zoom: 11,
-       mapTypeControl: false,
-          streetViewControl: false,
-          fullscreenControl: false,
+      mapTypeControl: false,
+      streetViewControl: false,
+      fullscreenControl: false,
       // styles: [
       //   {
       //     featureType: "all",
@@ -145,7 +81,8 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
 
     // Add property markers with custom React pin markers
     let moveHandler = null;
-    SAMPLE_PROPERTIES.forEach((property) => {
+    properties?.forEach((property) => {
+      console.log(property, "prop");
       const overlay = new window.google.maps.OverlayView();
       overlay._div = null;
 
@@ -160,14 +97,14 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
         const root = createRoot(div);
         root.render(
           <PropertyMarker
-            price={property.price}
-            isHot={property.isHot}
+            price={getDisplayPrice(property.price)}
+            onClick={() => setSelectedProperty(property)}
             isDeal={property.isDeal}
             has3DTour={property.has3DTour}
-            onClick={() => {
-              setSelectedProperty(property);
-              onPropertySelect?.(property);
-            }}
+            // onClick={() => {
+            //   setSelectedProperty(property);
+            //   onPropertySelect?.(property);
+            // }}
           />
         );
 
@@ -217,27 +154,7 @@ const MapView = ({ googleMapsApiKey, onPropertySelect, selectedLocation }) => {
 
   if (!googleMapsApiKey) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100">
-        <div className="text-center p-8">
-          <h3 className="text-lg font-semibold mb-2">
-            Google Maps API Key Required
-          </h3>
-          <p className="text-gray-600 mb-4">
-            Please enter your Google Maps API key to view the map
-          </p>
-          <input
-            type="text"
-            placeholder="Enter Google Maps API key..."
-            className="w-full max-w-md px-4 py-2 border rounded-lg"
-            onKeyPress={(e) => {
-              if (e.key === "Enter") {
-                // In a real app, this would be handled by parent component
-                // console.log('API key entered:', (e.target as HTMLInputElement).value);
-              }
-            }}
-          />
-        </div>
-      </div>
+      <div className="flex items-center justify-center h-full bg-gray-100"></div>
     );
   }
 

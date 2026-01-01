@@ -5,68 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-const SUGGESTED_LOCATIONS = [
-  {
-    id: "1",
-    name: "Lonavala",
-    type: "city",
-    coordinates: [73.4062, 18.7537],
-    propertyCount: 45,
-    description: "Hill station villas with scenic views",
-    features: ["45 villas", "Hill Station", "Scenic Views"],
-  },
-  {
-    id: "2",
-    name: "Khandala",
-    type: "area",
-    coordinates: [73.3931, 18.7322],
-    propertyCount: 23,
-    description: "Peaceful retreat homes in nature",
-    features: ["23 villas", "Nature Views", "Weekend Getaway"],
-  },
-  {
-    id: "3",
-    name: "Pune Hills",
-    type: "area",
-    coordinates: [73.8567, 18.5204],
-    propertyCount: 67,
-    description: "Modern villas near Pune city",
-    features: ["67 villas", "City Access", "Modern Amenities"],
-  },
-  {
-    id: "4",
-    name: "Karjat",
-    type: "city",
-    coordinates: [73.3228, 18.9109],
-    propertyCount: 34,
-    description: "Valley view properties with adventure",
-    features: ["34 villas", "Valley Views", "Adventure Sports"],
-  },
-  {
-    id: "5",
-    name: "Tiger Point",
-    type: "landmark",
-    coordinates: [73.417, 18.748],
-    propertyCount: 12,
-    description: "Exclusive properties near famous viewpoint",
-    features: ["12 villas", "Viewpoint", "Exclusive"],
-  },
-  {
-    id: "6",
-    name: "Rajmachi Point",
-    type: "landmark",
-    coordinates: [73.45, 18.72],
-    propertyCount: 8,
-    description: "Heritage properties with trekking access",
-    features: ["8 villas", "Heritage", "Trekking"],
-  },
-];
-
 export const SearchBar = ({
-  onSearch,
-  onFilterClick,
-  placeholder = "City, Neighborhood, Address...",
+  locations = [],
   onLocationSelect,
+  onFilterClick,
+  placeholder,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -83,22 +26,19 @@ export const SearchBar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleInputChange = (value) => {
-    setSearchQuery(value);
-    if (value.trim()) {
-      const filtered = SUGGESTED_LOCATIONS.filter(
-        (location) =>
-          location.name.toLowerCase().includes(value.toLowerCase()) ||
-          (location.description &&
-            location.description.toLowerCase().includes(value.toLowerCase()))
-      );
-      setFilteredLocations(filtered);
-      setShowSuggestions(true);
-    } else {
-      setFilteredLocations(SUGGESTED_LOCATIONS.slice(0, 4)); // Show top 4 suggestions
-      setShowSuggestions(true);
-    }
-  };
+ const handleInputChange = (value) => {
+  setSearchQuery(value);
+  if (!value.trim()) {
+    setFilteredLocations(locations.slice(0, 5));
+  } else {
+    setFilteredLocations(
+      locations.filter((loc) =>
+        loc.name.toLowerCase().includes(value.toLowerCase())
+      )
+    );
+  }
+  setShowSuggestions(true);
+};
 
   const handleCurrentLocationClick = () => {
     if (navigator.geolocation) {
@@ -127,11 +67,11 @@ export const SearchBar = ({
     }
   };
 
-  const handleLocationClick = (location) => {
-    setSearchQuery(location.name);
-    setShowSuggestions(false);
-    onLocationSelect?.(location);
-  };
+const handleLocationClick = (location) => {
+  setSearchQuery(location.name);
+  setShowSuggestions(false);
+  onLocationSelect(location?._id);
+};
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -154,7 +94,7 @@ export const SearchBar = ({
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => {
               if (!searchQuery.trim()) {
-                setFilteredLocations(SUGGESTED_LOCATIONS.slice(0, 4));
+                setFilteredLocations(locations?.slice(0, 4));
               }
               setShowSuggestions(true);
             }}
@@ -193,7 +133,7 @@ export const SearchBar = ({
             {/* Search Results Section */}
             {(searchQuery.trim()
               ? filteredLocations
-              : SUGGESTED_LOCATIONS.slice(0, 4)
+              : locations.slice(0, 4)
             ).length > 0 && (
               <>
                 <div className="text-sm text-gray-500 font-medium mb-3 px-1">
@@ -202,10 +142,10 @@ export const SearchBar = ({
 
                 {(searchQuery.trim()
                   ? filteredLocations
-                  : SUGGESTED_LOCATIONS.slice(0, 4)
+                  : locations.slice(0, 4)
                 ).map((location) => (
                   <button
-                    key={location.id}
+                    key={location._id}
                     onClick={() => handleLocationClick(location)}
                     className="w-full p-3 hover:bg-gray-50 rounded-lg transition-colors text-left mb-2 group"
                   >

@@ -42,7 +42,7 @@ export const PropertyMarker = ({
           {has3DTour && <span className="text-purple-400">📦</span>}
           
           <span className="font-bold text-xs whitespace-nowrap">
-            ₹{formatPrice(price)}
+           ₹{formatPrice(price)}
           </span>
         </div>
         
