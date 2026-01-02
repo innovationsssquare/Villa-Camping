@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchPropertiesBymap,
   fetchPropertylocation,
+  setselectedLocationId,
 } from "@/Redux/Slices/propertiesSlice";
 import { setSelectedCategory } from "@/Redux/Slices/bookingSlice";
 
@@ -26,7 +27,7 @@ const Mappropertyview = () => {
   const [showApiKeyInput, setShowApiKeyInput] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [selectedcategory, setSelectedcategory] = useState(null);
-  const [selectedLocationId, setSelectedLocationId] = useState(null);
+  // const [selectedLocationId, setSelectedLocationId] = useState(null);
   const [locationProperties, setLocationProperties] = useState([]);
   const {
     mapLoading,
@@ -35,6 +36,7 @@ const Mappropertyview = () => {
     locationLoading,
     locationData,
     locationError,
+    selectedLocationId
   } = useSelector((state) => state.properties);
   const { selectedCategoryId } = useSelector((state) => state.booking);
 
@@ -54,7 +56,7 @@ const Mappropertyview = () => {
 
     const locationId = defaultLocation._id;
 
-    setSelectedLocationId(locationId);
+    dispatch(setselectedLocationId(locationId));
 
     dispatch(
       fetchPropertiesBymap({
@@ -65,7 +67,7 @@ const Mappropertyview = () => {
   }, [locationData]);
 
   const handleLocationSelect = (location) => {
-    setSelectedLocationId(location);
+    dispatch(setselectedLocationId(location));
     dispatch(setSelectedCategory(null));
 
     dispatch(

@@ -20,7 +20,7 @@ export const PropertyHoverCard = ({ property, position }) => {
           position.x > window.innerWidth / 2 ? "translateX(-100%)" : "none",
       }}
     >
-      <Card className="w-72 bg-white p-0 shadow-xl rounded-xl overflow-hidden border border-gray-200">
+      <Card className="w-60 bg-white p-0 shadow-xl rounded-xl overflow-hidden border border-gray-200">
         <CardContent className="p-0">
           <div className="relative p-0">
             <Image

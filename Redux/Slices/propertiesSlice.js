@@ -169,6 +169,9 @@ const propertiesSlice = createSlice({
       state.weekendError = null;
       state.weekendLoading = false;
     },
+    setselectedLocationId: (state, action) => {
+      state.selectedLocationId = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -245,7 +248,7 @@ const propertiesSlice = createSlice({
   },
 });
 
-export const { clearProperties, clearWeekendProperties } =
+export const { clearProperties, clearWeekendProperties,setselectedLocationId } =
   propertiesSlice.actions;
 
 export default propertiesSlice.reducer;

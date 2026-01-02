@@ -1,5 +1,6 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
+import Image from 'next/image';
 
 
 
@@ -8,7 +9,8 @@ export const PropertyMarker = ({
   isHot,
   isDeal,
   has3DTour,
-  onClick
+  onClick,
+  image
 }) => {
   const formatPrice = (price) => {
     if (price >= 1000000) {
@@ -32,16 +34,21 @@ export const PropertyMarker = ({
         {/* Main price marker */}
         <div className={`
           ${getMarkerClass()} 
-          bg-white text-black border border-gray-300  rounded-full px-4 py-2 shadow-lg hover:shadow-xl 
+          bg-white text-black border border-gray-300  rounded-full h-8 w-8 p-2  shadow-lg hover:shadow-xl 
           transition-all duration-300 hover:scale-105 cursor-pointer
-          flex items-center gap-2 min-w-[80px] justify-center
+          flex items-center gap-2 min-w-[80px] justify-end
          
         `}>
-          {/* Status icon inside marker */}
-          {isHot && <span className="text-orange-400">🔥</span>}
-          {has3DTour && <span className="text-purple-400">📦</span>}
+          <Image
+            src={image}
+            height={20}
+            width={20}
+            className='absolute left-0 rounded-l-full h-8 w-8'
+            unoptimized
+          />
+
           
-          <span className="font-bold text-xs whitespace-nowrap">
+          <span className="font-bold text-xs text-left whitespace-nowrap">
            ₹{formatPrice(price)}
           </span>
         </div>

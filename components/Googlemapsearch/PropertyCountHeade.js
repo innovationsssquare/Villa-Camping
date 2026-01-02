@@ -19,7 +19,7 @@ export const PropertyCountHeader = ({
     }
     return num.toString();
   };
-
+console.log(count,location)
   return (
     <div className="fixed bottom-0  left-0 right-0 z-20">
       <Button
@@ -37,7 +37,7 @@ export const PropertyCountHeader = ({
             </div>
             <div className="text-left">
               <div className="text-lg font-bold text-villa-text">
-                {formatCount(count)} Properties
+                {count > 1 ? `${count} Properties`:`${count} Property`} 
               </div>
               {location && (
                 <div className="text-sm text-villa-text-muted">

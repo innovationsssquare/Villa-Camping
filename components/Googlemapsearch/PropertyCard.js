@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button } from "@heroui/react";
 import {
   Carousel,
   CarouselContent,
@@ -25,11 +25,12 @@ import {
 import Image from "next/image";
 import { IoLogoWhatsapp } from "react-icons/io";
 import { getDisplayPrice } from "./getDisplayPrice";
+import { useRouter } from "next/navigation";
 
 export const PropertyCard = ({ property, onClose, compact = false }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const images = property.images || [property.image];
-
+  const router = useRouter();
   if (compact) {
     return (
       <Card className="w-full p-0 bg-white shadow-none border border-gray-200 rounded-xl overflow-hidden  transition-all duration-300 animate-fade-in">
@@ -91,7 +92,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
   }
 
   return (
-    <Card className="w-full p-0 relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[50vh] mx-auto">
+    <Card className="w-60 p-0  relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[45vh] md:h-[50vh] mx-auto">
       <CardContent className="p-0">
         {onClose && (
           <button
@@ -111,7 +112,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                     <Image
                       src={image}
                       alt={`${property.title} - Image ${index + 1}`}
-                      className="w-full h-56 object-cover"
+                      className="w-full h-44 object-cover"
                     />
                   </CarouselItem>
                 ))}
@@ -126,7 +127,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
               width={20}
               unoptimized
               alt={property.title}
-              className="w-full h-44 object-cover"
+              className="w-full h-32 object-cover"
             />
           )}
 
@@ -154,13 +155,13 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
           <div className="p-3">
             <div className="flex items-center justify-between ">
               <span className="text-lg font-bold text-villa-primary">
-                 ₹{getDisplayPrice(property.price)}
+                ₹{getDisplayPrice(property.price)}
               </span>
               <div className="flex items-center gap-2">
                 <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsFavorite(!isFavorite)}
+                  isIconOnly
+                  variant="flat"
+                  onPress={() => setIsFavorite(!isFavorite)}
                   className="p-2"
                 >
                   <Heart
@@ -169,7 +170,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                     }`}
                   />
                 </Button>
-                <Button variant="ghost" size="sm" className="p-2">
+                <Button isIconOnly variant="flat" className="p-2">
                   <Share className="w-4 h-4" />
                 </Button>
               </div>
@@ -193,11 +194,41 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
             </div>
 
             <div className="flex gap-2">
-              <Button  className="flex-1 bg-black hover:bg-villa-primary/90">
-                <Eye className="w-4 h-4 mr-2" />
-                View Details
-              </Button>
-             
+              {property?.type === "villa" ? (
+                <Button
+                  onPress={() => router.push(`/view-Villa/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "camping" ? (
+                <Button
+                  onPress={() => router.push(`/view-Camping/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "cottage" ? (
+                <Button
+                  onPress={() => router.push(`/view-Cottage/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "hotel" ? (
+                <Button
+                  onPress={() => router.push(`/view-Hotel/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </ScrollArea>

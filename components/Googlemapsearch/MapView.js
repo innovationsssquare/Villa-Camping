@@ -24,7 +24,6 @@ const MapView = ({
   const [hoverPosition, setHoverPosition] = useState(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
 
-  console.log(properties);
   useEffect(() => {
     if (!googleMapsApiKey) return;
 
@@ -99,7 +98,7 @@ const MapView = ({
           <PropertyMarker
             price={getDisplayPrice(property.price)}
             onClick={() => setSelectedProperty(property)}
-            isDeal={property.isDeal}
+            image={property.image}
             has3DTour={property.has3DTour}
             // onClick={() => {
             //   setSelectedProperty(property);
@@ -130,8 +129,8 @@ const MapView = ({
         const projection = this.getProjection();
         if (!projection) return;
         const latLng = new window.google.maps.LatLng(
-          property.coordinates[1],
-          property.coordinates[0]
+          property.coordinates[0],
+          property.coordinates[1]
         );
         const pos = projection.fromLatLngToDivPixel(latLng);
         const div = this._div;
@@ -160,6 +159,17 @@ const MapView = ({
 
   return (
     <div className="relative w-full  h-full">
+      {loading && (
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-white/10 backdrop-blur-xs">
+          <div className="flex flex-col items-center gap-3">
+            <div className="h-10 w-10 rounded-full border-4 border-gray-300 border-t-black animate-spin" />
+            <p className="text-sm font-medium text-gray-700">
+              Loading properties...
+            </p>
+          </div>
+        </div>
+      )}
+
       <div ref={mapContainer} className="w-full h-full " />
 
       {/* Hover Card */}

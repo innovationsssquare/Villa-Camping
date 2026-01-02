@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useSelector } from "react-redux";
 
 export const SearchBar = ({
   locations = [],
@@ -16,6 +17,22 @@ export const SearchBar = ({
   const [filteredLocations, setFilteredLocations] = useState([]);
   const searchRef = useRef(null);
 
+  const { selectedLocationId } = useSelector((state) => state.properties);
+
+useEffect(() => {
+  if (!selectedLocationId || !locations.length) return;
+
+  const selectedLocation = locations.find(
+    (loc) => loc._id === selectedLocationId
+  );
+
+  if (selectedLocation) {
+    setSearchQuery(selectedLocation.name);
+  }
+}, [selectedLocationId, locations]);
+
+
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
@@ -26,19 +43,19 @@ export const SearchBar = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
- const handleInputChange = (value) => {
-  setSearchQuery(value);
-  if (!value.trim()) {
-    setFilteredLocations(locations.slice(0, 5));
-  } else {
-    setFilteredLocations(
-      locations.filter((loc) =>
-        loc.name.toLowerCase().includes(value.toLowerCase())
-      )
-    );
-  }
-  setShowSuggestions(true);
-};
+  const handleInputChange = (value) => {
+    setSearchQuery(value);
+    if (!value.trim()) {
+      setFilteredLocations(locations.slice(0, 5));
+    } else {
+      setFilteredLocations(
+        locations.filter((loc) =>
+          loc.name.toLowerCase().includes(value.toLowerCase())
+        )
+      );
+    }
+    setShowSuggestions(true);
+  };
 
   const handleCurrentLocationClick = () => {
     if (navigator.geolocation) {
@@ -67,11 +84,11 @@ export const SearchBar = ({
     }
   };
 
-const handleLocationClick = (location) => {
-  setSearchQuery(location.name);
-  setShowSuggestions(false);
-  onLocationSelect(location?._id);
-};
+  const handleLocationClick = (location) => {
+    setSearchQuery(location.name);
+    setShowSuggestions(false);
+    onLocationSelect(location?._id);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -102,7 +119,7 @@ const handleLocationClick = (location) => {
           />
         </div>
 
-        <Button
+        {/* <Button
           type="button"
           variant="outline"
           size="sm"
@@ -110,31 +127,16 @@ const handleLocationClick = (location) => {
           className="h-10 w-10 p-0 bg-white border-gray-200 hover:bg-gray-50"
         >
           <Filter className="h-4 w-4 text-gray-600 " />
-        </Button>
+        </Button> */}
       </form>
 
       {/* Enhanced Suggestions Dropdown */}
       {showSuggestions && (
         <Card className="absolute top-full md:left-4 md:right-4 md:mt-2 mt-1 z-50 md:max-h-80 h-[60vh] overflow-y-auto scrollbar-hide bg-white border border-gray-200 shadow-lg rounded-xl">
           <div className="md:p-4 p-2">
-            {/* Current Location Option */}
-            {/* <button
-              onClick={handleCurrentLocationClick}
-              className="w-full flex items-center p-3 hover:bg-gray-50 rounded-lg transition-colors text-left mb-4 border-b border-gray-100"
-            >
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                <Navigation className="w-5 h-5 text-blue-600" />
-              </div>
-              <span className="font-medium text-gray-900">
-                Use my current location
-              </span>
-            </button> */}
-
-            {/* Search Results Section */}
-            {(searchQuery.trim()
-              ? filteredLocations
-              : locations.slice(0, 4)
-            ).length > 0 && (
+              {/* Search Results Section */}
+            {(searchQuery.trim() ? filteredLocations : locations.slice(0, 4))
+              .length > 0 && (
               <>
                 <div className="text-sm text-gray-500 font-medium mb-3 px-1">
                   {searchQuery.trim() ? "Search Results" : "Popular Locations"}
@@ -179,9 +181,7 @@ const handleLocationClick = (location) => {
                         </div>
                       </div>
                       <div className="text-right ml-4 mt-1">
-                        <div className="text-lg font-bold text-gray-900">
-                          {location.propertyCount || 0}
-                        </div>
+                       
                       </div>
                     </div>
                   </button>
