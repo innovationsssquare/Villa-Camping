@@ -31,18 +31,21 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const images = property.images || [property.image];
   const router = useRouter();
+
+
+  
   if (compact) {
     return (
       <Card className="w-full p-0 bg-white shadow-none border border-gray-200 rounded-xl overflow-hidden  transition-all duration-300 animate-fade-in">
         <CardContent className="p-0">
-          <div className="flex justify-between ">
+          <div className="flex justify-between w-full">
             <Image
               height={40}
               width={40}
               unoptimized
               src={property.image}
               alt={property.title}
-              className="w-32 h-auto object-cover"
+              className="w-24 h-auto object-cover"
             />
             <div className="p-4 flex-1">
               <div className="flex justify-between items-start mb-2">
@@ -76,7 +79,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View Details
+                  View 
                 </Button>
               ) : property?.type === "camping" ? (
                 <Button
@@ -84,7 +87,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View Details
+                  View 
                 </Button>
               ) : property?.type === "cottage" ? (
                 <Button
@@ -92,7 +95,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View Details
+                  View 
                 </Button>
               ) : property?.type === "hotel" ? (
                 <Button
@@ -100,7 +103,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View Details
+                  View 
                 </Button>
               ) : (
                 ""

@@ -19,20 +19,37 @@ export const PropertiesListDrawer = ({
   const [selectedType, setSelectedType] = useState('all');
   const [selectedProperty, setSelectedProperty] = useState(null);
 
-  const sortedProperties = [...properties].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'beds':
-        return b.beds - a.beds;
-      case 'size':
-        return b.sqft - a.sqft;
-      default:
-        return 0;
-    }
-  });
+const isWeekendIST = () => {
+  const now = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+  const day = now.getDay(); // 0 = Sun, 6 = Sat
+  return day === 0 || day === 6;
+};
+
+const getEffectivePrice = (property) => {
+  return isWeekendIST()
+    ? property.price.weekendPrice
+    : property.price.weekdayPrice;
+};
+
+
+const sortedProperties = [...properties].sort((a, b) => {
+  const priceA = getEffectivePrice(a);
+  const priceB = getEffectivePrice(b);
+
+  switch (sortBy) {
+    case 'price-low':
+      return priceA - priceB;
+
+    case 'price-high':
+      return priceB - priceA;
+
+    default:
+      return 0;
+  }
+});
+
 
   const filteredProperties = selectedType === 'all' 
     ? sortedProperties 
