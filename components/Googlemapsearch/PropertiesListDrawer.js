@@ -41,16 +41,14 @@ export const PropertiesListDrawer = ({
   const propertyTypes = [
     { value: 'all', label: 'All Types' },
     { value: 'villa', label: 'Villa' },
-    { value: 'house', label: 'House' },
-    { value: 'apartment', label: 'Apartment' }
+    { value: 'camping', label: 'Camping' },
+    { value: 'cottage', label: 'Cottage' },
+    { value: 'hotel', label: 'Hotel' }
   ];
 
   const sortOptions = [
     { value: 'price-low', label: 'Price: Low to High' },
-    { value: 'price-high', label: 'Price: High to Low' },
-    { value: 'beds', label: 'Most Bedrooms' },
-    { value: 'size', label: 'Largest First' },
-    { value: 'newest', label: 'Newest First' }
+    { value: 'price-high', label: 'Price: High to Low' }
   ];
 
   return (
@@ -69,7 +67,7 @@ export const PropertiesListDrawer = ({
                       {properties.length > 0 ? `${totalCount.toLocaleString()} Properties` : 'No Search Property'}
                     </SheetTitle>
                     {location && properties.length > 0 && (
-                      <p className="text-sm text-villa-text-muted mt-1">in {location}</p>
+                      <p className="text-sm text-red-300 mt-1">in {location}</p>
                     )}
                   </div>
                 </div>

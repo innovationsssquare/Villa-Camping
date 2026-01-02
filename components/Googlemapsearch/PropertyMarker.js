@@ -34,7 +34,7 @@ export const PropertyMarker = ({
         {/* Main price marker */}
         <div className={`
           ${getMarkerClass()} 
-          bg-white text-black border border-gray-300  rounded-full h-8 w-8 p-2  shadow-lg hover:shadow-xl 
+          bg-orange-200 text-orange-500 border border-orange-500  rounded-full h-10 w-8 p-2  shadow-lg hover:shadow-xl 
           transition-all duration-300 hover:scale-105 cursor-pointer
           flex items-center gap-2 min-w-[80px] justify-end
          
@@ -43,7 +43,7 @@ export const PropertyMarker = ({
             src={image}
             height={20}
             width={20}
-            className='absolute left-0 rounded-l-full h-8 w-8'
+            className='absolute left-0 rounded-l-full h-10 w-10'
             unoptimized
           />
 
@@ -54,7 +54,7 @@ export const PropertyMarker = ({
         </div>
         
         {/* Speech bubble tail */}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-white"></div>
+        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-orange-300"></div>
       </div>
     </div>
   );

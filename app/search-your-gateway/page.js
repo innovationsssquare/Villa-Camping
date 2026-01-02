@@ -17,6 +17,7 @@ import {
   setselectedLocationId,
 } from "@/Redux/Slices/propertiesSlice";
 import { setSelectedCategory } from "@/Redux/Slices/bookingSlice";
+import ButtonLoader from "@/components/Loadercomponents/button-loader";
 
 const Mappropertyview = () => {
   const [isSearchDrawerOpen, setIsSearchDrawerOpen] = useState(false);
@@ -36,7 +37,7 @@ const Mappropertyview = () => {
     locationLoading,
     locationData,
     locationError,
-    selectedLocationId
+    selectedLocationId,
   } = useSelector((state) => state.properties);
   const { selectedCategoryId } = useSelector((state) => state.booking);
 
@@ -112,6 +113,16 @@ const Mappropertyview = () => {
     setGoogleMapsApiKey(apiKey);
     setShowApiKeyInput(false);
   };
+
+  // if (mapLoading || locationLoading) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen bg-black/10">
+  //       <div className="bg-black rounded-full flex justify-center items-center">
+  //         <ButtonLoader />
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="fixed inset-0 h-screen z-50 overflow-hidden ">

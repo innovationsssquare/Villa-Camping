@@ -57,7 +57,7 @@ export const FilterChips = ({ onFilterSelect }) => {
   if (loading || !categories.length) return null;
 
   return (
-    <div className="px-2 py-3">
+    <div className="px-2 py-3 md:py-8">
       <Carousel className="w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
           {categories.map((category) => {
@@ -74,7 +74,7 @@ export const FilterChips = ({ onFilterSelect }) => {
                   className={`villa-filter-chip cursor-pointer rounded-full px-3 py-2 shadow-md flex items-center gap-2 whitespace-nowrap
                     ${
                       isActive
-                        ? "bg-black text-white border-black"
+                        ? "bg-orange-50 text-black border-orange-500 border-2"
                         : "bg-white border-gray-300"
                     }
                   `}

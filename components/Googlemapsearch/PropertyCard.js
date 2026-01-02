@@ -35,22 +35,19 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
     return (
       <Card className="w-full p-0 bg-white shadow-none border border-gray-200 rounded-xl overflow-hidden  transition-all duration-300 animate-fade-in">
         <CardContent className="p-0">
-          <div className="flex">
+          <div className="flex justify-between ">
             <Image
               height={40}
               width={40}
               unoptimized
               src={property.image}
               alt={property.title}
-              className="w-24 h-24 object-cover"
+              className="w-32 h-auto object-cover"
             />
             <div className="p-4 flex-1">
               <div className="flex justify-between items-start mb-2">
                 <span className="text-lg font-bold text-villa-primary">
-                  ₹
-                  {property.price >= 1000000
-                    ? `${(property.price / 1000000).toFixed(1)}M`
-                    : `${(property.price / 1000).toFixed(0)}K`}
+                  ₹{getDisplayPrice(property.price)}
                 </span>
                 <div className="flex gap-1">
                   {property.isHot && (
@@ -68,22 +65,46 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
               </h4>
               <div className="flex items-center text-xs text-villa-text-muted mb-2">
                 <MapPin className="w-3 h-3 mr-1" />
-                <span className="line-clamp-1">{property.address}</span>
+                <span className="line-clamp-1">{property.location}</span>
               </div>
-              <div className="flex items-center gap-3 text-xs">
-                <div className="flex items-center">
-                  <Bed className="w-3 h-3 mr-1" />
-                  <span>{property.beds}</span>
-                </div>
-                <div className="flex items-center">
-                  <Bath className="w-3 h-3 mr-1" />
-                  <span>{property.baths}</span>
-                </div>
-                <div className="flex items-center">
-                  <Square className="w-3 h-3 mr-1" />
-                  <span>{property.sqft}</span>
-                </div>
-              </div>
+              
+            </div>
+            <div className="justify-center items-center flex px-4">
+               {property?.type === "villa" ? (
+                <Button
+                  onPress={() => router.push(`/view-Villa/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "camping" ? (
+                <Button
+                  onPress={() => router.push(`/view-Camping/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "cottage" ? (
+                <Button
+                  onPress={() => router.push(`/view-Cottage/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : property?.type === "hotel" ? (
+                <Button
+                  onPress={() => router.push(`/view-Hotel/${property?.id}`)}
+                  className="flex-1 bg-black text-white hover:bg-villa-primary/90"
+                >
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Details
+                </Button>
+              ) : (
+                ""
+              )}
             </div>
           </div>
         </CardContent>
@@ -92,14 +113,14 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
   }
 
   return (
-    <Card className="w-60 p-0  relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-[45vh] md:h-[50vh] mx-auto">
+    <Card className="w-60 p-0  relative max-w-sm bg-white shadow-xl rounded-2xl overflow-hidden animate-scale-in h-auto md:h-[50vh] mx-auto">
       <CardContent className="p-0">
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200"
+            className="absolute cursor-pointer top-2 right-2 z-10 bg-white/90 hover:bg-white rounded-full p-2 shadow-md transition-all duration-200"
           >
-            <X className="w-4 h-4" />
+            <X className="w-2 h-2" />
           </button>
         )}
 
@@ -151,7 +172,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
           </div>
         </div>
 
-        <ScrollArea className="h-60">
+        <ScrollArea className="h-auto">
           <div className="p-3">
             <div className="flex items-center justify-between ">
               <span className="text-lg font-bold text-villa-primary">
@@ -160,7 +181,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
               <div className="flex items-center gap-2">
                 <Button
                   isIconOnly
-                  variant="flat"
+                  variant="light"
                   onPress={() => setIsFavorite(!isFavorite)}
                   className="p-2"
                 >
@@ -170,7 +191,7 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
                     }`}
                   />
                 </Button>
-                <Button isIconOnly variant="flat" className="p-2">
+                <Button isIconOnly variant="light" className="p-2">
                   <Share className="w-4 h-4" />
                 </Button>
               </div>
@@ -182,14 +203,14 @@ export const PropertyCard = ({ property, onClose, compact = false }) => {
               </h3>
               <Badge
                 variant="outline"
-                className="text-villa-text-muted capitalize"
+                className="text-orange-500 capitalize bg-orange-200 border border-orange-500"
               >
                 {property.type}
               </Badge>
             </div>
 
             <div className="flex items-center text-villa-text-muted mb-4">
-              <MapPin className="w-4 h-4 mr-1 flex-shrink-0" />
+              <MapPin className="w-4 h-4 mr-1 text-red-400 flex-shrink-0" />
               <span className="text-sm">{property.location}</span>
             </div>
 
