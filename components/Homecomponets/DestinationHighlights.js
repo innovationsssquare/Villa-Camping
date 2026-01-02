@@ -1,10 +1,24 @@
-"use client"
+"use client";
 
-import Image from "next/image"
-import { MapPin, Star, ChevronLeft, ChevronRight, HomeIcon } from "lucide-react"
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
-import { Card, CardContent } from "@/components/ui/card"
-import { useEffect, useState } from "react"
+import Image from "next/image";
+import {
+  MapPin,
+  Star,
+  ChevronLeft,
+  ChevronRight,
+  HomeIcon,
+} from "lucide-react";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchdestination } from "@/Redux/Slices/propertiesSlice";
 
 const destinations = [
   {
@@ -39,9 +53,11 @@ const destinations = [
     properties: 8,
     rating: 4.6,
   },
-]
+];
 
 function DestinationCard({ destination }) {
+;
+
   return (
     <div className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-none hover:shadow-2xl transition-all duration-300  h-full border border-gray-200">
       <div className="relative md:h-56 h-36  overflow-hidden">
@@ -50,21 +66,25 @@ function DestinationCard({ destination }) {
           alt={destination.name}
           fill="true"
           className="object-fill w-full h-36 md:h-48  group-hover:scale-110 transition-transform duration-300"
-         
         />
         <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
           <Star className="w-4 h-4 text-amber-400 fill-current" />
-          <span className="text-sm font-medium text-white">{destination.rating}</span>
+          <span className="text-sm font-medium text-white">
+            {destination.rating}
+          </span>
         </div>
       </div>
 
       <div className="p-2 sm:p-6">
-      <div className="flex  items-center text-sm text-gray-400 mb-2">
-
-       <MapPin className="w-4 h-4 mr-1 text-red-400 " />
-        <h3 className="text-lg sm:text-xl  text-black ">{destination.name}</h3>
-      </div>
-        <p className="text-sm sm:text-base text-gray-600 mb-4 truncate">{destination.description}</p>
+        <div className="flex  items-center text-sm text-gray-400 mb-2">
+          <MapPin className="w-4 h-4 mr-1 text-red-400 " />
+          <h3 className="text-lg sm:text-xl  text-black ">
+            {destination.name}
+          </h3>
+        </div>
+        <p className="text-sm sm:text-base text-gray-600 mb-4 truncate">
+          {destination.description}
+        </p>
         <div className="flex items-center justify-between">
           <div className="flex items-center text-sm text-gray-400">
             <HomeIcon className="w-4 h-4 mr-1 text-black" />
@@ -77,54 +97,89 @@ function DestinationCard({ destination }) {
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
             </svg>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function DestinationHighlights() {
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(false);
+const dispatch=useDispatch()
+  const { destinationLoading, destinationData, destinationError } = useSelector(
+    (state) => state.properties
+  )
+
+useEffect(() => {
+ dispatch(fetchdestination())
+}, [dispatch])
+
 
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+      setIsMobile(window.innerWidth < 768);
+    };
 
-    checkIsMobile()
-    window.addEventListener("resize", checkIsMobile)
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
 
-    return () => window.removeEventListener("resize", checkIsMobile)
-  }, [])
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+ if (destinationLoading) {
+    return (
+      <section className="py-12 text-center text-gray-400">
+        Loading destinations...
+      </section>
+    );
+  }
+
+  if (destinationError) {
+    return (
+      <section className="py-12 text-center text-red-500">
+        Failed to load destinations
+      </section>
+    );
+  }
+
+  if (!destinationData || destinationData.length === 0) {
+    return null; // or EmptyState
+  }
+
 
   return (
     <section className=" sm:py-6 md:py-12 ">
       <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
         <div className="text-center  sm:mb-12 md:mb-4">
-        <h2 className="md:text-4xl text-center font-medium text-foreground">
+          <h2 className="md:text-4xl text-center font-medium text-foreground">
             Choose Your Destination
           </h2>
           <p className="text-xs sm:text-base md:text-sm text-gray-400 max-w-3xl mx-auto text-pretty">
-           {` Discover the perfect getaway in Lonavala's most beautiful hill stations`}
+            {` Discover the perfect getaway in Lonavala's most beautiful hill stations`}
           </p>
         </div>
 
         <div className=" relative">
-         
-
           <Carousel
             opts={{
               align: "start",
-            
             }}
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {destinations.map((destination, index) => (
-                <CarouselItem key={destination.name} className="pl-2 md:pl-4 basis-3/5 md:basis-4/16">
+              {destinationData.map((destination, index) => (
+                <CarouselItem
+                  key={destination.name}
+                  className="pl-2 md:pl-4 basis-3/5 md:basis-4/16"
+                >
                   <Card className="border-0 border-gray-200 shadow-none bg-transparent">
                     <CardContent className="p-0">
                       <DestinationCard destination={destination} />
@@ -133,12 +188,9 @@ export function DestinationHighlights() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-          
           </Carousel>
         </div>
-
-      
       </div>
     </section>
-  )
+  );
 }

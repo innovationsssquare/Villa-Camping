@@ -1,7 +1,8 @@
+"use client";
+
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Filter, MapPin, Navigation } from "lucide-react";
+import { Search, MapPin, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useSelector } from "react-redux";
@@ -9,42 +10,56 @@ import { useSelector } from "react-redux";
 export const SearchBar = ({
   locations = [],
   onLocationSelect,
-  onFilterClick,
-  placeholder,
+  placeholder = "Search location...",
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredLocations, setFilteredLocations] = useState([]);
+  const [isTyping, setIsTyping] = useState(false);
+
   const searchRef = useRef(null);
 
-  const { selectedLocationId } = useSelector((state) => state.properties);
-
-useEffect(() => {
-  if (!selectedLocationId || !locations.length) return;
-
-  const selectedLocation = locations.find(
-    (loc) => loc._id === selectedLocationId
+  const { selectedLocationId } = useSelector(
+    (state) => state.properties
   );
 
-  if (selectedLocation) {
-    setSearchQuery(selectedLocation.name);
-  }
-}, [selectedLocationId, locations]);
-
-
-
+  /* ---------------------------------------------
+     Set initial input value from Redux locationId
+  --------------------------------------------- */
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
+    if (!selectedLocationId || !locations.length || isTyping) return;
+
+    const selectedLocation = locations.find(
+      (loc) => loc._id === selectedLocationId
+    );
+
+    if (selectedLocation) {
+      setSearchQuery(selectedLocation.name);
+    }
+  }, [selectedLocationId, locations, isTyping]);
+
+  /* ---------------------------------------------
+     Close dropdown on outside click
+  --------------------------------------------- */
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
         setShowSuggestions(false);
       }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () =>
+      document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  /* ---------------------------------------------
+     Handle input typing
+  --------------------------------------------- */
   const handleInputChange = (value) => {
+    setIsTyping(true);
     setSearchQuery(value);
+
     if (!value.trim()) {
       setFilteredLocations(locations.slice(0, 5));
     } else {
@@ -54,138 +69,146 @@ useEffect(() => {
         )
       );
     }
+
     setShowSuggestions(true);
   };
 
-  const handleCurrentLocationClick = () => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          // Find closest location or create a current location entry
-          const currentLocation = {
-            id: "current",
-            name: "Current Location",
-            type: "area",
-            coordinates: [longitude, latitude],
-            propertyCount: 0,
-            description: "Properties near your current location",
-          };
-          setSearchQuery("Current Location");
-          setShowSuggestions(false);
-          onLocationSelect?.(currentLocation);
-        },
-        (error) => {
-          console.error("Error getting location:", error);
-          // Fallback to a default location
-          handleLocationClick(SUGGESTED_LOCATIONS[0]);
-        }
-      );
-    }
-  };
-
+  /* ---------------------------------------------
+     Handle location select
+  --------------------------------------------- */
   const handleLocationClick = (location) => {
+    if (location._id === selectedLocationId) {
+      setShowSuggestions(false);
+      return;
+    }
+
     setSearchQuery(location.name);
     setShowSuggestions(false);
-    onLocationSelect(location?._id);
+    setIsTyping(false);
+
+    onLocationSelect?.(location._id);
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    onSearch?.(searchQuery);
-    setShowSuggestions(false);
-  };
+  const visibleLocations = searchQuery.trim()
+    ? filteredLocations
+    : locations.slice(0, 4);
 
   return (
-    <div ref={searchRef} className="relative">
-      <form
-        onSubmit={handleSearch}
-        className="villa-search-bar  flex items-center gap-3 md:p-4 p-2 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg"
-      >
+    <div ref={searchRef} className="relative w-full">
+      {/* Search Input */}
+      <div className="flex items-center gap-3 md:p-4 p-2 rounded-xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-lg">
         <div className="flex-1 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
           <Input
             type="text"
-            placeholder={placeholder}
             value={searchQuery}
+            placeholder={placeholder}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => {
               if (!searchQuery.trim()) {
-                setFilteredLocations(locations?.slice(0, 4));
+                setFilteredLocations(locations.slice(0, 4));
+                setShowSuggestions(true);
               }
-              setShowSuggestions(true);
             }}
-            className="pl-10 border-0 bg-transparent focus:ring-0 text-sm placeholder:text-gray-500"
+            onKeyDown={(e) => {
+              if (e.key === "Escape") setShowSuggestions(false);
+            }}
+            className="pl-10 border-0 bg-transparent focus:ring-0 text-sm"
           />
         </div>
+      </div>
 
-        {/* <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={onFilterClick}
-          className="h-10 w-10 p-0 bg-white border-gray-200 hover:bg-gray-50"
-        >
-          <Filter className="h-4 w-4 text-gray-600 " />
-        </Button> */}
-      </form>
-
-      {/* Enhanced Suggestions Dropdown */}
+      {/* Suggestions Dropdown */}
       {showSuggestions && (
-        <Card className="absolute top-full md:left-4 md:right-4 md:mt-2 mt-1 z-50 md:max-h-80 h-[60vh] overflow-y-auto scrollbar-hide bg-white border border-gray-200 shadow-lg rounded-xl">
-          <div className="md:p-4 p-2">
-              {/* Search Results Section */}
-            {(searchQuery.trim() ? filteredLocations : locations.slice(0, 4))
-              .length > 0 && (
+        <Card className="absolute top-full left-0 right-0 mt-2 z-50 max-h-80 overflow-y-auto bg-white border border-gray-200 shadow-lg rounded-xl">
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100">
+      <span className="text-xs font-medium text-gray-500">
+        {searchQuery.trim() ? "Search Results" : "Popular Locations"}
+      </span>
+
+      <button
+        onClick={() => setShowSuggestions(false)}
+        className="p-1 rounded-full hover:bg-gray-100 transition"
+        aria-label="Close suggestions"
+      >
+        <X className="w-4 h-4 text-gray-500" />
+      </button>
+    </div>
+          <div className="p-2">
+            {visibleLocations.length === 0 ? (
+              <div className="text-center text-sm text-gray-500 py-6">
+                No locations found
+              </div>
+            ) : (
               <>
-                <div className="text-sm text-gray-500 font-medium mb-3 px-1">
-                  {searchQuery.trim() ? "Search Results" : "Popular Locations"}
+                <div className="text-xs text-gray-500 font-medium mb-2 px-2">
+                  {searchQuery.trim()
+                    ? "Search Results"
+                    : "Popular Locations"}
                 </div>
 
-                {(searchQuery.trim()
-                  ? filteredLocations
-                  : locations.slice(0, 4)
-                ).map((location) => (
-                  <button
-                    key={location._id}
-                    onClick={() => handleLocationClick(location)}
-                    className="w-full p-3 hover:bg-gray-50 rounded-lg transition-colors text-left mb-2 group"
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start flex-1">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center mr-3 mt-1 group-hover:bg-villa-primary/10 transition-colors">
-                          <MapPin className="w-5 h-5 text-gray-600 group-hover:text-villa-primary" />
+                {visibleLocations.map((location) => {
+                  const isActive =
+                    location._id === selectedLocationId;
+
+                  return (
+                    <button
+                      key={location._id}
+                      onClick={() => handleLocationClick(location)}
+                      className={`w-full p-3 rounded-lg text-left mb-1 transition-colors
+                        ${
+                          isActive
+                            ? "bg-orange-100 border border-orange-500 text-orange-500"
+                            : "hover:bg-gray-50"
+                        }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`w-9 h-9 rounded-full flex items-center justify-center mt-1
+                            ${
+                              isActive
+                                ? "bg-white/20"
+                                : "bg-gray-100"
+                            }`}
+                        >
+                          <MapPin className="w-4 h-4" />
                         </div>
+
                         <div className="flex-1">
-                          <div className="font-semibold text-gray-900 mb-1">
+                          <div className="font-semibold text-sm">
                             {location.name}
                           </div>
+
                           {location.description && (
-                            <div className="text-sm text-gray-600 mb-2">
+                            <div
+                              className={`text-xs mt-1 ${
+                                isActive
+                                  ? "text-orange-500/80"
+                                  : "text-gray-600"
+                              }`}
+                            >
                               {location.description}
                             </div>
                           )}
-                          {location.features && (
-                            <div className="flex flex-wrap gap-1">
-                              {location.features.map((feature, index) => (
+
+                          {location.features?.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {location.features.map((f, i) => (
                                 <Badge
-                                  key={index}
+                                  key={i}
                                   variant="secondary"
-                                  className="text-xs px-2 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200"
+                                  className="text-[10px]"
                                 >
-                                  {feature}
+                                  {f}
                                 </Badge>
                               ))}
                             </div>
                           )}
                         </div>
                       </div>
-                      <div className="text-right ml-4 mt-1">
-                       
-                      </div>
-                    </div>
-                  </button>
-                ))}
+                    </button>
+                  );
+                })}
               </>
             )}
           </div>

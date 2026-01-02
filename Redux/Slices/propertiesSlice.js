@@ -6,6 +6,7 @@ import {
   Getropertiesbyweekend,
   Getropertiesbymap,
   Getpropertylocation,
+  GetDestinations,
 } from "@/lib/API/properties/Property";
 
 /* ----------------------------------
@@ -123,6 +124,25 @@ export const fetchPropertylocation = createAsyncThunk(
   }
 );
 
+export const fetchdestination = createAsyncThunk(
+  "properties/fetchdestination",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await GetDestinations();
+
+      if (response?.success === false) {
+        return rejectWithValue(
+          response.message || "Failed to fetch weekend properties"
+        );
+      }
+
+      return response;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 /* ----------------------------------
    Slice
 ----------------------------------- */
@@ -151,6 +171,10 @@ const propertiesSlice = createSlice({
     locationLoading: false,
     locationData: [],
     locationError: null,
+
+    destinationLoading: false,
+    destinationData: [],
+    destinationError: null,
 
     // Shared error
     error: null,
@@ -240,15 +264,34 @@ const propertiesSlice = createSlice({
         state.locationLoading = false;
         state.locationData = action.payload?.data || [];
       })
+
       .addCase(fetchPropertylocation.rejected, (state, action) => {
         state.locationLoading = false;
         state.locationError =
+          action.payload || "Failed to load weekend properties";
+      })
+
+
+      .addCase(fetchdestination.pending, (state) => {
+        state.destinationLoading = true;
+        state.destinationError = null;
+      })
+      .addCase(fetchdestination.fulfilled, (state, action) => {
+        state.destinationLoading = false;
+        state.destinationData = action.payload?.data || [];
+      })
+      .addCase(fetchdestination.rejected, (state, action) => {
+        state.destinationLoading = false;
+        state.destinationError =
           action.payload || "Failed to load weekend properties";
       });
   },
 });
 
-export const { clearProperties, clearWeekendProperties,setselectedLocationId } =
-  propertiesSlice.actions;
+export const {
+  clearProperties,
+  clearWeekendProperties,
+  setselectedLocationId,
+} = propertiesSlice.actions;
 
 export default propertiesSlice.reducer;
