@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Button } from "@heroui/react";
 import {
   Carousel,
@@ -30,6 +30,9 @@ export function AvailableThisWeekend() {
     (state) => state.properties
   );
 
+  // ✅ NEW: track if weekend API was ever triggered
+  const hasRequestedWeekend = useRef(false);
+
   // Fetch categories once
   useEffect(() => {
     dispatch(fetchAllCategories());
@@ -38,6 +41,8 @@ export function AvailableThisWeekend() {
   // Fetch weekend properties when category changes
   useEffect(() => {
     if (!selectedCategoryId || selectedCategoryId === "all") return;
+
+    hasRequestedWeekend.current = true; // ✅ mark API triggered
 
     dispatch(
       fetchPropertiesByWeekend({
@@ -52,12 +57,12 @@ export function AvailableThisWeekend() {
   };
 
   return (
-    <div className="w-full  mx-auto md:px-4 px-3 md:py-6 py-3 space-y-3 md:space-y-6 ">
+    <div className="w-full mx-auto md:px-4 px-3 md:py-6 py-3 space-y-3 md:space-y-6">
       <h2 className="md:text-4xl text-center font-medium text-foreground">
         Available This Weekend
       </h2>
 
-      {/* Category Carousel */}
+      {/* Category Carousel - Mobile */}
       <div className="relative max-w-4xl md:hidden mx-auto">
         {loading ? (
           <div className="flex gap-2 overflow-hidden px-2 justify-center">
@@ -69,13 +74,7 @@ export function AvailableThisWeekend() {
             ))}
           </div>
         ) : (
-          <Carousel
-            className="w-full"
-            opts={{
-              align: "center",
-              loop: false,
-            }}
-          >
+          <Carousel className="w-full" opts={{ align: "center", loop: false }}>
             <CarouselContent className="-ml-2 md:-ml-4 justify-center">
               {categories?.map((category) => (
                 <CarouselItem key={category._id} className="pl-2 basis-auto">
@@ -83,10 +82,10 @@ export function AvailableThisWeekend() {
                     size="sm"
                     onPress={() => handleSelectCategory(category)}
                     className={cn(
-                      "whitespace-nowrap rounded-full px-4 py-2 text-xs md:text-sm font-medium transition-all duration-200",
+                      "whitespace-nowrap rounded-full px-4 py-2 text-xs md:text-sm font-medium transition-all",
                       selectedCategoryId === category._id
-                        ? "bg-black text-white hover:bg-black/90"
-                        : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                        ? "bg-black text-white"
+                        : "bg-gray-100 text-gray-700"
                     )}
                   >
                     {category.name}
@@ -94,12 +93,11 @@ export function AvailableThisWeekend() {
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="hidden md:flex -left-12" />
-            <CarouselNext className="hidden md:flex -right-12" />
           </Carousel>
         )}
       </div>
 
+      {/* Category Row - Desktop */}
       <div className="hidden md:flex justify-center gap-8 overflow-x-auto pb-2">
         {loading ? (
           <div className="flex gap-2">
@@ -115,7 +113,7 @@ export function AvailableThisWeekend() {
               onPress={() => handleSelectCategory(category)}
               className={cn(
                 "whitespace-nowrap",
-                selectedCategoryId === category?._id
+                selectedCategoryId === category._id
                   ? "bg-black text-white"
                   : "bg-gray-200"
               )}
@@ -126,11 +124,11 @@ export function AvailableThisWeekend() {
         )}
       </div>
 
-      {/* Loading State */}
-      {(weekendLoading || (loading && !weekendData.length)) && (
-        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2 ">
+      {/* Loading Skeleton */}
+      {weekendLoading && (
+        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className=" flex-shrink-0">
+            <div key={i} className="flex-shrink-0">
               <PropertySkeleton />
             </div>
           ))}
@@ -138,34 +136,36 @@ export function AvailableThisWeekend() {
       )}
 
       {/* Properties Carousel */}
-      {!weekendLoading &&
-        (!loading || weekendData.length > 0) &&
-        weekendData.length > 0 && (
-          <div className="relative py-2">
-            <Carousel className="w-full" opts={{ align: "start" }}>
-              <CarouselContent className="-ml-2 md:-ml-4">
-                {weekendData.map((property) => (
-                  <CarouselItem
-                    key={property._id}
-                    className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4"
-                  >
-                    <Weekendcard property={property} />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-              <CarouselPrevious className="hidden lg:flex -left-12" />
-              <CarouselNext className="hidden lg:flex -right-12" />
-            </Carousel>
-          </div>
-        )}
-
-      {/* Empty State */}
-      {!weekendLoading && weekendData.length === 0 && (
-        <div className="text-center text-gray-500 py-10">
-          <p className="text-lg">No properties available this weekend</p>
-          <p className="text-sm mt-2">Try selecting a different category</p>
+      {!weekendLoading && weekendData.length > 0 && (
+        <div className="relative py-2">
+          <Carousel className="w-full" opts={{ align: "start" }}>
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {weekendData.map((property) => (
+                <CarouselItem
+                  key={property._id}
+                  className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4"
+                >
+                  <Weekendcard property={property} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden lg:flex -left-12" />
+            <CarouselNext className="hidden lg:flex -right-12" />
+          </Carousel>
         </div>
       )}
+
+      {/* ✅ FIXED Empty State */}
+      {!weekendLoading &&
+        hasRequestedWeekend.current &&
+        weekendData.length === 0 && (
+          <div className="text-center text-gray-500 py-10">
+            <p className="text-lg">No properties available this weekend</p>
+            <p className="text-sm mt-2">
+              Try selecting a different category
+            </p>
+          </div>
+        )}
     </div>
   );
 }

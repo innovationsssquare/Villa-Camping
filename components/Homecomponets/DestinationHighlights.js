@@ -7,6 +7,9 @@ import {
   ChevronLeft,
   ChevronRight,
   HomeIcon,
+  Search,
+  Map,
+  RefreshCcw,
 } from "lucide-react";
 import {
   Carousel,
@@ -18,48 +21,20 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchdestination } from "@/Redux/Slices/propertiesSlice";
-
-const destinations = [
-  {
-    name: "Lonavala",
-    description: "Misty hills and scenic viewpoints",
-    image:
-      "https://images.unsplash.com/photo-1672662943161-ab22ba412741?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxsb25hdmFsYSUyMGhpbGxzJTIwbW91bnRhaW5zfGVufDF8fHx8MTc1Nzc3NDEzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
-    properties: 28,
-    rating: 4.8,
-  },
-  {
-    name: "Pawna Lake",
-    description: "Tranquil waters and sunset views",
-    image:
-      "https://images.unsplash.com/photo-1734076749900-7e304090008c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwYXduYSUyMGxha2UlMjBzdW5zZXR8ZW58MXx8fHwxNzU3Nzc0MTMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
-    properties: 15,
-    rating: 4.9,
-  },
-  {
-    name: "Kamshet",
-    description: "Adventure sports and paragliding",
-    image:
-      "https://images.unsplash.com/photo-1731420738764-730de624433d?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxrYW1zaGV0JTIwcGFyYWdsaWRpbmclMjBoaWxsc3xlbnwxfHx8fDE3NTc3NzQxMzN8MA&ixlib=rb-4.1.0&q=80&w=1080",
-    properties: 12,
-    rating: 4.7,
-  },
-  {
-    name: "Malavli",
-    description: "Lush greenery and peaceful retreats",
-    image:
-      "https://images.unsplash.com/photo-1623304027435-11c129173876?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxtYWxhdmxpJTIwbmF0dXJlJTIwZ3JlZW58ZW58MXx8fHwxNzU3Nzc0MTM0fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    properties: 8,
-    rating: 4.6,
-  },
-];
+import { fetchdestination, setselectedLocationId } from "@/Redux/Slices/propertiesSlice";
+import { Button, Skeleton } from "@heroui/react";
+import { PropertySkeleton } from "../Availableweekend/Property-skeleton";
+import { useRouter } from "next/navigation";
 
 function DestinationCard({ destination }) {
-;
-
+  console.log(destination)
+  const router=useRouter()
+  const dispatch=useDispatch()
   return (
-    <div className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-none hover:shadow-2xl transition-all duration-300  h-full border border-gray-200">
+    <div
+      onClick={() => {dispatch(setselectedLocationId(destination._id)),router.push("/search-your-gateway")}}
+      className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-none hover:shadow-2xl transition-all duration-300  h-full border border-gray-200"
+    >
       <div className="relative md:h-56 h-36  overflow-hidden">
         <img
           src={destination.image || "/placeholder.svg"}
@@ -111,17 +86,73 @@ function DestinationCard({ destination }) {
   );
 }
 
+function DestinationSkeleton() {
+  return (
+    <Card className="group w-full rounded-3xl overflow-hidden border-none shadow-md bg-white">
+      <Skeleton className="md:h-64 h-48 w-full rounded-none" />
+      <div className="p-5 sm:p-6 space-y-4">
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-5 w-32" />
+        </div>
+        <div className="space-y-2">
+          <Skeleton className="h-7 w-3/4" />
+          <Skeleton className="h-4 w-full" />
+        </div>
+        <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-5 w-5 rounded-full" />
+            <Skeleton className="h-5 w-24" />
+          </div>
+          <Skeleton className="h-10 w-10 rounded-full" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function EmptyDestinationState() {
+  const dispatch = useDispatch();
+
+  return (
+    <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
+      <div className="relative mb-8">
+        <div className="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center animate-bounce duration-[3000ms]">
+          <Map className="w-12 h-12 text-primary/30" />
+        </div>
+        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+          <Search className="w-5 h-5 text-primary" />
+        </div>
+      </div>
+      <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+        No destinations found
+      </h3>
+      <p className="text-gray-500 max-w-sm mb-10 leading-relaxed">
+        We couldn't find any destinations matching your current search. Try
+        refreshing or exploring other categories.
+      </p>
+      <Button
+        onClick={() => dispatch(fetchdestination())}
+        variant="outline"
+        className="rounded-full px-8 py-6 h-auto text-lg hover:bg-primary hover:text-white transition-all duration-300"
+      >
+        <RefreshCcw className="mr-2 h-5 w-5" />
+        Refresh List
+      </Button>
+    </div>
+  );
+}
+
 export function DestinationHighlights() {
   const [isMobile, setIsMobile] = useState(false);
-const dispatch=useDispatch()
+  const dispatch = useDispatch();
   const { destinationLoading, destinationData, destinationError } = useSelector(
     (state) => state.properties
-  )
+  );
 
-useEffect(() => {
- dispatch(fetchdestination())
-}, [dispatch])
-
+  useEffect(() => {
+    dispatch(fetchdestination());
+  }, [dispatch]);
 
   useEffect(() => {
     const checkIsMobile = () => {
@@ -133,27 +164,50 @@ useEffect(() => {
 
     return () => window.removeEventListener("resize", checkIsMobile);
   }, []);
+  //  if (!destinationLoading) {
+  //     return (
+  //       <div className="flex gap-4 overflow-x-hidden md:px-4 px-2 py-8 ">
+  //                 {[...Array(4)].map((_, i) => (
+  //                   <div key={i} className=" flex-shrink-0">
+  //                     <PropertySkeleton />
+  //                   </div>
+  //                 ))}
+  //               </div>
+  //     )
+  //   }
 
- if (destinationLoading) {
-    return (
-      <section className="py-12 text-center text-gray-400">
-        Loading destinations...
-      </section>
-    );
-  }
+  // if (destinationError) {
+  //   return (
+  //     <section className="py-24 text-center">
+  //       <div className="container mx-auto px-6 max-w-2xl">
+  //         <div className="bg-red-50 text-red-600 p-10 rounded-[2.5rem] border border-red-100">
+  //           <h3 className="text-2xl font-bold mb-4">Connection Issue</h3>
+  //           <p className="mb-8 opacity-80 leading-relaxed">
+  //             We're having trouble reaching our travel guide database. Please
+  //             check your internet connection and try again.
+  //           </p>
+  //           <Button
+  //             onClick={() => dispatch(fetchdestination())}
+  //             variant="destructive"
+  //             className="rounded-full px-10 py-6 h-auto text-lg shadow-xl shadow-red-200"
+  //           >
+  //             Retry Connection
+  //           </Button>
+  //         </div>
+  //       </div>
+  //     </section>
+  //   );
+  // }
 
-  if (destinationError) {
-    return (
-      <section className="py-12 text-center text-red-500">
-        Failed to load destinations
-      </section>
-    );
-  }
-
-  if (!destinationData || destinationData.length === 0) {
-    return null; // or EmptyState
-  }
-
+  // if (!destinationData || destinationData.length === 0) {
+  //   return (
+  //     <section className="py-12 md:py-20">
+  //       <div className="container mx-auto px-6">
+  //         <EmptyDestinationState />
+  //       </div>
+  //     </section>
+  //   );
+  // }
 
   return (
     <section className=" sm:py-6 md:py-12 ">
@@ -167,29 +221,64 @@ useEffect(() => {
           </p>
         </div>
 
-        <div className=" relative">
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2 md:-ml-4">
-              {destinationData.map((destination, index) => (
-                <CarouselItem
-                  key={destination.name}
-                  className="pl-2 md:pl-4 basis-3/5 md:basis-4/16"
+        {destinationLoading ? (
+          <div className="flex gap-4 overflow-x-hidden md:px-4 px-2 py-6 ">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className=" flex-shrink-0">
+                <PropertySkeleton />
+              </div>
+            ))}
+          </div>
+        ) : destinationError ? (
+          <section className="py-24 text-center">
+            <div className="container mx-auto px-6 max-w-2xl">
+              <div className="bg-red-50 text-red-600 p-10 rounded-[2.5rem] border border-red-100">
+                <h3 className="text-2xl font-bold mb-4">Connection Issue</h3>
+                <p className="mb-8 opacity-80 leading-relaxed">
+                  We're having trouble reaching our travel guide database.
+                  Please check your internet connection and try again.
+                </p>
+                <Button
+                  onClick={() => dispatch(fetchdestination())}
+                  variant="destructive"
+                  className="rounded-full px-10 py-6 h-auto text-lg shadow-xl shadow-red-200"
                 >
-                  <Card className="border-0 border-gray-200 shadow-none bg-transparent">
-                    <CardContent className="p-0">
-                      <DestinationCard destination={destination} />
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-          </Carousel>
-        </div>
+                  Retry Connection
+                </Button>
+              </div>
+            </div>
+          </section>
+        ) : !destinationData || destinationData.length === 0 ? (
+          <section className="py-12 md:py-20">
+            <div className="container mx-auto px-6">
+              <EmptyDestinationState />
+            </div>
+          </section>
+        ) : (
+          <div className=" relative">
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-2 md:-ml-4">
+                {destinationData.map((destination, index) => (
+                  <CarouselItem
+                    key={destination.name}
+                    className="pl-2 md:pl-4 basis-3/5 md:basis-4/16"
+                  >
+                    <Card className="border-0 border-gray-200 shadow-none bg-transparent">
+                      <CardContent className="p-0">
+                        <DestinationCard destination={destination} />
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+        )}
       </div>
     </section>
   );
