@@ -8,6 +8,8 @@ import {
   Getpropertylocation,
   GetDestinations,
 } from "@/lib/API/properties/Property";
+import { BaseUrl } from "@/lib/API/Baseurl";
+import Cookies from "js-cookie";
 
 /* ----------------------------------
    Thunks
@@ -143,6 +145,29 @@ export const fetchdestination = createAsyncThunk(
   }
 );
 
+export const fetchTrendingReels = createAsyncThunk(
+  "reels/fetchTrendingReels",
+  async (_, { rejectWithValue }) => {
+    try {
+      const token = Cookies.get("token");
+
+      const res = await fetch(`${BaseUrl}/User/reels/trending`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch reels");
+
+      const data = await res.json();
+      return data.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
 /* ----------------------------------
    Slice
 ----------------------------------- */
@@ -180,6 +205,10 @@ const propertiesSlice = createSlice({
     error: null,
 
     selectedLocationId: null,
+
+    reelsvideo: [],
+    reelloading: false,
+    reelerror: null,
   },
   reducers: {
     clearProperties: (state) => {
@@ -271,7 +300,6 @@ const propertiesSlice = createSlice({
           action.payload || "Failed to load weekend properties";
       })
 
-
       .addCase(fetchdestination.pending, (state) => {
         state.destinationLoading = true;
         state.destinationError = null;
@@ -284,6 +312,19 @@ const propertiesSlice = createSlice({
         state.destinationLoading = false;
         state.destinationError =
           action.payload || "Failed to load weekend properties";
+      })
+
+      .addCase(fetchTrendingReels.pending, (state) => {
+        state.reelloading = true;
+        state.reelerror = null;
+      })
+      .addCase(fetchTrendingReels.fulfilled, (state, action) => {
+        state.reelloading = false;
+        state.reelsvideo = action.payload;
+      })
+      .addCase(fetchTrendingReels.rejected, (state, action) => {
+        state.reelloading = false;
+        state.reelerror = action.payload;
       });
   },
 });

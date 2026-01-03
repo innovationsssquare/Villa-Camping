@@ -21,7 +21,7 @@ export default function Home() {
       <ShopbyCategory />
       <AvailableThisWeekend />
       <DestinationHighlights/>
-      <WeekendGetaway/>
+      {/* <WeekendGetaway/> */}
       {/* <DiscoverOffBeat/> */}
       <TrendingVideos/>
       <WhyChooseUs/>
