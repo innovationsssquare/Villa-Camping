@@ -168,6 +168,22 @@ export const fetchTrendingReels = createAsyncThunk(
   }
 );
 
+export const fetchReviewHighlights = createAsyncThunk(
+  "reviews/fetchReviewHighlights",
+  async (_, { rejectWithValue }) => {
+    try {
+      const res = await fetch(`${BaseUrl}/User/reviews/highlights`);
+      if (!res.ok) throw new Error("Failed to fetch reviews");
+
+      const data = await res.json();
+      return data.data;
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+
 /* ----------------------------------
    Slice
 ----------------------------------- */
@@ -209,6 +225,10 @@ const propertiesSlice = createSlice({
     reelsvideo: [],
     reelloading: false,
     reelerror: null,
+
+    reviewsdata: [],
+    reviewloading: false,
+    reviewerror: null,
   },
   reducers: {
     clearProperties: (state) => {
@@ -325,6 +345,19 @@ const propertiesSlice = createSlice({
       .addCase(fetchTrendingReels.rejected, (state, action) => {
         state.reelloading = false;
         state.reelerror = action.payload;
+      })
+
+       .addCase(fetchReviewHighlights.pending, (state) => {
+        state.reviewloading = true;
+        state.reviewerror = null;
+      })
+      .addCase(fetchReviewHighlights.fulfilled, (state, action) => {
+        state.reviewloading = false;
+        state.reviewsdata = action.payload;
+      })
+      .addCase(fetchReviewHighlights.rejected, (state, action) => {
+        state.reviewloading = false;
+        state.reviewerror = action.payload;
       });
   },
 });

@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 export function TrendingVideoSkeleton() {
   return (
-    <Card className="border border-gray-200 shadow-none rounded-xl">
+    <Card className="border border-gray-200 shadow-none p-0 rounded-xl">
       <CardContent className="p-0">
         <Skeleton className="w-full h-40 rounded-t-xl" />
         <div className="p-2 space-y-2">

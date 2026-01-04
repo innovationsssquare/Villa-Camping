@@ -139,7 +139,7 @@ export function AvailableThisWeekend() {
       {!weekendLoading && weekendData.length > 0 && (
         <div className="relative py-2">
           <Carousel className="w-full" opts={{ align: "start" }}>
-            <CarouselContent className="-ml-10 md:-ml-4">
+            <CarouselContent className="-ml-8 md:-ml-4">
               {weekendData.map((property) => (
                 <CarouselItem
                   key={property._id}
