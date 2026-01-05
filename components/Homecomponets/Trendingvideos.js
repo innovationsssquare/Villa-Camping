@@ -57,7 +57,7 @@ export default function TrendingVideos() {
       <Carousel className="w-full">
         <CarouselContent className="-ml-3">
           {reelloading
-            ? Array.from({ length: 4 }).map((_, i) => (
+            ? Array.from({ length: 8 }).map((_, i) => (
                 <CarouselItem key={i} className="pl-3 basis-2/5 md:basis-6/36">
                   <TrendingVideoSkeleton />
                 </CarouselItem>
