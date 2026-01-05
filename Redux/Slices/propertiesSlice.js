@@ -7,6 +7,7 @@ import {
   Getropertiesbymap,
   Getpropertylocation,
   GetDestinations,
+  GetAllreels,
 } from "@/lib/API/properties/Property";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import Cookies from "js-cookie";
@@ -183,6 +184,26 @@ export const fetchReviewHighlights = createAsyncThunk(
   }
 );
 
+export const fetchAllReels = createAsyncThunk(
+  "reels/fetchAll",
+  async () => {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/User/api/reels`)
+    const json = await res.json()
+
+    const nowIST = new Date(
+      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+    )
+    const isWeekend = nowIST.getDay() === 0 || nowIST.getDay() === 6
+
+    return json.data.map((r) => ({
+      ...r,
+      price: isWeekend
+        ? r.price?.weekend ?? r.price?.weekday
+        : r.price?.weekday ?? r.price?.weekend,
+    }))
+  }
+)
+
 
 /* ----------------------------------
    Slice
@@ -229,6 +250,10 @@ const propertiesSlice = createSlice({
     reviewsdata: [],
     reviewloading: false,
     reviewerror: null,
+
+    reeldata: [],
+    reeldataloading: false,
+    reeldataerror: null,
   },
   reducers: {
     clearProperties: (state) => {
@@ -347,7 +372,7 @@ const propertiesSlice = createSlice({
         state.reelerror = action.payload;
       })
 
-       .addCase(fetchReviewHighlights.pending, (state) => {
+      .addCase(fetchReviewHighlights.pending, (state) => {
         state.reviewloading = true;
         state.reviewerror = null;
       })
@@ -358,6 +383,19 @@ const propertiesSlice = createSlice({
       .addCase(fetchReviewHighlights.rejected, (state, action) => {
         state.reviewloading = false;
         state.reviewerror = action.payload;
+      })
+
+      .addCase(fetchAllReels.pending, (state) => {
+        state.reeldataloading = true;
+        state.reeldataerror = null;
+      })
+      .addCase(fetchAllReels.fulfilled, (state, action) => {
+        state.reeldataloading = false;
+        state.reeldata = action.payload;
+      })
+      .addCase(fetchAllReels.rejected, (state, action) => {
+        state.reeldataloading = false;
+        state.reeldataerror = action.payload;
       });
   },
 });
