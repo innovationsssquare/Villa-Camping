@@ -95,7 +95,7 @@ export function PropertyCard({ property }) {
   }
 
   return (
-    <Card className="relative overflow-hidden p-0   transition-all duration-300 ease-smooth group rounded-2xl border border-gray-300  w-[80%] md:w-full mx-auto">
+    <Card className="relative overflow-hidden p-0   transition-all duration-300 ease-smooth group rounded-2xl border border-gray-300  w-full md:w-full mx-auto">
       {/* Card Header with Rating and Like Button */}
       <CardHeader className="absolute z-20 top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 flex flex-row items-end justify-end p-0">
         {/* Rating Badge */}

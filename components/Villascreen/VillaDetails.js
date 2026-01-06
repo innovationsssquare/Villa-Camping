@@ -30,6 +30,7 @@ import {
   Camera,
   Mountain,
   Building2,
+  Sun,
 } from "lucide-react";
 
 // react-icons for items lucide doesn't provide (or where a better semantic icon exists)
