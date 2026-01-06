@@ -24,8 +24,8 @@ export default function Home() {
       {/* <WeekendGetaway/> */}
       {/* <DiscoverOffBeat/> */}
       <TrendingVideos/>
-      <WhyChooseUs/>
       <PropertyReviews/>
+      <WhyChooseUs/>
       {/* <Experiences/>
       <SpecialOffers/>
       <Testimonials/> */}

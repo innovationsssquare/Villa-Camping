@@ -113,7 +113,7 @@ export function WhyChooseUs() {
               </div>
             </div>
             <div>
-              <div className="text-lg md:text-2xl font-bold text-black md:mb-2">
+              <div className="text-lg md:text-2xl font-bold text-orange-500 md:mb-2">
                 <NumberTicker
                   value={24}
                   className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"

@@ -212,7 +212,7 @@ export function DestinationHighlights() {
   // }
 
   return (
-    <section className=" sm:py-6 md:py-12 ">
+    <section className="py-4 sm:py-6 md:py-12 ">
       <div className="w-full mx-auto px-3 sm:px-6 lg:px-8">
         <div className="text-center  sm:mb-12 md:mb-4">
           <h2 className="md:text-4xl text-center font-medium text-foreground">
@@ -224,7 +224,7 @@ export function DestinationHighlights() {
         </div>
 
         {destinationLoading ? (
-          <div className="flex gap-4 overflow-x-hidden md:px-4 px-2 py-6 ">
+          <div className="flex gap-4 overflow-x-hidden md:px-4  py-6 ">
             {[...Array(4)].map((_, i) => (
               <div key={i} className=" flex-shrink-0">
                 <PropertySkeleton />

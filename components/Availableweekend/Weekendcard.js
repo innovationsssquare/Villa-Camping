@@ -118,7 +118,7 @@ export function PropertyCard({ property }) {
 
       {/* Image Carousel */}
       <div
-        className="relative w-full h-32 md:h-60 overflow-hidden"
+        className="relative w-full h-36 md:h-60 overflow-hidden"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}

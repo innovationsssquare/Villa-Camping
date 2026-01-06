@@ -15,15 +15,16 @@ import { Play } from "lucide-react";
 import { Button } from "@heroui/react";
 
 import { TrendingVideoSkeleton } from "./TrendingVideoSkeleton";
-import VideoModal from "../Availableweekend/VideoModal";
 import { fetchTrendingReels } from "@/Redux/Slices/propertiesSlice";
+import { useRouter } from "next/navigation";
+import VideoModal from "./VideoModel";
 
 export default function TrendingVideos() {
   const dispatch = useDispatch();
   const { reelsvideo, reelloading, reelerror } = useSelector(
     (state) => state.properties
   );
-
+const router =useRouter()
   useEffect(() => {
     dispatch(fetchTrendingReels());
   }, [dispatch]);
@@ -43,6 +44,7 @@ export default function TrendingVideos() {
         </div>
 
         <Button
+         onPress={()=>router.push("/shorts")}
           size="sm"
           className="flex gap-1 items-center text-xs font-medium bg-orange-200 rounded-full"
         >
@@ -58,7 +60,7 @@ export default function TrendingVideos() {
         <CarouselContent className="-ml-3">
           {reelloading
             ? Array.from({ length: 8 }).map((_, i) => (
-                <CarouselItem key={i} className="pl-3 basis-2/5 md:basis-6/36">
+                <CarouselItem key={i} className="pl-2 basis-2/5 md:basis-6/36">
                   <TrendingVideoSkeleton />
                 </CarouselItem>
               ))

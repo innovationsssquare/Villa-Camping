@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "@heroui/react";
 import {
   Carousel,
@@ -20,6 +20,7 @@ import {
 import { fetchPropertiesByWeekend } from "@/Redux/Slices/propertiesSlice";
 import { PropertySkeleton } from "./Property-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CarouselIndicator } from "./carousel-indicators";
 
 export function AvailableThisWeekend() {
   const dispatch = useDispatch();
@@ -29,6 +30,23 @@ export function AvailableThisWeekend() {
   const { weekendData, weekendLoading } = useSelector(
     (state) => state.properties
   );
+
+  const [api, setApi] = useState();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  const onApiChange = (api) => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  };
+
+  const handleDotClick = (index) => {
+    api?.scrollTo(index);
+  };
 
   // ✅ NEW: track if weekend API was ever triggered
   const hasRequestedWeekend = useRef(false);
@@ -126,7 +144,7 @@ export function AvailableThisWeekend() {
 
       {/* Loading Skeleton */}
       {weekendLoading && (
-        <div className="flex gap-4 overflow-x-hidden md:px-4 px-2">
+        <div className="flex gap-4 overflow-x-hidden md:px-4">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="flex-shrink-0">
               <PropertySkeleton />
@@ -138,12 +156,19 @@ export function AvailableThisWeekend() {
       {/* Properties Carousel */}
       {!weekendLoading && weekendData.length > 0 && (
         <div className="relative py-2">
-          <Carousel className="w-full" opts={{ align: "start" }}>
+          <Carousel
+            setApi={(api) => {
+              setApi(api);
+              onApiChange(api);
+            }}
+            className="w-full"
+            opts={{ align: "start" }}
+          >
             <CarouselContent className="-ml-2 md:-ml-4">
               {weekendData.map((property) => (
                 <CarouselItem
                   key={property._id}
-                  className="pl-3 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4"
+                  className="pl-2 md:pl-4 basis-3/5 md:basis-4/16  lg:basis-1/4"
                 >
                   <Weekendcard property={property} />
                 </CarouselItem>
@@ -152,6 +177,13 @@ export function AvailableThisWeekend() {
             <CarouselPrevious className="hidden lg:flex -left-12" />
             <CarouselNext className="hidden lg:flex -right-12" />
           </Carousel>
+
+          <CarouselIndicator
+            current={current}
+            count={count}
+            variant="pills"
+            onDotClick={handleDotClick}
+          />
         </div>
       )}
 
@@ -161,9 +193,7 @@ export function AvailableThisWeekend() {
         weekendData.length === 0 && (
           <div className="text-center text-gray-500 py-10">
             <p className="text-lg">No properties available this weekend</p>
-            <p className="text-sm mt-2">
-              Try selecting a different category
-            </p>
+            <p className="text-sm mt-2">Try selecting a different category</p>
           </div>
         )}
     </div>
