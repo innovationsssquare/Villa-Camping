@@ -27,7 +27,6 @@ import { PropertySkeleton } from "../Availableweekend/Property-skeleton";
 import { useRouter } from "next/navigation";
 
 function DestinationCard({ destination }) {
-  console.log(destination)
   const router=useRouter()
   const dispatch=useDispatch()
   return (
@@ -36,10 +35,12 @@ function DestinationCard({ destination }) {
       className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-none hover:shadow-2xl transition-all duration-300  h-full border border-gray-200"
     >
       <div className="relative md:h-56 h-36  overflow-hidden">
-        <img
-          src={destination.image || "/placeholder.svg"}
+        <Image
+          src={destination?.coverImage || "/placeholder.svg"}
           alt={destination.name}
-          fill="true"
+          unoptimized
+          height={40}
+          width={40}
           className="object-fill w-full h-36 md:h-48  group-hover:scale-110 transition-transform duration-300"
         />
         <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
@@ -115,7 +116,7 @@ function EmptyDestinationState() {
   const dispatch = useDispatch();
 
   return (
-    <div className="flex flex-col items-center justify-center py-24 px-6 text-center bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
+    <div className="flex flex-col items-center justify-center py-8 px-6 text-center bg-gray-50/50 rounded-[2.5rem] border-2 border-dashed border-gray-200">
       <div className="relative mb-8">
         <div className="w-24 h-24 bg-white rounded-3xl shadow-xl flex items-center justify-center animate-bounce duration-[3000ms]">
           <Map className="w-12 h-12 text-primary/30" />
