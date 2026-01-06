@@ -67,8 +67,8 @@ const ShopbyCategory = () => {
                 <div className="rounded-md md:rounded-full  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
                 <div className="rounded-md md:rounded-full  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
                 <div className="rounded-md md:rounded-full  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
-                <div className="rounded-md md:rounded-full  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
-                <div className="rounded-md md:rounded-full  animate-pulse duration-1000 border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
+                <div className="rounded-md md:rounded-full hidden md:block  animate-pulse duration-1000  border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
+                <div className="rounded-md md:rounded-full hidden md:block animate-pulse duration-1000 border-1 border-white relative bg-gray-200 md:bg-gray-200 hover:bg-gray-200 backdrop-blur-2xl mb-3 md:h-20 md:w-20 h-16 w-16 overflow-hidden transition-all duration-300 group-hover:shadow-lg"></div>
               </CarouselItem>
             ) : categories?.length === 0 ? (
               <h2 className="md:text-4xl text-center md:mb-10 mb-4 font-medium text-foreground">
@@ -96,11 +96,10 @@ const ShopbyCategory = () => {
                         className="object-contain"
                       />
                     </Button>
-                    <span className="text-center md:text-sm text-xs font-medium text-black">
-                      {category?.name}
-                      {/* <Highlighter action="highlight" color="#000">
+                    <span className="text-center md:text-sm text-xs font-medium text-black mb-2">
+                      <Highlighter action="underline" color={"#ff8904"}>
                     {category?.name}
-                    </Highlighter> */}
+                    </Highlighter>
                     </span>
                   </div>
                 </CarouselItem>

@@ -25,6 +25,7 @@ import { fetchdestination, setselectedLocationId } from "@/Redux/Slices/properti
 import { Button, Skeleton } from "@heroui/react";
 import { PropertySkeleton } from "../Availableweekend/Property-skeleton";
 import { useRouter } from "next/navigation";
+import { Highlighter } from "../magicui/highlighter";
 
 function DestinationCard({ destination }) {
   const router=useRouter()
@@ -43,32 +44,32 @@ function DestinationCard({ destination }) {
           width={40}
           className="object-fill w-full h-36 md:h-48  group-hover:scale-110 transition-transform duration-300"
         />
-        <div className="absolute top-4 right-4 bg-black/80 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
-          <Star className="w-4 h-4 text-amber-400 fill-current" />
-          <span className="text-sm font-medium text-white">
+        <div className="absolute top-4 right-4 bg-orange-100 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
+          <Star className="w-4 h-4 text-orange-500 fill-current" />
+          <span className="text-sm font-medium ">
             {destination.rating}
           </span>
         </div>
       </div>
 
-      <div className="p-2 sm:p-6">
+      <div className="p-2 sm:p-4">
         <div className="flex  items-center text-sm text-gray-400 mb-2">
           <MapPin className="w-4 h-4 mr-1 text-red-400 " />
-          <h3 className="text-lg sm:text-xl  text-black ">
+          <h3 className="text-md sm:text-xl  text-black ">
             {destination.name}
           </h3>
         </div>
-        <p className="text-sm sm:text-base text-gray-600 mb-4 truncate">
+        <p className="text-sm sm:text-base text-gray-600 mb-2 truncate">
           {destination.description}
         </p>
         <div className="flex items-center justify-between">
-          <div className="flex items-center text-sm text-gray-400">
-            <HomeIcon className="w-4 h-4 mr-1 text-black" />
-            {destination.properties} properties
-          </div>
-          <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center group-hover:bg-white transition-colors">
+          <Highlighter  color="#fed5a6" className="flex  items-center text-xs text-gray-400 w-full">
+            <HomeIcon className="w-4 h-4 mr-1 text-black inline-block" />
+           <p className="text-xs md:text-sm inline-block">{destination.properties} properties</p> 
+          </Highlighter>
+          <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center group-hover:bg-orange-500 transition-colors">
             <svg
-              className="w-4 h-4 text-gray-300 group-hover:text-gray-900 transition-colors"
+              className="w-4 h-4 text-white group-hover:text-gray-900 transition-colors"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"

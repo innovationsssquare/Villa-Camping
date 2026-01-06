@@ -57,11 +57,11 @@ export function WhyChooseUs() {
                 key={feature.title}
                 className="text-center group hover:bg-stone-50 rounded-2xl md:p-6 p-2 transition-all duration-300"
               >
-                <div className="w-10 h-10 md:h-14 md:w-14 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-black transition-colors duration-300">
+                <div className="w-10 h-10 md:h-14 md:w-14 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:bg-black transition-colors duration-300">
                   <IconComponent className="w-5 h-5  text-black group-hover:text-white transition-colors duration-300" />
                 </div>
                 <h3 className="md:text-lg text-xs font-bold text-black mb-3">
-                  <Highlighter action="underline" color="#000">
+                  <Highlighter color={"#ff8904"} action="underline" >
                     {feature.title}
                   </Highlighter>
                 </h3>
@@ -74,15 +74,15 @@ export function WhyChooseUs() {
         </div>
 
         {/* Stats Section */}
-        <div className="md:mt-20 mt-4 bg-gray-200 border-white border rounded-3xl p-3 md:p-4">
+        <div className="md:mt-20 mt-4 bg-orange-100 border-white border rounded-3xl p-3 md:p-4">
           <div className="grid grid-cols-4 md:grid-cols-4 gap-8 text-center">
             <div className="flex flex-col items-center">
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={500}
-                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"
               />
-             <span>+</span>
+             <span className="text-orange-500">+</span>
 
               </div>
               <div className="text-black  text-xs md:text-sm">Happy Guests</div>
@@ -91,9 +91,9 @@ export function WhyChooseUs() {
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={500}
-                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"
               />
-             <span>+</span>
+             <span className="text-orange-500">+</span>
              </div>
               <div className="text-black  text-xs md:text-sm">
                 Premium Properties
@@ -103,9 +103,9 @@ export function WhyChooseUs() {
               <div className="flex items-center gap-1 ">
               <NumberTicker
                 value={4.4}
-                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
+                className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"
               />
-             <span>+</span>
+             <span className="text-orange-500">+</span>
 
               </div>
               <div className="text-black  text-xs md:text-sm">
@@ -116,12 +116,12 @@ export function WhyChooseUs() {
               <div className="text-lg md:text-2xl font-bold text-black md:mb-2">
                 <NumberTicker
                   value={24}
-                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
+                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"
                 />
                 /
                 <NumberTicker
                   value={7}
-                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-black"
+                  className="whitespace-pre-wraptext-lg md:text-2xl font-bold tracking-tighter text-orange-500"
                 />
               </div>
               <div className="text-black  text-xs md:text-sm">

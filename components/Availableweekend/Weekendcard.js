@@ -95,7 +95,7 @@ export function PropertyCard({ property }) {
   }
 
   return (
-    <Card className="relative overflow-hidden p-0   transition-all duration-300 ease-smooth group rounded-2xl border border-gray-300  w-full md:w-full mx-auto">
+    <Card className="relative shadow-none overflow-hidden p-0   transition-all duration-300 ease-smooth group rounded-2xl border border-gray-200  w-full md:w-full mx-auto">
       {/* Card Header with Rating and Like Button */}
       <CardHeader className="absolute z-20 top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 flex flex-row items-end justify-end p-0">
         {/* Rating Badge */}
@@ -184,8 +184,8 @@ export function PropertyCard({ property }) {
 
         {/* Best Rated Badge */}
         {property?.tags && (
-          <div className="absolute capitalize bottom-3 right-3 bg-white text-card-text-light text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
-            <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
+          <div className="absolute capitalize bottom-3 right-3 bg-orange-200 text-card-text-light text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
+            <Star className="h-3 w-3 fill-orange-500 text-orange-500" />
             {property?.tags}
           </div>
         )}

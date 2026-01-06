@@ -3,7 +3,7 @@ import { Skeleton } from "@heroui/react";
 
 const PropertyCardSkeletonnew = () => {
   return (
-    <Card className="overflow-hidden p-0 shadow-luxury hover:shadow-xl transition-all duration-300 bg-gradient-luxury border-0">
+    <Card className="overflow-hidden p-0 shadow-none hover:shadow-xl transition-all duration-300 bg-gradient-luxury border-0">
       {/* Desktop Layout (Horizontal) */}
       <div className="hidden md:flex md:h-80 p-0">
         {/* Image Section */}
