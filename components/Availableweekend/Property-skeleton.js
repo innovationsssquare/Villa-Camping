@@ -3,7 +3,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export function PropertySkeleton() {
   return (
-    <Card className="relative w-52 overflow-hidden p-0 rounded-2xl border border-gray-300 md:w-full mx-auto">
+    <Card className="relative w-52 overflow-hidden p-0 rounded-2xl border shadow-none md:w-full mx-auto">
       <CardHeader className="absolute z-20 top-2 md:top-3 left-2 md:left-3 right-2 md:right-3 flex flex-row items-start justify-between p-0">
         <Skeleton className="h-6 w-12 rounded-full" />
         <Skeleton className="h-8 w-8 rounded-full" />

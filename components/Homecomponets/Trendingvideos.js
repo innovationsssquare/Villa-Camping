@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Carousel,
@@ -18,13 +18,32 @@ import { TrendingVideoSkeleton } from "./TrendingVideoSkeleton";
 import { fetchTrendingReels } from "@/Redux/Slices/propertiesSlice";
 import { useRouter } from "next/navigation";
 import VideoModal from "./VideoModel";
+import { CarouselIndicator } from "../Availableweekend/carousel-indicators";
 
 export default function TrendingVideos() {
   const dispatch = useDispatch();
   const { reelsvideo, reelloading, reelerror } = useSelector(
     (state) => state.properties
   );
-const router =useRouter()
+  const router = useRouter();
+
+  const [api, setApi] = useState();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  const onApiChange = (api) => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  };
+
+  const handleDotClick = (index) => {
+    api?.scrollTo(index);
+  };
+
   useEffect(() => {
     dispatch(fetchTrendingReels());
   }, [dispatch]);
@@ -44,7 +63,7 @@ const router =useRouter()
         </div>
 
         <Button
-         onPress={()=>router.push("/shorts")}
+          onPress={() => router.push("/shorts")}
           size="sm"
           className="flex gap-1 items-center text-xs font-medium bg-orange-200 rounded-full"
         >
@@ -56,7 +75,13 @@ const router =useRouter()
       </div>
 
       {/* Carousel */}
-      <Carousel className="w-full">
+      <Carousel
+        setApi={(api) => {
+          setApi(api);
+          onApiChange(api);
+        }}
+        className="w-full"
+      >
         <CarouselContent className="-ml-3">
           {reelloading
             ? Array.from({ length: 8 }).map((_, i) => (
@@ -79,10 +104,10 @@ const router =useRouter()
                           className="w-full h-40 object-cover rounded-t-xl"
                         />
                         <div className="absolute inset-0 bg-black/10 flex items-center justify-center">
-                            <VideoModal
-                              thumbnailSrc={video.image}
-                              videoUrl={video.videoUrl}
-                            />
+                          <VideoModal
+                            thumbnailSrc={video.image}
+                            videoUrl={video.videoUrl}
+                          />
                         </div>
 
                         <div className="absolute bottom-2 left-2">
@@ -118,6 +143,12 @@ const router =useRouter()
         <CarouselPrevious className="left-0 -translate-x-1/2 hidden" />
         <CarouselNext className="right-0 translate-x-1/2 hidden" />
       </Carousel>
+      <CarouselIndicator
+        current={current}
+        count={count}
+        variant="glow"
+        onDotClick={handleDotClick}
+      />
     </div>
   );
 }

@@ -21,18 +21,25 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchdestination, setselectedLocationId } from "@/Redux/Slices/propertiesSlice";
+import {
+  fetchdestination,
+  setselectedLocationId,
+} from "@/Redux/Slices/propertiesSlice";
 import { Button, Skeleton } from "@heroui/react";
 import { PropertySkeleton } from "../Availableweekend/Property-skeleton";
 import { useRouter } from "next/navigation";
 import { Highlighter } from "../magicui/highlighter";
+import { CarouselIndicator } from "../Availableweekend/carousel-indicators";
 
 function DestinationCard({ destination }) {
-  const router=useRouter()
-  const dispatch=useDispatch()
+  const router = useRouter();
+  const dispatch = useDispatch();
   return (
     <div
-      onClick={() => {dispatch(setselectedLocationId(destination._id)),router.push("/search-your-gateway")}}
+      onClick={() => {
+        dispatch(setselectedLocationId(destination._id)),
+          router.push("/search-your-gateway");
+      }}
       className="group w-full md:w-auto  rounded-2xl overflow-hidden shadow-none hover:shadow-2xl transition-all duration-300  h-full border border-gray-200"
     >
       <div className="relative md:h-56 h-36  overflow-hidden">
@@ -46,9 +53,7 @@ function DestinationCard({ destination }) {
         />
         <div className="absolute top-4 right-4 bg-orange-100 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-1">
           <Star className="w-4 h-4 text-orange-500 fill-current" />
-          <span className="text-sm font-medium ">
-            {destination.rating}
-          </span>
+          <span className="text-sm font-medium ">{destination.rating}</span>
         </div>
       </div>
 
@@ -63,9 +68,14 @@ function DestinationCard({ destination }) {
           {destination.description}
         </p>
         <div className="flex items-center justify-between">
-          <Highlighter  color="#fed5a6" className="flex  items-center text-xs text-gray-400 w-full">
+          <Highlighter
+            color="#fed5a6"
+            className="flex  items-center text-xs text-gray-400 w-full"
+          >
             <HomeIcon className="w-4 h-4 mr-1 text-black inline-block" />
-           <p className="text-xs md:text-sm inline-block">{destination.properties} properties</p> 
+            <p className="text-xs md:text-sm inline-block">
+              {destination.properties} properties
+            </p>
           </Highlighter>
           <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center group-hover:bg-orange-500 transition-colors">
             <svg
@@ -151,6 +161,23 @@ export function DestinationHighlights() {
   const { destinationLoading, destinationData, destinationError } = useSelector(
     (state) => state.properties
   );
+
+  const [api, setApi] = useState();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  const onApiChange = (api) => {
+    if (!api) return;
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  };
+
+  const handleDotClick = (index) => {
+    api?.scrollTo(index);
+  };
 
   useEffect(() => {
     dispatch(fetchdestination());
@@ -259,6 +286,10 @@ export function DestinationHighlights() {
         ) : (
           <div className=" relative">
             <Carousel
+              setApi={(api) => {
+                setApi(api);
+                onApiChange(api);
+              }}
               opts={{
                 align: "start",
               }}
@@ -279,6 +310,12 @@ export function DestinationHighlights() {
                 ))}
               </CarouselContent>
             </Carousel>
+            <CarouselIndicator
+              current={current}
+              count={count}
+              variant="lines"
+              onDotClick={handleDotClick}
+            />
           </div>
         )}
       </div>

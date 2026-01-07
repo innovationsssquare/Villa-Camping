@@ -57,7 +57,7 @@ export function CarouselIndicator({
                 "h-1.5 rounded-full transition-colors duration-300",
                 current === index + 1
                   ? "bg-orange-500"
-                  : "bg-orange-200 hover:bg-indicator-hover"
+                  : "bg-orange-300 hover:bg-indicator-hover"
               )}
               initial={false}
               animate={{
@@ -74,9 +74,9 @@ export function CarouselIndicator({
       const progress = (current / count) * 100;
       return (
         <div className={cn("w-full max-w-xs mx-auto py-3", className)}>
-          <div className="relative h-1 bg-indicator-track rounded-full overflow-hidden">
+          <div className="relative h-1 bg-orange-100 rounded-full overflow-hidden">
             <motion.div
-              className="absolute inset-y-0 left-0 bg-indicator-progress rounded-full"
+              className="absolute inset-y-0 left-0 bg-orange-500 rounded-full"
               initial={false}
               animate={{ width: `${progress}%` }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -108,8 +108,8 @@ export function CarouselIndicator({
                 className={cn(
                   "rounded-full transition-colors duration-300",
                   current === index + 1
-                    ? "bg-indicator-active"
-                    : "bg-indicator-inactive hover:bg-indicator-hover"
+                    ? "bg-orange-500"
+                    : "bg-orange-300 hover:bg-indicator-hover"
                 )}
                 initial={false}
                 animate={{
@@ -166,8 +166,8 @@ export function CarouselIndicator({
                 className={cn(
                   "w-2.5 h-2.5 rounded-full transition-all duration-300",
                   current === index + 1
-                    ? "bg-indicator-glow-active"
-                    : "bg-indicator-glow-inactive"
+                    ? "bg-orange-500"
+                    : "bg-orange-200"
                 )}
                 initial={false}
                 animate={{
