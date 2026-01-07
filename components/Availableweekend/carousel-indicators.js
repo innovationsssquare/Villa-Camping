@@ -93,7 +93,7 @@ export function CarouselIndicator({
       return (
         <div
           className={cn(
-            "flex items-center justify-center gap-1 py-3",
+            "flex items-center justify-center gap-1 ",
             className
           )}
         >

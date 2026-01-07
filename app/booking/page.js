@@ -30,6 +30,7 @@ import { EmptyState } from "./empty-states";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
 import { ReviewDrawer } from "./Review-drawer";
+import ButtonLoader from "@/components/Loadercomponents/button-loader";
 
 const StatusBadge = ({ status }) => {
   const getStatusConfig = (status) => {
@@ -76,7 +77,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const BookingCard = ({ booking,onWriteReview }) => {
+const BookingCard = ({ booking, onWriteReview }) => {
   const {
     propertyId,
     checkIn,
@@ -465,13 +466,12 @@ export default function BookingScreen() {
 
             <div className="flex items-center gap-2">
               <NotificationSheet />
-
             </div>
           </div>
         </header>
 
         {/* Search Bar */}
-        <div className="sticky top-12 z-20 bg-card/80 bg-white backdrop-blur-md border-b border-gray-300 shadow-sm">
+        <div className="sticky top-12 z-40 bg-card/80 bg-white backdrop-blur-md border-b border-gray-300 shadow-sm">
           <div className="max-w-6xl mx-auto p-4">
             <div className="relative">
               <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
@@ -496,7 +496,7 @@ export default function BookingScreen() {
             onSelectionChange={(key) => setActiveTab(key)}
             className="w-full md:w-1/2"
             classNames={{
-              tabList: "w-full z-50  bg-gray-200  rounded-md p-0 mb-2",
+              tabList: "w-full z-30  bg-gray-200  rounded-md p-0 mb-2",
               cursor: "w-full bg-black border border-black",
               tab: " px-0 md:h-10 ",
               tabContent:
@@ -506,8 +506,10 @@ export default function BookingScreen() {
             <Tab key="Active" title="Active">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 ">
                 {loading ? (
-                  <div className="col-span-full py-20 text-center text-muted-foreground">
-                    Loading your stays...
+                  <div className="flex justify-center items-center h-[60vh] bg-white">
+                    <div className="bg-black rounded-full flex justify-center items-center">
+                      <ButtonLoader />
+                    </div>
                   </div>
                 ) : filteredResults?.length > 0 ? (
                   filteredResults?.map((booking) => (

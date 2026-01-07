@@ -4,6 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { Button as HeroButton, Spinner } from "@heroui/react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import {
@@ -27,7 +30,7 @@ import { MdHelp } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import { IoLogOut } from "react-icons/io5";
 import { Card, CardContent } from "@/components/ui/card";
-import Listprop from "@/public/Homeasset/Listprop.jpg"
+import Listprop from "@/public/Homeasset/Listprop.jpg";
 import {
   User,
   MessageCircle,
@@ -47,56 +50,57 @@ import {
   Menu,
 } from "lucide-react";
 import Image from "next/image";
-const navItems = [
-  {
-    title: "Profile Details",
-    href: "/account",
-    icon: <FaUser className="h-5 w-5" />,
-  },
-  // {
-  //   title: "About Us",
-  //   href: "/about",
-  //   icon: <User className="h-5 w-5" />,
-  // },
-  {
-    title: "My Booking",
-    href: "/booking",
-    icon: <FaBook className="h-5 w-5" />,
-  },
-  // {
-  //   title: "Payment Methods",
-  //   href: "/profile/payment",
-  // },
-  {
-    title: "Settings",
-    href: "/account/settings",
-    icon: <IoSettings className="h-5 w-5 " />,
-  },
-  {
-    title: "Privacy Policy",
-    href: "/account/privacy-policy",
-    icon: <IoShieldCheckmark className="h-5 w-5 " />,
-  },
-  {
-    title: "Help & Support",
-    href: "/account/support",
-    icon: <MdHelp className="h-5 w-5 " />,
-  },
-  {
-    title: "Contact us",
-    href: "/contact",
-    icon: <FaPhoneAlt className="h-5 w-5 " />,
-  },
-];
+import { useRef } from "react";
+
+
 
 export function UserSidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const touchStartX = useRef(null);
 
-  // Close sheet when route changes (mobile only)
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
+
+  const handleNavigate = (href) => {
+    startTransition(() => {
+      router.push(href);
+    });
+    setOpen(false);
+  };
+
+  const isActive = (href) => {
+    // exact match
+    if (pathname === href) return true;
+
+    // nested routes should NOT activate parent tabs
+    if (href === "/account") return pathname === "/account";
+
+    return pathname.startsWith(href + "/");
+  };
+
+  const activeClass = " text-orange-500 ";
+
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartX.current) return;
+
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+
+    // swipe left → close
+    if (diff > 60) {
+      setOpen(false);
+    }
+
+    touchStartX.current = null;
+  };
 
   return (
     <>
@@ -139,28 +143,52 @@ export function UserSidebar() {
               <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
                 <CardContent className="p-2">
                   <div className="grid grid-cols-3 gap-4">
-                    <div className="flex flex-col items-center space-y-2">
+                    <div
+                      onClick={() => handleNavigate("/account")}
+                      className="flex flex-col items-center space-y-2"
+                    >
                       <div className="p-3 bg-gray-100 rounded-full">
                         <User className="h-5 w-5 text-black fill-black" />
                       </div>
-                      <span className="text-xs text-center text-gray-600  font-semibold">
+                      <span
+                        className={cn(
+                          "text-xs text-center text-gray-600  font-semibold",
+                          isActive("/account") && activeClass
+                        )}
+                      >
                         My Account
                       </span>
                     </div>
-                    <div className="flex flex-col items-center space-y-2">
+                    <div
+                      onClick={() => handleNavigate("/account/support")}
+                      className="flex flex-col items-center space-y-2"
+                    >
                       <div className="p-3 bg-gray-100 rounded-full">
                         <MessageCircle className="h-5 w-5 text-black fill-black" />
                       </div>
-                      <span className="text-xs text-center text-gray-600 font-semibold">
+                      <span
+                        className={cn(
+                          "text-xs text-center text-gray-600  font-semibold",
+                          isActive("/account/support") && activeClass
+                        )}
+                      >
                         Support
                       </span>
                     </div>
-                    <div className="flex flex-col items-center space-y-2 relative">
+                    <div
+                      onClick={() => handleNavigate("/notifications")}
+                      className="flex flex-col items-center space-y-2 relative"
+                    >
                       <div className="p-3 bg-gray-100 rounded-full relative">
                         <Bell className="h-5 w-5 text-black fill-black" />
-                        <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></div>
+                        {/* <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></div> */}
                       </div>
-                      <span className="text-xs text-center text-gray-600 font-semibold">
+                      <span
+                        className={cn(
+                          "text-xs text-center text-gray-600  font-semibold",
+                          isActive("/notifications") && activeClass
+                        )}
+                      >
                         Notifications
                       </span>
                     </div>
@@ -172,19 +200,35 @@ export function UserSidebar() {
                 <CardContent className="p-2">
                   <h3 className="font-semibold text-gray-900 mb-3">My Trips</h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2">
+                    <div
+                      onClick={() => handleNavigate("/booking")}
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <MapPin className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700 text-sm font-semibold">
+                        <span
+                          className={cn(
+                            "text-xs text-center text-gray-600  font-semibold",
+                            isActive("/booking") && activeClass
+                          )}
+                        >
                           View/Manage Trips
                         </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
-                    <div className="flex items-center justify-between py-2">
+                    <div
+                      onClick={() => handleNavigate("/wishlist")}
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <Heart className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700 text-sm font-semibold">
+                        <span
+                          className={cn(
+                            "text-xs text-center text-gray-600  font-semibold",
+                            isActive("/wishlist") && activeClass
+                          )}
+                        >
                           Wishlist
                         </span>
                       </div>
@@ -194,7 +238,10 @@ export function UserSidebar() {
                 </CardContent>
               </Card>
 
-              <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
+              <Card
+                onClick={() => handleNavigate("/become-host")}
+                className="shadow-none border border-gray-300 rounded-2xl p-0"
+              >
                 <CardContent className="p-2">
                   <div className="flex items-center space-x-3">
                     <div className="h-12 w-12 rounded-lg overflow-hidden">
@@ -219,27 +266,59 @@ export function UserSidebar() {
 
               <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
                 <CardContent className="p-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">Legal and Support</h3>
+                  <h3 className="font-semibold text-gray-900 mb-3">
+                    Legal and Support
+                  </h3>
                   <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2">
+                    <div
+                      onClick={() => handleNavigate("/account/contact-us")}
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <Phone className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700 text-sm font-semibold">Contact us</span>
+                        <span
+                          className={cn(
+                            "text-xs text-center text-gray-600  font-semibold",
+                            isActive("/account/contact-us") && activeClass
+                          )}
+                        >
+                          Contact us
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
-                    <div className="flex items-center justify-between py-2">
+                    <div
+                      onClick={() => handleNavigate("/account/privacy-policy")}
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <Users className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700 text-sm font-semibold">Privacy Policy</span>
+                        <span
+                          className={cn(
+                            "text-xs text-center text-gray-600  font-semibold",
+                            isActive("/account/privacy-policy") && activeClass
+                          )}
+                        >
+                          Privacy Policy
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
-                    <div className="flex items-center justify-between py-2">
+                    <div
+                      onClick={() =>
+                        handleNavigate("/account/Terms-Conditions")
+                      }
+                      className="flex items-center justify-between py-2"
+                    >
                       <div className="flex items-center space-x-3">
                         <Calendar className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700 text-sm font-semibold">
-                         Terms & Conditions
+                        <span
+                          className={cn(
+                            "text-xs text-center text-gray-600  font-semibold",
+                            isActive("/account/Terms-Conditions") && activeClass
+                          )}
+                        >
+                          Terms & Conditions
                         </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
@@ -300,7 +379,9 @@ export function UserSidebar() {
                         <div className="h-6 w-6 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center">
                           <Instagram className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-gray-700 text-xs font-semibold">Instagram</span>
+                        <span className="text-gray-700 text-xs font-semibold">
+                          Instagram
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
@@ -309,7 +390,9 @@ export function UserSidebar() {
                         <div className="h-6 w-6 bg-black rounded-lg flex items-center justify-center">
                           <X className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-gray-700 text-xs font-semibold">X</span>
+                        <span className="text-gray-700 text-xs font-semibold">
+                          X
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
@@ -318,7 +401,9 @@ export function UserSidebar() {
                         <div className="h-6 w-6 bg-blue-600 rounded-lg flex items-center justify-center">
                           <Linkedin className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-gray-700 font-semibold text-xs">LinkedIn</span>
+                        <span className="text-gray-700 font-semibold text-xs">
+                          LinkedIn
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
@@ -327,15 +412,15 @@ export function UserSidebar() {
                         <div className="h-6 w-6 bg-blue-500 rounded-lg flex items-center justify-center">
                           <Facebook className="h-4 w-4 text-white" />
                         </div>
-                        <span className="text-gray-700 font-semibold text-xs">Facebook</span>
+                        <span className="text-gray-700 font-semibold text-xs">
+                          Facebook
+                        </span>
                       </div>
                       <ChevronRight className="h-4 w-4 text-gray-400" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
-
-           
             </div>
           </div>
         </SheetContent>

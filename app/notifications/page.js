@@ -10,52 +10,7 @@ import { useState } from "react";
 
 // Sample notification data
 const initialNotifications = [
-  {
-    id: "1",
-    title: "Order Shipped",
-    message: "Your order #12345 has been shipped and is on its way.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 30), // 30 minutes ago
-    read: false,
-    priority: "medium",
-    type: "order",
-  },
-  {
-    id: "2",
-    title: "Payment Successful",
-    message: "Your payment of $49.99 has been processed successfully.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-    read: false,
-    priority: "medium",
-    type: "payment",
-  },
-  {
-    id: "3",
-    title: "Account Security",
-    message:
-      "We noticed a login from a new device. Please verify if this was you.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-    read: false,
-    priority: "high",
-    type: "account",
-  },
-  {
-    id: "4",
-    title: "New Feature Available",
-    message: "Check out our new wishlist feature! Save items for later.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-    read: true,
-    priority: "low",
-    type: "system",
-  },
-  {
-    id: "5",
-    title: "Special Offer",
-    message: "Enjoy 20% off your next purchase with code SPECIAL20.",
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-    read: true,
-    priority: "medium",
-    type: "system",
-  },
+ 
 ];
 
 // Helper function to format the timestamp
