@@ -17,9 +17,14 @@ import { clearSelectedTents, removeCoupon } from "@/Redux/Slices/bookingSlice";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "@heroui/react";
+import {
+  toggleWishlist,
+  optimisticToggle,
+  fetchWishlistIds,
+} from "@/Redux/Slices/wishlistSlice";
 
 export function PropertyCard({ property }) {
-  const [isLiked, setIsLiked] = useState(false);
+  // const [isLiked, setIsLiked] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -30,6 +35,15 @@ export function PropertyCard({ property }) {
 
   // Use the imported hero image as fallback
   const displayImages = property.images || [property.image || propertyHero];
+
+const wishlistIds = useSelector((state) => state.wishlist.ids);
+console.log(wishlistIds,"wishlistIds")
+// 🔑 derive Set safely
+const wishlistSet = new Set(wishlistIds);
+console.log(wishlistSet)
+const wishlistKey = `villa:${property._id}`;
+const isLiked = wishlistSet.has(wishlistKey);
+
 
   useEffect(() => {
     const checkMobile = () => {
@@ -85,6 +99,32 @@ export function PropertyCard({ property }) {
     setCurrentImageIndex(0);
   }, [property._id]);
 
+  useEffect(() => {
+    dispatch(fetchWishlistIds({id:"6833656360ed0e90157dd2e1"}))
+  }, [dispatch])
+  
+
+ const handleWishlist = () => {
+    // ⚡ optimistic UI
+    dispatch(
+      optimisticToggle({
+        propertyId: property._id,
+        propertyType:"villa",
+        userId:"6833656360ed0e90157dd2e1"
+      })
+    );
+
+    // 🌐 API call
+    dispatch(
+      toggleWishlist({
+        propertyId: property._id,
+        propertyType: "villa",
+        userId:"6833656360ed0e90157dd2e1"
+      })
+    );
+  };
+
+
   function formatRupee(amount) {
     if (amount == null || Number.isNaN(Number(amount))) return "₹0";
     // no decimal places - change maximumFractionDigits if needed
@@ -104,13 +144,15 @@ export function PropertyCard({ property }) {
         <Button
           isIconOnly
           radius="full"
-          className="bg-white/80 backdrop-blur-sm hover:bg-white/95 rounded-full h-6 w-6 md:h-8 md:w-8 p-0 border-0 shadow-lg"
-          onPress={() => setIsLiked(!isLiked)}
+          className="bg-white/80 backdrop-blur-sm hover:bg-white rounded-full h-7 w-7 p-0 border-0 shadow-lg"
+          onPress={handleWishlist}
         >
           <Heart
             className={cn(
-              "h-3 w-3 md:h-4 md:w-4 transition-all duration-200 ease-bounce",
-              isLiked ? "fill-heart-red text-heart-red" : "text-gray-600"
+              "h-4 w-4 transition-all duration-200",
+              isLiked
+                ? "fill-red-500 text-red-500 scale-110 animate-heart"
+                : "text-gray-600"
             )}
           />
         </Button>

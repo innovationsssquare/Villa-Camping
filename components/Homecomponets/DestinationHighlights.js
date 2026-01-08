@@ -259,29 +259,10 @@ export function DestinationHighlights() {
             ))}
           </div>
         ) : destinationError ? (
-          <section className="py-24 text-center">
-            <div className="container mx-auto px-6 max-w-2xl">
-              <div className="bg-red-50 text-red-600 p-10 rounded-[2.5rem] border border-red-100">
-                <h3 className="text-2xl font-bold mb-4">Connection Issue</h3>
-                <p className="mb-8 opacity-80 leading-relaxed">
-                  We're having trouble reaching our travel guide database.
-                  Please check your internet connection and try again.
-                </p>
-                <Button
-                  onClick={() => dispatch(fetchdestination())}
-                  variant="destructive"
-                  className="rounded-full px-10 py-6 h-auto text-lg shadow-xl shadow-red-200"
-                >
-                  Retry Connection
-                </Button>
-              </div>
-            </div>
-          </section>
+          <section className="py-24 text-center"></section>
         ) : !destinationData || destinationData.length === 0 ? (
           <section className="py-12 md:py-20">
-            <div className="container mx-auto px-6">
-              <EmptyDestinationState />
-            </div>
+            <div className="container mx-auto px-6"></div>
           </section>
         ) : (
           <div className=" relative">

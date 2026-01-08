@@ -9,6 +9,7 @@ import campingSlice from "@/Redux/Slices/campingSlice";
 import cottageSlice from "@/Redux/Slices/cottageSlice";
 import hotelSlice from "@/Redux/Slices/hotelSlice";
 import myBookingReducer from "@/Redux/Slices/myBookingSlice";
+import wishlistReducer from "@/Redux/Slices/wishlistSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,5 +23,6 @@ export const store = configureStore({
     coupons:couponSlice,
     hotel:hotelSlice,
     myBookings: myBookingReducer,
+    wishlist:wishlistReducer,
   },
 });

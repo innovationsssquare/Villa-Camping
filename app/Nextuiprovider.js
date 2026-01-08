@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import SplashScreen from "@/components/Homecomponets/SplashScreen";
 import { useState } from "react";
 import { ToastProvider } from "@heroui/toast";
+import { SocketProvider } from "@/lib/context/SocketProvider";
 
 export function NextuiProviderWrapper({ children }) {
   const pathname = usePathname();
@@ -22,60 +23,62 @@ export function NextuiProviderWrapper({ children }) {
   }
 
   return (
-    <HeroUIProvider>
-      {pathname === "/Signin" ||
-      pathname === "/shorts" ||
-      pathname === "/date-selection" ||
-      pathname === "/search-stay" ||
-      pathname === "/checkout" ||
-      pathname === "/search-your-gateway" ||
-      pathname.startsWith("/view-Camping") ||
-      pathname.startsWith("/view-Cottage") ||
-      pathname.startsWith("/view-Hotel") ||
-      pathname.startsWith("/view-Villa") ? null : (
-        <Navbar />
-      )}
-      {pathname === "/Signin" ||
-      pathname === "/shorts" ||
-      pathname === "/date-selection" ||
-      pathname === "/search-stay" ||
-      pathname === "/checkout" ||
-      pathname === "/account" ||
-      pathname === "/wishlist" ||
-      pathname === "/account/settings" ||
-      pathname === "/notifications" ||
-      pathname === "/search-your-gateway" ||
-      pathname === "/booking" ||
-      pathname.startsWith("/view-Camping") ||
-      pathname.startsWith("/view-Cottage") ||
-      pathname.startsWith("/view-Hotel") ||
-      pathname.startsWith("/view-Villa") ? null : (
-        <AppHeader />
-      )}
-      <div className="z-[400]">
-        <ToastProvider placement={"top-center"} />
-      </div>
-      {children}
-      {pathname === "/Signin" ||
-      pathname === "/shorts" ||
-      pathname === "/date-selection" ||
-      pathname === "/search-stay" ||
-      pathname === "/search-your-gateway" ||
-      pathname === "/checkout" ||
-      pathname.startsWith("/view-Camping") ||
-      pathname.startsWith("/view-Cottage") ||
-      pathname.startsWith("/view-Hotel") ||
-      pathname.startsWith("/view-Villa") ? null : (
-        <BottomNav />
-      )}
-      {pathname === "/Signin" ||
-      pathname === "/shorts" ||
-      pathname === "/date-selection" ||
-      pathname === "/search-stay" ||
-      pathname === "/search-your-gateway" ||
-      pathname === "/category/all" ? null : (
-        <Footer />
-      )}
-    </HeroUIProvider>
+    <SocketProvider>
+      <HeroUIProvider>
+        {pathname === "/Signin" ||
+        pathname === "/shorts" ||
+        pathname === "/date-selection" ||
+        pathname === "/search-stay" ||
+        pathname === "/checkout" ||
+        pathname === "/search-your-gateway" ||
+        pathname.startsWith("/view-Camping") ||
+        pathname.startsWith("/view-Cottage") ||
+        pathname.startsWith("/view-Hotel") ||
+        pathname.startsWith("/view-Villa") ? null : (
+          <Navbar />
+        )}
+        {pathname === "/Signin" ||
+        pathname === "/shorts" ||
+        pathname === "/date-selection" ||
+        pathname === "/search-stay" ||
+        pathname === "/checkout" ||
+        pathname === "/account" ||
+        pathname === "/wishlist" ||
+        pathname === "/account/settings" ||
+        pathname === "/notifications" ||
+        pathname === "/search-your-gateway" ||
+        pathname === "/booking" ||
+        pathname.startsWith("/view-Camping") ||
+        pathname.startsWith("/view-Cottage") ||
+        pathname.startsWith("/view-Hotel") ||
+        pathname.startsWith("/view-Villa") ? null : (
+          <AppHeader />
+        )}
+        <div className="z-[400]">
+          <ToastProvider placement={"top-center"} />
+        </div>
+        {children}
+        {pathname === "/Signin" ||
+        pathname === "/shorts" ||
+        pathname === "/date-selection" ||
+        pathname === "/search-stay" ||
+        pathname === "/search-your-gateway" ||
+        pathname === "/checkout" ||
+        pathname.startsWith("/view-Camping") ||
+        pathname.startsWith("/view-Cottage") ||
+        pathname.startsWith("/view-Hotel") ||
+        pathname.startsWith("/view-Villa") ? null : (
+          <BottomNav />
+        )}
+        {pathname === "/Signin" ||
+        pathname === "/shorts" ||
+        pathname === "/date-selection" ||
+        pathname === "/search-stay" ||
+        pathname === "/search-your-gateway" ||
+        pathname === "/category/all" ? null : (
+          <Footer />
+        )}
+      </HeroUIProvider>
+    </SocketProvider>
   );
 }
