@@ -20,7 +20,18 @@ import Cookies from "js-cookie";
 export const fetchAllProperties = createAsyncThunk(
   "properties/fetchAll",
   async (
-    { categoryId, checkIn, checkOut, subtype, page, limit },
+    {
+      categoryId,
+      checkIn,
+      checkOut,
+      subtype,
+      page,
+      limit,
+      sortBy,
+      priceMin,
+      priceMax,
+      search,
+    },
     { rejectWithValue }
   ) => {
     try {
@@ -29,6 +40,10 @@ export const fetchAllProperties = createAsyncThunk(
         checkIn,
         checkOut,
         subtype,
+        search,
+        priceMax,
+        priceMin,
+        sortBy,
         page,
         limit,
       });
@@ -184,26 +199,24 @@ export const fetchReviewHighlights = createAsyncThunk(
   }
 );
 
-export const fetchAllReels = createAsyncThunk(
-  "reels/fetchAll",
-  async () => {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_PRODUCTION_URL}/User/api/reels`)
-    const json = await res.json()
+export const fetchAllReels = createAsyncThunk("reels/fetchAll", async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/User/api/reels`
+  );
+  const json = await res.json();
 
-    const nowIST = new Date(
-      new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
-    )
-    const isWeekend = nowIST.getDay() === 0 || nowIST.getDay() === 6
+  const nowIST = new Date(
+    new Date().toLocaleString("en-US", { timeZone: "Asia/Kolkata" })
+  );
+  const isWeekend = nowIST.getDay() === 0 || nowIST.getDay() === 6;
 
-    return json.data.map((r) => ({
-      ...r,
-      price: isWeekend
-        ? r.price?.weekend ?? r.price?.weekday
-        : r.price?.weekday ?? r.price?.weekend,
-    }))
-  }
-)
-
+  return json.data.map((r) => ({
+    ...r,
+    price: isWeekend
+      ? r.price?.weekend ?? r.price?.weekday
+      : r.price?.weekday ?? r.price?.weekend,
+  }));
+});
 
 /* ----------------------------------
    Slice

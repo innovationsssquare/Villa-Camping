@@ -1,103 +1,192 @@
-import { useState } from "react";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+"use client";
+
+import { useMemo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
   DrawerTrigger,
   DrawerClose,
 } from "@/components/ui/drawer";
-import { Button } from "@heroui/react";
+
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
 
+import { Button } from "@heroui/react";
+import { SlidersHorizontal } from "lucide-react";
 
+import {
+  setSelectedCategory,
+  setSelectedCategoryname,
+} from "@/Redux/Slices/bookingSlice";
 
-const sortOptions = [
-  { value: "price-low", label: "Price: Low to High", icon: ArrowUp },
-  { value: "price-high", label: "Price: High to Low", icon: ArrowDown },
-  { value: "rating-high", label: "Rating: High to Low", icon: ArrowDown },
-  { value: "rating-low", label: "Rating: Low to High", icon: ArrowUp },
-  { value: "newest", label: "Newest First", icon: ArrowDown },
-  { value: "oldest", label: "Oldest First", icon: ArrowUp },
-  { value: "name-az", label: "Name: A to Z", icon: ArrowUp },
-  { value: "name-za", label: "Name: Z to A", icon: ArrowDown },
+import {
+  addPropertyType,
+  clearPropertyType,
+  removePropertyType,
+  setPriceMax,
+  setPriceMin,
+  setPropertyType,
+  setSortBy,
+} from "@/Redux/Slices/propertyFilterSlice";
+
+/* ===== PROPERTY TYPES BY CATEGORY SLUG ===== */
+export const PROPERTY_TYPES_BY_SLUG = {
+  villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
+  camping: ["Single Tent", "Couple Tent", "Family Tent"],
+  cottage: ["Single Cottage", "Couple Cottage", "Family Cottage"],
+  hotel: ["Standard Room", "Deluxe Room", "Suite", "Presidential Suite"],
+};
+
+/* ===== SORT OPTIONS ===== */
+const SORT_OPTIONS = [
+  { value: "popular", label: "Most Popular" },
+  { value: "low-high", label: "Price: Low → High" },
+  { value: "high-low", label: "Price: High → Low" },
+  { value: "rating", label: "Highest Rated" },
 ];
 
-export function SortDrawer({ onSortChange, currentSort = "" }) {
-  const [selectedSort, setSelectedSort] = useState(currentSort);
+export function SortDrawer() {
+  const dispatch = useDispatch();
 
-  const handleSortSelect = (value) => {
-    setSelectedSort(value);
-  };
+  const { categories } = useSelector((state) => state.category);
+  const { selectedCategoryId } = useSelector((state) => state.booking);
+  const { selectedPropertyTypes, sortBy, priceMin, priceMax } = useSelector(
+    (state) => state.propertyFilter
+  );
 
-  const handleApplySort = () => {
-    onSortChange?.(selectedSort);
-  };
+  const [localSort, setLocalSort] = useState(sortBy);
 
-  const handleClearSort = () => {
-    setSelectedSort("");
-    onSortChange?.("");
-  };
+  /* ===== ACTIVE CATEGORY (ID → OBJECT) ===== */
+  const activeCategory = useMemo(() => {
+    if (!selectedCategoryId || !categories?.length) return null;
+    return categories.find((c) => c._id === selectedCategoryId) || null;
+  }, [selectedCategoryId, categories]);
+
+  /* ===== PROPERTY TYPES FROM SLUG ===== */
+  const availableSubtypes = useMemo(() => {
+    if (!activeCategory) return [];
+    return PROPERTY_TYPES_BY_SLUG[activeCategory.slug] || [];
+  }, [activeCategory]);
 
   return (
     <Drawer>
       <DrawerTrigger asChild>
-        <Button
-          variant="outline"
-          className="bg-white border text-xs border-gray-200 shadow-none text-black hover:bg-gray-50 h-10 px-6 rounded-full flex items-center gap-3  justify-center font-medium"
-        >
-          <ArrowUpDown className="h-4 w-4" />
-          SORT
+        <Button size="sm" className="bg-black text-white">
+          <SlidersHorizontal className="w-4 h-4" />
         </Button>
       </DrawerTrigger>
+
       <DrawerContent>
         <DrawerHeader>
-          <DrawerTitle>Sort Properties</DrawerTitle>
+          <DrawerTitle>Filters & Sort</DrawerTitle>
           <DrawerDescription>
-           {` Choose how you'd like to sort the properties`}
+            Refine results by price, category and type
           </DrawerDescription>
         </DrawerHeader>
-        <ScrollArea className="h-[50vh] px-4">
-          <div className="space-y-4">
-            <RadioGroup value={selectedSort} onValueChange={handleSortSelect}>
-              {sortOptions.map((option) => (
-                <div key={option.value} className="flex items-center space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                  <RadioGroupItem value={option.value} id={option.value} />
-                  <Label 
-                    htmlFor={option.value} 
-                    className="flex items-center gap-3 cursor-pointer flex-1 font-medium"
-                  >
-                    <option.icon className="h-4 w-4 text-gray-600" />
-                    {option.label}
-                  </Label>
+
+        <ScrollArea className="h-[75vh] px-4 space-y-8">
+          {/* PRICE RANGE */}
+          <section>
+            <h4 className="font-semibold mb-2">Price Range</h4>
+            <p className="text-sm text-gray-600 mb-3">
+              ₹{priceMin ?? 0} – ₹{priceMax ?? 60000}
+            </p>
+            <Slider
+              min={0}
+              max={60000}
+              step={1000}
+              value={[priceMin ?? 0, priceMax ?? 60000]}
+              onValueChange={([min, max]) => {
+                dispatch(setPriceMin(min));
+                dispatch(setPriceMax(max));
+              }}
+            />
+          </section>
+
+          {/* SORT */}
+          <section>
+            <h4 className="font-semibold mb-3">Sort By</h4>
+            <RadioGroup
+              value={localSort}
+              onValueChange={(value) => {
+                setLocalSort(value);
+                dispatch(setSortBy(value)); // 🔑 APPLY IMMEDIATELY
+              }}
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <div key={opt.value} className="flex items-center gap-3 mb-2">
+                  <RadioGroupItem value={opt.value} />
+                  <Label>{opt.label}</Label>
                 </div>
               ))}
             </RadioGroup>
-          </div>
+          </section>
+
+          {/* CATEGORY */}
+          <section>
+            <h4 className="font-semibold mb-3">Category</h4>
+            <div className="space-y-2">
+              {categories.map((cat) => (
+                <div key={cat._id} className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedCategoryId === cat._id}
+                    onCheckedChange={() => {
+                      dispatch(setSelectedCategory(cat._id));
+                      dispatch(setSelectedCategoryname(cat.name));
+                    }}
+                  />
+                  <Label>{cat.name}</Label>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          {/* PROPERTY TYPE */}
+          <section>
+            <h4 className="font-semibold mb-3">Property Type</h4>
+
+            {!activeCategory && (
+              <p className="text-sm text-gray-500">
+                Select a category to see property types
+              </p>
+            )}
+
+            <div className="space-y-2">
+              {availableSubtypes.map((type) => (
+                <div key={type} className="flex items-center gap-3">
+                  <Checkbox
+                    checked={selectedPropertyTypes === type}
+                    onCheckedChange={(checked) =>
+                      checked
+                        ? dispatch(setPropertyType(type))
+                        : dispatch(clearPropertyType())
+                    }
+                  />
+                  <Label>{type}</Label>
+                </div>
+              ))}
+            </div>
+          </section>
         </ScrollArea>
+
         <DrawerFooter>
-          <div className="flex gap-2">
+          <DrawerClose asChild>
             <Button
-              variant="outline"
-              onClick={handleClearSort}
-              className="flex-1 border border-gray-200 bg-gray-50 hover:bg-gray-100"
+              className="bg-black text-white"
+              onPress={() => dispatch(setSortBy(localSort))}
             >
-              Clear Sort
+              Apply Filters
             </Button>
-            <DrawerClose asChild>
-              <Button 
-                onClick={handleApplySort}
-                className="flex-1 bg-black text-white hover:bg-gray-800"
-              >
-                Apply Sort
-              </Button>
-            </DrawerClose>
-          </div>
+          </DrawerClose>
         </DrawerFooter>
       </DrawerContent>
     </Drawer>

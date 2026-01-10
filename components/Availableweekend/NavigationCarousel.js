@@ -10,12 +10,17 @@ import {
   TrendingUp,
   Navigation,
   SlidersHorizontal,
+  WavesLadder,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import mapp from "@/public/Aboutusasset/google-maps.jpg";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { SortDrawer } from "../Productcomponets/SortDrawer";
+import { useDispatch } from "react-redux";
+import { setSortBy } from "@/Redux/Slices/propertyFilterSlice";
+import { GiPoolDive } from "react-icons/gi";
 
 const defaultTabs = [
   {
@@ -25,9 +30,14 @@ const defaultTabs = [
     active: true,
   },
   {
-    id: "sort",
-    label: "Sort By",
-    icon: <ArrowUpDown className="w-4 h-4 text-green-500" />,
+    id: "pool",
+    label: "Pool",
+    icon: <WavesLadder className="w-4 h-4 text-sky-500" />,
+  },
+   {
+    id: "trending",
+    label: "Trending",
+    icon: <TrendingUp className="w-4 h-4 text-fuchsia-500" />,
   },
   {
     id: "newly",
@@ -39,16 +49,12 @@ const defaultTabs = [
     label: "Featured",
     icon: <TrendingUp className="w-4 h-4 text-blue-500" />,
   },
-  {
-    id: "trending",
-    label: "Trending",
-    icon: <TrendingUp className="w-4 h-4 text-fuchsia-500" />,
-  },
-  {
-    id: "nearby",
-    label: "Nearby",
-    icon: <Navigation className="w-4 h-4 text-teal-500" />,
-  },
+ 
+  // {
+  //   id: "nearby",
+  //   label: "Nearby",
+  //   icon: <Navigation className="w-4 h-4 text-teal-500" />,
+  // },
 ];
 
 export const NavigationCarousel = ({
@@ -63,15 +69,36 @@ export const NavigationCarousel = ({
   const scrollContainerRef = useRef(null);
   const { isVisible } = useScrollDirection();
   const router = useRouter();
+
+  const dispatch = useDispatch();
+
   const handleTabClick = (tabId) => {
     setActiveTab(tabId);
     onTabChange?.(tabId);
 
-    if (tabId === "sort") {
-      onSortClick?.();
-    }
-    if (tabId === "map") {
-      router.push("/search-your-gateway");
+    switch (tabId) {
+      case "newly":
+        dispatch(setSortBy("new"));
+        break;
+
+      case "featured":
+        dispatch(setSortBy("featured"));
+        break;
+
+      case "trending":
+        dispatch(setSortBy("trending"));
+        break;
+
+      case "pool":
+        dispatch(setSortBy("pool"));
+        break;
+
+      case "map":
+        router.push("/search-your-gateway");
+        return;
+
+      default:
+        break;
     }
   };
 
@@ -103,16 +130,7 @@ export const NavigationCarousel = ({
       )}
     >
       <div className="flex items-center gap-3 p-2 mt-1">
-        {/* Fixed Filter Button */}
-        <Button
-          variant="solid"
-          size="sm"
-          onPress={handleFilterClick}
-          className="flex-shrink-0 bg-black text-white hover:bg-black/90 shadow-soft"
-        >
-          <SlidersHorizontal className="w-4 h-4" />
-        </Button>
-
+        <SortDrawer />
         {/* Scrollable Tabs Container */}
         <div
           ref={scrollContainerRef}
@@ -127,7 +145,7 @@ export const NavigationCarousel = ({
                   variant="ghost"
                   size="sm"
                   data-active={isActive}
-                  onClick={() => handleTabClick(tab.id)}
+                  onPress={() => handleTabClick(tab.id)}
                   className={cn(
                     "flex-shrink-0 transition-all duration-200 animate-fade-in",
                     isActive

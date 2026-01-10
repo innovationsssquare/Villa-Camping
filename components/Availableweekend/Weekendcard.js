@@ -218,7 +218,7 @@ const isLiked = wishlistSet.has(wishlistKey);
                     ? "bg-backdrop-blur bg-white"
                     : "bg-backdrop-blur/50 hover:bg-backdrop-blur/70 bg-gray-300"
                 )}
-                onClick={() => goToImage(index)}
+                onPress={() => goToImage(index)}
               />
             ))}
           </div>
@@ -228,7 +228,7 @@ const isLiked = wishlistSet.has(wishlistKey);
         {property?.tags && (
           <div className="absolute capitalize bottom-3 right-3 bg-orange-200 text-card-text-light text-xs px-2 py-1 rounded-full flex items-center gap-1 z-10 font-medium">
             <Star className="h-3 w-3 fill-orange-500 text-orange-500" />
-            {property?.tags}
+            {property?.tags[0]}
           </div>
         )}
 
