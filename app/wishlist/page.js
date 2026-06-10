@@ -6,6 +6,10 @@ import { useRouter } from "next/navigation";
 import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
 import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { cn } from "@/lib/utils";
+import { useDispatch, useSelector } from "react-redux";
+import PropertyCard from "@/components/Availableweekend/Weekendcard";
+import { useEffect } from "react";
+import { fetchmyWishlists } from "@/Redux/Slices/wishlistSlice";
 
 const WishlistItem = ({
   id,
@@ -75,39 +79,14 @@ const WishlistItem = ({
 const Wishlist = () => {
   const navigate = useRouter();
   const { addToast } = useToast();
+  const { wishlists, wishloading, wishlisterror } = useSelector(
+    (state) => state.wishlist
+  );
 
-  const wishlistItems = [
-    {
-      id: "1",
-      title: "Cozy Mountain Cabin",
-      location: "Aspen, Colorado",
-      rating: 4.8,
-      reviews: 124,
-      price: "$180",
-      imageUrl:
-        "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop",
-    },
-    {
-      id: "2",
-      title: "Beachfront Villa",
-      location: "Malibu, California",
-      rating: 4.9,
-      reviews: 87,
-      price: "$350",
-      imageUrl:
-        "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop",
-    },
-    {
-      id: "3",
-      title: "Urban Loft",
-      location: "New York City",
-      rating: 4.6,
-      reviews: 203,
-      price: "$120",
-      imageUrl:
-        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
-    },
-  ];
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(fetchmyWishlists());
+  }, [dispatch]);
 
   const handleBackClick = () => {
     navigate.push("/");
@@ -143,33 +122,15 @@ const Wishlist = () => {
 
             <div className="flex items-center gap-2">
               <NotificationSheet />
-
-              {/* <Button
-                           onClick={() => router.push("/bag")}
-                           variant="outline"
-                           size="icon"
-                           className="rounded-md  border-gray-300 relative bg-[#FFFFFF4D]"
-                         >
-                           <IoBag className="h-5 w-5" />
-                           {cartItemCount > 0 && (
-                             <Badge
-                               className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
-                               variant="default"
-                             >
-                               {cartItemCount}
-                             </Badge>
-                           )}
-                           <span className="sr-only">Shopping cart</span>
-                         </Button> */}
             </div>
           </div>
         </section>
         <div className="px-mobile py-section-gap">
-          {wishlistItems.length > 0 ? (
+          {wishlists.length > 0 ? (
             <>
               <div className="flex items-center justify-between mb-3 ">
                 <h2 className="text-lg font-heading-weight text-foreground">
-                  {wishlistItems.length} saved places
+                  {wishlists.length} saved places
                 </h2>
                 <button className="text-sm text-accent hover:text-accent/80 transition-colors">
                   Clear all
@@ -177,13 +138,8 @@ const Wishlist = () => {
               </div>
 
               <div className="space-y-4">
-                {wishlistItems.map((item) => (
-                  <WishlistItem
-                    key={item.id}
-                    {...item}
-                    onRemove={handleRemoveFromWishlist}
-                    onShare={handleShareItem}
-                  />
+                {wishlists.map((item, k) => (
+                  <PropertyCard key={k} property={item?.propertyId} />
                 ))}
               </div>
             </>
@@ -194,7 +150,7 @@ const Wishlist = () => {
                 Your wishlist is empty
               </h2>
               <p className="text-muted-foreground mb-6">
-               {` Start exploring and save places you'd love to visit`}
+                {` Start exploring and save places you'd love to visit`}
               </p>
               <button
                 onClick={() => navigate("/")}

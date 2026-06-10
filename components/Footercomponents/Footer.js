@@ -162,17 +162,17 @@ export default function Footer() {
               <div className="flex items-start">
                 <MapPin className="w-5 h-5 text-gray-300 mr-3 mt-1 flex-shrink-0" />
                 <div className="text-gray-300">
-                  <p>123 Hill Station Road</p>
+                  <p>Apti pavananagar mawal</p>
                   <p>Lonavala, Maharashtra 410401</p>
                 </div>
               </div>
               <div className="flex items-center">
                 <Phone className="w-5 h-5 text-gray-300 mr-3" />
                 <a
-                  href="tel:+919876543210"
+                  href="tel:+918669186483"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
-                  +91 98765 43210
+                  +91 8669186483
                 </a>
               </div>
               <div className="flex items-center">

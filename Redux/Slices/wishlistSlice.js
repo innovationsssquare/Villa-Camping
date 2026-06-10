@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-
+import { Mywishlist } from "@/lib/API/User/User";
 /* ===============================
    Helpers
 ================================ */
@@ -12,14 +12,14 @@ const API_BASE = process.env.NEXT_PUBLIC_PRODUCTION_URL;
 /** ❤️ Toggle wishlist */
 export const toggleWishlist = createAsyncThunk(
   "wishlist/toggle",
-  async ({ propertyId, propertyType ,userId}, { rejectWithValue }) => {
+  async ({ propertyId, propertyType, userId }, { rejectWithValue }) => {
     try {
       const res = await fetch(`${API_BASE}/Wishlist/wishlist/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ propertyId, propertyType,userId }),
+        body: JSON.stringify({ propertyId, propertyType, userId }),
       });
 
       const data = await res.json();
@@ -37,15 +37,31 @@ export const fetchWishlistIds = createAsyncThunk(
   "wishlist/ids",
   async (id, { rejectWithValue }) => {
     try {
-      const res = await fetch(`${API_BASE}/Wishlist/wishlist/ids/6833656360ed0e90157dd2e1`, {
-         method: "GET",
-         headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const res = await fetch(
+        `${API_BASE}/Wishlist/wishlist/ids/6833656360ed0e90157dd2e1`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
+
+      return data.data; // ["villa:123", "hotel:456"]
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
+  }
+);
+
+export const fetchmyWishlists = createAsyncThunk(
+  "wishlist/mywishlist",
+  async (_, { rejectWithValue }) => {
+    try {
+      const data = await Mywishlist();
 
       return data.data; // ["villa:123", "hotel:456"]
     } catch (err) {
@@ -64,6 +80,10 @@ const wishlistSlice = createSlice({
     ids: [], // ✅ SERIALIZABLE
     loading: false,
     error: null,
+
+    wishlists: [],
+    wishloading: false,
+    wishlisterror: null,
   },
 
   reducers: {
@@ -102,6 +122,18 @@ const wishlistSlice = createSlice({
       .addCase(fetchWishlistIds.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      })
+      .addCase(fetchmyWishlists.pending, (state) => {
+        state.wishloading = true;
+        state.wishlisterror = null;
+      })
+      .addCase(fetchmyWishlists.fulfilled, (state, action) => {
+        state.wishloading = false;
+        state.wishlists = action.payload;
+      })
+      .addCase(fetchmyWishlists.rejected, (state, action) => {
+        state.wishloading = false;
+        state.wishlisterror = action.payload;
       })
 
       .addCase(toggleWishlist.rejected, (state, action) => {

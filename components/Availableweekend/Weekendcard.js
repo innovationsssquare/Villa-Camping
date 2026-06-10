@@ -34,14 +34,14 @@ export function PropertyCard({ property }) {
   const dispatch = useDispatch();
 
   // Use the imported hero image as fallback
-  const displayImages = property.images || [property.image || propertyHero];
+  const displayImages = property.images || [property.image ];
 
 const wishlistIds = useSelector((state) => state.wishlist.ids);
 console.log(wishlistIds,"wishlistIds")
 // 🔑 derive Set safely
 const wishlistSet = new Set(wishlistIds);
 console.log(wishlistSet)
-const wishlistKey = `villa:${property._id}`;
+const wishlistKey = `Villa:${property._id}`;
 const isLiked = wishlistSet.has(wishlistKey);
 
 
@@ -118,7 +118,7 @@ const isLiked = wishlistSet.has(wishlistKey);
     dispatch(
       toggleWishlist({
         propertyId: property._id,
-        propertyType: "villa",
+        propertyType: "Villa",
         userId:"6833656360ed0e90157dd2e1"
       })
     );
