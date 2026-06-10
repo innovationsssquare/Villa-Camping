@@ -10,6 +10,12 @@ import { CampingProvider } from "@/lib/context/CampingContext";
 import { useDispatch, useSelector } from "react-redux";
 import { useParams, useRouter } from "next/navigation";
 import { fetchCampingById } from "@/Redux/Slices/campingSlice";
+import {
+  setPropertyId,
+  setcategoryId,
+  setOwnerId,
+  setPropertyType,
+} from "@/Redux/Slices/bookingSlice";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { XCircle } from "lucide-react";
 import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
@@ -41,8 +47,14 @@ const [tents, setTents] = useState([]);
   }, [id]);
 
   const handleBookTent = (tentId, tentType, price) => {
-    console.log('Booking tent:', { tentId, tentType, price });
-    // TODO: Navigate to payment page or open booking modal
+    // Store the selected tent details in Redux and open booking dialog
+    if (camping) {
+      dispatch(setPropertyId(camping?._id));
+      dispatch(setcategoryId(camping?.category));
+      dispatch(setOwnerId(camping?.owner));
+      dispatch(setPropertyType("Camping"));
+      // The FixedBookingBar will handle opening the booking dialog
+    }
   };
 
   // Intersection Observer for each section
