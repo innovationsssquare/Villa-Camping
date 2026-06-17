@@ -1,52 +1,19 @@
 "use client";
 
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-} from "@/components/ui/carousel";
+// Using HTML5 video for hero instead of the carousel component
 import Image from "next/image";
 import Link from "next/link";
 import Banner1 from "@/public/Aboutusasset/Villabanner.jpg";
 import Banner2 from "@/public/Aboutusasset/Campbanner.jpg";
 import Banner3 from "@/public/Aboutusasset/Cottagebanner.jpg";
 import Banner4 from "@/public/Aboutusasset/Hotelbanner.jpg";
-import Autoplay from "embla-carousel-autoplay";
-
 import { useEffect, useState } from "react";
-import OfferCarousel from "./offer-carousel";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { cn } from "@/lib/utils";
+import OfferCarousel from "./offer-carousel";
 export default function Hero() {
-  const [heroApi, setHeroApi] = useState();
-  const [heroCurrentIndex, setHeroCurrentIndex] = useState(0);
-  const [heroCount, setHeroCount] = useState(0);
   const [categoriesApi, setCategoriesApi] = useState();
   const { isVisible } = useScrollDirection();
-
-  useEffect(() => {
-    if (!heroApi) return;
-
-    setHeroCount(heroApi.scrollSnapList().length);
-
-    const onSelect = () => {
-      setHeroCurrentIndex(heroApi.selectedScrollSnap());
-    };
-
-    heroApi.on("select", onSelect);
-
-    onSelect();
-
-    return () => {
-      heroApi.off("select", onSelect);
-    };
-  }, [heroApi]);
-
-  const goToSlide = (index) => {
-    heroApi?.scrollTo(index);
-  };
 
   return (
     <main
@@ -55,82 +22,29 @@ export default function Hero() {
         isVisible ? "translate-y-16" : "translate-y-16"
       )}
     >
-      {/* Hero Carousel Section */}
+      {/* Hero Video Section: replace carousel with a looping hero video. */}
       <section className="w-full relative">
-        <Carousel
-          plugins={[
-            Autoplay({
-              delay: 8000,
-            }),
-          ]}
-          className="w-full "
-          setApi={setHeroApi}
-        >
-          <CarouselContent>
-            <CarouselItem>
-              <div className="relative md:h-screen h-[350px] w-full">
-                <Image
-                  src={Banner3}        
-                  alt="Sewing supplies including blue fabric, thread spools, and a sewing machine"
-                  fill
-                  className="object-fill brightness-50"
-                  priority
-                />
-              </div>
-            </CarouselItem>
-            <CarouselItem>
-              <div className="relative md:h-screen h-[350px] w-full">
-                <Image
-                  src={Banner4}
-                  alt="Sewing supplies"
-                  fill
-                  className="object-fill brightness-50"
-                />
-              </div>
-            </CarouselItem>
-            <CarouselItem>
-              <div className="relative md:h-screen h-[350px]  w-full">
-                <Image
-                  src={Banner1}
-                  alt="Crafting materials"
-                  fill
-                  className="object-fill brightness-50"
-                />
-              </div>
-            </CarouselItem>
-            <CarouselItem>
-              <div className="relative md:h-screen h-[350px]  w-full">
-                <Image
-                  src={Banner2}
-                  alt="Crafting materials"
-                  fill
-                  className="object-fill brightness-50"
-                />
-              </div>
-            </CarouselItem>
-          </CarouselContent>
-
-          {/* Dot indicators for hero carousel */}
-          <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
-            {Array.from({ length: heroCount }).map((_, index) => (
-              <button
-                key={index}
-                onClick={() => goToSlide(index)}
-                className={`h-2 w-2 rounded-full transition-opacity ${
-                  index === heroCurrentIndex
-                    ? "bg-[#106C83]"
-                    : "bg-white opacity-50"
-                }`}
-                aria-label={`Go to slide ${index + 1}`}
-              />
-            ))}
-          </div>
-        </Carousel>
-        <OfferCarousel
-          heroApi={heroApi}
-          heroCurrentIndex={heroCurrentIndex}
-          heroCount={heroCount}
-        />
+        <div className="relative md:h-screen h-[350px] w-full">
+          <video
+            className="object-fill w-full h-full brightness-70 "
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={Banner1.src}
+          >
+            <source src="/Productasset/Video Project.mp4" type="video/mp4" />
+            <Image
+              src={Banner1}
+              alt="hero poster"
+              fill
+              className="object-cover brightness-50"
+            />
+          </video>
+        </div>
+        <div className="w-full">
+          <OfferCarousel />
+        </div>
       </section>
     </main>
   );

@@ -1,13 +1,12 @@
 "use client";
-import PropertyDetails from "@/components/Propertyviewcomponents/property-details";
+import CampingDetails from "@/components/Propertyviewcomponents/camping-details";
 import Tentview from "@/components/Tentscreen/Tentview";
 
 export default function Home() {
   return (
     <div className="min-h-screen">
-      {/* <Villascreen /> */}
       <Tentview/>
-      {/* <PropertyDetails /> */}
+      <CampingDetails/>
     </div>
   );
 }

@@ -12,7 +12,7 @@ font-family: Helvetica;
 }
 
 body::-webkit-scrollbar {
-    width: 0.5em;
+    width: 0.2em;
   }
 
   body::-webkit-scrollbar-track {
@@ -20,7 +20,7 @@ body::-webkit-scrollbar {
   }
 
   body::-webkit-scrollbar-thumb {
-    background-color : black;
+    background-color : #ff6900;
     border-radius: 10px;
   }
 

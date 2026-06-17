@@ -28,7 +28,7 @@ import {
   updateGuestCount,
   setSelectedCategoryname,
 } from "@/Redux/Slices/bookingSlice";
-import Logo from "../../public/Loginasset/Logo2.png";
+import Logo from "../../public/Productasset/Logo2.png";
 import Image from "next/image";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 import { useRouter } from "next/navigation";
@@ -185,7 +185,7 @@ export default function AirbnbNavbar() {
     <>
       <div
         className={`fixed top-0 hidden md:block left-0 right-0 z-50  bg-white border-b border-gray-200 transition-all duration-300 ease-in-out ${
-          isVisible ? (isMobile ? "h-28" : "h-44") : "h-16"
+          isVisible ? (isMobile ? "h-28" : "h-40") : "h-16"
         } overflow-visible`}
       >
         <div className="w-full mx-auto px-3  h-full">
@@ -201,7 +201,7 @@ export default function AirbnbNavbar() {
                 <Image
                   src={Logo || "/placeholder.svg"}
                   alt="Thevillacamp"
-                  className="h-14 w-14 object-contain mt-2"
+                  className="h-16 w-16 object-contain mt-2"
                 />
               </div>
             </div>
