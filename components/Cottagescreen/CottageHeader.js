@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { ArrowLeft, Share, Bell, User } from "lucide-react";
 import { Button } from "@heroui/react";

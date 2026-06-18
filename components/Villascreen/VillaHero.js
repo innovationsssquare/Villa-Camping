@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { Heart, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -54,14 +55,15 @@ const VillaHero = () => {
             <CarouselContent>
               {villa?.images?.map((image, index) => (
                 <CarouselItem key={index}>
-                  <Image
-                    src={image}
-                    height={80}
-                    unoptimized
-                    width={50}
-                    alt={`${villa?.name} ${index + 1}`}
-                    className="w-full h-64 object-fill rounded-none"
-                  />
+                      <Image
+                        src={image}
+                        height={80}
+                        unoptimized
+                        width={50}
+                        priority={index === 0}
+                        alt={`${villa?.name} ${index + 1}`}
+                        className="w-full h-64 object-fill rounded-none"
+                      />
                 </CarouselItem>
               ))}
             </CarouselContent>

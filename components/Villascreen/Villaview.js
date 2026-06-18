@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useRef, useEffect } from "react";
 import { useInView } from "react-intersection-observer";
 import VillaHeader from "./VillaHeader";

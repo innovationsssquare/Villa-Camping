@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { Heart, Camera, ChevronLeft, ChevronRight } from "lucide-react";
 import {
@@ -58,6 +59,7 @@ const CottageHero = () => {
                        height={80}
                        unoptimized
                        width={50}
+                       priority={index === 0}
                        alt={`${cottage?.name} ${index + 1}`}
                        className="w-full h-64 object-cover rounded-none"
                      />
