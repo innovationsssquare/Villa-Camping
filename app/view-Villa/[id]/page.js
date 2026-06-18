@@ -5,7 +5,7 @@ import Villaview from "@/components/Villascreen/Villaview";
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
 
 export async function generateMetadata({ params }) {
-  const id = params.id;
+  const { id } = await params;
   try {
     const res = await fetch(`${SITE_ORIGIN}/api/villas/${id}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch");
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }) {
 }
 
 export default async function Home({ params }) {
-  const id = params.id;
+  const { id } = await params;
   let villa = null;
   try {
     const res = await fetch(`${SITE_ORIGIN}/api/villas/${id}`, { cache: "no-store" });

@@ -72,6 +72,12 @@ export default function RootLayout({ children }) {
             name="viewport"
             content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
           />
+          {process.env.GOOGLE_SITE_VERIFICATION ? (
+            <meta name="google-site-verification" content={process.env.GOOGLE_SITE_VERIFICATION} />
+          ) : null}
+          {process.env.BING_SITE_VERIFICATION ? (
+            <meta name="msvalidate.01" content={process.env.BING_SITE_VERIFICATION} />
+          ) : null}
         </head>
         <Script
           src="https://checkout.razorpay.com/v1/checkout.js"
