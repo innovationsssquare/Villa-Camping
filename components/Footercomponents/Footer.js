@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import Footerlogo from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Footer() {
   return (
@@ -233,24 +234,24 @@ export default function Footer() {
             © 2025 The Villa Camp. All rights reserved.
           </div>
           <div className="flex gap-6 text-sm">
-            <a
-              href="#"
+            <Link
+              href="/privacy-policy"
               className="text-gray-400 hover:text-gray-300 transition-colors"
             >
               Privacy Policy
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/terms-of-service"
               className="text-gray-400 hover:text-gray-300 transition-colors"
             >
               Terms of Service
-            </a>
-            <a
-              href="#"
+            </Link>
+            <Link
+              href="/cancellation-policy"
               className="text-gray-400 hover:text-gray-300 transition-colors"
             >
               Cancellation Policy
-            </a>
+            </Link>
           </div>
         </div>
       </div>

@@ -32,6 +32,7 @@ import Logo from "../../public/Productasset/Logo2.png";
 import Image from "next/image";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 import { useRouter } from "next/navigation";
+import useSearchUrlParams from "@/hooks/use-search-url-params";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import { DualDatePicker } from "./dual-date-picker";
@@ -45,6 +46,7 @@ export default function AirbnbNavbar() {
   const [activeDropdown, setActiveDropdown] = useState(null);
   const { isVisible, setIsVisible } = useScrollDirection();
   const router = useRouter();
+  const { pathname } = useSearchUrlParams();
   const { categories } = useSelector((state) => state.category);
   const {
     selectedCategoryId,
@@ -303,40 +305,118 @@ export default function AirbnbNavbar() {
           >
             {/* Navigation tabs */}
             <div className="hidden md:flex items-center justify-center space-x-8 pb-2">
-              <div className="flex items-center space-x-2 cursor-pointer border-b-2 border-gray-800 pb-3">
-                <FaHome className="w-4 h-4" />
-                <span className="text-sm font-medium">Homes</span>
-              </div>
-              <div className="flex items-center space-x-2 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-3 transition-colors">
-                <Lightbulb className="w-4 h-4" />
-                <span className="text-sm font-medium">Experiences</span>
-                <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
-                  NEW
-                </span>
-              </div>
-              <div className="flex items-center space-x-2 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-3 transition-colors">
-                <UtensilsCrossed className="w-4 h-4" />
-                <span className="text-sm font-medium">Services</span>
-                <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
-                  NEW
-                </span>
-              </div>
+              {(() => {
+                const homeActive =
+                  pathname === "/" ||
+                  pathname.startsWith("/view-") ||
+                  pathname.startsWith("/search-stay") ||
+                  pathname.startsWith("/category");
+                const experiencesActive = pathname.startsWith("/experiences");
+                const servicesActive = pathname.startsWith("/services");
+
+                return (
+                  <>
+                    <div
+                      onClick={() => router.push("/")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
+                        homeActive
+                          ? "border-b-2 border-gray-800"
+                          : "hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      <FaHome className="w-4 h-4" />
+                      <span className="text-sm font-medium">Homes</span>
+                    </div>
+
+                    <div
+                      onClick={() => router.push("/experiences")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
+                        experiencesActive
+                          ? "border-b-2 border-gray-800"
+                          : "hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      <Lightbulb className="w-4 h-4" />
+                      <span className="text-sm font-medium">Experiences</span>
+                      <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                        NEW
+                      </span>
+                    </div>
+
+                    <div
+                      onClick={() => router.push("/services")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
+                        servicesActive
+                          ? "border-b-2 border-gray-800"
+                          : "hover:border-b-2 hover:border-gray-300"
+                      }`}
+                    >
+                      <UtensilsCrossed className="w-4 h-4" />
+                      <span className="text-sm font-medium">Services</span>
+                      <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
+                        NEW
+                      </span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Mobile navigation tabs */}
-            <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
-              <div className="flex items-center space-x-1 cursor-pointer border-b-2 border-gray-800 pb-2">
-                <FaHome className="w-3 h-3" />
-                <span className="text-xs font-medium">Homes</span>
-              </div>
-              <div className="flex items-center space-x-1 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-2 transition-colors">
-                <Lightbulb className="w-3 h-3" />
-                <span className="text-xs font-medium">Experiences</span>
-              </div>
-              <div className="flex items-center space-x-1 cursor-pointer hover:border-b-2 hover:border-gray-300 pb-2 transition-colors">
-                <UtensilsCrossed className="w-3 h-3" />
-                <span className="text-xs font-medium">Services</span>
-              </div>
+              <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
+              {(() => {
+                const homeActive =
+                  pathname === "/" ||
+                  pathname.startsWith("/view-") ||
+                  pathname.startsWith("/search-stay") ||
+                  pathname.startsWith("/category");
+                const experiencesActive = pathname.startsWith("/experiences");
+                const servicesActive = pathname.startsWith("/services");
+
+                return (
+                  <>
+                    <div
+                      onClick={() => router.push("/")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
+                        homeActive ? "border-b-2 border-gray-800" : ""
+                      }`}
+                    >
+                      <FaHome className="w-3 h-3" />
+                      <span className="text-xs font-medium">Homes</span>
+                    </div>
+                    <div
+                      onClick={() => router.push("/experiences")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
+                        experiencesActive ? "border-b-2 border-gray-800" : ""
+                      }`}
+                    >
+                      <Lightbulb className="w-3 h-3" />
+                      <span className="text-xs font-medium">Experiences</span>
+                    </div>
+                    <div
+                      onClick={() => router.push("/services")}
+                      role="button"
+                      tabIndex={0}
+                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
+                        servicesActive ? "border-b-2 border-gray-800" : ""
+                      }`}
+                    >
+                      <UtensilsCrossed className="w-3 h-3" />
+                      <span className="text-xs font-medium">Services</span>
+                    </div>
+                  </>
+                );
+              })()}
             </div>
 
             {/* Expanded search form */}
