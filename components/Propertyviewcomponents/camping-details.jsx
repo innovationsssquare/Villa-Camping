@@ -20,12 +20,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import PremiumPropertyHero from "./premium-property-hero";
-import PropertyHeaderSection from "./property-header-section";
+import PremiumPropertyHero from "./Camping-view-details/premium-property-hero";
+import PropertyHeaderSection from "./Camping-view-details/property-header-section";
 import StickyTabsNavigation from "./sticky-tabs-navigation";
-import PropertyContentSections from "./property-content-sections";
-import StickyBookingWidget from "./sticky-booking-widget";
-import Logo from "../../public/Loginasset/Logo2.png";
+import PropertyContentSections from "./Camping-view-details/property-content-sections";
+import StickyBookingWidget from "./Camping-view-details/sticky-booking-widget";
+import Logo from "../../public/Productasset/Logo2.png";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
@@ -88,7 +88,7 @@ export default function CampingDetails() {
                     <Image
                       src={Logo}
                       alt="Thevillacamp"
-                      className="h-12 w-12 object-contain mt-2"
+                      className="h-16 w-16 object-contain mt-2"
                     />
                   </div>
                 </div>
@@ -106,20 +106,20 @@ export default function CampingDetails() {
         </header>
 
         <main className="w-full mx-auto">
-          {/* <PremiumPropertyHero />
+          <PremiumPropertyHero />
           <StickyTabsNavigation />
-          <PropertyHeaderSection /> */}
+          <PropertyHeaderSection />
 
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               {/* Content Sections */}
               <div className="lg:col-span-2">
-                {/* <PropertyContentSections /> */}
+                <PropertyContentSections />
               </div>
 
               {/* Sticky Booking Widget */}
               <div className="lg:col-span-1 relative">
-                {/* <StickyBookingWidget /> */}
+                <StickyBookingWidget />
               </div>
             </div>
           </div>

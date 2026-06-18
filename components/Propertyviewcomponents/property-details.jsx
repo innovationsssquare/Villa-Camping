@@ -25,7 +25,7 @@ import PropertyHeaderSection from "./property-header-section";
 import StickyTabsNavigation from "./sticky-tabs-navigation";
 import PropertyContentSections from "./property-content-sections";
 import StickyBookingWidget from "./sticky-booking-widget";
-import Logo from "../../public/Loginasset/Logo2.png";
+import Logo from "../../public/Productasset/Logo2.png";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import { fetchVillaById } from "@/Redux/Slices/villaSlice";

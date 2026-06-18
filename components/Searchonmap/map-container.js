@@ -13,24 +13,11 @@ export function MapContainer({
   const [markers, setMarkers] = useState([]);
 
   useEffect(() => {
-    // Load Google Maps script dynamically
-    const loadGoogleMaps = () => {
-      if (window.google) {
-        setIsMapLoaded(true);
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${
-        process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY"
-      }&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setIsMapLoaded(true);
-      document.head.appendChild(script);
-    };
-
-    loadGoogleMaps();
+    import("@/lib/googleMapsLoader").then(({ loadGoogleMaps }) => {
+      loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "YOUR_API_KEY")
+        .then(() => setIsMapLoaded(true))
+        .catch(() => console.error("Failed to load Google Maps"));
+    });
   }, []);
 
   useEffect(() => {

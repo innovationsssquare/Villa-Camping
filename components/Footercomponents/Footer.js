@@ -7,7 +7,7 @@ import {
   Twitter,
   Youtube,
 } from "lucide-react";
-import Footerlogo from "@/public/Loginasset/Logo2.png"
+import Footerlogo from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
 
 export default function Footer() {
@@ -194,7 +194,7 @@ export default function Footer() {
           <div className=" mb-4">
             <Image
               src={Footerlogo || "/placeholder.svg"}
-              alt="Brindah Logo"
+              alt="Thevillacamp Logo"
               width={128}
               height={128}
               className="h-40 w-40"

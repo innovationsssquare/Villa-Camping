@@ -42,6 +42,13 @@ import { AirVent, Car, Mountain, Tv, Waves, Wifi } from "lucide-react";
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const villa = useVilla();
+  const basePrice =
+    Number(villa?.basePricePerNight) ||
+    Number(villa?.pricing?.weekdayPrice) ||
+    Number(villa?.pricing?.weekendPrice) ||
+    0;
+  const taxes = Math.round(basePrice * 0.18);
+  const totalPerNight = basePrice + taxes;
 
   const amenityIcons = {
     "Mountain View": FaMountain,
@@ -97,12 +104,12 @@ export default function PropertyHeaderSection() {
             {/* Property Title & Location */}
             <div className="mb-6">
               <h1 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-3 tracking-tight drop-shadow-lg">
-                {villa?.name} - {villa?.location?.addressLine}
+                {villa?.name} - {villa?.address?.addressLine}
               </h1>
               <div className="flex items-center gap-2 text-gray-600">
                 <FaMapMarkerAlt className="w-5 h-5 text-black" />
                 <span className="text-sm font-medium drop-shadow">
-                  {villa?.location?.area}, {villa?.location?.city}
+                  {villa?.address?.area}, {villa?.address?.city}
                 </span>
               </div>
             </div>
@@ -221,7 +228,7 @@ export default function PropertyHeaderSection() {
                 <div className="mb-4">
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-gray-900">
-                      ₹{villa?.basePricePerNight}
+                      ₹{basePrice}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
@@ -232,7 +239,7 @@ export default function PropertyHeaderSection() {
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex justify-between">
                     <span>Base price </span>
-                    <span>₹{villa?.basePricePerNight}</span>
+                    <span>₹{basePrice}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Service fee</span>
@@ -244,15 +251,13 @@ export default function PropertyHeaderSection() {
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes</span>
-                    <span>{Math.round(villa?.basePricePerNight * 0.18)}</span>
+                    <span>{taxes}</span>
                   </div>
                   <hr className="border-gray-200" />
                   <div className="flex justify-between font-semibold text-gray-900">
                     <span>Total per night</span>
                     <span>
-                      ₹
-                      {Math.round(villa?.basePricePerNight * 0.18) +
-                        villa?.basePricePerNight}
+                      ₹{totalPerNight}
                     </span>
                   </div>
                 </div>

@@ -14,36 +14,7 @@ export default function GoogleMap({
   const [error, setError] = useState(null);
   console.log(coordinates);
   useEffect(() => {
-    const loadGoogleMaps = async () => {
-      try {
-        // Check if Google Maps is already loaded
-        if (window.google && window.google.maps) {
-          initializeMap();
-          return;
-        }
-
-        // Load Google Maps script
-        const script = document.createElement("script");
-        script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`;
-        script.async = true;
-        script.defer = true;
-
-        script.onload = () => {
-          setIsLoaded(true);
-          initializeMap();
-        };
-
-        script.onerror = () => {
-          setError("Failed to load Google Maps");
-        };
-
-        document.head.appendChild(script);
-      } catch (err) {
-        setError("Error loading Google Maps");
-      }
-    };
-
-    const initializeMap = () => {
+      const initializeMap = () => {
       if (!mapRef.current || !window.google) return;
 
       const map = new window.google.maps.Map(mapRef.current, {
@@ -83,8 +54,14 @@ export default function GoogleMap({
       );
       return;
     }
-
-    loadGoogleMaps();
+    import("@/lib/googleMapsLoader").then(({ loadGoogleMaps }) => {
+      loadGoogleMaps(process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY)
+        .then(() => {
+          setIsLoaded(true);
+          initializeMap();
+        })
+        .catch(() => setError("Failed to load Google Maps"));
+    });
   }, [center, zoom]);
 
   if (error) {

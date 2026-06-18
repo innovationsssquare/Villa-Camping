@@ -33,7 +33,7 @@ export default function Hero() {
             playsInline
             poster={Banner1.src}
           >
-            <source src="/Productasset/Video Project.mp4" type="video/mp4" />
+            <source src="https://res.cloudinary.com/dznqbnzzd/video/upload/v1781779851/Video_Project_ohyotj.mp4" type="video/mp4" />
             <Image
               src={Banner1}
               alt="hero poster"

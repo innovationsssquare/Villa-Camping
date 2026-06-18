@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
           strategy="lazyOnload"
         />
 
-        <body className={geist.className}>
+        <body className={geist.className} suppressHydrationWarning>
           <Suspense
             fallback={
               <div className="h-screen bg-white w-full flex justify-center items-center">

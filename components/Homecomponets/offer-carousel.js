@@ -10,6 +10,7 @@ export default function OfferCarousel({
   heroApi,
   heroCurrentIndex = 0,
   heroCount = 0,
+  autoPlayMs = 5000,
 }) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const router = useRouter();
@@ -51,6 +52,27 @@ export default function OfferCarousel({
       setCurrentSlide(heroCurrentIndex);
     }
   }, [heroCurrentIndex, carouselItems.length]);
+
+  // Autoplay: advance slides every `autoPlayMs` milliseconds
+  useEffect(() => {
+    if (!autoPlayMs || autoPlayMs <= 0) return;
+
+    const id = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const nextIndex = prev === carouselItems.length - 1 ? 0 : prev + 1;
+        if (heroApi && nextIndex < heroCount) {
+          try {
+            heroApi.scrollTo(nextIndex);
+          } catch (e) {
+            // ignore if heroApi is unavailable
+          }
+        }
+        return nextIndex;
+      });
+    }, autoPlayMs);
+
+    return () => clearInterval(id);
+  }, [autoPlayMs, heroApi, heroCount, carouselItems.length]);
 
   const nextSlide = () => {
     const nextIndex =

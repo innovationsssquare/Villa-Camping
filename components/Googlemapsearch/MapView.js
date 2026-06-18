@@ -26,23 +26,11 @@ const MapView = ({
 
   useEffect(() => {
     if (!googleMapsApiKey) return;
-
-    // Load Google Maps script
-    const loadGoogleMapsScript = () => {
-      if (window.google && window.google.maps) {
-        setIsScriptLoaded(true);
-        return;
-      }
-
-      const script = document.createElement("script");
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${googleMapsApiKey}&libraries=places`;
-      script.async = true;
-      script.defer = true;
-      script.onload = () => setIsScriptLoaded(true);
-      document.head.appendChild(script);
-    };
-
-    loadGoogleMapsScript();
+    import("@/lib/googleMapsLoader").then(({ loadGoogleMaps }) => {
+      loadGoogleMaps(googleMapsApiKey)
+        .then(() => setIsScriptLoaded(true))
+        .catch(() => console.error("Failed to load Google Maps"));
+    });
   }, [googleMapsApiKey]);
 
   useEffect(() => {

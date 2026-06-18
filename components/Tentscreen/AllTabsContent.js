@@ -347,7 +347,7 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
             </h3>
             {camping?.faqs &&
               camping?.faqs.map((faq, index) => (
-                <Accordion type="single" collapsible className="space-y-3">
+                <Accordion key={faq._id || index} type="single" collapsible className="space-y-3">
                   <AccordionItem
                     key={faq._id || index}
                     value={`faq-${index}`}
