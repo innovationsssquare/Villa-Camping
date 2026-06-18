@@ -1,5 +1,3 @@
-import { NEXT_PUBLIC_SITE_URL, NEXT_PUBLIC_PRODUCTION_URL } from 'process.env';
-
 export async function GET() {
   const site = process.env.NEXT_PUBLIC_SITE_URL || 'https://thevillacamp.com';
 
