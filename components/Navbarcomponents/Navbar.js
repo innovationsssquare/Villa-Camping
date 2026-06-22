@@ -188,7 +188,7 @@ export default function AirbnbNavbar() {
       <div
         className={`fixed top-0 hidden md:block left-0 right-0 z-50  bg-white border-b border-gray-200 transition-all duration-300 ease-in-out ${
           isVisible ? (isMobile ? "h-28" : "h-40") : "h-16"
-        } overflow-hidden`}
+        } overflow-visible`}
       >
         <div className="w-full mx-auto px-3  h-full">
           {/* Top row - Logo and right side menu */}
@@ -203,7 +203,7 @@ export default function AirbnbNavbar() {
                 <Image
                   src={Logo || "/placeholder.svg"}
                   alt="Thevillacamp"
-                  className="h-20 w-44 object-contain mt-2"
+                  className="h-18 w-48 object-contain "
                 />
               </div>
             </div>
