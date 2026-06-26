@@ -75,7 +75,7 @@ export function ParallaxHero() {
           }}
         >
           <div className="mb-6 inline-block">
-            <span className="px-4 py-2 bg-black/10 text-black rounded-full text-sm font-semibold">
+            <span className="px-4 py-2 bg-[#ff6900]/70  text-black rounded-full text-sm font-semibold">
               Premium Luxury Villas
             </span>
           </div>
@@ -85,7 +85,7 @@ export function ParallaxHero() {
           </h1>
 
           <p className="text-base sm:text-xl text-muted-foreground mb-8 max-w-lg mx-auto md:mx-0">
-            Join thousands of hosts earning premium income. Showcase your luxury villa and connect with travelers worldwide.
+            Join thousands of hosts earning premium income. Showcase your luxury villa and connect with travelers.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">

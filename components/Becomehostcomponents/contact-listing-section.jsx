@@ -156,7 +156,7 @@ export function ContactListingSection() {
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-black"
-                  placeholder="+1 (555) 000-0000"
+                  placeholder="+91 8669186483"
                 />
               </div>
 

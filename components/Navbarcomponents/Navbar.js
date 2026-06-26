@@ -36,7 +36,14 @@ import useSearchUrlParams from "@/hooks/use-search-url-params";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import { DualDatePicker } from "./dual-date-picker";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Tabs, Tab, Chip } from "@heroui/react";
+import { ProfileSheet } from "./ProfileSheet";
 
 export default function AirbnbNavbar() {
   const dispatch = useDispatch();
@@ -61,7 +68,7 @@ export default function AirbnbNavbar() {
 
   // Get selected category name for display
   const selectedCategory = categories?.find(
-    (cat) => cat.id === selectedCategoryId
+    (cat) => cat.id === selectedCategoryId,
   );
 
   const dropdownRef = useRef(null);
@@ -161,7 +168,7 @@ export default function AirbnbNavbar() {
           subtype: "",
           page: 1,
           limit: 20,
-        })
+        }),
       ).unwrap();
 
       console.log("Search completed successfully");
@@ -218,7 +225,7 @@ export default function AirbnbNavbar() {
             >
               <div
                 onClick={() => {
-                  setActiveDropdown("minimized"), setIsVisible(!isVisible);
+                  (setActiveDropdown("minimized"), setIsVisible(!isVisible));
                 }}
                 className={`flex items-center bg-[#FFFFFF4D] border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer ${
                   isMobile ? "scale-90 " : "mt-2"
@@ -262,20 +269,14 @@ export default function AirbnbNavbar() {
             <div className="flex items-center space-x-2 md:space-x-4">
               <span
                 onClick={() => router.push("/become-host")}
-                className="text-xs md:text-sm font-medium text-gray-800 hidden lg:block cursor-pointer hover:bg-gray-100 px-2 md:px-3 py-1 md:py-2 rounded-full transition-colors"
+                className="text-xs bg-[#ff6900]/70  md:text-sm font-medium text-white hidden lg:block cursor-pointer hover:bg-[#ff6900]  px-2 md:px-3 py-1 md:py-2 rounded-full transition-colors"
               >
                 Become a host
               </span>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full w-8 h-8 md:w-10 md:h-10"
-              >
-                <Globe className="w-3 h-3 md:w-4 md:h-4" />
-              </Button>
+          
 
-              <div className="flex items-center space-x-1 border border-gray-300 rounded-full p-0.5 md:p-1 cursor-pointer hover:shadow-md transition-shadow">
+              {/* <div className="flex items-center space-x-1 border border-gray-300 rounded-full p-0.5 md:p-1 cursor-pointer hover:shadow-md transition-shadow">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -291,7 +292,9 @@ export default function AirbnbNavbar() {
                 >
                   <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4" />
                 </Button>
-              </div>
+              </div> */}
+                     <ProfileSheet/>
+
             </div>
           </div>
 
@@ -316,7 +319,7 @@ export default function AirbnbNavbar() {
 
                 return (
                   <>
-                    <div
+                    {/* <div
                       onClick={() => router.push("/")}
                       role="button"
                       tabIndex={0}
@@ -362,14 +365,67 @@ export default function AirbnbNavbar() {
                       <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
                         NEW
                       </span>
-                    </div>
+                    </div> */}
+                    <Tabs
+                      aria-label="Options"
+                      selectedKey={pathname}
+                      classNames={{
+                        tabList: "gap-8 mb-1 w-full relative rounded-none p-0  ",
+                        cursor: "w-full bg-[#ff6900]",
+                        tab: "max-w-fit px-0 h-8",
+                        tabContent:
+                          "group-data-[selected=true]:text-[#ff6900] text-black text-md font-medium",
+                      }}
+                      color="primary"
+                      variant="underlined"
+                    >
+                      <Tab
+                        key="/"
+                        onClick={() => router.push("/")}
+                        title={
+                          <div className="flex items-center space-x-2">
+                            <FaHome className="w-3 h-3" />
+
+                            <span>Home</span>
+                          </div>
+                        }
+                      />
+                      <Tab
+                        key="/experiences"
+                        onClick={() => router.push("/experiences")}
+                        title={
+                          <div className="flex items-center space-x-2">
+                            <Lightbulb className="w-3 h-3" />
+
+                            <span>Experiences</span>
+                            <Chip size="sm" variant="shadow">
+                              New
+                            </Chip>
+                          </div>
+                        }
+                      />
+                      <Tab
+                        key="/services"
+                        onClick={() => router.push("/services")}
+                        title={
+                          <div className="flex items-center space-x-2">
+                            <UtensilsCrossed className="w-3 h-3" />
+
+                            <span>Services</span>
+                            <Chip size="sm" variant="shadow">
+                              New
+                            </Chip>
+                          </div>
+                        }
+                      />
+                    </Tabs>
                   </>
                 );
               })()}
             </div>
 
             {/* Mobile navigation tabs */}
-              <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
+            <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
               {(() => {
                 const homeActive =
                   pathname === "/" ||
@@ -432,7 +488,7 @@ export default function AirbnbNavbar() {
                     <div
                       onClick={() =>
                         setActiveDropdown(
-                          activeDropdown === "category" ? null : "category"
+                          activeDropdown === "category" ? null : "category",
                         )
                       }
                       className="flex-1 px-3 py-2 border-r border-gray-300 rounded-l-full hover:bg-gray-50 cursor-pointer transition-colors"
@@ -448,7 +504,7 @@ export default function AirbnbNavbar() {
                     <div
                       onClick={() =>
                         setActiveDropdown(
-                          activeDropdown === "guests" ? null : "guests"
+                          activeDropdown === "guests" ? null : "guests",
                         )
                       }
                       className="flex-1 px-3 py-2  cursor-pointer transition-colors rounded-r-full"
@@ -473,7 +529,7 @@ export default function AirbnbNavbar() {
                     <div
                       onClick={() =>
                         setActiveDropdown(
-                          activeDropdown === "category" ? null : "category"
+                          activeDropdown === "category" ? null : "category",
                         )
                       }
                       className={`flex-1 ml-4 px-4 py-3 border-r border-gray-300 rounded-l-full  cursor-pointer transition-colors ${
@@ -490,10 +546,10 @@ export default function AirbnbNavbar() {
                     </div>
                     <div
                       onClick={() => {
-                        setActiveDropdown(
-                          activeDropdown === "checkin" ? null : "checkin"
+                        (setActiveDropdown(
+                          activeDropdown === "checkin" ? null : "checkin",
                         ),
-                          setFocusedSide("checkin");
+                          setFocusedSide("checkin"));
                       }}
                       className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
                         activeDropdown === "checkin" ? "" : ""
@@ -509,10 +565,10 @@ export default function AirbnbNavbar() {
                     </div>
                     <div
                       onClick={() => {
-                        setActiveDropdown(
-                          activeDropdown === "checkout" ? null : "checkout"
+                        (setActiveDropdown(
+                          activeDropdown === "checkout" ? null : "checkout",
                         ),
-                          setFocusedSide("checkout");
+                          setFocusedSide("checkout"));
                       }}
                       className={`flex-1 px-4 py-3 border-r border-gray-300  cursor-pointer transition-colors ${
                         activeDropdown === "checkout" ? "" : ""
@@ -529,7 +585,7 @@ export default function AirbnbNavbar() {
                     <div
                       onClick={() =>
                         setActiveDropdown(
-                          activeDropdown === "guests" ? null : "guests"
+                          activeDropdown === "guests" ? null : "guests",
                         )
                       }
                       className={`flex-1 px-4 py-3  cursor-pointer transition-colors rounded-r-full ${
@@ -644,17 +700,6 @@ export default function AirbnbNavbar() {
         </div>
       </div>
 
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent
-          side="right"
-          className="w-full sm:w-[500px] p-0 overflow-y-auto"
-        >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Profile Menu</SheetTitle>
-          </SheetHeader>
-          {/* Empty sheet content - can be filled later */}
-        </SheetContent>
-      </Sheet>
     </>
   );
 }

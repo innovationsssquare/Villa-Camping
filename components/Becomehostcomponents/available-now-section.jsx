@@ -11,7 +11,7 @@ export function AvailableNowSection() {
           {/* Left Content */}
           <div className="order-2 md:order-1">
             <div className="mb-6 inline-block">
-              <span className="px-4 py-2 bg-black/10 text-black rounded-full text-sm font-semibold">
+              <span className="px-4 py-2 bg-[#ff6900]/70  text-black rounded-full text-sm font-semibold">
                 Download Now
               </span>
             </div>
