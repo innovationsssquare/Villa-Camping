@@ -129,9 +129,22 @@ export default function AirbnbNavbar() {
   };
 
   const getTotalGuests = () => {
-    const total = selectedGuest.adults + selectedGuest.childrenn;
-    if (total === 1) return "1 guest";
-    return `${total} guests`;
+    const adultsAndChildren = selectedGuest.adults + selectedGuest.childrenn;
+    const infants = selectedGuest.infants || 0;
+    const pets = selectedGuest.pets || 0;
+    
+    let parts = [];
+    if (adultsAndChildren > 0) {
+      parts.push(`${adultsAndChildren} guest${adultsAndChildren > 1 ? "s" : ""}`);
+    }
+    if (infants > 0) {
+      parts.push(`${infants} infant${infants > 1 ? "s" : ""}`);
+    }
+    if (pets > 0) {
+      parts.push(`${pets} pet${pets > 1 ? "s" : ""}`);
+    }
+    
+    return parts.length > 0 ? parts.join(", ") : "Add guests";
   };
 
   const handleGuestChange = (type, value) => {
@@ -504,15 +517,34 @@ export default function AirbnbNavbar() {
                     <div
                       onClick={() =>
                         setActiveDropdown(
+                          activeDropdown === "checkin" ? null : "checkin",
+                        )
+                      }
+                      className="flex-1 px-3 py-2 border-r border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors"
+                    >
+                      <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
+                        <Calendar className="w-3 h-3 mr-1" />
+                        Dates
+                      </div>
+                      <div className="text-xs text-gray-500 truncate">
+                        {checkin && checkout
+                          ? `${formatDate(checkin)} - ${formatDate(checkout)}`
+                          : "Add dates"}
+                      </div>
+                    </div>
+                    <div
+                      onClick={() =>
+                        setActiveDropdown(
                           activeDropdown === "guests" ? null : "guests",
                         )
                       }
-                      className="flex-1 px-3 py-2  cursor-pointer transition-colors rounded-r-full"
+                      className="flex-1 px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
                     >
-                      <div className="text-xs font-semibold text-gray-800 mb-0.5">
+                      <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
+                        <Users className="w-3 h-3 mr-1" />
                         Who
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 truncate">
                         {getTotalGuests()}
                       </div>
                     </div>
@@ -532,18 +564,19 @@ export default function AirbnbNavbar() {
                           activeDropdown === "category" ? null : "category",
                         )
                       }
-                      className={`flex-1 ml-4 px-4 py-3 border-r border-gray-300 rounded-l-full  cursor-pointer transition-colors ${
-                        activeDropdown === "category" ? "" : ""
+                      className={`flex-1 ml-4 px-4 py-3 border-r border-gray-300 rounded-l-full cursor-pointer transition-colors ${
+                        activeDropdown === "category" ? "bg-white/80" : ""
                       }`}
                     >
                       <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaHome className="w-4 h-4 mr-1" />
+                        <FaHome className="w-4 h-4 mr-1 text-black" />
                         Category
                       </div>
                       <div className="text-sm text-gray-700 truncate">
                         {selectedCategoryName || "Select category"}
                       </div>
                     </div>
+
                     <div
                       onClick={() => {
                         (setActiveDropdown(
@@ -552,17 +585,18 @@ export default function AirbnbNavbar() {
                           setFocusedSide("checkin"));
                       }}
                       className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
-                        activeDropdown === "checkin" ? "" : ""
+                        activeDropdown === "checkin" ? "bg-white/80" : ""
                       }`}
                     >
                       <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaCalendarCheck className="w-4 h-4 mr-1" />
+                        <FaCalendarCheck className="w-4 h-4 mr-1 text-black" />
                         Check in
                       </div>
                       <div className="text-sm text-gray-700">
                         {formatDate(checkin)}
                       </div>
                     </div>
+
                     <div
                       onClick={() => {
                         (setActiveDropdown(
@@ -570,50 +604,51 @@ export default function AirbnbNavbar() {
                         ),
                           setFocusedSide("checkout"));
                       }}
-                      className={`flex-1 px-4 py-3 border-r border-gray-300  cursor-pointer transition-colors ${
-                        activeDropdown === "checkout" ? "" : ""
+                      className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
+                        activeDropdown === "checkout" ? "bg-white/80" : ""
                       }`}
                     >
                       <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaCalendarCheck className="w-4 h-4 mr-1" />
+                        <FaCalendarCheck className="w-4 h-4 mr-1 text-black" />
                         Check out
                       </div>
                       <div className="text-sm text-gray-700">
                         {formatDate(checkout)}
                       </div>
                     </div>
+
                     <div
                       onClick={() =>
                         setActiveDropdown(
                           activeDropdown === "guests" ? null : "guests",
                         )
                       }
-                      className={`flex-1 px-4 py-3  cursor-pointer transition-colors rounded-r-full ${
-                        activeDropdown === "guests" ? " rounded-r-none" : ""
+                      className={`flex-1 px-4 py-3 cursor-pointer transition-colors rounded-r-full ${
+                        activeDropdown === "guests"
+                          ? "bg-white/80 rounded-r-none"
+                          : ""
                       }`}
                     >
                       <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <MdPeopleAlt className="w-4 h-4 mr-1" />
+                        <MdPeopleAlt className="w-4 h-4 mr-1 text-black" />
                         Who
                       </div>
-                      <div className="text-sm text-gray-700">
+                      <div className="text-sm text-gray-700 truncate">
                         {getTotalGuests()}
                       </div>
                     </div>
+                    
                     <button
                       onClick={handleSearch}
-                      className={
-                        isSearching
-                          ? `bg-black rounded-full  m-2 cursor-pointer hover:bg-black transition-colors`
-                          : `bg-black rounded-full p-2.5  m-2 cursor-pointer hover:bg-black transition-colors`
-                      }
+                      className="bg-black rounded-full p-2.5 m-2 cursor-pointer hover:bg-black transition-colors"
+                      disabled={isSearching}
                     >
                       {isSearching ? (
-                        <div className="flex   justify-center items-center">
+                        <div className="flex justify-center items-center">
                           <ButtonLoader />
                         </div>
                       ) : (
-                        <Search className="w-5 h-5  text-white" />
+                        <Search className="w-5 h-5 text-white" />
                       )}
                     </button>
                   </>
@@ -623,7 +658,7 @@ export default function AirbnbNavbar() {
               {/* Dropdowns with mobile-optimized positioning */}
               {activeDropdown === "category" && (
                 <div
-                  className={`absolute top-full mt-1 z-50 ${
+                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
                     isMobile ? "left-0" : "left-24"
                   }`}
                 >
@@ -640,30 +675,26 @@ export default function AirbnbNavbar() {
 
               {activeDropdown === "checkin" && (
                 <div
-                  className={`absolute top-full mt-1 z-50 ${
+                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
                     isMobile ? "left-0" : "left-[38%]"
                   }`}
                 >
-                  {(activeDropdown === "checkin" ||
-                    activeDropdown === "checkout") && (
-                    <div className="absolute top-full  left-1/2 transform -translate-x-1/2 z-50">
-                      <DualDatePicker
-                        checkinDate={checkin}
-                        checkoutDate={checkout}
-                        onCheckinSelect={handleCheckinSelect}
-                        onCheckoutSelect={handleCheckoutSelect}
-                        onClose={() => setActiveDropdown(null)}
-                        focusedSide={focusedSide}
-                        setFocusedSide={setFocusedSide}
-                      />
-                    </div>
-                  )}
+                  <DualDatePicker
+                    checkinDate={checkin}
+                    checkoutDate={checkout}
+                    onCheckinSelect={handleCheckinSelect}
+                    onCheckoutSelect={handleCheckoutSelect}
+                    onClose={() => setActiveDropdown(null)}
+                    focusedSide={focusedSide}
+                    setFocusedSide={setFocusedSide}
+                    isMobile={isMobile}
+                  />
                 </div>
               )}
 
               {activeDropdown === "checkout" && (
                 <div
-                  className={`absolute top-full mt-1 z-50 ${
+                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
                     isMobile ? "left-0" : "left-[30%]"
                   }`}
                 >
@@ -675,13 +706,14 @@ export default function AirbnbNavbar() {
                     onClose={() => setActiveDropdown(null)}
                     focusedSide={focusedSide}
                     setFocusedSide={setFocusedSide}
+                    isMobile={isMobile}
                   />
                 </div>
               )}
 
               {activeDropdown === "guests" && (
                 <div
-                  className={`absolute top-full mt-1 z-50 ${
+                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
                     isMobile ? "right-0" : "right-32"
                   }`}
                 >
@@ -700,6 +732,14 @@ export default function AirbnbNavbar() {
         </div>
       </div>
 
+      {/* Background Dim Backdrop */}
+      {activeDropdown && (
+        <div
+          onClick={() => setActiveDropdown(null)}
+          className="fixed inset-0 bg-black/25 backdrop-blur-xs transition-opacity duration-300 z-40"
+          style={{ top: isVisible ? (isMobile ? "112px" : "160px") : "64px" }}
+        />
+      )}
     </>
   );
 }

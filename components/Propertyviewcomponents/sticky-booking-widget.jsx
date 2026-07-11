@@ -708,11 +708,13 @@ export default function StickyBookingWidget() {
             {/* Best Price Banner */}
             <div className="flex items-center justify-between transition-all duration-300">
               <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                    ₹58,750
-                  </span>
-                </div>
+                {appliedCoupon && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 line-through text-sm transition-all duration-300">
+                      ₹{(finalTotal + discountAmount).toLocaleString()}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-baseline space-x-1">
                   <span className="text-xl font-bold text-black transition-all duration-300">
                     ₹{finalTotal.toLocaleString()}

@@ -1,5 +1,6 @@
 "use client"
 import React, { forwardRef, useState } from "react";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Accordion,
   AccordionContent,
@@ -333,9 +334,7 @@ const AllTabsContent = ({ refs, tents, onBookTent }) => {
                   className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg"
                 >
                   <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                    {amenityIcons[amenity] || (
-                      <Building2 className="w-4 h-4 text-black" />
-                    )}
+                  <CustomAmenityIcon name={amenity} className="w-6 h-6 text-black" />
                   </div>
                   <span className="text-sm font-medium">{amenity}</span>
                 </div>

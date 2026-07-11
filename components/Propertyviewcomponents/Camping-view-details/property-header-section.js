@@ -4,40 +4,14 @@ import {
   FaStar,
   FaUsers,
   FaHome,
-  FaBath,
-  FaUtensils,
-  FaMountain,
-  FaWifi,
-  FaHotTub,
-  FaFire,
   FaMapMarkerAlt,
   FaAward,
-  FaInfoCircle,
-  FaCar,
-  FaTv,
-  FaSnowflake,
-  FaCoffee,
-  FaGamepad,
-  FaCamera,
-  FaMusic,
-  FaDumbbell,
-  FaTree,
-  FaSun,
-  FaShieldAlt,
-  FaClock,
-  FaPhone,
-  FaTshirt,
-  FaBed,
-  FaCouch,
-  FaBlender,
-  FaMicrochip,
-  FaSwimmingPool,
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useCamping } from "@/lib/context/CampingContext";
-import { AirVent, Car, Mountain, Tv, Waves, Wifi } from "lucide-react";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
@@ -50,51 +24,13 @@ export default function PropertyHeaderSection() {
   const taxes = Math.round(basePrice * 0.18);
   const totalPerNight = basePrice + taxes;
 
-  const amenityIcons = {
-    "Mountain View": FaMountain,
-    "Breakfast Included": FaUtensils,
-    WiFi: FaWifi,
-    Jacuzzi: FaHotTub,
-    "BBQ Grill": FaFire,
-    "Free Parking": FaCar,
-    "Smart TV": FaTv,
-    "Air Conditioning": FaSnowflake,
-    "Coffee Machine": FaCoffee,
-    "Game Room": FaGamepad,
-    "Security Cameras": FaCamera,
-    "Sound System": FaMusic,
-    "Fitness Center": FaDumbbell,
-    "Garden View": FaTree,
-    Terrace: FaSun,
-    Heating: FaSnowflake,
-    Safe: FaShieldAlt,
-    "24/7 Support": FaClock,
-    Phone: FaPhone,
-    "Laundry Service": FaTshirt,
-    Kitchen: FaUtensils,
-    "Premium Bedding": FaBed,
-    "Living Area": FaCouch,
-    Refrigerator: FaBlender,
-    Microwave: FaMicrochip,
-    "Swimming Pool": FaSwimmingPool, // from backend
-    Parking: FaCar, // backend synonym
-    Garden: FaTree, // backend synonym
-    TV: FaTv, // backend synonym
-    Security: FaShieldAlt, // backend synonym
-    Balcony: FaSun, // backend synonym
-    "Washing Machine": FaTshirt, // backend synonym
-  };
-
-  const allAmenities = camping?.amenities?.map((label) => ({
-    label,
-    icon: amenityIcons[label] || FaInfoCircle, // fallback if not matched
-  }));
+  const allAmenities = camping?.amenities || [];
 
   const displayedAmenities = showAllAmenities
     ? allAmenities
-    : allAmenities?.slice(0, 5);
+    : allAmenities.slice(0, 5);
 
-  const remainingCount = (allAmenities?.length || 0) - 5;
+  const remainingCount = Math.max(0, (allAmenities.length || 0) - 5);
 
   return (
     <div id="overview" className="bg-white min-h-[400px] relative">
@@ -128,7 +64,7 @@ export default function PropertyHeaderSection() {
                 <div className="flex items-center gap-1">
                   <FaStar className="w-5 h-5 text-amber-400" />
                   <span className="font-bold text-lg text-black drop-shadow">
-                    {camping?.averageRating}
+                    {camping?.averageRating || "0"}
                   </span>
                   <span className="text-black/80">/5</span>
                 </div>
@@ -136,7 +72,7 @@ export default function PropertyHeaderSection() {
                   variant="link"
                   className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow"
                 >
-                  {camping?.totalReviews} Reviews
+                  {camping?.totalReviews || 0} Reviews
                 </Button>
               </div>
             </div>
@@ -150,38 +86,26 @@ export default function PropertyHeaderSection() {
                 <FaUsers className="w-4 h-4 mr-2 text-black" />
                 Up to {camping?.maxCapacity} Guests
               </Badge>
-              <Badge
-                variant="secondary"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-              >
-                <FaHome className="w-4 h-4 mr-2 text-black" />
-                {camping?.bhkType}
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-              >
-                <FaSwimmingPool className="w-4 h-4 mr-2 text-black" /> Pool
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-              >
-                <FaUtensils className="w-4 h-4 mr-2 text-black" />
-                Meals Available
-              </Badge>
+              {camping?.bhkType && (
+                <Badge
+                  variant="secondary"
+                  className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+                >
+                  <FaHome className="w-4 h-4 mr-2 text-black" />
+                  {camping.bhkType}
+                </Badge>
+              )}
+              {camping?.topamenities?.slice(0, 3).map((amenity, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
+                >
+                  <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-2 text-black" />
+                  {amenity}
+                </Badge>
+              ))}
             </div>
-
-            {/* Great For Section */}
-            {/* <div className="mb-8">
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-medium text-gray-900">Great for:</span>
-                <div className="flex items-center gap-2">
-                  <FaMountain className="w-5 h-5 text-gray-600" />
-                  <span className="text-gray-800 font-medium">Mountain Retreat</span>
-                </div>
-              </div>
-            </div> */}
 
             {/* Premium Amenities */}
             <div className="flex flex-wrap items-center gap-3 w-full">
@@ -191,44 +115,31 @@ export default function PropertyHeaderSection() {
                   variant="outline"
                   className="bg-gray-200 border-white text-black px-3 py-2 rounded-md hover:bg-gray-300"
                 >
-                  <amenity.icon className="w-4 h-4 mr-2 text-black" />
-                  {amenity.label}
-                  {amenity.hasIndicator && (
-                    <span className="ml-1 w-2 h-2 bg-green-500 rounded-full"></span>
-                  )}
+                  <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-2 text-black" />
+                  {amenity}
                 </Badge>
               ))}
-              <Button
-                variant="link"
-                className="text-blue-600 hover:text-blue-800 p-0 h-auto font-medium"
-                onClick={() => setShowAllAmenities(!showAllAmenities)}
-              >
-                {showAllAmenities
-                  ? "Show Less"
-                  : `+${remainingCount} Amenities`}
-              </Button>
+              {allAmenities.length > 5 && (
+                <Button
+                  variant="link"
+                  className="text-blue-600 hover:text-blue-800 p-0 h-auto font-medium"
+                  onClick={() => setShowAllAmenities(!showAllAmenities)}
+                >
+                  {showAllAmenities
+                    ? "Show Less"
+                    : `+${remainingCount} Amenities`}
+                </Button>
+              )}
             </div>
           </div>
 
           <div className="lg:w-80 flex-shrink-0">
             <div className="border-white border bg-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:bg-white">
               <div className="text-center">
-                <div className="mb-2">
-                  <span className="text-gray-500 line-through text-lg">
-                    ₹58,750
-                  </span>
-                  <Badge
-                    variant="destructive"
-                    className="ml-2 text-xs bg-black border-0"
-                  >
-                    Save 10%
-                  </Badge>
-                </div>
-
                 <div className="mb-4">
                   <div className="flex items-baseline justify-center gap-1">
                     <span className="text-4xl font-bold text-gray-900">
-                      ₹{basePrice}
+                      ₹{basePrice.toLocaleString("en-IN")}
                     </span>
                   </div>
                   <p className="text-sm text-gray-600 mt-1">
@@ -239,7 +150,7 @@ export default function PropertyHeaderSection() {
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex justify-between">
                     <span>Base price </span>
-                    <span>₹{basePrice}</span>
+                    <span>₹{basePrice.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Service fee</span>
@@ -251,13 +162,13 @@ export default function PropertyHeaderSection() {
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes</span>
-                    <span>{taxes}</span>
+                    <span>₹{taxes.toLocaleString("en-IN")}</span>
                   </div>
                   <hr className="border-gray-200" />
                   <div className="flex justify-between font-semibold text-gray-900">
                     <span>Total per night</span>
                     <span>
-                      ₹{totalPerNight}
+                      ₹{totalPerNight.toLocaleString("en-IN")}
                     </span>
                   </div>
                 </div>

@@ -124,45 +124,12 @@ export default function CampingDetails() {
             </div>
           </div>
 
-          {/* Similar Properties */}
-          <div className="mt-12 border-t border-gray-200 py-8 w-11/12 mx-auto">
+          {/* Similar Properties - Coming soon with backend data */}
+          {/* <div className="mt-12 border-t border-gray-200 py-8 w-11/12 mx-auto">
             <h3 className="text-lg font-semibold text-gray-900 mb-6">
               Similar stays
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[1, 2, 3].map((item) => (
-                <Card key={item} className="overflow-hidden">
-                  <div className="relative">
-                    <img
-                      src={`/villa-sign.png?height=200&width=300&text=Villa+${item}`}
-                      alt={`Similar property ${item}`}
-                      className="w-full h-48 object-cover"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="absolute top-3 right-3 bg-white/80 hover:bg-white"
-                    >
-                      <Heart className="w-4 h-4" />
-                    </Button>
-                  </div>
-                  <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="font-medium">Villa Paradise {item}</span>
-                      <div className="flex items-center space-x-1">
-                        <Star className="w-4 h-4 fill-current text-yellow-400" />
-                        <span className="text-sm">4.8</span>
-                      </div>
-                    </div>
-                    <p className="text-sm text-gray-600 mb-2">Goa, India</p>
-                    <p className="font-semibold">
-                      ₹{15000 + item * 5000} night
-                    </p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
+          </div> */}
         </main>
       </div>
     </CampingProvider>

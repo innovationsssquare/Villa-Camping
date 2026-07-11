@@ -16,9 +16,12 @@ const MapView = ({
   selectedLocation,
   properties,
   loading,
+  hoveredPropertyId,
+  onPropertyHover,
 }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const overlaysRef = useRef([]);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [hoveredProperty, setHoveredProperty] = useState(null);
   const [hoverPosition, setHoverPosition] = useState(null);
@@ -33,43 +36,33 @@ const MapView = ({
     });
   }, [googleMapsApiKey]);
 
+  // 1. Initialize Google Map once
   useEffect(() => {
     if (!mapContainer.current || !isScriptLoaded || !window.google) return;
 
-    // Initialize Google Map
     map.current = new window.google.maps.Map(mapContainer.current, {
       center: { lat: 18.7537, lng: 73.4062 },
       zoom: 11,
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
-      // styles: [
-      //   {
-      //     featureType: "all",
-      //     elementType: "geometry.fill",
-      //     stylers: [{ color: "#f5f5f5" }],
-      //   },
-      //   {
-      //     featureType: "water",
-      //     elementType: "geometry",
-      //     stylers: [{ color: "#e9e9e9" }, { lightness: 17 }],
-      //   },
-      //   {
-      //     featureType: "administrative",
-      //     elementType: "geometry.stroke",
-      //     stylers: [{ color: "#c9b2a6" }, { lightness: 17 }, { weight: 1.2 }],
-      //   },
-      // ],
-      // disableDefaultUI: false,
-      // zoomControl: true,
-      // streetViewControl: false,
-      // fullscreenControl: false,
     });
+  }, [isScriptLoaded]);
 
-    // Add property markers with custom React pin markers
+  // 2. Draw and update markers dynamically when properties change
+  useEffect(() => {
+    if (!map.current || !window.google) return;
+
+    // Clear existing overlays
+    overlaysRef.current.forEach((overlay) => {
+      overlay.setMap(null);
+    });
+    overlaysRef.current = [];
+
     let moveHandler = null;
     properties?.forEach((property) => {
-      console.log(property, "prop");
+      if (!property.coordinates || property.coordinates.length < 2) return;
+
       const overlay = new window.google.maps.OverlayView();
       overlay._div = null;
 
@@ -78,29 +71,31 @@ const MapView = ({
         div.style.position = "absolute";
         div.style.transform = "translate(-50%, -100%)";
         div.style.pointerEvents = "auto";
+        div.id = `map-marker-${property.id}`;
         this._div = div;
 
-        // Render React marker
         const root = createRoot(div);
         root.render(
           <PropertyMarker
             price={getDisplayPrice(property.price)}
-            onClick={() => setSelectedProperty(property)}
+            onClick={() => {
+              setSelectedProperty(property);
+              onPropertySelect?.(property);
+            }}
             image={property.image}
             has3DTour={property.has3DTour}
-            // onClick={() => {
-            //   setSelectedProperty(property);
-            //   onPropertySelect?.(property);
-            // }}
           />
         );
 
         div.addEventListener("mouseenter", () => {
+          onPropertyHover?.(property.id, "map");
           setHoveredProperty(property);
           moveHandler = (e) => setHoverPosition({ x: e.clientX, y: e.clientY });
           window.addEventListener("mousemove", moveHandler);
         });
+
         div.addEventListener("mouseleave", () => {
+          onPropertyHover?.(null, null);
           setHoveredProperty(null);
           setHoverPosition(null);
           if (moveHandler) {
@@ -136,8 +131,67 @@ const MapView = ({
       };
 
       overlay.setMap(map.current);
+      overlaysRef.current.push(overlay);
     });
-  }, [isScriptLoaded, onPropertySelect]);
+
+    // Fit map bounds to encompass all active property markers
+    if (properties && properties.length > 0) {
+      const bounds = new window.google.maps.LatLngBounds();
+      let hasValidCoords = false;
+      properties.forEach((property) => {
+        if (property.coordinates && property.coordinates.length === 2) {
+          bounds.extend(
+            new window.google.maps.LatLng(
+              property.coordinates[0],
+              property.coordinates[1]
+            )
+          );
+          hasValidCoords = true;
+        }
+      });
+
+      if (hasValidCoords) {
+        map.current.fitBounds(bounds);
+        
+        // Prevent map from zooming in too close if there's only 1 marker
+        const listener = window.google.maps.event.addListener(
+          map.current,
+          "bounds_changed",
+          function () {
+            if (this.getZoom() > 14) {
+              this.setZoom(14);
+            }
+            window.google.maps.event.removeListener(listener);
+          }
+        );
+      }
+    }
+
+    return () => {
+      if (moveHandler) {
+        window.removeEventListener("mousemove", moveHandler);
+      }
+    };
+  }, [properties, isScriptLoaded]);
+
+  // 3. Lightweight style updating effect when hoveredPropertyId changes
+  useEffect(() => {
+    properties?.forEach((property) => {
+      const el = document.getElementById(`map-marker-${property.id}`);
+      if (el) {
+        const innerMarker = el.querySelector(".villa-marker");
+        if (innerMarker) {
+          if (property.id === hoveredPropertyId) {
+            innerMarker.classList.add("marker-active");
+            el.style.zIndex = "1000";
+          } else {
+            innerMarker.classList.remove("marker-active");
+            el.style.zIndex = "";
+          }
+        }
+      }
+    });
+  }, [hoveredPropertyId, properties]);
 
   if (!googleMapsApiKey) {
     return (
@@ -170,7 +224,7 @@ const MapView = ({
 
       {/* Property Card Overlay */}
       {selectedProperty && (
-        <div className="absolute bottom-40 left-4 right-4 z-50">
+        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-50 w-[260px]">
           <PropertyCard
             property={selectedProperty}
             onClose={() => {

@@ -279,9 +279,8 @@ const PropertyCardnew = ({ property }) => {
               onPress={() => setIsWishlisted(!isWishlisted)}
             >
               <Heart
-                className={`w-4 h-4 ${
-                  isWishlisted ? "fill-red-500 text-red-500" : ""
-                }`}
+                className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""
+                  }`}
               />
             </Button>
             <Button
@@ -445,9 +444,8 @@ const PropertyCardnew = ({ property }) => {
               <button
                 key={index}
                 onClick={() => api?.scrollTo(index)}
-                className={`w-2 h-2 rounded-full transition-colors ${
-                  index === currentSlide ? "bg-white" : "bg-white/50"
-                }`}
+                className={`w-2 h-2 rounded-full transition-colors ${index === currentSlide ? "bg-white" : "bg-white/50"
+                  }`}
               />
             ))}
           </div>
@@ -478,9 +476,8 @@ const PropertyCardnew = ({ property }) => {
               onPress={() => setIsWishlisted(!isWishlisted)}
             >
               <Heart
-                className={`w-4 h-4 ${
-                  isWishlisted ? "fill-red-500 text-red-500" : ""
-                }`}
+                className={`w-4 h-4 ${isWishlisted ? "fill-red-500 text-red-500" : ""
+                  }`}
               />
             </Button>
             <Button
@@ -608,10 +605,10 @@ const PropertyCardnew = ({ property }) => {
                 </div>
                 {property.pricing.weekendPrice >
                   property.pricing.weekdayPrice && (
-                  <p   className="text-xs">
-                    Weekend ₹{formatRupee(property.pricing.weekendPrice)}
-                  </p>
-                )}
+                    <p className="text-xs">
+                      Weekend ₹{formatRupee(property.pricing.weekendPrice)}
+                    </p>
+                  )}
               </div>
             </div>
             <div className="space-y-3">

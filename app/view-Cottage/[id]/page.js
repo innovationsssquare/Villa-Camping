@@ -1,14 +1,17 @@
 import Cottageview from "@/components/Cottagescreen/Cottageview";
 import CottageDetails from "@/components/Propertyviewcomponents/cottage-details";
+import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
-    const res = await fetch(`${SITE_ORIGIN}/api/cottages/${id}`, { cache: "no-store" });
+    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch");
-    const cottage = await res.json();
+    const result = await res.json();
+    const cottage = result?.data;
     const title = cottage?.name || `Cottage ${id}`;
     const description = cottage?.shortDescription || cottage?.description || "Book beautiful stays on ThevillaCamp.";
     const ogImage = (cottage?.images && cottage.images[0]) || "/og-default.jpg";
@@ -36,18 +39,16 @@ export default async function Home({ params }) {
   const { id } = await params;
   let cottage = null;
   try {
-    const res = await fetch(`${SITE_ORIGIN}/api/cottages/${id}`, { cache: "no-store" });
-    if (res.ok) cottage = await res.json();
+    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, { cache: "no-store" });
+    if (res.ok) {
+      const result = await res.json();
+      cottage = result?.data;
+    }
   } catch (e) {}
 
   return (
     <div className="min-h-screen">
-      {cottage ? (
-        (function () {
-          const JsonLd = require("@/components/Propertyviewcomponents/JsonLd").default;
-          return JsonLd ? JsonLd({ villa: cottage }) : null;
-        })()
-      ) : null}
+      {cottage ? <JsonLd villa={cottage} /> : null}
       <Cottageview />
       <CottageDetails />
     </div>

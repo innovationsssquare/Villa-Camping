@@ -59,52 +59,52 @@ export default function Footer() {
             <h4 className="text-lg font-medium mb-6">Quick Links</h4>
             <ul className="space-y-3">
               <li>
-                <a
-                  href="#destinations"
+                <Link
+                  href="/category/all"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Destinations
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#experiences"
+                <Link
+                  href="/experiences"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Experiences
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#gallery"
+                <Link
+                  href="/category/all"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Gallery
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#offers"
+                <Link
+                  href="/category/all"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Special Offers
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/about"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/contact"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -114,44 +114,44 @@ export default function Footer() {
             <h4 className="text-lg font-medium mb-6">Destinations</h4>
             <ul className="space-y-3">
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/category/villa"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Lonavala Villas
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/category/camping"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Pawna Lake Camps
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/category/cottage"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Kamshet Cottages
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/category/hotel"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   Malavli Retreats
-                </a>
+                </Link>
               </li>
               <li>
-                <a
-                  href="#"
+                <Link
+                  href="/category/all"
                   className="text-gray-300 hover:text-gray-300 transition-colors"
                 >
                   All Properties
-                </a>
+                </Link>
               </li>
             </ul>
           </div>

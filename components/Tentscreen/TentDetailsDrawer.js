@@ -1,4 +1,5 @@
 import * as React from "react";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Drawer,
   DrawerClose,
@@ -288,9 +289,7 @@ const TentDetailsDrawer = ({ tent, open, onOpenChange, onBookNow }) => {
                       variant="ghost"
                       className="text-xs py-1.5 px-3"
                     >
-                      {amenityIcons[amenity] || (
-                        <Building2 className="w-4 h-4 text-black" />
-                      )}
+                      <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-1 text-black" />
                       {amenity}
                     </Badge>
                   ))}

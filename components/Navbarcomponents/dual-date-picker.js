@@ -75,10 +75,14 @@ export function DualDatePicker({
   const getFirstDayOfMonth = (date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-  const isDateDisabled = (dateObj, isCheckout = false) => {
-    if (dateObj < minBoundary) return true;
-    if (isCheckout && checkinDate) {
-      return dateObj <= new Date(checkinDate);
+  const isDateDisabled = (dateObj) => {
+    const dateMidnight = moment(dateObj).tz(timezone).startOf("day").toDate();
+    const minBoundaryMidnight = moment(minBoundary).tz(timezone).startOf("day").toDate();
+
+    if (dateMidnight < minBoundaryMidnight) return true;
+    if (focusedSide === "checkout" && checkinDate) {
+      const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day").toDate();
+      return dateMidnight <= checkinMidnight;
     }
     return false;
   };
@@ -138,10 +142,17 @@ export function DualDatePicker({
     }
   };
 
-  const handleDateClick = (mCell, isCheckout = false) => {
+  const handleDateClick = (mCell) => {
     const isoDate = mCell.format();
 
-    if (isCheckout || (checkinDate && focusedSide === "checkout")) {
+    if (focusedSide === "checkout") {
+      if (checkinDate) {
+        const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day");
+        const currentMidnight = moment(mCell).tz(timezone).startOf("day");
+        if (currentMidnight <= checkinMidnight) {
+          return;
+        }
+      }
       onCheckoutSelect(isoDate);
       setFocusedSide("checkin");
       if (onClose) onClose();
@@ -159,7 +170,7 @@ export function DualDatePicker({
 
     // Empty cells before the first day of the month
     for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="w-8 h-8 md:w-10 md:h-10" />);
+      days.push(<div key={`empty-${i}`} className="w-8 h-8 md:w-9 md:h-9" />);
     }
 
     const mCheckin = checkinDate
@@ -182,14 +193,14 @@ export function DualDatePicker({
         .startOf("day");
 
       const dateObj = mCell.toDate();
-      const isDisabled = isDateDisabled(dateObj, isRightSide);
+      const isDisabled = isDateDisabled(dateObj);
       const isCheckinDate = mCheckin ? mCell.isSame(mCheckin, "day") : false;
       const isCheckoutDate = mCheckout ? mCell.isSame(mCheckout, "day") : false;
       const isInRange = isDateInRange(dateObj);
       const isToday = mCell.isSame(moment.tz(timezone).startOf("day"), "day");
 
       let buttonClasses = [
-        "w-8 h-8 md:w-10 md:h-10 text-xs md:text-sm font-medium transition-all duration-200 flex items-center justify-center relative",
+        "w-8 h-8 md:w-9 md:h-9 text-xs md:text-sm font-semibold transition-all duration-200 flex items-center justify-center relative",
       ];
 
       if (isDisabled) {
@@ -232,7 +243,7 @@ export function DualDatePicker({
           key={day}
           onClick={() => {
             if (!isDisabled) {
-              handleDateClick(mCell, isRightSide);
+              handleDateClick(mCell);
             }
           }}
           onMouseEnter={() => {
@@ -267,21 +278,21 @@ export function DualDatePicker({
 
       <div
         className={`bg-card border border-gray-200 rounded-2xl shadow-elegant relative z-20 bg-white ${
-          isMobile ? "p-4 w-80" : "p-6 w-[650px]"
+          isMobile ? "p-4 w-80" : "p-5 w-[660px]"
         }`}
       >
         {/* Headers */}
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-2 gap-3 mb-4">
           {/* Check-in Header */}
           <div
-            className={`text-center p-3 rounded-lg border-2 transition-all ${
+            className={`text-center p-2 rounded-lg border transition-all ${
               focusedSide === "checkin"
-                ? "border-black bg-gray-200"
+                ? "border-black bg-gray-100"
                 : "border-gray-200"
             }`}
           >
-            <h3 className="font-semibold text-foreground text-sm">Check-in</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-semibold text-foreground text-xs">Check-in</h3>
+            <p className="text-xs text-muted-foreground font-medium">
               {checkinDate
                 ? moment(checkinDate).format("MMM DD, YYYY")
                 : "Select date"}
@@ -290,14 +301,14 @@ export function DualDatePicker({
 
           {/* Check-out Header */}
           <div
-            className={`text-center p-3 rounded-lg border-2 transition-all ${
+            className={`text-center p-2 rounded-lg border transition-all ${
               focusedSide === "checkout"
-                ? "border-black bg-gray-200"
+                ? "border-black bg-gray-100"
                 : "border-gray-200"
             }`}
           >
-            <h3 className="font-semibold text-foreground text-sm">Check-out</h3>
-            <p className="text-xs text-muted-foreground">
+            <h3 className="font-semibold text-foreground text-xs">Check-out</h3>
+            <p className="text-xs text-muted-foreground font-medium">
               {checkoutDate
                 ? moment(checkoutDate).format("MMM DD, YYYY")
                 : "Select date"}
@@ -315,20 +326,20 @@ export function DualDatePicker({
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonth("prev", "left")}
-                className="w-6 h-6 rounded-full hover:bg-muted"
+                className="w-7 h-7 rounded-full hover:bg-muted"
               >
-                <ChevronLeft className="w-3 h-3" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </Button>
-              <h4 className="font-medium text-foreground text-xs">
+              <h4 className="font-bold text-foreground text-xs md:text-sm">
                 {monthNames[leftMonth.getMonth()]} {leftMonth.getFullYear()}
               </h4>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonth("next", "left")}
-                className="w-6 h-6 rounded-full hover:bg-muted"
+                className="w-7 h-7 rounded-full hover:bg-muted"
               >
-                <ChevronRight className="w-3 h-3" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </Button>
             </div>
 
@@ -337,7 +348,7 @@ export function DualDatePicker({
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
                 <div
                   key={day}
-                  className="w-8 h-6 md:w-10 md:h-6 flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  className="w-8 h-6 md:w-9 md:h-6 flex items-center justify-center text-xs font-semibold text-muted-foreground"
                 >
                   {day}
                 </div>
@@ -358,20 +369,20 @@ export function DualDatePicker({
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonth("prev", "right")}
-                className="w-6 h-6 rounded-full hover:bg-muted"
+                className="w-7 h-7 rounded-full hover:bg-muted"
               >
-                <ChevronLeft className="w-3 h-3" />
+                <ChevronLeft className="w-3.5 h-3.5" />
               </Button>
-              <h4 className="font-medium text-foreground text-xs">
+              <h4 className="font-bold text-foreground text-xs md:text-sm">
                 {monthNames[rightMonth.getMonth()]} {rightMonth.getFullYear()}
               </h4>
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => navigateMonth("next", "right")}
-                className="w-6 h-6 rounded-full hover:bg-muted"
+                className="w-7 h-7 rounded-full hover:bg-muted"
               >
-                <ChevronRight className="w-3 h-3" />
+                <ChevronRight className="w-3.5 h-3.5" />
               </Button>
             </div>
 
@@ -380,7 +391,7 @@ export function DualDatePicker({
               {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
                 <div
                   key={day}
-                  className="w-8 h-6 md:w-10 md:h-6 flex items-center justify-center text-xs font-medium text-muted-foreground"
+                  className="w-8 h-6 md:w-9 md:h-6 flex items-center justify-center text-xs font-semibold text-muted-foreground"
                 >
                   {day}
                 </div>

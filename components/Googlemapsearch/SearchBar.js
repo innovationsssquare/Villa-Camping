@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Search, MapPin, X } from "lucide-react";
+import { Search, MapPin, X, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,7 @@ export const SearchBar = ({
   locations = [],
   onLocationSelect,
   placeholder = "Search location...",
+  onFilterClick,
 }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -113,9 +114,18 @@ export const SearchBar = ({
             onKeyDown={(e) => {
               if (e.key === "Escape") setShowSuggestions(false);
             }}
-            className="pl-10 border-0 bg-transparent focus:ring-0 text-sm"
+            className="pl-10 border-0 bg-transparent focus:ring-0 text-sm focus:outline-none"
           />
         </div>
+        {onFilterClick && (
+          <button
+            onClick={onFilterClick}
+            className="p-2.5 bg-gray-100 hover:bg-gray-200 active:scale-95 rounded-lg text-gray-700 transition-all cursor-pointer flex items-center justify-center border border-gray-200"
+            title="Filters"
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
       {/* Suggestions Dropdown */}

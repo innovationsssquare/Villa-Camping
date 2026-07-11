@@ -48,6 +48,8 @@ import {
 import { useCottage } from "@/lib/context/CottageContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { useRouter } from "next/navigation";
+import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
+import CottageSelectionDrawer from "@/components/Cottagescreen/cottage-selection-drawer";
 
 export default function StickyBookingWidget() {
   const [stickyState, setStickyState] = useState("normal");
@@ -74,13 +76,31 @@ export default function StickyBookingWidget() {
     Math.round((+checkOutDate - +checkInDate) / msPerDay)
   );
 
+  const reduxSelectedCottages = useSelector((state) => state.booking.selectedCottages);
+  const dayCottages = useSelector((state) => state.cottage.dayDetails?.cottages || []);
+  const [isCottageDrawerOpen, setIsCottageDrawerOpen] = useState(false);
+
+  const baseAmount = calculateCottageTotal(
+    reduxSelectedCottages,
+    dayCottages,
+    checkin,
+    checkout
+  );
+
   const { discountAmount, finalTotal } = calculateBookingPrice(
-    cottage?.basePricePerNight,
-    nights,
+    baseAmount,
+    1, // nights for coupon is 1 for Cottage
     appliedCoupon
   );
 
-  const totalGuests = selectedGuest?.adults + selectedGuest?.childrenn;
+  const totalGuests = (selectedGuest?.adults || 0) + (selectedGuest?.childrenn || 0);
+
+  const totalSelectedCottages = Object.values(reduxSelectedCottages || {}).reduce(
+    (sum, c) => sum + (c?.quantity || 0),
+    0
+  );
+
+  const displayTotal = totalSelectedCottages > 0 ? finalTotal : (cottage?.basePricePerNight || 0) * nights;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
@@ -382,7 +402,7 @@ export default function StickyBookingWidget() {
               </Popover>
             </div>
 
-            {/* Guests and Rooms Selection */}
+            {/* Guests and Accommodations Selection */}
             <div className="grid grid-cols-1 gap-3 mb-6">
               <Popover>
                 <PopoverTrigger asChild>
@@ -485,6 +505,27 @@ export default function StickyBookingWidget() {
                   </div>
                 </PopoverContent>
               </Popover>
+
+              {/* Cottage Selection */}
+              <div 
+                className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white mt-1"
+                onClick={() => setIsCottageDrawerOpen(true)}
+              >
+                <label className="text-xs font-bold text-black uppercase block mb-1 transition-all duration-300">
+                  Select Cottages
+                </label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Home className="w-4 h-4 text-black" />
+                    <span className="text-sm font-medium text-black">
+                      {totalSelectedCottages > 0 
+                        ? `${totalSelectedCottages} ${totalSelectedCottages === 1 ? "Cottage" : "Cottages"} Selected` 
+                        : "No Cottages Selected"}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-black" />
+                </div>
+              </div>
             </div>
 
             {/* Coupon Code Section */}
@@ -703,14 +744,16 @@ export default function StickyBookingWidget() {
             {/* Best Price Banner */}
             <div className="flex items-center justify-between transition-all duration-300">
               <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                    ₹58,750
-                  </span>
-                </div>
+                {appliedCoupon && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 line-through text-sm transition-all duration-300">
+                      ₹{(displayTotal + discountAmount).toLocaleString()}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-baseline space-x-1">
                   <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalTotal.toLocaleString()}
+                    ₹{displayTotal.toLocaleString()}
                   </span>
                   <span className="text-gray-600 text-sm transition-all duration-300">
                     {` (for ${totalGuests} guest)`}
@@ -742,10 +785,16 @@ export default function StickyBookingWidget() {
                 dispatch(setPropertyType("Cottage"));
                 router.push("/checkout");
               }}
-              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
+              disabled={totalSelectedCottages === 0}
+              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-2 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Reserve Now
             </Button>
+            {totalSelectedCottages === 0 && (
+              <p className="text-center text-xs text-red-500 font-medium mb-4">
+                * Please select at least one cottage to proceed.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -759,6 +808,16 @@ export default function StickyBookingWidget() {
           style={{ transformOrigin: "center" }}
         />
       </div>
+      <CottageSelectionDrawer
+        isOpen={isCottageDrawerOpen}
+        onClose={() => setIsCottageDrawerOpen(false)}
+        cottages={cottage?.cottages || []}
+        selectedCottages={reduxSelectedCottages}
+        onCottageSelectionChange={() => {}}
+        totalGuests={totalGuests}
+        id={cottage?._id}
+        dateStr={checkInDate}
+      />
     </div>
   );
 }

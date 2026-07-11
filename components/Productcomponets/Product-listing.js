@@ -81,7 +81,7 @@ export const PROPERTY_TYPES_BY_SLUG = {
   hotel: ["Standard Room", "Deluxe Room", "Suite", "Presidential Suite"],
 };
 
-export default function PropertyFilterListing() {
+export default function PropertyFilterListing({ categorySlug }) {
   const [showFilterSidebar, setShowFilterSidebar] = useState(false);
   const dispatch = useDispatch();
   const {
@@ -111,6 +111,26 @@ export default function PropertyFilterListing() {
     (state) => state.properties
   );
   const router = useRouter();
+
+  // Sync categorySlug parameter with Redux category state
+  useEffect(() => {
+    if (categorySlug === "all") {
+      dispatch(setSelectedCategory(null));
+      dispatch(setSelectedCategoryname("All Stays"));
+      dispatch(clearPropertyType());
+    } else if (categorySlug && categories?.length > 0) {
+      const matchedCategory = categories.find(
+        (cat) => cat.slug?.toLowerCase() === categorySlug.toLowerCase()
+      );
+      if (matchedCategory) {
+        if (selectedCategoryId !== matchedCategory._id) {
+          dispatch(setSelectedCategory(matchedCategory._id));
+          dispatch(setSelectedCategoryname(matchedCategory.name));
+          dispatch(clearPropertyType());
+        }
+      }
+    }
+  }, [categorySlug, categories, selectedCategoryId, dispatch]);
 
   useEffect(() => {
     dispatch(

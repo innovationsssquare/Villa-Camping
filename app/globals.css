@@ -359,3 +359,25 @@ div.spinner div.bar12 {
 .animate-heart {
   animation: heart-pop 0.3s ease-out;
 }
+
+/* Custom Google Maps marker active styling */
+.villa-marker {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.villa-marker.marker-active {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+  border-color: #000000 !important;
+  transform: scale(1.18) !important;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4) !important;
+}
+
+.marker-tail {
+  transition: border-top-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.villa-marker.marker-active + .marker-tail {
+  border-top-color: #000000 !important;
+}
+

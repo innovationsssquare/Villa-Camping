@@ -24,7 +24,7 @@ import Image from "next/image";
 import { addToast, Button } from "@heroui/react";
 import { getDeviceId } from "@/lib/deviceId";
 
-const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange }) => {
+const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
   const [open, setOpen] = useState(autoOpen);

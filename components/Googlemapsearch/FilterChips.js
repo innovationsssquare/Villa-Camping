@@ -26,7 +26,7 @@ const CATEGORY_ICON_MAP = {
   hotel: <Bed className="h-3 w-3 text-purple-500" />,
 };
 
-export const FilterChips = ({ onFilterSelect }) => {
+export const FilterChips = ({ onFilterSelect, className = "px-2 py-3 md:py-8" }) => {
   const dispatch = useDispatch();
 
   const { categories = [], loading } = useSelector(
@@ -57,7 +57,7 @@ export const FilterChips = ({ onFilterSelect }) => {
   if (loading || !categories.length) return null;
 
   return (
-    <div className="px-2 py-3 md:py-8">
+    <div className={className}>
       <Carousel className="w-full">
         <CarouselContent className="-ml-2 md:-ml-4">
           {categories.map((category) => {

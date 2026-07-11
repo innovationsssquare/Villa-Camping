@@ -1,141 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import {
   FaStar,
-  FaWifi,
-  FaCar,
-  FaWater,
-  FaCoffee,
-  FaMountain,
-  FaUtensils,
   FaMapMarkerAlt,
-  FaHome,
   FaBed,
   FaLeaf,
-  FaHiking,
-  FaSun,
-  FaHotTub,
-  FaFire,
-  FaTv,
-  FaSnowflake,
-  FaGamepad,
-  FaCamera,
-  FaMusic,
-  FaDumbbell,
-  FaTree,
-  FaShieldAlt,
-  FaClock,
-  FaPhone,
-  FaCouch,
-  FaBlender,
-  FaMicrochip,
-  FaSwimmingPool,
-  FaTshirt,
-  FaInfoCircle,
 } from "react-icons/fa";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import GoogleMap from "./google-map";
 import { useVilla } from "@/lib/context/VillaContext";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import Image from "next/image";
 
 export default function PropertyContentSections() {
   const villa = useVilla();
+  const [showAllAmenities, setShowAllAmenities] = useState(false);
 
-  const amenityIcons = {
-    "Mountain View": FaMountain,
-    "Breakfast Included": FaUtensils,
-    WiFi: FaWifi,
-    Jacuzzi: FaHotTub,
-    "BBQ Grill": FaFire,
-    "Free Parking": FaCar,
-    "Smart TV": FaTv,
-    "Air Conditioning": FaSnowflake,
-    "Coffee Machine": FaCoffee,
-    "Game Room": FaGamepad,
-    "Security Cameras": FaCamera,
-    "Sound System": FaMusic,
-    "Fitness Center": FaDumbbell,
-    "Garden View": FaTree,
-    Terrace: FaSun,
-    Heating: FaSnowflake,
-    Safe: FaShieldAlt,
-    "24/7 Support": FaClock,
-    Phone: FaPhone,
-    "Laundry Service": FaTshirt,
-    Kitchen: FaUtensils,
-    "Premium Bedding": FaBed,
-    "Living Area": FaCouch,
-    Refrigerator: FaBlender,
-    Microwave: FaMicrochip,
-    "Swimming Pool": FaSwimmingPool,
+  const amenities = villa?.amenities || [];
+  const displayedAmenities = showAllAmenities
+    ? amenities
+    : amenities.slice(0, 8);
 
-    // backend synonyms
-    Parking: FaCar,
-    Garden: FaTree,
-    TV: FaTv,
-    Security: FaShieldAlt,
-    Balcony: FaSun,
-    "Washing Machine": FaTshirt,
-  };
-
-  const amenities = villa?.amenities?.map((label) => ({
-    label,
-    icon: amenityIcons[label] || FaInfoCircle,
-  }));
-
-  const experiences = [
-    {
-      title: "FULLY-SERVICED VILLAS",
-      image:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    },
-    {
-      title: "PARTY VIBE",
-      image:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
-    },
-    {
-      title: "PREMIUM INTERIORS",
-      image:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    },
-    {
-      title: "CURATED EXPERIENCES",
-      image:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    },
-  ];
-
-  const reviews = [
-    {
-      name: "Priya Sharma",
-      rating: 5,
-      date: "March 2024",
-      comment:
-        "Absolutely stunning property with breathtaking mountain views. The villa is spacious and well-maintained.",
-      avatar:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    },
-    {
-      name: "Rajesh Kumar",
-      rating: 5,
-      date: "February 2024",
-      comment:
-        "Perfect for a family getaway. The amenities were excellent and the staff was very helpful.",
-      avatar:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    },
-    {
-      name: "Anita Patel",
-      rating: 4,
-      date: "January 2024",
-      comment:
-        "Beautiful location and great facilities. Would definitely recommend for a peaceful retreat.",
-      avatar:
-        "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    },
-  ];
+  const reviews = villa?.reviews || [];
 
   return (
     <div className="w-full space-y-12">
@@ -158,26 +52,29 @@ export default function PropertyContentSections() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {experiences.map((experience, index) => (
-              <div
-                key={index}
-                className="relative rounded-lg overflow-hidden group cursor-pointer transition-all duration-500 hover:shadow-xl"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <Image
-                  height={40}
-                  width={40}
-                  src={villa?.images[index] || "/placeholder.svg"}
-                  alt={experience.title}
-                  className="w-full h-48 object-cover transition-all duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 group-hover:bg-black/60">
-                  <h4 className="text-white font-bold text-center px-4 transition-all duration-300 group-hover:transform group-hover:scale-105">
-                    {experience.title}
-                  </h4>
+            {(villa?.images?.slice(0, 4) || []).map((img, index) => {
+              const titles = ["FULLY-SERVICED VILLAS", "PARTY VIBE", "PREMIUM INTERIORS", "CURATED EXPERIENCES"];
+              return (
+                <div
+                  key={index}
+                  className="relative rounded-lg overflow-hidden group cursor-pointer transition-all duration-500 hover:shadow-xl"
+                  style={{ animationDelay: `${index * 150}ms` }}
+                >
+                  <Image
+                    height={192}
+                    width={300}
+                    src={img || "/placeholder.svg"}
+                    alt={titles[index] || "Experience"}
+                    className="w-full h-48 object-cover transition-all duration-500 group-hover:scale-110"
+                  />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 group-hover:bg-black/60">
+                    <h4 className="text-white font-bold text-center px-4 transition-all duration-300 group-hover:transform group-hover:scale-105">
+                      {titles[index] || ""}
+                    </h4>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </section>
@@ -188,36 +85,53 @@ export default function PropertyContentSections() {
         className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
       >
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
-          Refund Policy
+          Rules and Refund Policy
         </h2>
         <Card className="border-gray-200 border transition-all duration-300">
           <CardContent className="p-6">
-            <div className="space-y-4">
-              <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
-                  Cancellation Policy
-                </h3>
-                <ul className="space-y-2 text-gray-700 text-sm">
-                  <li className="transition-all duration-300 hover:text-black">
-                    • Free cancellation up to 7 days before check-in
-                  </li>
-                  <li className="transition-all duration-300 hover:text-black">
-                    • 50% refund for cancellations 3-7 days before check-in
-                  </li>
-                  <li className="transition-all duration-300 hover:text-black">
-                    • No refund for cancellations within 3 days of check-in
-                  </li>
-                </ul>
-              </div>
-              <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
-                <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
-                  Modification Policy
-                </h3>
-                <p className="text-gray-700 transition-all duration-300 hover:text-black text-sm">
-                  Date changes are subject to availability and may incur
-                  additional charges based on rate differences.
-                </p>
-              </div>
+            <div className="space-y-6">
+              {villa?.cancellationPolicy?.length > 0 && (
+                <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
+                  <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
+                    Cancellation Policy
+                  </h3>
+                  <ul className="space-y-2 text-gray-700 text-sm">
+                    {villa.cancellationPolicy.map((policy, index) => (
+                      <li key={index} className="transition-all duration-300 hover:text-black">
+                        • {policy}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {villa?.houseRules?.length > 0 && (
+                <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
+                  <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
+                    House Rules
+                  </h3>
+                  <ul className="space-y-2 text-gray-700 text-sm">
+                    {villa.houseRules.map((rule, index) => (
+                      <li key={index} className="transition-all duration-300 hover:text-black">
+                        • {rule}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {villa?.paymentTerms?.length > 0 && (
+                <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-4 -m-4">
+                  <h3 className="font-semibold text-lg mb-2 text-black transition-all duration-300">
+                    Payment Terms
+                  </h3>
+                  <ul className="space-y-2 text-gray-700 text-sm">
+                    {villa.paymentTerms.map((term, index) => (
+                      <li key={index} className="transition-all duration-300 hover:text-black">
+                        • {term}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -231,66 +145,48 @@ export default function PropertyContentSections() {
         <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
           Spaces
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-6 -m-6">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-gray-200 border border-white rounded-md flex items-center justify-center mr-3">
-                <FaBed className="w-4 h-4 text-black" />
-              </div>
-              <h3 className="font-semibold text-lg text-black transition-all duration-300">
-                Indoor Spaces
-              </h3>
-            </div>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              {[
-                "5 spacious bedrooms with mountain views",
-                "Large living room with comfortable seating",
-                "Fully equipped kitchen",
-                "5 modern bathrooms",
-                "Dining area for group meals",
-              ].map((item, index) => (
-                <li
-                  key={index}
-                  className="transition-all duration-300 hover:text-black hover:transform hover:translate-x-2"
-                >
-                  • {item}
-                </li>
-              ))}
-            </ul>
+        {villa?.spaces?.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {villa.spaces.map((space, index) => (
+              <Card key={space._id || index} className="overflow-hidden border-gray-200 transition-all duration-300 hover:shadow-lg">
+                {space.image && (
+                  <div className="relative h-48 overflow-hidden">
+                    <Image
+                      src={space.image}
+                      alt={space.name}
+                      fill
+                      className="object-cover transition-transform duration-300 hover:scale-105"
+                      unoptimized
+                    />
+                  </div>
+                )}
+                <CardContent className="p-4 space-y-3">
+                  <h3 className="font-semibold text-lg text-black">{space.name}</h3>
+                  {space.description && (
+                    <p className="text-sm text-gray-600">{space.description}</p>
+                  )}
+                  {space.details?.length > 0 && (
+                    <ul className="space-y-1">
+                      {space.details.map((detail, i) => (
+                        <li key={i} className="text-sm text-gray-600 transition-all duration-300 hover:text-black hover:translate-x-1">
+                          • {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
           </div>
-          <div className="transition-all duration-300 hover:bg-gray-50 rounded-lg p-6 -m-6">
-            <div className="flex items-center mb-4">
-              <div className="w-8 h-8 bg-gray-200 border border-white rounded-md flex items-center justify-center mr-3">
-                <FaLeaf className="w-4 h-4 text-black" />
-              </div>
-              <h3 className="font-semibold text-lg text-black transition-all duration-300">
-                Outdoor Spaces
-              </h3>
-            </div>
-            <ul className="space-y-2 text-gray-700 text-sm">
-              {[
-                "Private garden with mountain views",
-                "Outdoor seating area",
-                "BBQ facility",
-                "Parking space for multiple vehicles",
-                "Terrace with panoramic views",
-              ].map((item, index) => (
-                <li
-                  key={index}
-                  className="transition-all duration-300 hover:text-black hover:transform hover:translate-x-2"
-                >
-                  • {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        ) : (
+          <p className="text-sm text-gray-400">No spaces information available.</p>
+        )}
       </section>
 
       {/* Reviews Section */}
       <section
         id="reviewss"
-        className="scroll-mt-32 min-h-[600px] transition-all duration-500 ease-out"
+        className="scroll-mt-32 min-h-[300px] transition-all duration-500 ease-out"
       >
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-bold text-black transition-all duration-300">
@@ -299,60 +195,69 @@ export default function PropertyContentSections() {
           <div className="flex items-center space-x-2 transition-all duration-300 hover:transform hover:scale-105">
             <FaStar className="w-5 h-5 text-yellow-400 transition-all duration-300" />
             <span className="text-xl font-semibold text-black transition-all duration-300">
-              4.8
+              {villa?.averageRating || "N/A"}
             </span>
             <span className="text-gray-500 transition-all duration-300">
-              • 65 reviews
+              • {villa?.totalReviews || reviews.length} reviews
             </span>
           </div>
         </div>
 
-        <div className="space-y-6">
-          {reviews.map((review, index) => (
-            <Card
-              key={index}
-              className="border-gray-200 border transition-all duration-300 "
-            >
-              <CardContent className="p-3">
-                <div className="flex items-start space-x-4">
-                  <img
-                    src={review.avatar || "/placeholder.svg"}
-                    alt={review.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-gray-200 transition-all duration-300 hover:border-gray-400"
-                  />
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-semibold text-black transition-all duration-300">
-                        {review.name}
-                      </h4>
-                      <span className="text-sm text-gray-500 transition-all duration-300">
-                        {review.date}
-                      </span>
+        {reviews.length > 0 ? (
+          <div className="space-y-6">
+            {reviews.map((review, index) => (
+              <Card
+                key={review._id || index}
+                className="border-gray-200 border transition-all duration-300"
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-start space-x-4">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center border-2 border-gray-200 text-black font-semibold text-lg">
+                      {(review.userName || review.name || "U").charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex items-center space-x-1 mb-3">
-                      {[...Array(review.rating)].map((_, i) => (
-                        <FaStar
-                          key={i}
-                          className="w-4 h-4 text-yellow-400 transition-all duration-300 hover:scale-125"
-                        />
-                      ))}
+                    <div className="flex-1">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-black transition-all duration-300">
+                          {review.userName || review.name || "Anonymous"}
+                        </h4>
+                        <span className="text-sm text-gray-500 transition-all duration-300">
+                          {review.createdAt
+                            ? new Date(review.createdAt).toLocaleDateString("en-IN", {
+                                month: "long",
+                                year: "numeric",
+                              })
+                            : review.date || ""}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1 mb-3">
+                        {[...Array(review.rating || 0)].map((_, i) => (
+                          <FaStar
+                            key={i}
+                            className="w-4 h-4 text-yellow-400 transition-all duration-300 hover:scale-125"
+                          />
+                        ))}
+                      </div>
+                      <p className="text-gray-700 transition-all text-sm duration-300">
+                        {review.comment || review.text || ""}
+                      </p>
                     </div>
-                    <p className="text-gray-700 transition-all text-sm duration-300">
-                      {review.comment}
-                    </p>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <p className="text-sm text-gray-400">No reviews yet.</p>
+        )}
 
-        <Button
-          variant="outline"
-          className="mt-6 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105 bg-transparent"
-        >
-          Show all 65 reviews
-        </Button>
+        {(villa?.totalReviews || reviews.length) > 3 && (
+          <Button
+            variant="outline"
+            className="mt-6 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 hover:shadow-md hover:transform hover:scale-105 bg-transparent"
+          >
+            Show all {villa?.totalReviews || reviews.length} reviews
+          </Button>
+        )}
       </section>
 
       {/* Amenities Section */}
@@ -365,22 +270,30 @@ export default function PropertyContentSections() {
         </h2>
 
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {amenities?.map((amenity, index) => (
+          {displayedAmenities?.map((amenity, index) => (
             <div
               key={index}
               className="flex items-center space-x-3 p-4 bg-gray-50 border border-gray-200 rounded-lg transition-all duration-300 hover:bg-gray-100 hover:shadow-md hover:transform hover:scale-105"
             >
               <div className="w-10 h-10 bg-gray-200 border border-white rounded-md flex items-center justify-center transition-all duration-300">
-                <amenity.icon className="w-5 h-5 text-black transition-all duration-300" />
+                <CustomAmenityIcon name={amenity} className="w-5 h-5 text-black" />
               </div>
               <span className="font-medium text-sm text-black transition-all duration-300">
-                {amenity.label}
+                {amenity}
               </span>
             </div>
           ))}
         </div>
 
-       
+        {amenities.length > 8 && (
+          <Button
+            variant="outline"
+            className="mt-4 border-gray-200 text-black hover:bg-gray-50 transition-all duration-300 bg-transparent"
+            onClick={() => setShowAllAmenities(!showAllAmenities)}
+          >
+            {showAllAmenities ? "Show Less" : `Show all ${amenities.length} amenities`}
+          </Button>
+        )}
       </section>
 
       {/* Location Section */}
@@ -399,24 +312,32 @@ export default function PropertyContentSections() {
               </div>
               <div>
                 <h3 className="font-semibold text-lg text-black transition-all duration-300">
-                  Vastalya, Malawali
+                  {villa?.address?.addressLine || "Address"}
                 </h3>
                 <p className="text-gray-600 transition-all duration-300">
-                  Lonavala, Pune
+                  {villa?.address?.area}{villa?.address?.city ? `, ${villa.address.city}` : ""}
                 </p>
               </div>
             </div>
-            <GoogleMap
-              center={{ lat: 18.7645, lng: 73.4084 }}
-              zoom={14}
-              className="w-full h-64 rounded-lg mb-4 border border-gray-300"
-            />
-            <p className="text-gray-700 text-sm transition-all duration-300">
-              Located in the serene hill station of Ramgarh, this villa offers
-              easy access to local attractions while maintaining privacy and
-              tranquility. The property is approximately 20 km from Nainital
-              city center.
-            </p>
+            {villa?.coordinates && (
+              <GoogleMap
+                coordinates={villa.coordinates}
+                zoom={14}
+                className="w-full h-64 rounded-lg mb-4 border border-gray-300"
+              />
+            )}
+            {villa?.nearbyattractions?.length > 0 && (
+              <div className="mt-4">
+                <h4 className="font-semibold text-base text-black mb-2">Nearby Attractions</h4>
+                <ul className="space-y-1 text-sm text-gray-700">
+                  {villa.nearbyattractions.map((loc, index) => (
+                    <li key={index} className="transition-all duration-300 hover:text-black">
+                      • {loc?.nearbylocation} - {loc?.distance} km
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </CardContent>
         </Card>
       </section>
@@ -424,41 +345,31 @@ export default function PropertyContentSections() {
       {/* FAQs Section */}
       <section
         id="faqss"
-        className="scroll-mt-32 min-h-[400px] transition-all duration-500 ease-out"
+        className="scroll-mt-32 min-h-[200px] transition-all duration-500 ease-out"
       >
-        <h2 className="text-lg font-bold text-black mb-6 transition-all duration-300">
-          Frequently Asked Questions
+        <h2 className="text-2xl font-bold text-black mb-6 transition-all duration-300">
+          Explore Your Stay
         </h2>
-        <div className="space-y-2">
-          {[
-            {
-              q: "What is the check-in and check-out time?",
-              a: "Check-in: 2:00 PM | Check-out: 11:00 AM",
-            },
-            {
-              q: "Is parking available?",
-              a: "Yes, free parking is available for multiple vehicles.",
-            },
-            {
-              q: "Are pets allowed?",
-              a: "Pets are allowed with prior approval and additional charges may apply.",
-            },
-          ].map((faq, index) => (
-            <Card
-              key={index}
-              className="border-gray-200 border transition-all duration-300"
-            >
-              <CardContent className="p-3">
-                <h3 className="font-semibold text-base mb-2 text-black transition-all duration-300">
-                  {faq.q}
-                </h3>
-                <p className="text-gray-700 text-sm transition-all duration-300">
-                  {faq.a}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {villa?.exploreStay?.length > 0 ? (
+          <Accordion type="single" collapsible className="space-y-3">
+            {villa.exploreStay.map((item, index) => (
+              <AccordionItem
+                key={item._id || index}
+                value={`explore-${index}`}
+                className="bg-gray-50 border border-gray-200 rounded-lg px-4"
+              >
+                <AccordionTrigger className="font-medium hover:no-underline text-black">
+                  {item.title}
+                </AccordionTrigger>
+                <AccordionContent className="text-sm text-gray-700">
+                  {item.description}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        ) : (
+          <p className="text-sm text-gray-400">No details available.</p>
+        )}
       </section>
     </div>
   );

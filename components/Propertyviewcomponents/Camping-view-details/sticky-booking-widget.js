@@ -48,6 +48,8 @@ import {
 import { useCamping } from "@/lib/context/CampingContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { useRouter } from "next/navigation";
+import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
+import TentSelectionDrawer from "@/components/Tentscreen/tent-selection-drawer";
 
 export default function StickyBookingWidget() {
   const [stickyState, setStickyState] = useState("normal");
@@ -74,13 +76,31 @@ export default function StickyBookingWidget() {
     Math.round((+checkOutDate - +checkInDate) / msPerDay)
   );
 
+  const reduxSelectedTents = useSelector((state) => state.booking.selectedTents);
+  const dayTents = useSelector((state) => state.camping.dayDetails?.tents || []);
+  const [isTentDrawerOpen, setIsTentDrawerOpen] = useState(false);
+
+  const baseAmount = calculateCampingTentTotal(
+    reduxSelectedTents,
+    dayTents,
+    checkin,
+    checkout
+  );
+
   const { discountAmount, finalTotal } = calculateBookingPrice(
-    camping?.basePricePerNight,
-    nights,
+    baseAmount,
+    1, // nights for coupon is 1 for camping
     appliedCoupon
   );
 
-  const totalGuests = selectedGuest?.adults + selectedGuest?.childrenn;
+  const totalGuests = (selectedGuest?.adults || 0) + (selectedGuest?.childrenn || 0);
+
+  const totalSelectedTents = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t?.quantity || 0),
+    0
+  );
+
+  const displayTotal = totalSelectedTents > 0 ? finalTotal : (camping?.basePricePerNight || 0) * nights;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
@@ -384,7 +404,7 @@ export default function StickyBookingWidget() {
               </Popover>
             </div>
 
-            {/* Guests and Rooms Selection */}
+            {/* Guests and Accommodations Selection */}
             <div className="grid grid-cols-1 gap-3 mb-6">
               <Popover>
                 <PopoverTrigger asChild>
@@ -490,6 +510,27 @@ export default function StickyBookingWidget() {
                   </div>
                 </PopoverContent>
               </Popover>
+
+              {/* Tents Selection */}
+              <div 
+                className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white mt-1"
+                onClick={() => setIsTentDrawerOpen(true)}
+              >
+                <label className="text-xs font-bold text-black uppercase block mb-1 transition-all duration-300">
+                  Select Tents
+                </label>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Home className="w-4 h-4 text-black" />
+                    <span className="text-sm font-medium text-black">
+                      {totalSelectedTents > 0 
+                        ? `${totalSelectedTents} ${totalSelectedTents === 1 ? "Tent" : "Tents"} Selected` 
+                        : "No Tents Selected"}
+                    </span>
+                  </div>
+                  <ChevronDown className="w-4 h-4 text-black" />
+                </div>
+              </div>
             </div>
 
             {/* Coupon Code Section */}
@@ -708,14 +749,16 @@ export default function StickyBookingWidget() {
             {/* Best Price Banner */}
             <div className="flex items-center justify-between transition-all duration-300">
               <div>
-                <div className="flex items-center space-x-2">
-                  <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                    ₹58,750
-                  </span>
-                </div>
+                {appliedCoupon && (
+                  <div className="flex items-center space-x-2">
+                    <span className="text-gray-400 line-through text-sm transition-all duration-300">
+                      ₹{(displayTotal + discountAmount).toLocaleString()}
+                    </span>
+                  </div>
+                )}
                 <div className="flex items-baseline space-x-1">
                   <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalTotal.toLocaleString()}
+                    ₹{displayTotal.toLocaleString()}
                   </span>
                   <span className="text-gray-600 text-sm transition-all duration-300">
                     {` (for ${totalGuests} guest)`}
@@ -741,16 +784,22 @@ export default function StickyBookingWidget() {
             {/* Reserve Button */}
             <Button
               onClick={() => {
-                dispatch(setPropertyId(villa?._id));
-                dispatch(setcategoryId(villa?.category));
-                dispatch(setOwnerId(villa?.owner));
-                dispatch(setPropertyType("Villa"));
+                dispatch(setPropertyId(camping?._id));
+                dispatch(setcategoryId(camping?.category));
+                dispatch(setOwnerId(camping?.owner));
+                dispatch(setPropertyType("Camping"));
                 router.push("/checkout");
               }}
-              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
+              disabled={totalSelectedTents === 0}
+              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-2 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Reserve Now
             </Button>
+            {totalSelectedTents === 0 && (
+              <p className="text-center text-xs text-red-500 font-medium mb-4">
+                * Please select at least one tent to proceed.
+              </p>
+            )}
           </CardContent>
         </Card>
 
@@ -764,6 +813,16 @@ export default function StickyBookingWidget() {
           style={{ transformOrigin: "center" }}
         />
       </div>
+      <TentSelectionDrawer
+        isOpen={isTentDrawerOpen}
+        onClose={() => setIsTentDrawerOpen(false)}
+        tents={camping?.tents || []}
+        selectedTents={reduxSelectedTents}
+        onTentSelectionChange={() => {}}
+        totalGuests={totalGuests}
+        id={camping?._id}
+        dateStr={checkInDate}
+      />
     </div>
   );
 }

@@ -1,14 +1,17 @@
 import Viewhotel from "@/components/Hotelscreen/Viewhotel";
 import HotelDetails from "@/components/Propertyviewcomponents/hotel-details";
+import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
-    const res = await fetch(`${SITE_ORIGIN}/api/hotels/${id}`, { cache: "no-store" });
+    const res = await fetch(`${BaseUrl}/Hotel/get/hotel/${id}`, { cache: "no-store" });
     if (!res.ok) throw new Error("Failed to fetch");
-    const hotel = await res.json();
+    const result = await res.json();
+    const hotel = result?.data;
     const title = hotel?.name || `Hotel ${id}`;
     const description = hotel?.shortDescription || hotel?.description || "Book beautiful stays on ThevillaCamp.";
     const ogImage = (hotel?.images && hotel.images[0]) || "/og-default.jpg";
@@ -36,18 +39,16 @@ export default async function Home({ params }) {
   const { id } = await params;
   let hotel = null;
   try {
-    const res = await fetch(`${SITE_ORIGIN}/api/hotels/${id}`, { cache: "no-store" });
-    if (res.ok) hotel = await res.json();
+    const res = await fetch(`${BaseUrl}/Hotel/get/hotel/${id}`, { cache: "no-store" });
+    if (res.ok) {
+      const result = await res.json();
+      hotel = result?.data;
+    }
   } catch (e) {}
 
   return (
     <div className="min-h-screen">
-      {hotel ? (
-        (function () {
-          const JsonLd = require("@/components/Propertyviewcomponents/JsonLd").default;
-          return JsonLd ? JsonLd({ villa: hotel }) : null;
-        })()
-      ) : null}
+      {hotel ? <JsonLd villa={hotel} /> : null}
       <Viewhotel />
       <HotelDetails />
     </div>

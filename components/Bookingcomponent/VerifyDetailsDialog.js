@@ -1,4 +1,7 @@
+"use client";
 import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { updateCustomerField } from "@/Redux/Slices/bookingSlice";
 import {
   Dialog,
   DialogContent,
@@ -11,37 +14,33 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Check, X } from "lucide-react";
 
-const VerifyDetailsDialog = ({ open, onOpenChange }) => {
-  const [bookingFor, setBookingFor] = useState("myself");
-  const [formData, setFormData] = useState({
-    firstName: "Bdbd",
-    lastName: "Bxbdnbd",
-    mobile: "8669186483",
-    email: "Bxbdb@gmaul.com",
-    city: "Yes",
-    gstNumber: "",
-  });
+const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
+  const dispatch = useDispatch();
+  const customerDetails = useSelector((state) => state.booking.customerDetails);
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    dispatch(updateCustomerField({ field, value }));
   };
 
   const validateEmail = (email) => {
+    if (!email) return false;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
 
   const validateMobile = (mobile) => {
+    if (!mobile) return false;
     const mobileRegex = /^\d{10}$/;
     return mobileRegex.test(mobile);
   };
 
   const validateName = (name) => {
+    if (!name) return false;
     return name.trim().length >= 2 && /^[a-zA-Z\s]+$/.test(name.trim());
   };
 
   const isFieldValid = (field) => {
-    const value = formData[field];
+    const value = customerDetails[field] || "";
 
     switch (field) {
       case "email":
@@ -55,6 +54,23 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
         return value.trim().length >= 2;
       default:
         return value.length > 0;
+    }
+  };
+
+  const isFormValid = () => {
+    return (
+      isFieldValid("firstName") &&
+      isFieldValid("lastName") &&
+      isFieldValid("mobile") &&
+      isFieldValid("email") &&
+      isFieldValid("city")
+    );
+  };
+
+  const handlePayNow = () => {
+    if (isFormValid()) {
+      onPayNow();
+      onOpenChange(false);
     }
   };
 
@@ -77,11 +93,11 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
           {/* Booking For */}
           <div>
             <Label className="text-sm font-medium text-gray-900 mb-4 block">
-             {` I'm booking for :`}
+              {`I'm booking for :`}
             </Label>
             <RadioGroup
-              value={bookingFor}
-              onValueChange={setBookingFor}
+              value={customerDetails.bookingFor || "myself"}
+              onValueChange={(val) => handleInputChange("bookingFor", val)}
               className="flex gap-8"
             >
               <div className="flex items-center space-x-3">
@@ -125,7 +141,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
               <div className="relative">
                 <Input
                   id="firstName"
-                  value={formData.firstName}
+                  value={customerDetails.firstName || ""}
                   onChange={(e) =>
                     handleInputChange("firstName", e.target.value)
                   }
@@ -148,7 +164,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
               <div className="relative">
                 <Input
                   id="lastName"
-                  value={formData.lastName}
+                  value={customerDetails.lastName || ""}
                   onChange={(e) =>
                     handleInputChange("lastName", e.target.value)
                   }
@@ -175,7 +191,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
               <div className="relative">
                 <Input
                   id="mobile"
-                  value={`+91  ${formData.mobile}`}
+                  value={customerDetails.mobile ? `+91  ${customerDetails.mobile}` : ""}
                   onChange={(e) => {
                     const value = e.target.value
                       .replace("+91  ", "")
@@ -205,7 +221,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
                 <Input
                   id="email"
                   type="email"
-                  value={formData.email}
+                  value={customerDetails.email || ""}
                   onChange={(e) => handleInputChange("email", e.target.value)}
                   className="w-full px-4 py-3 bg-gray-100 border-0 rounded-lg text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 pr-10"
                 />
@@ -224,12 +240,12 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
               htmlFor="city"
               className="text-sm font-medium text-gray-700 block mb-2"
             >
-              Residential City
+              Residential City <span className="text-red-500">*</span>
             </Label>
             <div className="relative">
               <Input
                 id="city"
-                value={formData.city}
+                value={customerDetails.city || ""}
                 onChange={(e) => handleInputChange("city", e.target.value)}
                 className="w-full px-4 py-3 bg-gray-100 border-0 rounded-lg text-gray-900 font-medium focus:bg-white focus:ring-2 focus:ring-blue-500 pr-10"
               />
@@ -252,7 +268,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
             </p>
             <Input
               placeholder="GST Number"
-              value={formData.gstNumber}
+              value={customerDetails.gstNumber || ""}
               onChange={(e) => handleInputChange("gstNumber", e.target.value)}
               className="w-full px-4 py-3 bg-gray-100 border-0 rounded-lg text-gray-500 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:ring-blue-500"
             />
@@ -261,9 +277,8 @@ const VerifyDetailsDialog = ({ open, onOpenChange }) => {
           {/* Pay Now Button */}
           <Button
             className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-4 rounded-lg text-base mt-8"
-            onClick={() => {
-              // Handle payment logic here
-            }}
+            disabled={!isFormValid()}
+            onClick={handlePayNow}
           >
             Pay Now
           </Button>

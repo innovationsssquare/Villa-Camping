@@ -63,7 +63,7 @@ export const PropertyMarker = ({
         </div>
         
         {/* Speech bubble tail */}
-        <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-orange-500"></div>
+        <div className="marker-tail absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-[8px] border-r-[8px] border-t-[8px] border-l-transparent border-r-transparent border-t-orange-500 transition-colors duration-300"></div>
       </div>
     </div>
   );

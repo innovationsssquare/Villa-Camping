@@ -49,6 +49,8 @@
   import { useHotel } from "@/lib/context/HotelContext";
   import { calculateBookingPrice } from "@/lib/bookingUtils";
   import { useRouter } from "next/navigation";
+  import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
+  import RoomSelectionDrawer from "@/components/Hotelscreen/RoomSelectionDrawer";
 
   export default function StickyBookingWidget() {
     const [stickyState, setStickyState] = useState("normal");
@@ -75,13 +77,31 @@
       Math.round((+checkOutDate - +checkInDate) / msPerDay)
     );
 
+    const reduxSelectedRooms = useSelector((state) => state.booking.selectedRooms);
+    const dayRooms = useSelector((state) => state.hotel.dayDetails?.rooms || []);
+    const [isRoomDrawerOpen, setIsRoomDrawerOpen] = useState(false);
+
+    const baseAmount = calculateHotelTotal(
+      reduxSelectedRooms,
+      dayRooms,
+      checkin,
+      checkout
+    );
+
     const { discountAmount, finalTotal } = calculateBookingPrice(
-      hotel?.basePricePerNight,
-      nights,
+      baseAmount,
+      1, // nights for coupon is 1 for Hotel
       appliedCoupon
     );
 
-    const totalGuests = selectedGuest?.adults + selectedGuest?.childrenn;
+    const totalGuests = (selectedGuest?.adults || 0) + (selectedGuest?.childrenn || 0);
+
+    const totalSelectedRooms = Object.values(reduxSelectedRooms || {}).reduce(
+      (sum, r) => sum + (r?.quantity || 0),
+      0
+    );
+
+    const displayTotal = totalSelectedRooms > 0 ? finalTotal : (hotel?.basePricePerNight || 0) * nights;
 
     const widgetRef = useRef(null);
     const containerRef = useRef(null);
@@ -383,7 +403,7 @@
                 </Popover>
               </div>
 
-              {/* Guests and Rooms Selection */}
+              {/* Guests and Accommodations Selection */}
               <div className="grid grid-cols-1 gap-3 mb-6">
                 <Popover>
                   <PopoverTrigger asChild>
@@ -486,6 +506,27 @@
                     </div>
                   </PopoverContent>
                 </Popover>
+
+                {/* Room Selection */}
+                <div 
+                  className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white mt-1"
+                  onClick={() => setIsRoomDrawerOpen(true)}
+                >
+                  <label className="text-xs font-bold text-black uppercase block mb-1 transition-all duration-300">
+                    Select Rooms
+                  </label>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Home className="w-4 h-4 text-black" />
+                      <span className="text-sm font-medium text-black">
+                        {totalSelectedRooms > 0 
+                          ? `${totalSelectedRooms} ${totalSelectedRooms === 1 ? "Room" : "Rooms"} Selected` 
+                          : "No Rooms Selected"}
+                      </span>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-black" />
+                  </div>
+                </div>
               </div>
 
               {/* Coupon Code Section */}
@@ -704,14 +745,16 @@
               {/* Best Price Banner */}
               <div className="flex items-center justify-between transition-all duration-300">
                 <div>
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                      ₹58,750
-                    </span>
-                  </div>
+                  {appliedCoupon && (
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-400 line-through text-sm transition-all duration-300">
+                        ₹{(displayTotal + discountAmount).toLocaleString()}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-baseline space-x-1">
                     <span className="text-xl font-bold text-black transition-all duration-300">
-                      ₹{finalTotal.toLocaleString()}
+                      ₹{displayTotal.toLocaleString()}
                     </span>
                     <span className="text-gray-600 text-sm transition-all duration-300">
                       {` (for ${totalGuests} guest)`}
@@ -743,10 +786,16 @@
                   dispatch(setPropertyType("Hotel"));
                   router.push("/checkout");
                 }}
-                className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
+                disabled={totalSelectedRooms === 0}
+                className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-2 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Reserve Now
               </Button>
+              {totalSelectedRooms === 0 && (
+                <p className="text-center text-xs text-red-500 font-medium mb-4">
+                  * Please select at least one room to proceed.
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -760,6 +809,16 @@
             style={{ transformOrigin: "center" }}
           />
         </div>
+        <RoomSelectionDrawer
+          isOpen={isRoomDrawerOpen}
+          onClose={() => setIsRoomDrawerOpen(false)}
+          rooms={hotel?.rooms || []}
+          selectedRooms={reduxSelectedRooms}
+          onRoomSelectionChange={() => {}}
+          totalGuests={totalGuests}
+          id={hotel?._id}
+          dateStr={checkInDate}
+        />
       </div>
     );
   }

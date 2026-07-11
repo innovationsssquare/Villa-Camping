@@ -41,7 +41,7 @@ const LOCATIONS = [
   'Rajmachi Point'
 ];
 
-export const FilterDrawer = ({ isOpen, onOpenChange }) => {
+export const FilterDrawer = ({ isOpen, onOpenChange, side = "bottom" }) => {
   const [priceRange, setPriceRange] = useState([100000, 1000000]);
   const [selectedTypes, setSelectedTypes] = useState([]);
   const [selectedAmenities, setSelectedAmenities] = useState([]);
@@ -96,8 +96,8 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
 
   return (
     <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh] border-none p-0">
-        <div className="flex flex-col h-full">
+      <SheetContent side={side} className={side === "bottom" ? "h-[90vh] border-none p-0" : "w-full sm:max-w-md h-full border-none p-0"}>
+        <div className="flex flex-col h-full bg-white">
           <SheetHeader className="p-6 pb-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <SheetTitle className="text-left flex items-center">
@@ -117,7 +117,7 @@ export const FilterDrawer = ({ isOpen, onOpenChange }) => {
             </div>
           </SheetHeader>
           
-          <ScrollArea className="flex-1 h-[60vh] pb-4">
+          <ScrollArea className={`flex-1 pb-4 ${side === "bottom" ? "h-[60vh]" : "h-[calc(100vh-165px)]"}`}>
             <div className="p-6 space-y-8">
             
 

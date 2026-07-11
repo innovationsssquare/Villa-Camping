@@ -1,4 +1,5 @@
 import React from "react";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 
 import { useCamping } from "@/lib/context/CampingContext";
 import { Button } from "@heroui/react";
@@ -228,13 +229,11 @@ const TentDetails = () => {
               className="text-center relative flex flex-col items-center"
             >
               <div className="w-12 h-12 border border-gray-400 rounded-md flex items-center justify-center mb-2 relative">
-                {amenitiesIcons[amenity] || (
-                  <Building2 className="w-6 h-6 text-gray-600" />
-                )}
-                {index === 5 && villa.topamenities.length > 6 && (
+                <CustomAmenityIcon name={amenity} className="w-6 h-6 text-gray-600" />
+                {index === 5 && camping?.topamenities?.length > 6 && (
                   <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
                     <span className="text-white text-xs font-bold">
-                      +{villa?.amenities?.length - 5}
+                      +{camping?.amenities?.length - 5}
                     </span>
                   </div>
                 )}

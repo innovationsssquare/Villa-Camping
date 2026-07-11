@@ -98,7 +98,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     (state) => state.cottage.dayDetails?.cottages || []
   );
   const dayRooms = useSelector(
-    (state) => state.cottage.dayDetails?.rooms || []
+    (state) => state.hotel.dayDetails?.rooms || []
   );
 
   const checkInDate = checkin ? new Date(checkin) : new Date();
@@ -161,7 +161,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   let baseAmountForCoupon = 0;
   let nightsForCoupon = nights;
 
-  if (propertyType === "Camping") {
+  if (propertyType?.toLowerCase() === "camping") {
     baseAmountForCoupon = calculateCampingTentTotal(
       reduxSelectedTents,
       dayTents,
@@ -169,7 +169,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       checkout
     );
     nightsForCoupon = 1;
-  } else if (propertyType === "Cottage") {
+  } else if (propertyType?.toLowerCase() === "cottage") {
     baseAmountForCoupon = calculateCottageTotal(
       reduxSelectedCottages,
       dayCottages,
@@ -177,7 +177,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       checkout
     );
     nightsForCoupon = 1; // 🔑 same rule as camping
-  } else if (propertyType === "Hotel") {
+  } else if (propertyType?.toLowerCase() === "hotel") {
     baseAmountForCoupon = calculateHotelTotal(
       reduxSelectedRooms,
       dayRooms,
@@ -261,7 +261,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
 
     let items = [];
 
-    if (propertyType === "Villa") {
+    if (propertyType?.toLowerCase() === "villa") {
       items = [
         {
           unitType: "VillaUnit",
@@ -274,7 +274,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         },
       ];
     }
-    if (propertyType === "Camping") {
+    if (propertyType?.toLowerCase() === "camping") {
       items = Object.entries(reduxSelectedTents).map(([tentType, t]) => ({
         unitType: "Tent",
         unitId: t.unitId,
@@ -290,7 +290,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       }));
     }
 
-    if (propertyType === "Cottage") {
+    if (propertyType?.toLowerCase() === "cottage") {
       items = Object.entries(reduxSelectedCottages).map(([cottageType, c]) => ({
         unitType: "CottageUnit",
         unitId: c.unitId,
@@ -305,7 +305,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           }),
       }));
     }
-    if (propertyType === "hotel") {
+    if (propertyType?.toLowerCase() === "hotel") {
       items = Object.values(reduxSelectedRooms).map((room) => ({
         unitType: "RoomUnit",
         unitId: room.unitId,
@@ -347,10 +347,14 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       null;
 
     const normalizedPropertyType =
-      propertyType === "Cottage"
+      propertyType?.toLowerCase() === "cottage"
         ? "Cottages"
-        : propertyType === "hotel"
+        : propertyType?.toLowerCase() === "hotel"
         ? "Hotels"
+        : propertyType?.toLowerCase() === "camping"
+        ? "Camping"
+        : propertyType?.toLowerCase() === "villa"
+        ? "Villa"
         : propertyType;
 
     const bookingData = {
@@ -371,12 +375,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       couponCode: couponCode,
       paymentType: "full",
       partialPercentage: 30,
-      taxRate: 5,
+      taxRate: 18, // keep consistent with frontend calc (we used 18%)
       deviceId,
       couponId,
-      paymentType: "full",
-      partialPercentage: 30,
-      taxRate: 18, // keep consistent with frontend calc (we used 18%)
     };
     setIsBookingDetailsOpen(false);
     try {
@@ -646,7 +647,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
               </span>
             </div>
             <span className="font-medium text-black">
-              {formatRupee(finalTotal)}
+              {formatRupee(taxAmount)}
             </span>
           </div>
         </div>
