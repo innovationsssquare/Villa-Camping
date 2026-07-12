@@ -1,31 +1,47 @@
-import { verifyFirebaseIdToken } from "@/lib/firebaseAdmin";
 import connectDB from "@/lib/dbConnect";
 import User from "@/Model/Userschema";
+import jwt from "jsonwebtoken";
 
 export async function POST(req) {
-  const { idToken } = await req.json();
+  try {
+    const { token, user } = await req.json();
 
-  const decoded = await verifyFirebaseIdToken(idToken);
-  if (!decoded) {
-    return new Response(JSON.stringify({ error: "Invalid token" }), {
-      status: 401,
+    if (!token || !user) {
+      return new Response(JSON.stringify({ error: "Token and user details are required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    // Verify token using same secret as backend
+    const secret = process.env.NEXTAUTH_SECRET || "PAVAN2585";
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (err) {
+      console.error("JWT verification failed in Next.js login API:", err.message);
+      return new Response(JSON.stringify({ error: "Invalid or expired session token" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    await connectDB();
+
+    const dbUser = await User.findById(decoded.id || user._id);
+    if (!dbUser) {
+      return new Response(JSON.stringify({ error: "User not found in database" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return Response.json({ success: true, user: dbUser, token });
+  } catch (err) {
+    console.error("Login API route error:", err);
+    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
     });
   }
-
-  const { uid, email, name, picture, firebase } = decoded;
-
-  await connectDB();
-
-  let user = await User.findOne({ firebaseUID: uid });
-  if (!user) {
-    user = await User.create({
-      firebaseUID: uid,
-      email,
-      fullName: name,
-      profilePic: picture,
-      providerAccountId: firebase?.sign_in_provider || "custom",
-    });
-  }
-
-  return Response.json({ success: true, user: user, token: idToken });
 }

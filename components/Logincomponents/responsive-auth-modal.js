@@ -23,11 +23,16 @@ import Logoicon from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
 import { addToast, Button } from "@heroui/react";
 import { getDeviceId } from "@/lib/deviceId";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
   const [googleLoading, setGoogleLoading] = useState(false);
   const [appleLoading, setAppleLoading] = useState(false);
   const [open, setOpen] = useState(autoOpen);
+  const [phone, setPhone] = useState("");
+  const [otp, setOtp] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpLoading, setOtpLoading] = useState(false);
   const router = useRouter();
   const isMobile = useIsMobile();
 
@@ -54,14 +59,36 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
           ? new GoogleAuthProvider()
           : new OAuthProvider("apple.com");
       const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      const res = await fetch("/api/login", {
+
+      // Extract raw ID Token from the auth result credentials
+      const credential = providerType === "google"
+        ? GoogleAuthProvider.credentialFromResult(result)
+        : OAuthProvider.credentialFromResult(result);
+
+      const idToken = credential?.idToken;
+      if (!idToken) throw new Error(`${providerType} ID Token is missing`);
+
+      // 1. Authenticate with Express backend
+      const res = await fetch(`${BaseUrl}/auth/${providerType === "google" ? "google" : "apple"}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
+        body: JSON.stringify({
+          [providerType === "google" ? "idToken" : "identityToken"]: idToken,
+          role: "user",
+        }),
       });
-      if (!res.ok) throw new Error("Login failed");
-      const data = await res.json();
+      if (!res.ok) throw new Error("Backend authentication failed");
+      const backendData = await res.json();
+
+      // 2. Establish local Next.js session
+      const localRes = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: backendData.token, user: backendData.user }),
+      });
+      if (!localRes.ok) throw new Error("Local session creation failed");
+      const data = await localRes.json();
+
       const deviceId = await getDeviceId();
       if (data.user?._id) {
         localStorage.setItem("thevilla_user_id", data.user._id);
@@ -84,6 +111,80 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
     }
   };
 
+  const handleSendOTP = async () => {
+    if (!phone) return;
+    setOtpLoading(true);
+    try {
+      const res = await fetch(`${BaseUrl}/auth/otp/send`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: phone, role: "user" }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to send OTP");
+
+      addToast({
+        title: "OTP Sent",
+        description: data.message || "OTP code sent to your WhatsApp number",
+        color: "success",
+      });
+      setOtpSent(true);
+    } catch (err) {
+      addToast({
+        title: "Failed to send OTP",
+        description: err.message || "Something went wrong. Please check your phone number.",
+        color: "danger",
+      });
+      console.error("OTP send failed:", err);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async () => {
+    if (!phone || !otp) return;
+    setOtpLoading(true);
+    try {
+      // 1. Verify OTP with backend
+      const res = await fetch(`${BaseUrl}/auth/otp/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phoneNumber: phone, otp, role: "user" }),
+      });
+      const backendData = await res.json();
+      if (!res.ok) throw new Error(backendData.message || "Invalid or expired OTP");
+
+      // 2. Establish local Next.js session
+      const localRes = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: backendData.token, user: backendData.user }),
+      });
+      if (!localRes.ok) throw new Error("Local session creation failed");
+      const data = await localRes.json();
+
+      const deviceId = await getDeviceId();
+      if (data.user?._id) {
+        localStorage.setItem("thevilla_user_id", data.user._id);
+      }
+      Cookies.set("token", data.token, { expires: 7 });
+      setOpen(false);
+      setTimeout(() => {
+        onOpenChange?.(true);
+        window.location.href = returnUrl;
+      }, 100);
+    } catch (err) {
+      addToast({
+        title: "Verification Failed",
+        description: err.message || "Invalid OTP code",
+        color: "danger",
+      });
+      console.error("OTP verify failed:", err);
+    } finally {
+      setOtpLoading(false);
+    }
+  };
+
   const AuthContent = () => (
     <div className="space-y-6 border-0 border-none">
       {/* Header */}
@@ -96,13 +197,75 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
         </h2>
         <p className="text-gray-600">Sign in to your account to continue</p>
       </div>
+
+      {/* WhatsApp OTP Form */}
+      <div className="bg-gray-50/50 p-4 rounded-xl border border-gray-100 space-y-4">
+        <div className="text-center">
+          <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">WhatsApp OTP Login</span>
+        </div>
+        {!otpSent ? (
+          <div className="space-y-3">
+            <input
+              type="tel"
+              placeholder="Phone (e.g. +919876543210)"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black bg-white text-sm"
+            />
+            <Button
+              onPress={handleSendOTP}
+              disabled={otpLoading || !phone}
+              className="w-full h-11 bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors text-sm rounded-lg"
+            >
+              {otpLoading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Send OTP via WhatsApp"}
+            </Button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="text-center text-xs text-gray-500">
+              OTP sent to <span className="font-semibold text-gray-700">{phone}</span>
+            </div>
+            <input
+              type="text"
+              placeholder="Enter 6-digit OTP"
+              value={otp}
+              onChange={(e) => setOtp(e.target.value)}
+              className="w-full h-11 px-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center tracking-widest text-black bg-white text-sm font-semibold"
+              maxLength={6}
+            />
+            <Button
+              onPress={handleVerifyOTP}
+              disabled={otpLoading || otp.length < 6}
+              className="w-full h-11 bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors text-sm rounded-lg"
+            >
+              {otpLoading ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Verify & Sign In"}
+            </Button>
+            <button
+              onClick={() => setOtpSent(false)}
+              className="w-full text-xs text-blue-600 hover:underline text-center block"
+            >
+              Change Phone Number
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="relative">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-gray-200" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-2 text-gray-400">Or continue with</span>
+        </div>
+      </div>
+
       {/* Auth Buttons */}
-      <div className="space-y-4">
+      <div className="space-y-3">
         {/* Google Sign In */}
         <Button
           onPress={() => handleLogin("google")}
-          disabled={googleLoading || appleLoading}
-          className="w-full h-12 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm transition-all duration-200 hover:shadow-md group"
+          disabled={googleLoading || appleLoading || otpLoading}
+          className="w-full h-11 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 shadow-sm transition-all duration-200 hover:shadow-md group rounded-lg text-sm"
           variant="outline"
         >
           {googleLoading ? (
@@ -135,8 +298,8 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
         {/* Apple Sign In */}
         <Button
           onClick={() => handleLogin("apple")}
-          disabled={googleLoading || appleLoading}
-          className="w-full h-12 bg-black hover:bg-gray-800 text-white transition-all duration-200 hover:shadow-md group"
+          disabled={googleLoading || appleLoading || otpLoading}
+          className="w-full h-11 bg-black hover:bg-gray-800 text-white transition-all duration-200 hover:shadow-md group rounded-lg text-sm"
         >
           {appleLoading ? (
             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -153,18 +316,19 @@ const ResponsiveAuthModal = ({ autoOpen = false, onOpenChange, returnUrl }) => {
         </Button>
       </div>
       {/* Terms */}
-      <p className="text-xs text-center text-gray-500">
+      <p className="text-xs text-center text-gray-400">
         By signing in, you agree to our{" "}
-        <a href="#" className="underline hover:text-gray-700">
+        <a href="#" className="underline hover:text-gray-500">
           Terms of Service
         </a>{" "}
         and{" "}
-        <a href="#" className="underline hover:text-gray-700">
+        <a href="#" className="underline hover:text-gray-500">
           Privacy Policy
         </a>
       </p>
     </div>
   );
+
 
   if (isMobile) {
     return (
