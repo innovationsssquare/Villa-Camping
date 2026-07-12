@@ -54,6 +54,7 @@ export const PropertyMarker = ({
             width={20}
             className='absolute left-0 rounded-l-full h-10 w-10'
             unoptimized
+            alt="Property marker"
           />
 
           

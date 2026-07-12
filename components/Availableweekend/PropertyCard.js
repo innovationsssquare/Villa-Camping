@@ -397,7 +397,7 @@ const PropertyCardnew = ({ property }) => {
               Min 1 Nights
             </div>
             <div className="text-2xl font-bold text-price-text mb-2">
-              {basePrice}
+              {formatRupee(basePrice)}
             </div>
             <div className="text-xs text-muted-foreground">
               for 1 Nights + Taxes
@@ -606,7 +606,7 @@ const PropertyCardnew = ({ property }) => {
                 {property.pricing.weekendPrice >
                   property.pricing.weekdayPrice && (
                     <p className="text-xs">
-                      Weekend ₹{formatRupee(property.pricing.weekendPrice)}
+                      Weekend {formatRupee(property.pricing.weekendPrice)}
                     </p>
                   )}
               </div>

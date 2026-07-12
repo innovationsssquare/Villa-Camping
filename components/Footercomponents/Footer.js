@@ -1,3 +1,12 @@
+"use client";
+
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import {
+  setselectedLocationId,
+  fetchdestination,
+} from "@/Redux/Slices/propertiesSlice";
 import {
   MapPin,
   Phone,
@@ -12,6 +21,25 @@ import Image from "next/image";
 import Link from "next/link";
 
 export default function Footer() {
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const { destinationData } = useSelector((state) => state.properties);
+
+  useEffect(() => {
+    if (!destinationData || destinationData.length === 0) {
+      dispatch(fetchdestination());
+    }
+  }, [dispatch, destinationData]);
+
+  const handleDestinationClick = (namePrefix) => {
+    const matched = destinationData?.find(
+      (dest) => dest.name?.toLowerCase().includes(namePrefix.toLowerCase())
+    );
+    if (matched) {
+      dispatch(setselectedLocationId(matched._id));
+    }
+    router.push("/search-your-gateway");
+  };
   return (
     <footer className="bg-black/90 text-white overflow-hidden hidden text-xs md:block">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -114,36 +142,36 @@ export default function Footer() {
             <h4 className="text-lg font-medium mb-6">Destinations</h4>
             <ul className="space-y-3">
               <li>
-                <Link
-                  href="/category/villa"
-                  className="text-gray-300 hover:text-gray-300 transition-colors"
+                <button
+                  onClick={() => handleDestinationClick("Lonavala")}
+                  className="text-gray-300 hover:text-gray-300 transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
                 >
                   Lonavala Villas
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="/category/camping"
-                  className="text-gray-300 hover:text-gray-300 transition-colors"
+                <button
+                  onClick={() => handleDestinationClick("Pawna")}
+                  className="text-gray-300 hover:text-gray-300 transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
                 >
                   Pawna Lake Camps
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="/category/cottage"
-                  className="text-gray-300 hover:text-gray-300 transition-colors"
+                <button
+                  onClick={() => handleDestinationClick("Kamshet")}
+                  className="text-gray-300 hover:text-gray-300 transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
                 >
                   Kamshet Cottages
-                </Link>
+                </button>
               </li>
               <li>
-                <Link
-                  href="/category/hotel"
-                  className="text-gray-300 hover:text-gray-300 transition-colors"
+                <button
+                  onClick={() => handleDestinationClick("Malavli")}
+                  className="text-gray-300 hover:text-gray-300 transition-colors text-left bg-transparent border-none p-0 cursor-pointer"
                 >
                   Malavli Retreats
-                </Link>
+                </button>
               </li>
               <li>
                 <Link

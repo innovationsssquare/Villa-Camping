@@ -159,7 +159,7 @@ export default function PropertyHeaderSection() {
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex justify-between">
                     <span>Base price </span>
-                    <span>₹{basePrice}</span>
+                    <span>₹{basePrice.toLocaleString("en-IN")}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Service fee</span>
@@ -171,13 +171,13 @@ export default function PropertyHeaderSection() {
                   </div>
                   <div className="flex justify-between">
                     <span>Taxes</span>
-                    <span>{taxes}</span>
+                    <span>₹{taxes.toLocaleString("en-IN")}</span>
                   </div>
                   <hr className="border-gray-200" />
                   <div className="flex justify-between font-semibold text-gray-900">
                     <span>Total per night</span>
                     <span>
-                      ₹{totalPerNight}
+                      ₹{totalPerNight.toLocaleString("en-IN")}
                     </span>
                   </div>
                 </div>

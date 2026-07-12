@@ -68,7 +68,7 @@ export default function AirbnbNavbar() {
 
   // Get selected category name for display
   const selectedCategory = categories?.find(
-    (cat) => cat.id === selectedCategoryId,
+    (cat) => cat._id === selectedCategoryId,
   );
 
   const dropdownRef = useRef(null);
@@ -667,6 +667,7 @@ export default function AirbnbNavbar() {
                       dispatch(setSelectedCategory(categoryId));
                       dispatch(setSelectedCategoryname(categoryName));
                       setActiveDropdown(null);
+                      router.push(`/category/${categoryName.toLowerCase()}`);
                     }}
                     isMobile={isMobile}
                   />

@@ -123,14 +123,12 @@ export default function PropertyFilterListing({ categorySlug }) {
         (cat) => cat.slug?.toLowerCase() === categorySlug.toLowerCase()
       );
       if (matchedCategory) {
-        if (selectedCategoryId !== matchedCategory._id) {
-          dispatch(setSelectedCategory(matchedCategory._id));
-          dispatch(setSelectedCategoryname(matchedCategory.name));
-          dispatch(clearPropertyType());
-        }
+        dispatch(setSelectedCategory(matchedCategory._id));
+        dispatch(setSelectedCategoryname(matchedCategory.name));
+        dispatch(clearPropertyType());
       }
     }
-  }, [categorySlug, categories, selectedCategoryId, dispatch]);
+  }, [categorySlug, categories, dispatch]);
 
   useEffect(() => {
     dispatch(
@@ -297,6 +295,7 @@ export default function PropertyFilterListing({ categorySlug }) {
                     dispatch(setSelectedCategory(cat?._id));
                     dispatch(setSelectedCategoryname(cat?.name));
                     dispatch(clearPropertyType());
+                    router.push(`/category/${cat.slug}`);
                   }}
                 />
                 <Label>{cat.name}</Label>
