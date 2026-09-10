@@ -1,16 +1,40 @@
-import { Button } from "@/components/ui/button";
-import { Play, X } from "lucide-react";
+"use client";
+
+import { X, Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-const VideoModal = ({ trigger, videoUrl, thumbnailSrc }) => {
-  const [isOpen, setIsOpen] = useState(false);
+export default function VideoModal({
+  trigger,
+  videoUrl,
+  thumbnailSrc,
+  title,
+  author,
+  isOpen: controlledIsOpen,
+  onClose: controlledOnClose,
+}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isControlled = typeof controlledIsOpen === "boolean";
+  const isOpen = isControlled ? controlledIsOpen : internalIsOpen;
 
-  // Handle escape key to close modal
+  const handleClose = () => {
+    if (isControlled) {
+      controlledOnClose?.();
+    } else {
+      setInternalIsOpen(false);
+    }
+  };
+
+  const handleOpen = () => {
+    if (!isControlled) {
+      setInternalIsOpen(true);
+    }
+  };
+
   useEffect(() => {
     const handleEscape = (e) => {
       if (e.key === "Escape") {
-        setIsOpen(false);
+        handleClose();
       }
     };
 
@@ -25,61 +49,67 @@ const VideoModal = ({ trigger, videoUrl, thumbnailSrc }) => {
     };
   }, [isOpen]);
 
-  const modal = isOpen
-    ? createPortal(
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-8">
-          {/* Reduced blur backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-xs"
-            onClick={() => setIsOpen(false)}
-          />
+  const modal =
+    isOpen && typeof document !== "undefined"
+      ? createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+              onClick={handleClose}
+            />
 
-          {/* Video container with vertical aspect ratio for reel-style */}
-          <div className="relative z-10 w-full max-w-sm max-h-[90vh] aspect-[9/16]">
-            <div className="relative w-full h-full bg-gradient-to-br from-gray-900 to-black rounded-xl overflow-hidden shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8)]">
-              {/* Close button with enhanced styling */}
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsOpen(false)}
-                className="absolute top-6 right-6 z-20 bg-white/10 hover:bg-white/20 text-white rounded-full backdrop-blur-sm border border-white/20 transition-all duration-200"
-              >
-                <X className="w-5 h-5" />
-              </Button>
+            {/* Video Container (Vertical Reel Style) */}
+            <div className="relative z-10 w-full max-w-[340px] sm:max-w-sm max-h-[85vh] aspect-[9/16] bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/15 flex flex-col">
+              {/* Top Bar with Title & Close Button */}
+              <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between p-3 bg-gradient-to-b from-black/80 via-black/40 to-transparent pointer-events-auto">
+                <div className="pr-2 truncate">
+                  {title && (
+                    <h4 className="text-white text-xs sm:text-sm font-bold truncate drop-shadow-sm">
+                      {title}
+                    </h4>
+                  )}
+                  {author && (
+                    <p className="text-white/80 text-[10px] sm:text-xs truncate">
+                      {author}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={handleClose}
+                  className="w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 text-white flex items-center justify-center backdrop-blur-md border border-white/20 transition-all shrink-0 active:scale-95"
+                  aria-label="Close video"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
 
-              {/* Video element with enhanced styling */}
+              {/* Video Player */}
               <video
-                className="w-full h-full object-cover rounded-xl"
+                className="w-full h-full object-cover"
                 controls
                 autoPlay
+                playsInline
                 poster={thumbnailSrc}
               >
                 <source src={videoUrl} type="video/mp4" />
                 Your browser does not support the video tag.
               </video>
             </div>
-          </div>
-        </div>,
-        document.body
-      )
-    : null;
+          </div>,
+          document.body
+        )
+      : null;
 
   return (
     <>
-      <div onClick={() => setIsOpen(true)}>
-        {trigger || (
-          <Button
-            variant="secondary"
-            size="lg"
-            className="  bg-[#201e1e80]     rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
-          >
-            <Play className="w-4 h-4 mr-1 fill-white" />
-          </Button>
-        )}
-      </div>
+      {trigger && (
+        <div onClick={handleOpen} className="w-full h-full cursor-pointer">
+          {trigger}
+        </div>
+      )}
       {modal}
     </>
   );
-};
-
-export default VideoModal;
+}

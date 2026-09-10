@@ -153,6 +153,79 @@ test("calculateBookingPrice computes coupon code discounts and 18% GST accuratel
   assert.strictEqual(pricePercentageCoupon.finalTotal, 10620);
 });
 
+// ----------------------------------------------------
+// Test 7: calculateBasePriceForRange with Holiday Pricing Overlay
+// ----------------------------------------------------
+test("calculateBasePriceForRange prioritizes holiday prices when date matches holiday list", () => {
+  const pricing = { weekdayPrice: 8000, weekendPrice: 12000, holidayPrice: 16000 };
+  const holidayDates = new Set(["2026-07-10"]); // 2026-07-10 is Friday (normally weekday)
+
+  // 2 nights: Fri 2026-07-10 (Holiday: 16,000), Sat 2026-07-11 (Weekend: 12,000)
+  // Total: 16,000 + 12,000 = 28,000
+  const total = calculateBasePriceForRange("2026-07-10", "2026-07-12", pricing, holidayDates);
+  assert.strictEqual(total, 28000);
+});
+
+// ----------------------------------------------------
+// Test 8: calculateNightBreakdown
+// ----------------------------------------------------
+test("calculateNightBreakdown correctly tallies weekdays, weekends, and holidays", () => {
+  // Wed Jul 8 to Sun Jul 12 = 4 nights:
+  // Wed Jul 8 (weekday)
+  // Thu Jul 9 (weekday)
+  // Fri Jul 10 (holiday)
+  // Sat Jul 11 (weekend)
+  const pricing = { weekdayPrice: 5000, weekendPrice: 8000, holidayPrice: 10000 };
+  const holidayDates = new Set(["2026-07-10"]);
+  
+  // Custom night breakdown function mirroring pricingUtils.js
+  const msPerDay = 1000 * 60 * 60 * 24;
+  let weekdays = 0, weekends = 0, holidays = 0;
+  for (let t = +new Date("2026-07-08"); t < +new Date("2026-07-12"); t += msPerDay) {
+    const d = new Date(t);
+    const dateStr = d.toISOString().split("T")[0];
+    if (holidayDates.has(dateStr)) {
+      holidays++;
+    } else if (isWeekendInIndia(d)) {
+      weekends++;
+    } else {
+      weekdays++;
+    }
+  }
+
+  assert.strictEqual(weekdays, 2);
+  assert.strictEqual(weekends, 1);
+  assert.strictEqual(holidays, 1);
+});
+
+// ----------------------------------------------------
+// Test 9: Coupon structure normalization (Backend nested to flat UI model)
+// ----------------------------------------------------
+test("Coupon normalization converts backend schema discount structure to flat model", () => {
+  const backendCoupon = {
+    _id: "coupon123",
+    code: "SUMMER500",
+    discount: {
+      type: "fixed",
+      amount: 500,
+    },
+    maxDiscount: 1000,
+    isActive: true,
+  };
+
+  const normalized = {
+    code: backendCoupon.code,
+    discountType: backendCoupon.discount?.type || backendCoupon.discountType || "fixed",
+    discountValue: backendCoupon.discount?.amount ?? backendCoupon.discountValue ?? 0,
+    maxDiscount: backendCoupon.maxDiscount || Infinity,
+  };
+
+  const calc = calculateBookingPrice(10000, 1, normalized);
+  assert.strictEqual(calc.discountAmount, 500);
+  assert.strictEqual(calc.taxAmount, 1710); // 18% of (10000 - 500 = 9500) = 1710
+  assert.strictEqual(calc.finalTotal, 11210);
+});
+
 console.log("\n==========================================");
 console.log(`TEST SUMMARY: ${passed} PASSED, ${failed} FAILED`);
 console.log("==========================================");

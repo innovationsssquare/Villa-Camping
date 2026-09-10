@@ -2,25 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Globe,
   Menu,
-  User,
   Lightbulb,
   UtensilsCrossed,
   Calendar,
   Users,
+  Compass,
+  ChevronRight,
+  X,
+  Home,
+  ConciergeBell,
 } from "lucide-react";
-import { FaHome } from "react-icons/fa";
-import { FaCalendarCheck } from "react-icons/fa";
+import { FaHome, FaCalendarCheck } from "react-icons/fa";
 import { MdPeopleAlt } from "react-icons/md";
 
-import { Button } from "@/components/ui/button";
-import { DatePicker } from "./date-picker";
+import { DualDatePicker } from "./dual-date-picker";
 import { GuestSelector } from "./guest-selector";
 import { CategorySearch } from "./category-dropdown";
-import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import {
   setSelectedCategory,
   setCheckin,
@@ -28,32 +30,30 @@ import {
   updateGuestCount,
   setSelectedCategoryname,
 } from "@/Redux/Slices/bookingSlice";
-import Logo from "../../public/Productasset/mainlogo.png";
+import Logo from "../../public/Productasset/mainlogo_clean.png";
 import Image from "next/image";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
-import { useRouter } from "next/navigation";
-import useSearchUrlParams from "@/hooks/use-search-url-params";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
-import { DualDatePicker } from "./dual-date-picker";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
-import { Tabs, Tab, Chip } from "@heroui/react";
 import { ProfileSheet } from "./ProfileSheet";
 
 export default function AirbnbNavbar() {
   const dispatch = useDispatch();
-  const [isExpanded, setIsExpanded] = useState(true);
-  const [scrollY, setScrollY] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
-  const { isVisible, setIsVisible } = useScrollDirection();
   const router = useRouter();
-  const { pathname } = useSearchUrlParams();
+  const pathname = usePathname() || "/";
+  const searchParams = useSearchParams();
+
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState(null); // 'category' | 'checkin' | 'checkout' | 'guests' | null
+  const [hoveredSegment, setHoveredSegment] = useState(null);
+  const [focusedSide, setFocusedSide] = useState("checkin");
+  const [isSearching, setIsSearching] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  const navbarRef = useRef(null);
+
   const { categories } = useSelector((state) => state.category);
   const {
     selectedCategoryId,
@@ -62,16 +62,6 @@ export default function AirbnbNavbar() {
     selectedGuest,
     selectedCategoryName,
   } = useSelector((state) => state.booking);
-  const [isSearching, setIsSearching] = useState(false);
-  const [focusedSide, setFocusedSide] = useState("checkin");
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-
-  // Get selected category name for display
-  const selectedCategory = categories?.find(
-    (cat) => cat._id === selectedCategoryId,
-  );
-
-  const dropdownRef = useRef(null);
 
   useEffect(() => {
     dispatch(fetchAllCategories());
@@ -84,44 +74,77 @@ export default function AirbnbNavbar() {
     }
   }, [dispatch, selectedCategoryId, categories]);
 
+  const scrolledRef = useRef(false);
+
+  // Responsive Listener
   useEffect(() => {
-    const checkMobile = () => {
+    const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
+  // Butter-smooth Scroll Listener (Zero Lag)
+  useEffect(() => {
+    let ticking = false;
 
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      setScrollY(currentScrollY);
-      const threshold = isMobile ? 50 : 100;
-      setIsExpanded(currentScrollY < threshold);
-
-      // Close any open dropdown when scrolling
-      if (activeDropdown) {
-        setActiveDropdown(null);
-      }
-    };
-
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setActiveDropdown(null);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const scrollThreshold = 60;
+          const scrolled = window.scrollY > scrollThreshold;
+          if (scrolled !== scrolledRef.current) {
+            scrolledRef.current = scrolled;
+            setIsScrolled(scrolled);
+            if (scrolled && !activeDropdown) {
+              setIsExpanded(false);
+            } else if (!scrolled) {
+              setIsExpanded(true);
+            }
+          }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [activeDropdown]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (navbarRef.current && !navbarRef.current.contains(e.target)) {
+        setActiveDropdown(null);
+        if (isScrolled) {
+          setIsExpanded(false);
+        }
+      }
+    };
+
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        setActiveDropdown(null);
+        if (isScrolled) {
+          setIsExpanded(false);
+        }
+      }
+    };
+
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", checkMobile);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
     };
-  }, [isMobile, activeDropdown]);
+  }, [isScrolled]);
 
   const formatDate = (date) => {
-    if (!date) return "Add dates";
+    if (!date) return null;
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -129,50 +152,57 @@ export default function AirbnbNavbar() {
   };
 
   const getTotalGuests = () => {
-    const adultsAndChildren = selectedGuest.adults + selectedGuest.childrenn;
+    const total = (selectedGuest.adults || 1) + (selectedGuest.childrenn || 0);
     const infants = selectedGuest.infants || 0;
     const pets = selectedGuest.pets || 0;
-    
-    let parts = [];
-    if (adultsAndChildren > 0) {
-      parts.push(`${adultsAndChildren} guest${adultsAndChildren > 1 ? "s" : ""}`);
-    }
-    if (infants > 0) {
-      parts.push(`${infants} infant${infants > 1 ? "s" : ""}`);
-    }
-    if (pets > 0) {
-      parts.push(`${pets} pet${pets > 1 ? "s" : ""}`);
-    }
-    
-    return parts.length > 0 ? parts.join(", ") : "Add guests";
+
+    let parts = [`${total} guest${total > 1 ? "s" : ""}`];
+    if (infants > 0) parts.push(`${infants} infant${infants > 1 ? "s" : ""}`);
+    if (pets > 0) parts.push(`${pets} pet${pets > 1 ? "s" : ""}`);
+
+    return parts.join(", ");
   };
 
   const handleGuestChange = (type, value) => {
     dispatch(updateGuestCount({ type, value }));
   };
 
-  const handleSearch = async () => {
-    if (!selectedCategoryId || !selectedCategoryName) {
-      console.log("No category selected");
-      return;
-    }
+  const handleCheckinSelect = (date) => {
+    dispatch(setCheckin(date));
+    dispatch(setCheckout(null));
+    setFocusedSide("checkout");
+    setActiveDropdown("checkout");
+  };
 
+  const handleCheckoutSelect = (date) => {
+    dispatch(setCheckout(date));
+    // Auto-advance to Guest selector immediately after date selection
+    setTimeout(() => {
+      setActiveDropdown("guests");
+    }, 120);
+  };
+
+  const handleSearch = async () => {
     setIsSearching(true);
     setActiveDropdown(null);
+    if (isScrolled) {
+      setIsExpanded(false);
+    }
 
     try {
-      console.log("Search:", {
-        selectedCategoryId,
-        selectedCategoryName,
-        checkin,
-        checkout,
-        selectedGuest,
-      });
+      const params = new URLSearchParams();
+      if (checkin) params.set("checkin", checkin);
+      if (checkout) params.set("checkout", checkout);
+      if (selectedGuest?.adults) params.set("adults", selectedGuest.adults.toString());
+      if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
+      const queryStr = params.toString();
 
-      // Navigate to category page
-      router.push(`/category/${selectedCategoryName.toLowerCase()}`);
+      const targetSlug = selectedCategoryName
+        ? selectedCategoryName.toLowerCase()
+        : "all";
 
-      // Dispatch async action to fetch properties
+      router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
+
       await dispatch(
         fetchAllProperties({
           categoryId: selectedCategoryId,
@@ -181,566 +211,483 @@ export default function AirbnbNavbar() {
           subtype: "",
           page: 1,
           limit: 20,
-        }),
+        })
       ).unwrap();
-
-      console.log("Search completed successfully");
-    } catch (error) {
-      console.error("Search failed:", error);
+    } catch (err) {
+      console.error("Search error:", err);
     } finally {
       setIsSearching(false);
     }
   };
 
-  const handleCheckinSelect = (date) => {
-    dispatch(setCheckin(date)); // save ISO string in Redux
-    dispatch(setCheckout(null)); // clear checkout if needed
-    setActiveDropdown("checkout");
-  };
-
-  const handleCheckoutSelect = (date) => {
-    dispatch(setCheckout(date));
-    setActiveDropdown(null);
-  };
+  // Condition to check if any dropdown is open
+  const isAnyDropdownOpen = activeDropdown !== null;
 
   return (
     <>
-      <div
-        className={`fixed top-0 hidden md:block left-0 right-0 z-50  bg-white border-b border-gray-200 transition-all duration-300 ease-in-out ${
-          isVisible ? (isMobile ? "h-28" : "h-40") : "h-16"
-        } overflow-visible`}
+      <header
+        ref={navbarRef}
+        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-250 ease-out ${isScrolled && !isExpanded
+          ? "shadow-sm border-b border-neutral-200/80 h-16"
+          : "border-b border-neutral-200/60 h-[136px]"
+          }`}
       >
-        <div className="w-full mx-auto px-3  h-full">
-          {/* Top row - Logo and right side menu */}
-          <div
-            className={`flex items-center justify-between ${
-              isMobile ? "h-16" : "h-14"
-            }`}
-          >
-            {/* Logo */}
-            <div className="flex items-center">
-              <div className="flex items-center space-x-2">
-                <Image
-                  src={Logo || "/placeholder.svg"}
-                  alt="Thevillacamp"
-                  className="h-18 w-48 object-contain "
-                />
-              </div>
-            </div>
-
-            {/* Center search - minimized state */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Top Bar: Logo, Navigation Tabs, Host/Profile */}
+          <div className="flex items-center justify-between h-16">
+            {/* Logo - Sized prominently with clean cropped asset */}
             <div
-              className={`absolute  left-1/2 transform -translate-x-1/2 transition-all duration-300 ease-in-out ${
-                !isVisible
-                  ? "opacity-100 scale-100 translate-y-0"
-                  : "opacity-0 scale-95 pointer-events-none translate-y-2 "
-              }`}
+              onClick={() => router.push("/")}
+              className="flex items-center cursor-pointer transition-transform hover:scale-[1.02] shrink-0"
             >
-              <div
-                onClick={() => {
-                  (setActiveDropdown("minimized"), setIsVisible(!isVisible));
-                }}
-                className={`flex items-center bg-[#FFFFFF4D] border border-gray-300 rounded-full shadow-sm hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                  isMobile ? "scale-90 " : "mt-2"
-                }`}
-              >
-                <div className="flex items-center px-3 md:px-4 py-2">
-                  <FaHome className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
-                  <span className="text-xs md:text-sm font-medium text-gray-800">
-                    {selectedCategoryName || "Any category"}
-                  </span>
-                </div>
-                <div className="border-l border-gray-300 h-4 md:h-6"></div>
-                <div className="flex items-center px-3 md:px-4 py-2">
-                  <FaCalendarCheck className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
-                  <span className="text-xs md:text-sm font-medium text-gray-800">
-                    {checkin && checkout
-                      ? `${formatDate(checkin)} - ${formatDate(checkout)}`
-                      : "Anytime"}
-                  </span>
-                </div>
-                <div className="border-l border-gray-300 h-4 md:h-6"></div>
-                <div className="flex items-center px-3 md:px-4 py-2">
-                  <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4 text-black mr-1 md:mr-2" />
-
-                  <span className="text-xs md:text-sm text-gray-600">
-                    {selectedGuest.adults > 1 || selectedGuest.children > 0
-                      ? getTotalGuests()
-                      : "Add guests"}
-                  </span>
-                </div>
-                <div
-                  onClick={() => setIsVisible(!isVisible)}
-                  className="bg-black rounded-full p-1.5 md:p-2 m-1"
-                >
-                  <Search className="w-3 h-3 md:w-4 md:h-4 text-white" />
-                </div>
-              </div>
+              <Image
+                src={Logo}
+                alt="TheVillaCamp"
+                width={100}
+                height={6}
+                priority
+                className="h-8 sm:h-10 md:h-8 object-cover w-auto "
+              />
             </div>
 
-            {/* Right side */}
-            <div className="flex items-center space-x-2 md:space-x-4">
-              <span
+            {/* Center: When Scrolled & Compact -> Airbnb Floating Search Pill */}
+            <AnimatePresence mode="wait">
+              {isScrolled && !isExpanded ? (
+                <motion.div
+                  key="compact-search-pill"
+                  initial={{ opacity: 0, scale: 0.94, y: -6 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.94, y: -6 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  onClick={() => {
+                    setIsExpanded(true);
+                    setActiveDropdown(checkin && !checkout ? "checkout" : "checkin");
+                  }}
+                  className="hidden md:flex items-center h-11 bg-white rounded-full border border-neutral-300 shadow-[0_1px_2px_rgba(0,0,0,0.08),0_4px_12px_rgba(0,0,0,0.05)] hover:shadow-md cursor-pointer pl-4 pr-1.5 transition-shadow"
+                >
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 pr-3 border-r border-neutral-200">
+                    <Home className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                    <span>{selectedCategoryName || "Any category"}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800 px-3 border-r border-neutral-200">
+                    <Calendar className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                    <span>
+                      {checkin && checkout
+                        ? `${formatDate(checkin)} – ${formatDate(checkout)}`
+                        : checkin
+                        ? `${formatDate(checkin)} – Add checkout`
+                        : "Any week"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 pl-3 pr-2">
+                    <Users className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                    <span>
+                      {selectedGuest?.adults > 1 || selectedGuest?.childrenn > 0
+                        ? getTotalGuests()
+                        : "Add guests"}
+                    </span>
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-[#ff6900] text-white flex items-center justify-center shadow-xs shrink-0">
+                    <Search className="w-3.5 h-3.5" />
+                  </div>
+                </motion.div>
+              ) : (
+                /* Center: When Expanded -> Airbnb Category Tabs with Icons */
+                <motion.div
+                  key="navigation-tabs"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.18, ease: "easeOut" }}
+                  className="hidden md:flex items-center gap-7 text-sm font-medium"
+                >
+                  {/* Stays Tab */}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/")}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname === "/"
+                      ? "text-neutral-950 font-bold"
+                      : "text-neutral-500 hover:text-neutral-900"
+                      }`}
+                  >
+                    <Home
+                      className={`w-4.5 h-4.5 transition-colors ${pathname === "/" ? "text-[#ff6900]" : "text-neutral-400 group-hover:text-neutral-700"
+                        }`}
+                    />
+                    <span>Stays</span>
+                    {pathname === "/" && (
+                      <motion.div
+                        layoutId="activeNavTab"
+                        className="absolute -bottom-2 left-0 right-0 h-[3px] bg-[#ff6900] rounded-full shadow-xs"
+                        transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                      />
+                    )}
+                  </button>
+
+                  {/* Experiences Tab */}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/experiences")}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/experiences")
+                      ? "text-neutral-950 font-bold"
+                      : "text-neutral-500 hover:text-neutral-900"
+                      }`}
+                  >
+                    <Compass
+                      className={`w-4.5 h-4.5 transition-colors ${pathname.startsWith("/experiences")
+                        ? "text-[#ff6900]"
+                        : "text-neutral-400 group-hover:text-neutral-700"
+                        }`}
+                    />
+                    <span>Experiences</span>
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
+                      New
+                    </span>
+                    {pathname.startsWith("/experiences") && (
+                      <motion.div
+                        layoutId="activeNavTab"
+                        className="absolute -bottom-2 left-0 right-0 h-[3px] bg-[#ff6900] rounded-full shadow-xs"
+                        transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                      />
+                    )}
+                  </button>
+
+                  {/* Services Tab */}
+                  <button
+                    type="button"
+                    onClick={() => router.push("/services")}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/services")
+                      ? "text-neutral-950 font-bold"
+                      : "text-neutral-500 hover:text-neutral-900"
+                      }`}
+                  >
+                    <ConciergeBell
+                      className={`w-4.5 h-4.5 transition-colors ${pathname.startsWith("/services")
+                        ? "text-[#ff6900]"
+                        : "text-neutral-400 group-hover:text-neutral-700"
+                        }`}
+                    />
+                    <span>Services</span>
+                    <span className="text-[10px] font-bold bg-neutral-150 text-neutral-700 px-1.5 py-0.5 rounded-full">
+                      New
+                    </span>
+                    {pathname.startsWith("/services") && (
+                      <motion.div
+                        layoutId="activeNavTab"
+                        className="absolute -bottom-2 left-0 right-0 h-[3px] bg-[#ff6900] rounded-full shadow-xs"
+                        transition={{ type: "spring", stiffness: 450, damping: 30 }}
+                      />
+                    )}
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Right Action Menu: Become a host, Profile */}
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                type="button"
                 onClick={() => router.push("/become-host")}
-                className="text-xs bg-[#ff6900]/70  md:text-sm font-medium text-white hidden lg:block cursor-pointer hover:bg-[#ff6900]  px-2 md:px-3 py-1 md:py-2 rounded-full transition-colors"
+                className="hidden bg-orange-300  lg:block text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-orange-200 text-neutral-800 transition-colors cursor-pointer"
               >
                 Become a host
-              </span>
+              </button>
 
-          
-
-              {/* <div className="flex items-center space-x-1 border border-gray-300 rounded-full p-0.5 md:p-1 cursor-pointer hover:shadow-md transition-shadow">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-6 h-6 md:w-8 md:h-8"
-                >
-                  <Menu className="w-3 h-3 md:w-4 md:h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-6 h-6 md:w-8 md:h-8"
-                  onClick={() => setIsSheetOpen(true)}
-                >
-                  <MdPeopleAlt className="w-3 h-3 md:w-4 md:h-4" />
-                </Button>
-              </div> */}
-                     <ProfileSheet/>
-
+              <ProfileSheet />
             </div>
           </div>
 
-          {/* Navigation tabs and expanded search */}
-          <div
-            className={`transition-all duration-300 ease-in-out -mt-4 ${
-              isVisible
-                ? "opacity-100 translate-y-0"
-                : "opacity-0 -translate-y-2 pointer-events-none"
-            }`}
-          >
-            {/* Navigation tabs */}
-            <div className="hidden md:flex items-center justify-center space-x-8 pb-2">
-              {(() => {
-                const homeActive =
-                  pathname === "/" ||
-                  pathname.startsWith("/view-") ||
-                  pathname.startsWith("/search-stay") ||
-                  pathname.startsWith("/category");
-                const experiencesActive = pathname.startsWith("/experiences");
-                const servicesActive = pathname.startsWith("/services");
-
-                return (
-                  <>
-                    {/* <div
-                      onClick={() => router.push("/")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
-                        homeActive
-                          ? "border-b-2 border-gray-800"
-                          : "hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      <FaHome className="w-4 h-4" />
-                      <span className="text-sm font-medium">Homes</span>
-                    </div>
-
-                    <div
-                      onClick={() => router.push("/experiences")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
-                        experiencesActive
-                          ? "border-b-2 border-gray-800"
-                          : "hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      <Lightbulb className="w-4 h-4" />
-                      <span className="text-sm font-medium">Experiences</span>
-                      <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
-                        NEW
-                      </span>
-                    </div>
-
-                    <div
-                      onClick={() => router.push("/services")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-2 cursor-pointer pb-3 transition-colors ${
-                        servicesActive
-                          ? "border-b-2 border-gray-800"
-                          : "hover:border-b-2 hover:border-gray-300"
-                      }`}
-                    >
-                      <UtensilsCrossed className="w-4 h-4" />
-                      <span className="text-sm font-medium">Services</span>
-                      <span className="bg-black text-white text-xs px-1.5 py-0.5 rounded font-medium">
-                        NEW
-                      </span>
-                    </div> */}
-                    <Tabs
-                      aria-label="Options"
-                      selectedKey={pathname}
-                      classNames={{
-                        tabList: "gap-8 mb-1 w-full relative rounded-none p-0  ",
-                        cursor: "w-full bg-[#ff6900]",
-                        tab: "max-w-fit px-0 h-8",
-                        tabContent:
-                          "group-data-[selected=true]:text-[#ff6900] text-black text-md font-medium",
-                      }}
-                      color="primary"
-                      variant="underlined"
-                    >
-                      <Tab
-                        key="/"
-                        onClick={() => router.push("/")}
-                        title={
-                          <div className="flex items-center space-x-2">
-                            <FaHome className="w-3 h-3" />
-
-                            <span>Home</span>
-                          </div>
-                        }
-                      />
-                      <Tab
-                        key="/experiences"
-                        onClick={() => router.push("/experiences")}
-                        title={
-                          <div className="flex items-center space-x-2">
-                            <Lightbulb className="w-3 h-3" />
-
-                            <span>Experiences</span>
-                            <Chip size="sm" variant="shadow">
-                              New
-                            </Chip>
-                          </div>
-                        }
-                      />
-                      <Tab
-                        key="/services"
-                        onClick={() => router.push("/services")}
-                        title={
-                          <div className="flex items-center space-x-2">
-                            <UtensilsCrossed className="w-3 h-3" />
-
-                            <span>Services</span>
-                            <Chip size="sm" variant="shadow">
-                              New
-                            </Chip>
-                          </div>
-                        }
-                      />
-                    </Tabs>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Mobile navigation tabs */}
-            <div className="md:hidden flex items-center justify-center space-x-6 pb-2">
-              {(() => {
-                const homeActive =
-                  pathname === "/" ||
-                  pathname.startsWith("/view-") ||
-                  pathname.startsWith("/search-stay") ||
-                  pathname.startsWith("/category");
-                const experiencesActive = pathname.startsWith("/experiences");
-                const servicesActive = pathname.startsWith("/services");
-
-                return (
-                  <>
-                    <div
-                      onClick={() => router.push("/")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
-                        homeActive ? "border-b-2 border-gray-800" : ""
-                      }`}
-                    >
-                      <FaHome className="w-3 h-3" />
-                      <span className="text-xs font-medium">Homes</span>
-                    </div>
-                    <div
-                      onClick={() => router.push("/experiences")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
-                        experiencesActive ? "border-b-2 border-gray-800" : ""
-                      }`}
-                    >
-                      <Lightbulb className="w-3 h-3" />
-                      <span className="text-xs font-medium">Experiences</span>
-                    </div>
-                    <div
-                      onClick={() => router.push("/services")}
-                      role="button"
-                      tabIndex={0}
-                      className={`flex items-center space-x-1 cursor-pointer pb-2 ${
-                        servicesActive ? "border-b-2 border-gray-800" : ""
-                      }`}
-                    >
-                      <UtensilsCrossed className="w-3 h-3" />
-                      <span className="text-xs font-medium">Services</span>
-                    </div>
-                  </>
-                );
-              })()}
-            </div>
-
-            {/* Expanded search form */}
-            <div className="pb-2 relative" ref={dropdownRef}>
-              <div
-                className={`flex items-center bg-[#FFFFFF4D] border border-gray-300 rounded-full shadow-lg mx-auto ${
-                  isMobile ? "max-w-sm" : "max-w-4xl"
-                }`}
+          {/* Expanded Search Bar Container (Compact Airbnb Dimensions: max-w-[760px]) */}
+          <AnimatePresence>
+            {(!isScrolled || isExpanded) && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -8 }}
+                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                className="pb-2 relative"
               >
-                {isMobile ? (
-                  // Mobile: Simplified layout
-                  <>
-                    <div
-                      onClick={() =>
-                        setActiveDropdown(
-                          activeDropdown === "category" ? null : "category",
-                        )
-                      }
-                      className="flex-1 px-3 py-2 border-r border-gray-300 rounded-l-full hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
-                        <FaHome className="w-3 h-3 mr-1" />
-                        Category
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {selectedCategory?.name || "Select category"}
-                      </div>
-                    </div>
-                    <div
-                      onClick={() =>
-                        setActiveDropdown(
-                          activeDropdown === "checkin" ? null : "checkin",
-                        )
-                      }
-                      className="flex-1 px-3 py-2 border-r border-gray-300 hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
-                        <Calendar className="w-3 h-3 mr-1" />
-                        Dates
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {checkin && checkout
-                          ? `${formatDate(checkin)} - ${formatDate(checkout)}`
-                          : "Add dates"}
-                      </div>
-                    </div>
-                    <div
-                      onClick={() =>
-                        setActiveDropdown(
-                          activeDropdown === "guests" ? null : "guests",
-                        )
-                      }
-                      className="flex-1 px-3 py-2 hover:bg-gray-50 cursor-pointer transition-colors"
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-0.5 flex items-center">
-                        <Users className="w-3 h-3 mr-1" />
-                        Who
-                      </div>
-                      <div className="text-xs text-gray-500 truncate">
-                        {getTotalGuests()}
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleSearch}
-                      className="bg-black rounded-full p-2 m-1 cursor-pointer hover:bg-black transition-colors"
-                    >
-                      <Search className="w-4 h-4 text-white" />
-                    </button>
-                  </>
-                ) : (
-                  // Desktop: Full layout
-                  <>
-                    <div
-                      onClick={() =>
-                        setActiveDropdown(
-                          activeDropdown === "category" ? null : "category",
-                        )
-                      }
-                      className={`flex-1 ml-4 px-4 py-3 border-r border-gray-300 rounded-l-full cursor-pointer transition-colors ${
-                        activeDropdown === "category" ? "bg-white/80" : ""
+                <div className="max-w-[760px] mx-auto relative">
+                  {/* Outer Search Pill */}
+                  <div
+                    className={`relative flex items-center rounded-full border transition-all duration-200 ${isAnyDropdownOpen
+                      ? "bg-[#EBEBEB] border-transparent shadow-lg"
+                      : "bg-white border-neutral-200/90 shadow-[0_2px_8px_rgba(0,0,0,0.08)] hover:shadow-md"
                       }`}
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaHome className="w-4 h-4 mr-1 text-black" />
-                        Category
-                      </div>
-                      <div className="text-sm text-gray-700 truncate">
-                        {selectedCategoryName || "Select category"}
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => {
-                        (setActiveDropdown(
-                          activeDropdown === "checkin" ? null : "checkin",
-                        ),
-                          setFocusedSide("checkin"));
-                      }}
-                      className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
-                        activeDropdown === "checkin" ? "bg-white/80" : ""
-                      }`}
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaCalendarCheck className="w-4 h-4 mr-1 text-black" />
-                        Check in
-                      </div>
-                      <div className="text-sm text-gray-700">
-                        {formatDate(checkin)}
-                      </div>
-                    </div>
-
-                    <div
-                      onClick={() => {
-                        (setActiveDropdown(
-                          activeDropdown === "checkout" ? null : "checkout",
-                        ),
-                          setFocusedSide("checkout"));
-                      }}
-                      className={`flex-1 px-4 py-3 border-r border-gray-300 cursor-pointer transition-colors ${
-                        activeDropdown === "checkout" ? "bg-white/80" : ""
-                      }`}
-                    >
-                      <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <FaCalendarCheck className="w-4 h-4 mr-1 text-black" />
-                        Check out
-                      </div>
-                      <div className="text-sm text-gray-700">
-                        {formatDate(checkout)}
-                      </div>
-                    </div>
-
+                  >
+                    {/* Segment 1: Where / Category */}
                     <div
                       onClick={() =>
-                        setActiveDropdown(
-                          activeDropdown === "guests" ? null : "guests",
-                        )
+                        setActiveDropdown(activeDropdown === "category" ? null : "category")
                       }
-                      className={`flex-1 px-4 py-3 cursor-pointer transition-colors rounded-r-full ${
-                        activeDropdown === "guests"
-                          ? "bg-white/80 rounded-r-none"
-                          : ""
-                      }`}
+                      onMouseEnter={() => setHoveredSegment("category")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className={`relative flex-[1.2] pl-5 pr-3 py-2.5 rounded-full cursor-pointer transition-colors duration-150 ${activeDropdown === "category" ? "z-20" : "z-10"
+                        }`}
                     >
-                      <div className="text-xs font-semibold text-gray-800 mb-1 flex items-center">
-                        <MdPeopleAlt className="w-4 h-4 mr-1 text-black" />
-                        Who
-                      </div>
-                      <div className="text-sm text-gray-700 truncate">
-                        {getTotalGuests()}
-                      </div>
-                    </div>
-                    
-                    <button
-                      onClick={handleSearch}
-                      className="bg-black rounded-full p-2.5 m-2 cursor-pointer hover:bg-black transition-colors"
-                      disabled={isSearching}
-                    >
-                      {isSearching ? (
-                        <div className="flex justify-center items-center">
-                          <ButtonLoader />
-                        </div>
-                      ) : (
-                        <Search className="w-5 h-5 text-white" />
+                      {activeDropdown === "category" && (
+                        <motion.div
+                          layoutId="searchBarActivePill"
+                          className="absolute inset-0 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.14)] z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
                       )}
-                    </button>
-                  </>
-                )}
-              </div>
+                      {hoveredSegment === "category" && activeDropdown !== "category" && (
+                        <motion.div
+                          layoutId="searchBarHoverPill"
+                          className="absolute inset-0 bg-black/[0.04] rounded-full z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <div className="relative z-10 select-none">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-800 uppercase leading-tight">
+                          <FaHome className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                          <span>Where</span>
+                        </div>
+                        <div className="text-xs text-neutral-500 font-medium truncate mt-0.5">
+                          {selectedCategoryName || "Search destinations"}
+                        </div>
+                      </div>
+                    </div>
 
-              {/* Dropdowns with mobile-optimized positioning */}
-              {activeDropdown === "category" && (
-                <div
-                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
-                    isMobile ? "left-0" : "left-24"
-                  }`}
-                >
-                  <CategorySearch
-                    onCategorySelect={(categoryId, categoryName) => {
-                      dispatch(setSelectedCategory(categoryId));
-                      dispatch(setSelectedCategoryname(categoryName));
-                      setActiveDropdown(null);
-                      router.push(`/category/${categoryName.toLowerCase()}`);
-                    }}
-                    isMobile={isMobile}
-                  />
-                </div>
-              )}
+                    {/* Divider 1 */}
+                    {activeDropdown !== "category" &&
+                      activeDropdown !== "checkin" &&
+                      hoveredSegment !== "category" &&
+                      hoveredSegment !== "checkin" && (
+                        <div className="w-px h-7 bg-neutral-300 shrink-0 relative z-0" />
+                      )}
 
-              {activeDropdown === "checkin" && (
-                <div
-                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
-                    isMobile ? "left-0" : "left-[38%]"
-                  }`}
-                >
-                  <DualDatePicker
-                    checkinDate={checkin}
-                    checkoutDate={checkout}
-                    onCheckinSelect={handleCheckinSelect}
-                    onCheckoutSelect={handleCheckoutSelect}
-                    onClose={() => setActiveDropdown(null)}
-                    focusedSide={focusedSide}
-                    setFocusedSide={setFocusedSide}
-                    isMobile={isMobile}
-                  />
-                </div>
-              )}
+                    {/* Segment 2: Check in */}
+                    <div
+                      onClick={() => {
+                        setActiveDropdown(activeDropdown === "checkin" ? null : "checkin");
+                        setFocusedSide("checkin");
+                      }}
+                      onMouseEnter={() => setHoveredSegment("checkin")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className={`relative flex-1 px-4 py-2.5 rounded-full cursor-pointer transition-colors duration-150 ${activeDropdown === "checkin" ? "z-20" : "z-10"
+                        }`}
+                    >
+                      {activeDropdown === "checkin" && (
+                        <motion.div
+                          layoutId="searchBarActivePill"
+                          className="absolute inset-0 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.14)] z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      {hoveredSegment === "checkin" && activeDropdown !== "checkin" && (
+                        <motion.div
+                          layoutId="searchBarHoverPill"
+                          className="absolute inset-0 bg-black/[0.04] rounded-full z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <div className="relative z-10 select-none">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-800 uppercase leading-tight">
+                          <FaCalendarCheck className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                          <span>Check in</span>
+                        </div>
+                        <div className="text-xs font-medium text-neutral-500 truncate mt-0.5">
+                          {checkin ? formatDate(checkin) : "Add dates"}
+                        </div>
+                      </div>
+                    </div>
 
-              {activeDropdown === "checkout" && (
-                <div
-                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
-                    isMobile ? "left-0" : "left-[30%]"
-                  }`}
-                >
-                  <DualDatePicker
-                    checkinDate={checkin}
-                    checkoutDate={checkout}
-                    onCheckinSelect={handleCheckinSelect}
-                    onCheckoutSelect={handleCheckoutSelect}
-                    onClose={() => setActiveDropdown(null)}
-                    focusedSide={focusedSide}
-                    setFocusedSide={setFocusedSide}
-                    isMobile={isMobile}
-                  />
-                </div>
-              )}
+                    {/* Divider 2 */}
+                    {activeDropdown !== "checkin" &&
+                      activeDropdown !== "checkout" &&
+                      hoveredSegment !== "checkin" &&
+                      hoveredSegment !== "checkout" && (
+                        <div className="w-px h-7 bg-neutral-300 shrink-0 relative z-0" />
+                      )}
 
-              {activeDropdown === "guests" && (
-                <div
-                  className={`absolute top-full mt-1 z-50 transition-all duration-300 origin-top animate-in fade-in zoom-in-95 duration-200 ease-out ${
-                    isMobile ? "right-0" : "right-32"
-                  }`}
-                >
-                  <GuestSelector
-                    adults={selectedGuest.adults}
-                    childrenn={selectedGuest.childrenn}
-                    infants={selectedGuest.infants}
-                    pets={selectedGuest.pets}
-                    onGuestChange={handleGuestChange}
-                    isMobile={isMobile}
-                  />
+                    {/* Segment 3: Check out */}
+                    <div
+                      onClick={() => {
+                        setActiveDropdown(activeDropdown === "checkout" ? null : "checkout");
+                        setFocusedSide("checkout");
+                      }}
+                      onMouseEnter={() => setHoveredSegment("checkout")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className={`relative flex-1 px-4 py-2.5 rounded-full cursor-pointer transition-colors duration-150 ${activeDropdown === "checkout" ? "z-20" : "z-10"
+                        }`}
+                    >
+                      {activeDropdown === "checkout" && (
+                        <motion.div
+                          layoutId="searchBarActivePill"
+                          className="absolute inset-0 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.14)] z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      {hoveredSegment === "checkout" && activeDropdown !== "checkout" && (
+                        <motion.div
+                          layoutId="searchBarHoverPill"
+                          className="absolute inset-0 bg-black/[0.04] rounded-full z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <div className="relative z-10 select-none">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-800 uppercase leading-tight">
+                          <FaCalendarCheck className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                          <span>Check out</span>
+                        </div>
+                        <div className="text-xs font-medium text-neutral-500 truncate mt-0.5">
+                          {checkout ? formatDate(checkout) : "Add dates"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Divider 3 */}
+                    {activeDropdown !== "checkout" &&
+                      activeDropdown !== "guests" &&
+                      hoveredSegment !== "checkout" &&
+                      hoveredSegment !== "guests" && (
+                        <div className="w-px h-7 bg-neutral-300 shrink-0 relative z-0" />
+                      )}
+
+                    {/* Segment 4: Who / Guests & Search Button */}
+                    <div
+                      onClick={() =>
+                        setActiveDropdown(activeDropdown === "guests" ? null : "guests")
+                      }
+                      onMouseEnter={() => setHoveredSegment("guests")}
+                      onMouseLeave={() => setHoveredSegment(null)}
+                      className={`relative flex-[1.1] pl-4 pr-1.5 py-1.5 rounded-full cursor-pointer transition-colors duration-150 flex items-center justify-between ${activeDropdown === "guests" ? "z-20" : "z-10"
+                        }`}
+                    >
+                      {activeDropdown === "guests" && (
+                        <motion.div
+                          layoutId="searchBarActivePill"
+                          className="absolute inset-0 bg-white rounded-full shadow-[0_4px_16px_rgba(0,0,0,0.14)] z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      {hoveredSegment === "guests" && activeDropdown !== "guests" && (
+                        <motion.div
+                          layoutId="searchBarHoverPill"
+                          className="absolute inset-0 bg-black/[0.04] rounded-full z-0 pointer-events-none"
+                          transition={{ type: "spring", stiffness: 450, damping: 35 }}
+                        />
+                      )}
+                      <div className="min-w-0 pr-2 relative z-10 select-none">
+                        <div className="flex items-center gap-1.5 text-[11px] font-bold tracking-wider text-neutral-800 uppercase leading-tight">
+                          <MdPeopleAlt className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                          <span>Who</span>
+                        </div>
+                        <div className="text-xs font-medium text-neutral-500 truncate mt-0.5">
+                          {selectedGuest?.adults > 1 || selectedGuest?.childrenn > 0
+                            ? getTotalGuests()
+                            : "Add guests"}
+                        </div>
+                      </div>
+
+                      {/* Airbnb Dynamic Search Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSearch();
+                        }}
+                        disabled={isSearching}
+                        className={`h-11 rounded-full bg-[#ff6900] hover:bg-[#e05d00] text-white flex items-center justify-center gap-2 px-3.5 shadow-md transition-all duration-200 cursor-pointer relative z-20 ${isAnyDropdownOpen ? "w-24" : "w-11"
+                          }`}
+                      >
+                        {isSearching ? (
+                          <ButtonLoader />
+                        ) : (
+                          <>
+                            <Search className="w-4 h-4 shrink-0" />
+                            {isAnyDropdownOpen && (
+                              <motion.span
+                                initial={{ opacity: 0, width: 0 }}
+                                animate={{ opacity: 1, width: "auto" }}
+                                exit={{ opacity: 0, width: 0 }}
+                                className="text-xs font-bold whitespace-nowrap overflow-hidden"
+                              >
+                                Search
+                              </motion.span>
+                            )}
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Dropdown 1: Category / Where Popover */}
+                  <AnimatePresence>
+                    {activeDropdown === "category" && (
+                      <div className="absolute top-full left-0 mt-3 z-50">
+                        <CategorySearch
+                          onCategorySelect={(categoryId, categoryName) => {
+                            dispatch(setSelectedCategory(categoryId === "all" ? null : categoryId));
+                            dispatch(setSelectedCategoryname(categoryName));
+                            setActiveDropdown("checkin");
+                            setFocusedSide("checkin");
+                          }}
+                          isMobile={isMobile}
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Dropdown 2 & 3: Checkin & Checkout Popover (Dual Date Picker with Indian Holidays) */}
+                  <AnimatePresence>
+                    {(activeDropdown === "checkin" || activeDropdown === "checkout") && (
+                      <div className="absolute top-full left-1/2 -translate-x-1/2 mt-3 z-50">
+                        <DualDatePicker
+                          checkinDate={checkin}
+                          checkoutDate={checkout}
+                          onCheckinSelect={handleCheckinSelect}
+                          onCheckoutSelect={handleCheckoutSelect}
+                          onClose={() => setActiveDropdown(null)}
+                          focusedSide={focusedSide}
+                          setFocusedSide={setFocusedSide}
+                          isMobile={isMobile}
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Dropdown 4: Who / Guest Selector Popover */}
+                  <AnimatePresence>
+                    {activeDropdown === "guests" && (
+                      <div className="absolute top-full right-0 mt-3 z-50">
+                        <GuestSelector
+                          adults={selectedGuest?.adults || 1}
+                          childrenn={selectedGuest?.childrenn || 0}
+                          infants={selectedGuest?.infants || 0}
+                          pets={selectedGuest?.pets || 0}
+                          onGuestChange={handleGuestChange}
+                          onClose={() => setActiveDropdown(null)}
+                          isMobile={isMobile}
+                        />
+                      </div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              )}
-            </div>
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </header>
 
-      {/* Background Dim Backdrop */}
-      {activeDropdown && (
-        <div
-          onClick={() => setActiveDropdown(null)}
-          className="fixed inset-0 bg-black/25 backdrop-blur-xs transition-opacity duration-300 z-40"
-          style={{ top: isVisible ? (isMobile ? "112px" : "160px") : "64px" }}
-        />
-      )}
+      {/* Dim Background Backdrop (Airbnb Signature) */}
+      <AnimatePresence>
+        {isAnyDropdownOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={() => setActiveDropdown(null)}
+            className="fixed inset-0 bg-black/25 backdrop-blur-[2px] z-40"
+            style={{
+              top: isScrolled && !isExpanded ? "64px" : "136px",
+            }}
+          />
+        )}
+      </AnimatePresence>
     </>
   );
 }

@@ -15,6 +15,8 @@ import {
   MoreVertical,
   Receipt,
   Info,
+  AlertCircle,
+  ShieldAlert,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -30,6 +32,8 @@ import { EmptyState } from "./empty-states";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
 import { ReviewDrawer } from "./Review-drawer";
+import { DisputeDrawer } from "./Dispute-drawer";
+import { GetCustomerDisputesAPI } from "@/lib/API/Dispute/Dispute";
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
 
 const StatusBadge = ({ status }) => {
@@ -77,7 +81,7 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const BookingCard = ({ booking, onWriteReview }) => {
+const BookingCard = ({ booking, onWriteReview, onRaiseDispute }) => {
   const {
     propertyId,
     checkIn,
@@ -146,7 +150,7 @@ const BookingCard = ({ booking, onWriteReview }) => {
                   <span className="text-sm">{branchLocation}</span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {(status?.toLowerCase() === "booked" ||
                   status?.toLowerCase() === "confirmed") && (
                   <>
@@ -168,6 +172,15 @@ const BookingCard = ({ booking, onWriteReview }) => {
                     Write a Review
                   </Button>
                 )}
+                <Button
+                  onClick={() => onRaiseDispute && onRaiseDispute(booking)}
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 flex items-center gap-1 text-xs font-bold"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  Report Issue
+                </Button>
               </div>
             </div>
           </div>
@@ -380,13 +393,23 @@ export default function BookingScreen() {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("Active");
   const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
+  const [disputeDrawerOpen, setDisputeDrawerOpen] = useState(false);
 
   const [selectedBookingForReview, setSelectedBookingForReview] =
     useState(null);
+  const [selectedBookingForDispute, setSelectedBookingForDispute] =
+    useState(null);
+  const [customerDisputes, setCustomerDisputes] = useState([]);
+  const [disputesLoading, setDisputesLoading] = useState(false);
 
   const handleWriteReview = (booking) => {
     setSelectedBookingForReview(booking);
     setReviewDrawerOpen(true);
+  };
+
+  const handleRaiseDispute = (booking) => {
+    setSelectedBookingForDispute(booking);
+    setDisputeDrawerOpen(true);
   };
 
   const getCustomerId = () => {
@@ -405,9 +428,34 @@ export default function BookingScreen() {
 
   const customerId = getCustomerId();
 
+  const loadCustomerDisputes = async (cId) => {
+    const id = cId || customerId;
+    if (!id) return;
+    setDisputesLoading(true);
+    try {
+      let email = "";
+      try {
+        const storedUser = localStorage.getItem("thevilla_user");
+        if (storedUser) {
+          const u = JSON.parse(storedUser);
+          email = u?.email || "";
+        }
+      } catch {}
+      const res = await GetCustomerDisputesAPI(id, email);
+      if (res?.success) {
+        setCustomerDisputes(res.data || []);
+      }
+    } catch (e) {
+      console.error("Failed to load customer disputes:", e);
+    } finally {
+      setDisputesLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!customerId) return;
     dispatch(fetchMyBookings(customerId));
+    loadCustomerDisputes(customerId);
   }, [dispatch, customerId]);
 
   const isCompletedByCheckout = (checkOut) => {
@@ -517,6 +565,7 @@ export default function BookingScreen() {
                       key={booking._id}
                       booking={booking}
                       onWriteReview={handleWriteReview}
+                      onRaiseDispute={handleRaiseDispute}
                     />
                   ))
                 ) : (
@@ -539,11 +588,107 @@ export default function BookingScreen() {
                       key={booking._id}
                       booking={booking}
                       onWriteReview={handleWriteReview}
+                      onRaiseDispute={handleRaiseDispute}
                     />
                   ))
                 ) : (
                   <div className="col-span-full">
                     <EmptyState type="completed" />
+                  </div>
+                )}
+              </div>
+            </Tab>
+
+            <Tab key="Disputes" title={`Claims & Issues (${customerDisputes.length})`}>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {disputesLoading ? (
+                  <div className="col-span-full py-20 text-center text-muted-foreground">
+                    Loading your dispute records...
+                  </div>
+                ) : customerDisputes.length > 0 ? (
+                  customerDisputes.map((dispute) => {
+                    const statusColorMap = {
+                      OPEN: "bg-amber-100 text-amber-800 border-amber-300",
+                      UNDER_INVESTIGATION: "bg-blue-100 text-blue-800 border-blue-300",
+                      AWAITING_EVIDENCE: "bg-orange-100 text-orange-800 border-orange-300",
+                      RESOLVED_REFUND_CUSTOMER: "bg-emerald-100 text-emerald-800 border-emerald-300",
+                      RESOLVED_PAYOUT_OWNER: "bg-purple-100 text-purple-800 border-purple-300",
+                      RESOLVED_SPLIT: "bg-indigo-100 text-indigo-800 border-indigo-300",
+                      DISMISSED: "bg-gray-100 text-gray-800 border-gray-300",
+                    };
+                    const statusLabelMap = {
+                      OPEN: "Under Review by Host & Support",
+                      UNDER_INVESTIGATION: "Under Investigation by Villa Admin",
+                      AWAITING_EVIDENCE: "Evidence Requested from Host",
+                      RESOLVED_REFUND_CUSTOMER: "Refund Approved & Processed",
+                      RESOLVED_PAYOUT_OWNER: "Settled with Host",
+                      RESOLVED_SPLIT: "Split Resolution Settled",
+                      DISMISSED: "Dismissed by Admin",
+                    };
+                    const hostNote = dispute.adminNotes?.find((n) => n.authorName === "Property Host" || n.note?.startsWith("Host Response:"));
+
+                    return (
+                      <Card key={dispute._id} className="border border-gray-300 p-5 rounded-2xl shadow-none bg-white space-y-4">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-mono text-xs font-bold text-gray-500">
+                                #{dispute.disputeId || dispute._id?.slice(-8)}
+                              </span>
+                              <Badge className={cn("text-[10px] uppercase font-bold border", statusColorMap[dispute.status] || "bg-gray-100 text-gray-700")}>
+                                {statusLabelMap[dispute.status] || dispute.status}
+                              </Badge>
+                            </div>
+                            <h4 className="font-bold text-base text-gray-900">
+                              {dispute.propertyId?.name || dispute.propertyName || "Villa Stay"}
+                            </h4>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs text-gray-500 block">Claimed</span>
+                            <span className="font-black text-red-600 text-base">
+                              ₹{(dispute.disputedAmount || 0).toLocaleString()}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="bg-orange-50/70 border border-orange-200/70 rounded-xl p-3.5 space-y-1.5">
+                          <div className="flex items-center gap-1.5 text-orange-800 text-xs font-bold uppercase tracking-wider">
+                            <ShieldAlert className="w-3.5 h-3.5" />
+                            <span>Your Claim: {dispute.title}</span>
+                          </div>
+                          <p className="text-xs text-gray-700 leading-relaxed">
+                            "{dispute.description}"
+                          </p>
+                        </div>
+
+                        {hostNote && (
+                          <div className="bg-blue-50/70 border border-blue-200/70 rounded-xl p-3.5 space-y-1.5">
+                            <div className="flex items-center gap-1.5 text-blue-800 text-xs font-bold uppercase tracking-wider">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                              <span>Host Explanation Submitted</span>
+                            </div>
+                            <p className="text-xs text-blue-950 leading-relaxed">
+                              {hostNote.note.replace(/^Host Response:\s*/, "")}
+                            </p>
+                          </div>
+                        )}
+
+                        <div className="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
+                          <span>Filed on {new Date(dispute.createdAt).toLocaleDateString()}</span>
+                          <span className="font-semibold text-gray-700 capitalize">
+                            Category: {dispute.category?.replace(/_/g, " ")}
+                          </span>
+                        </div>
+                      </Card>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full py-16 text-center border-2 border-dashed border-gray-200 rounded-2xl p-8 bg-gray-50/50">
+                    <CheckCircle2 className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+                    <h4 className="font-bold text-gray-900 text-base mb-1">No Active Claims or Concerns</h4>
+                    <p className="text-xs text-gray-500 max-w-md mx-auto">
+                      All your bookings have completed smoothly. If you ever experience an issue with cleanliness, amenities, or check-in, you can report it directly from the booking card.
+                    </p>
                   </div>
                 )}
               </div>
@@ -555,6 +700,12 @@ export default function BookingScreen() {
         isOpen={reviewDrawerOpen}
         onClose={() => setReviewDrawerOpen(false)}
         booking={selectedBookingForReview}
+      />
+      <DisputeDrawer
+        isOpen={disputeDrawerOpen}
+        onClose={() => setDisputeDrawerOpen(false)}
+        booking={selectedBookingForDispute}
+        onSuccess={() => customerId && loadCustomerDisputes(customerId)}
       />
     </>
   );

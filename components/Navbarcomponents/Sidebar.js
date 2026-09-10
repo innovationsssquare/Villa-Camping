@@ -107,8 +107,8 @@ export function UserSidebar() {
       {/* Mobile trigger */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
-          <Button variant="ghost" className="rounded-full">
-            <TiThMenu size={15} className="-ml-4" />
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full p-0 flex items-center justify-center hover:bg-neutral-100 text-neutral-800">
+            <TiThMenu size={16} />
             <span className="sr-only">Menu</span>
           </Button>
         </SheetTrigger>

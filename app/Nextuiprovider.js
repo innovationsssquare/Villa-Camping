@@ -6,76 +6,69 @@ import { AppHeader } from "@/components/Navbarcomponents/Mobilenav";
 import { HeroUIProvider } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import SplashScreen from "@/components/Homecomponets/SplashScreen";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastProvider } from "@heroui/toast";
 import { SocketProvider } from "@/lib/context/SocketProvider";
 
+const hideChrome = (pathname) =>
+  pathname === "/Signin" ||
+  pathname === "/shorts" ||
+  pathname === "/date-selection" ||
+  pathname === "/search-stay" ||
+  pathname === "/checkout" ||
+  pathname === "/camping-checkout" ||
+  pathname === "/search-your-gateway" ||
+  pathname?.startsWith("/view-Camping") ||
+  pathname?.startsWith("/view-Cottage") ||
+  pathname?.startsWith("/view-Hotel") ||
+  pathname?.startsWith("/view-Villa");
+
+const hideMobileHeader = (pathname) =>
+  hideChrome(pathname) ||
+  pathname === "/account" ||
+  pathname === "/wishlist" ||
+  pathname === "/account/settings" ||
+  pathname === "/notifications" ||
+  pathname === "/booking";
+
 export function NextuiProviderWrapper({ children }) {
   const pathname = usePathname();
-  const [showSplash, setShowSplash] = useState(true);
+  const [splashVisible, setSplashVisible] = useState(true);
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("thevilla_splash_seen")) {
+        setSplashVisible(false);
+      }
+    } catch {
+      setSplashVisible(false);
+    }
+  }, []);
 
   const handleSplashComplete = () => {
-    setShowSplash(false);
+    try {
+      sessionStorage.setItem("thevilla_splash_seen", "1");
+    } catch {
+      // ignore
+    }
+    setSplashVisible(false);
   };
 
-  if (showSplash) {
+  if (splashVisible) {
     return <SplashScreen onComplete={handleSplashComplete} />;
   }
 
   return (
     <SocketProvider>
       <HeroUIProvider>
-        {pathname === "/Signin" ||
-        pathname === "/shorts" ||
-        pathname === "/date-selection" ||
-        pathname === "/search-stay" ||
-        pathname === "/checkout" ||
-        pathname === "/search-your-gateway" ||
-        pathname.startsWith("/view-Camping") ||
-        pathname.startsWith("/view-Cottage") ||
-        pathname.startsWith("/view-Hotel") ||
-        pathname.startsWith("/view-Villa") ? null : (
-          <Navbar />
-        )}
-        {pathname === "/Signin" ||
-        pathname === "/shorts" ||
-        pathname === "/date-selection" ||
-        pathname === "/search-stay" ||
-        pathname === "/checkout" ||
-        pathname === "/account" ||
-        pathname === "/wishlist" ||
-        pathname === "/account/settings" ||
-        pathname === "/notifications" ||
-        pathname === "/search-your-gateway" ||
-        pathname === "/booking" ||
-        pathname.startsWith("/view-Camping") ||
-        pathname.startsWith("/view-Cottage") ||
-        pathname.startsWith("/view-Hotel") ||
-        pathname.startsWith("/view-Villa") ? null : (
-          <AppHeader />
-        )}
+        {hideChrome(pathname) ? null : <Navbar />}
+        {hideMobileHeader(pathname) ? null : <AppHeader />}
         <div className="z-[400]">
           <ToastProvider placement={"top-center"} />
         </div>
         {children}
-        {pathname === "/Signin" ||
-        pathname === "/shorts" ||
-        pathname === "/date-selection" ||
-        pathname === "/search-stay" ||
-        pathname === "/search-your-gateway" ||
-        pathname === "/checkout" ||
-        pathname.startsWith("/view-Camping") ||
-        pathname.startsWith("/view-Cottage") ||
-        pathname.startsWith("/view-Hotel") ||
-        pathname.startsWith("/view-Villa") ? null : (
-          <BottomNav />
-        )}
-        {pathname === "/Signin" ||
-        pathname === "/shorts" ||
-        pathname === "/date-selection" ||
-        pathname === "/search-stay" ||
-        pathname === "/search-your-gateway" ||
-        pathname === "/category/all" ? null : (
+        {hideChrome(pathname) ? null : <BottomNav />}
+        {hideChrome(pathname) || pathname === "/category/all" ? null : (
           <Footer />
         )}
       </HeroUIProvider>

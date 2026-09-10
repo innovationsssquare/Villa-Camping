@@ -62,7 +62,7 @@ export function BottomNav() {
       label: "Home",
     },
     {
-      value:`/category/${selectedCategoryName}`,
+      value: `/category/${selectedCategoryName}`,
       icon: <IoGrid className="h-5 w-5" />,
       outline: <IoGridOutline className="h-5 w-5" />,
       label: "category",

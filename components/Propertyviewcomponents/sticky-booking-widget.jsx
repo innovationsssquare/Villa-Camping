@@ -47,6 +47,15 @@ import {
 } from "@/Redux/Slices/bookingSlice";
 import { useVilla } from "@/lib/context/VillaContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
+import {
+  calculateBasePriceForRange,
+  useHolidayDates,
+  calculateNightBreakdown,
+} from "@/lib/pricingUtils";
+import { Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
+import { Checkvillaavailability } from "@/lib/API/category/Villa/Villa";
+import { BaseUrl } from "@/lib/API/Baseurl";
+import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function StickyBookingWidget() {
@@ -57,11 +66,15 @@ export default function StickyBookingWidget() {
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+  const [availabilityChecking, setAvailabilityChecking] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState("");
   const villa = useVilla();
   const router = useRouter();
   const dispatch = useDispatch();
   const { checkin, checkout, selectedGuest, selectedSubtype, appliedCoupon } =
     useSelector((state) => state.booking);
+
+  const holidayDates = useHolidayDates();
 
   const checkInDate = checkin ? new Date(checkin) : new Date();
   const checkOutDate = checkout
@@ -74,37 +87,56 @@ export default function StickyBookingWidget() {
     Math.round((+checkOutDate - +checkInDate) / msPerDay)
   );
 
-  const { discountAmount, finalTotal } = calculateBookingPrice(
-    villa?.basePricePerNight,
-    nights,
+  // Compute the base amount using weekday/weekend/holiday pricing with dynamic holiday dates
+  const villaPricing = villa?.pricing ?? {};
+  const baseAmount = calculateBasePriceForRange(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    villaPricing,
+    holidayDates
+  );
+
+  const nightBreakdown = calculateNightBreakdown(
+    checkInDate?.toISOString(),
+    checkOutDate?.toISOString(),
+    villaPricing,
+    holidayDates
+  );
+
+  // Pass base=1 night multiplier since calculateBasePriceForRange already totals all nights
+  const { discountAmount, finalTotal, taxAmount } = calculateBookingPrice(
+    baseAmount,
+    1,
     appliedCoupon
   );
 
-  const totalGuests = selectedGuest?.adults + selectedGuest?.childrenn;
+  const totalGuests = (selectedGuest?.adults || 0) + (selectedGuest?.childrenn || 0);
+  const maxCapacity = Number(villa?.maxCapacity || 10);
+  const isOverCapacity = totalGuests > maxCapacity;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
 
-  const availableCoupons = [
+  const defaultAvailableCoupons = [
     {
       code: "VILLACAMP10",
       title: "Book your dreamy getaway",
       description:
-        "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
+        "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs.",
       discount: 10,
       type: "percentage",
       maxDiscount: 10000,
-      validUntil: "31 December 2025",
+      validUntil: "Valid",
     },
     {
       code: "VILLACAMP102025",
       title: "Instant Discount",
       description:
-        "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
+        "Get an instant discount of Rs. 4,000 on selected stays.",
       discount: 4000,
       type: "fixed",
       maxDiscount: 15000,
-      validUntil: "31 December 2025",
+      validUntil: "Valid",
     },
     {
       code: "VILLACAMPWEEKEND15",
@@ -113,17 +145,64 @@ export default function StickyBookingWidget() {
       discount: 15,
       type: "percentage",
       maxDiscount: 15000,
-      validUntil: "31 December 2025",
+      validUntil: "Valid",
     },
   ];
+
+  const [couponsList, setCouponsList] = useState(defaultAvailableCoupons);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCoupons() {
+      try {
+        let res = null;
+        if (villa?._id) {
+          res = await Getallcouponbypropertyid(villa._id);
+        }
+        if (!res || !res.data?.coupons?.length) {
+          const allRes = await fetch(`${BaseUrl}/Coupon/GetAllCoupons`);
+          res = await allRes.json();
+        }
+        if (isMounted && res?.data?.coupons?.length) {
+          const formatted = res.data.coupons
+            .filter((c) => c.isActive !== false)
+            .map((c) => ({
+              code: c.code,
+              title: c.title || c.code,
+              description: c.description || "",
+              discount: c.discount?.amount ?? c.discountValue ?? c.discount,
+              type: c.discount?.type || c.discountType || "percentage",
+              maxDiscount: c.maxDiscount || Infinity,
+              validUntil: c.validTill
+                ? new Date(c.validTill).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Valid",
+              couponId: c._id,
+            }));
+          if (formatted.length > 0) {
+            setCouponsList(formatted);
+          }
+        }
+      } catch (err) {
+        console.warn("[sticky-booking-widget] Error loading backend coupons:", err);
+      }
+    }
+    loadCoupons();
+    return () => {
+      isMounted = false;
+    };
+  }, [villa?._id]);
 
   const applyCoupon = async (code) => {
     setIsApplyingCoupon(true);
     setCouponError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
-    const coupon = availableCoupons.find(
+    const coupon = couponsList.find(
       (c) => c.code.toLowerCase() === code.toLowerCase()
     );
 
@@ -133,7 +212,7 @@ export default function StickyBookingWidget() {
       return;
     }
 
-    if (coupon.minAmount && villa?.basePricePerNight < coupon.minAmount) {
+    if (coupon.minAmount && baseAmount < coupon.minAmount) {
       setCouponError(
         `Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`
       );
@@ -406,6 +485,9 @@ export default function StickyBookingWidget() {
                 </PopoverTrigger>
                 <PopoverContent className="w-80 bg-white border-2 border-gray-200">
                   <div className="space-y-4">
+                    <div className="text-xs text-gray-500 font-medium">
+                      Property capacity: Up to {maxCapacity} guests
+                    </div>
                     <div className="flex items-center justify-between">
                       <div>
                         <Label className="font-bold text-black">Adults</Label>
@@ -435,14 +517,17 @@ export default function StickyBookingWidget() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            dispatch(
-                              updateGuestCount({
-                                type: "adults",
-                                value: selectedGuest.adults + 1,
-                              })
-                            )
-                          }
+                          onClick={() => {
+                            if (totalGuests < maxCapacity) {
+                              dispatch(
+                                updateGuestCount({
+                                  type: "adults",
+                                  value: selectedGuest.adults + 1,
+                                })
+                              );
+                            }
+                          }}
+                          disabled={totalGuests >= maxCapacity}
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
@@ -474,14 +559,17 @@ export default function StickyBookingWidget() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() =>
-                            dispatch(
-                              updateGuestCount({
-                                type: "childrenn",
-                                value: selectedGuest.childrenn + 1,
-                              })
-                            )
-                          }
+                          onClick={() => {
+                            if (totalGuests < maxCapacity) {
+                              dispatch(
+                                updateGuestCount({
+                                  type: "childrenn",
+                                  value: selectedGuest.childrenn + 1,
+                                })
+                              );
+                            }
+                          }}
+                          disabled={totalGuests >= maxCapacity}
                         >
                           <Plus className="w-4 h-4" />
                         </Button>
@@ -598,7 +686,7 @@ export default function StickyBookingWidget() {
                             </div>
 
                             <div className="space-y-4 pb-6">
-                              {availableCoupons.map((coupon, index) => (
+                              {couponsList.map((coupon, index) => (
                                 <Card
                                   key={coupon.code}
                                   className="p-6 border border-white bg-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 "
@@ -711,24 +799,24 @@ export default function StickyBookingWidget() {
                 {appliedCoupon && (
                   <div className="flex items-center space-x-2">
                     <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                      ₹{(finalTotal + discountAmount).toLocaleString()}
+                      ₹{(finalTotal + discountAmount).toLocaleString("en-IN")}
                     </span>
                   </div>
                 )}
                 <div className="flex items-baseline space-x-1">
                   <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalTotal.toLocaleString()}
+                    ₹{finalTotal.toLocaleString("en-IN")}
                   </span>
                   <span className="text-gray-600 text-sm transition-all duration-300">
-                    {` (for ${totalGuests} guest)`}
+                    {nights === 1 ? "(1 night)" : `(${nights} nights)`}
                   </span>
                 </div>
                 <span className="text-gray-500 text-xs transition-all duration-300">
-                  Per Night + Taxes
+                  Incl. taxes · {totalGuests} {totalGuests === 1 ? "guest" : "guests"}
                 </span>
                 {appliedCoupon && (
                   <div className="text-green-600 text-xs font-medium">
-                    Saved ₹{discountAmount.toLocaleString()} with{" "}
+                    Saved ₹{discountAmount.toLocaleString("en-IN")} with{" "}
                     {appliedCoupon.code}
                   </div>
                 )}
@@ -740,18 +828,56 @@ export default function StickyBookingWidget() {
               </div>
             </div>
 
+            {/* Capacity & Availability Alerts */}
+            {isOverCapacity && (
+              <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 text-red-700 text-xs">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
+                <span>Max property capacity is {maxCapacity} guests. Please reduce guest count to proceed.</span>
+              </div>
+            )}
+            {availabilityError && (
+              <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center space-x-2 text-amber-800 text-xs">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-600" />
+                <span>{availabilityError}</span>
+              </div>
+            )}
+
             {/* Reserve Button */}
             <Button
-              onClick={() => {
+              onClick={async () => {
+                if (isOverCapacity) return;
+                setAvailabilityError("");
+                setAvailabilityChecking(true);
+                try {
+                  const avail = await Checkvillaavailability({
+                    propertyId: villa?._id,
+                    checkIn: checkInDate.toISOString(),
+                    checkOut: checkOutDate.toISOString(),
+                  });
+                  if (avail && avail.available === false) {
+                    setAvailabilityError(avail.message || "This villa is not available for the selected dates.");
+                    setAvailabilityChecking(false);
+                    return;
+                  }
+                } catch (e) {
+                  console.warn("Availability pre-check failed:", e);
+                }
+                setAvailabilityChecking(false);
+
                 dispatch(setPropertyId(villa?._id));
                 dispatch(setcategoryId(villa?.category));
                 dispatch(setOwnerId(villa?.owner));
                 dispatch(setPropertyType("Villa"));
                 router.push("/checkout");
               }}
-              className="w-full mt-2 bg-black hover:bg-gray-800 text-white  py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95"
+              disabled={isOverCapacity || finalTotal <= 0 || availabilityChecking}
+              className="w-full mt-2 bg-black hover:bg-gray-800 text-white py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              Reserve Now
+              {availabilityChecking
+                ? "Checking Availability..."
+                : isOverCapacity
+                ? `Max ${maxCapacity} Guests Allowed`
+                : "Reserve Now"}
             </Button>
           </CardContent>
         </Card>

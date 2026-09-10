@@ -30,7 +30,7 @@ const Tentview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
   const [showStickyTabs, setShowStickyTabs] = useState(false);
   const tabsRef = useRef(null);
-const [tents, setTents] = useState([]);
+  const [tents, setTents] = useState([]);
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -118,7 +118,7 @@ const [tents, setTents] = useState([]);
     }
   };
 
-if (loading) {
+  if (loading) {
     return <VillaScreenSkeleton />;
   }
 
@@ -146,52 +146,52 @@ if (loading) {
 
 
   return (
-    <CampingProvider  camping={camping}>
+    <CampingProvider camping={camping}>
 
-    <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
-      <TentHeader />
-      <TentHero />
-      <TentDetails />
+      <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
+        <TentHeader />
+        <TentHero />
+        <TentDetails />
 
-      <div ref={tabsRef}>
-        <StickyTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isSticky={false}
-        />
-      </div>
-
-      {showStickyTabs && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+        <div ref={tabsRef}>
           <StickyTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            isSticky={true}
+            isSticky={false}
           />
         </div>
-      )}
 
-      <div>
-        <AllTabsContent
-          refs={{
-            highlightsRef,
-            refundRef,
-            spacesRef,
-            reviewsRef,
-            amenitiesRef,
-            locationRef,
-            experiencesRef,
-            faqsRef,
-          }}
-         
-          onBookTent={handleBookTent}
-        />
+        {showStickyTabs && (
+          <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+            <StickyTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isSticky={true}
+            />
+          </div>
+        )}
+
+        <div>
+          <AllTabsContent
+            refs={{
+              highlightsRef,
+              refundRef,
+              spacesRef,
+              reviewsRef,
+              amenitiesRef,
+              locationRef,
+              experiencesRef,
+              faqsRef,
+            }}
+
+            onBookTent={handleBookTent}
+          />
+        </div>
+
+        <FixedBookingBar />
       </div>
-
-      <FixedBookingBar />
-    </div>
     </CampingProvider>
   );
 };

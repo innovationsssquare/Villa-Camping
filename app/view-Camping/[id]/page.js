@@ -8,7 +8,7 @@ const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.co
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
-    const res = await fetch(`${BaseUrl}/Camping/get/camping/${id}`, { cache: "no-store" });
+    const res = await fetch(`${BaseUrl}/Camping/get/camping/${id}`, { next: { revalidate: 120 } });
     if (!res.ok) throw new Error("Failed to fetch");
     const result = await res.json();
     const camping = result?.data;
@@ -39,18 +39,18 @@ export default async function Home({ params }) {
   const { id } = await params;
   let camping = null;
   try {
-    const res = await fetch(`${BaseUrl}/Camping/get/camping/${id}`, { cache: "no-store" });
+    const res = await fetch(`${BaseUrl}/Camping/get/camping/${id}`, { next: { revalidate: 120 } });
     if (res.ok) {
       const result = await res.json();
       camping = result?.data;
     }
-  } catch (e) {}
+  } catch (e) { }
 
   return (
     <div className="min-h-screen">
       {camping ? <JsonLd villa={camping} /> : null}
-      <Tentview/>
-      <CampingDetails/>
+      <Tentview />
+      <CampingDetails />
     </div>
   );
 }

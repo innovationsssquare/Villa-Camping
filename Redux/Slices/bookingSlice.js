@@ -164,6 +164,10 @@ const bookingSlice = createSlice({
     resetBooking: (state) => {
       return initialState;
     },
+    hydrateBooking: (state, action) => {
+      if (!action.payload || typeof action.payload !== "object") return state;
+      return { ...initialState, ...action.payload };
+    },
   },
 });
 
@@ -174,6 +178,7 @@ export const {
   setSelectedGuest,
   updateGuestCount,
   resetBooking,
+  hydrateBooking,
   setSelectedCategoryname,
   setSelectedSubtype,
   updateSubtypeQuantity,

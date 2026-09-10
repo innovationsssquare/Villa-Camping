@@ -50,7 +50,15 @@ import {
 } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { getDeviceId } from "@/lib/deviceId";
-import { calculateBasePriceForRange } from "@/lib/datePricing";
+import {
+  calculateBasePriceForRange,
+  useHolidayDates,
+  calculateNightBreakdown,
+} from "@/lib/pricingUtils";
+import { Checkvillaavailability } from "@/lib/API/category/Villa/Villa";
+import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
+import { Getcottageavability } from "@/lib/API/category/Cottage/Cottage";
+import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
 import { calculateCampingTentTotal } from "@/lib/calculateTentBasePrice";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
@@ -78,6 +86,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
+  const holidayDates = useHolidayDates();
   const { addToast } = useToast();
   const router = useRouter();
   const reduxSelectedTents = useSelector(
@@ -120,6 +129,17 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   const totalGuests =
     guestCounts.adults + guestCounts.children + guestCounts.infants;
 
+  // Count weekday vs weekend vs holiday nights for the villa price breakdown label
+  const villaNightBreakdown =
+    propertyType?.toLowerCase() === "villa"
+      ? calculateNightBreakdown(
+          checkInDate?.toISOString(),
+          checkOutDate?.toISOString(),
+          property?.pricing ?? {},
+          holidayDates
+        )
+      : null;
+
   useEffect(() => {
     if (categoryId && propertyId) {
       dispatch(fetchproperty({ categoryId, propertyId }));
@@ -127,7 +147,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!categoryId & !propertyId) {
+    if (!categoryId && !propertyId) {
       setopenmodal(true);
     }
   }, [categoryId, propertyId]);
@@ -189,8 +209,10 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
     baseAmountForCoupon = calculateBasePriceForRange(
       checkInDate?.toISOString(),
       checkOutDate?.toISOString(),
-      property?.pricing ?? {}
+      property?.pricing ?? {},
+      holidayDates
     );
+    nightsForCoupon = 1; // calculateBasePriceForRange already totals all nights
   }
 
   const { basePrice, discountAmount, taxAmount, finalTotal } =
@@ -259,9 +281,101 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       return;
     }
 
+    // Re-validate availability before proceeding to create booking
+    try {
+      if (propertyType?.toLowerCase() === "villa") {
+        const avail = await Checkvillaavailability({
+          propertyId,
+          checkIn: checkInDate?.toISOString(),
+          checkOut: checkOutDate?.toISOString(),
+        });
+        if (avail && avail.available === false) {
+          addToast({
+            title: "Dates Unavailable",
+            description: avail.message || "This villa is no longer available for the selected dates.",
+            variant: "destructive",
+            duration: 2500,
+          });
+          setloading(false);
+          return;
+        }
+      } else if (propertyType?.toLowerCase() === "camping") {
+        const requestedTents = Object.entries(reduxSelectedTents).map(([type, t]) => ({
+          tentType: type,
+          quantity: t.quantity,
+        }));
+        const avail = await Getcampingavability({
+          propertyId,
+          checkIn: checkin,
+          checkOut: checkout,
+          tents: requestedTents,
+        });
+        if (avail && avail.available === false) {
+          addToast({
+            title: "Tents Unavailable",
+            description: avail.message || "Selected tents are no longer available for these dates.",
+            variant: "destructive",
+            duration: 2500,
+          });
+          setloading(false);
+          return;
+        }
+      } else if (propertyType?.toLowerCase() === "cottage") {
+        const requestedCottages = Object.entries(reduxSelectedCottages).map(([type, c]) => ({
+          cottageType: type,
+          quantity: c.quantity,
+        }));
+        const avail = await Getcottageavability({
+          propertyId,
+          checkIn: checkin,
+          checkOut: checkout,
+          cottages: requestedCottages,
+        });
+        if (avail && avail.available === false) {
+          addToast({
+            title: "Cottages Unavailable",
+            description: avail.message || "Selected cottages are no longer available for these dates.",
+            variant: "destructive",
+            duration: 2500,
+          });
+          setloading(false);
+          return;
+        }
+      } else if (propertyType?.toLowerCase() === "hotel") {
+        const requestedRooms = Object.values(reduxSelectedRooms).map((r) => ({
+          roomType: r.typeName,
+          quantity: r.quantity,
+        }));
+        const avail = await Gethotelavability({
+          propertyId,
+          checkIn: checkin,
+          checkOut: checkout,
+          rooms: requestedRooms,
+        });
+        if (avail && avail.available === false) {
+          addToast({
+            title: "Rooms Unavailable",
+            description: avail.message || "Selected rooms are no longer available for these dates.",
+            variant: "destructive",
+            duration: 2500,
+          });
+          setloading(false);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn("Pre-payment availability check error:", err);
+    }
+
     let items = [];
 
     if (propertyType?.toLowerCase() === "villa") {
+      const villaTotalBase = calculateBasePriceForRange(
+        checkInDate?.toISOString(),
+        checkOutDate?.toISOString(),
+        property?.pricing ?? {},
+        holidayDates
+      );
       items = [
         {
           unitType: "VillaUnit",
@@ -270,7 +384,7 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
           quantity: 1,
           pricePerNight: Number(property?.pricing?.weekdayPrice),
           nights: nights,
-          totalPrice: Number(property?.pricing?.weekdayPrice) * nights,
+          totalPrice: villaTotalBase,
         },
       ];
     }
@@ -384,6 +498,12 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
       const response = await Createbooking(bookingData);
       setOpen(!open);
       if (response?.success === true) {
+        if (response?.data?.booking?.customerId) {
+          try {
+            localStorage.setItem("thevilla_user_id", response.data.booking.customerId);
+            localStorage.setItem("customer_id", response.data.booking.customerId);
+          } catch {}
+        }
         const Bookingid = response?.data?.booking._id;
         const orderData = response.data.order;
         var razorpayOptions = {
@@ -434,9 +554,9 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
             }
           },
           prefill: {
-            name: customerDetails.fullName,
+            name: `${customerDetails.firstName || ""} ${customerDetails.lastName || ""}`.trim(),
             email: customerDetails.email,
-            contact: customerDetails.phone,
+            contact: customerDetails.mobile,
           },
           theme: {
             color: "black",
@@ -620,7 +740,36 @@ export default function BookingPreviewScreen({ isOpen, onClose }) {
         <div className="space-y-3 mb-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
-              <span className="text-black">Rental Charges</span>
+              <div>
+                <span className="text-black">Rental Charges</span>
+                {villaNightBreakdown && (
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {villaNightBreakdown.weekdays > 0 && (
+                      <span>
+                        ₹{(property?.pricing?.weekdayPrice ?? 0).toLocaleString("en-IN")}
+                        {" × "}{villaNightBreakdown.weekdays} weekday{villaNightBreakdown.weekdays !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {villaNightBreakdown.weekdays > 0 && (villaNightBreakdown.weekends > 0 || villaNightBreakdown.holidays > 0) && <span>, </span>}
+                    {villaNightBreakdown.weekends > 0 && (
+                      <span>
+                        ₹{(property?.pricing?.weekendPrice ?? 0).toLocaleString("en-IN")}
+                        {" × "}{villaNightBreakdown.weekends} weekend{villaNightBreakdown.weekends !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                    {villaNightBreakdown.holidays > 0 && (
+                      <span>
+                        {(villaNightBreakdown.weekdays > 0 || villaNightBreakdown.weekends > 0) && <span>, </span>}
+                        ₹{(property?.pricing?.holidayPrice ?? property?.pricing?.weekdayPrice ?? 0).toLocaleString("en-IN")}
+                        {" × "}{villaNightBreakdown.holidays} holiday{villaNightBreakdown.holidays !== 1 ? "s" : ""}
+                      </span>
+                    )}
+                  </p>
+                )}
+                {!villaNightBreakdown && (
+                  <p className="text-xs text-gray-500 mt-0.5">{nights} night{nights !== 1 ? "s" : ""}</p>
+                )}
+              </div>
               <FaInfoCircle className="w-4 h-4 text-gray-400" />
             </div>
             <span className="font-medium text-black">

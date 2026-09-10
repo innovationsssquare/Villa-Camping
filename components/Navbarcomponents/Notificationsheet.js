@@ -146,11 +146,11 @@ export function NotificationSheet() {
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative rounded-md border-gray-300 border bg-[#FFFFFF4D]">
+        <Button variant="outline" size="icon" className="relative rounded-full border-gray-200 border bg-white/90 h-7 w-7 p-0 flex items-center justify-center shadow-2xs hover:bg-neutral-50 text-neutral-800">
           <FaBell className="h-3 w-3" />
           {unreadCount > 0 && (
             <Badge
-              className="absolute -top-1 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
+              className="absolute -top-1 -right-1 px-1 py-0 bg-[#ff6900] text-white border-1 border-white min-w-[1rem] h-4 text-[9px] flex items-center justify-center"
               variant="default"
             >
               {unreadCount}

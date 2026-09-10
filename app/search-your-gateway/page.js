@@ -157,7 +157,7 @@ const Mappropertyview = () => {
     setIsFilterDrawerOpen(true);
   };
 
-  const handlePropertySelect = (property) => {};
+  const handlePropertySelect = (property) => { };
 
   const handleApiKeySubmit = (apiKey) => {
     setGoogleMapsApiKey(apiKey);
@@ -266,7 +266,7 @@ const Mappropertyview = () => {
       <div className="hidden lg:flex flex-row flex-1 h-full overflow-hidden">
         {/* Left Side: Property Listings & Controls */}
         <div className="w-[50%] xl:w-[45%] h-full flex flex-col border-r border-gray-150 bg-white relative">
-          
+
           {/* Subtype/Sort Control Strip */}
           <div className="px-6 py-4 bg-white border-b border-gray-150 flex items-center justify-between shadow-xs">
             <div className="flex items-center gap-3">

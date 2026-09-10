@@ -25,7 +25,7 @@ export default function VillaReel({ villas }) {
   const isScrolling = useRef(false);
   const controlsTimeoutRef = useRef();
   const swipeStartTime = useRef(0);
-const router = useRouter();
+  const router = useRouter();
 
   useEffect(() => {
     // Store original body styles

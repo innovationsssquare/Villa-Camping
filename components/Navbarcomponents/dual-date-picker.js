@@ -1,9 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useState, useMemo, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Sparkles,
+  Calendar as CalendarIcon,
+  Tag,
+} from "lucide-react";
 import moment from "moment-timezone";
+import { useIndianHolidays } from "@/hooks/useIndianHolidays";
 
 export function DualDatePicker({
   checkinDate,
@@ -14,9 +21,26 @@ export function DualDatePicker({
   isMobile = false,
   timezone = "Asia/Kolkata",
   onClose,
-  focusedSide,
-  setFocusedSide
+  focusedSide = "checkin",
+  setFocusedSide,
 }) {
+  const currentYear = useMemo(() => {
+    return checkinDate
+      ? moment.tz(checkinDate, timezone).year()
+      : moment().tz(timezone).year();
+  }, [checkinDate, timezone]);
+
+  const {
+    allHolidays,
+    holidayMap,
+    longWeekendSet,
+    longWeekends,
+    getNextLongWeekend,
+    isHoliday,
+    getHolidayName,
+    isLongWeekend,
+  } = useIndianHolidays(currentYear);
+
   const [leftMonth, setLeftMonth] = useState(() => {
     const base = checkinDate ? moment(checkinDate) : moment();
     return base.tz(timezone).startOf("month").toDate();
@@ -28,46 +52,32 @@ export function DualDatePicker({
   });
 
   const [hoveredDate, setHoveredDate] = useState(null);
+  const [tooltipHoliday, setTooltipHoliday] = useState(null);
 
-  useEffect(() => {
-    if (checkinDate && !checkoutDate) {
-      setFocusedSide("checkout");
-    } else if (!checkinDate) {
-      setFocusedSide("checkin");
-    }
-  }, [checkinDate, checkoutDate]);
+  const navigateMonth = (direction) => {
+    setLeftMonth((prev) => {
+      const m = moment(prev).tz(timezone).startOf("month");
+      const next =
+        direction === "prev" ? m.subtract(1, "month") : m.add(1, "month");
+      setRightMonth(next.clone().add(1, "month").toDate());
+      return next.toDate();
+    });
+  };
 
-  const monthNames = useMemo(
-    () => [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ],
-    []
-  );
+  const monthNames = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
 
-  const startOfTodayLocal = useMemo(
+  const startOfToday = useMemo(
     () => moment.tz(timezone).startOf("day").toDate(),
     [timezone]
   );
 
   const minBoundary = useMemo(() => {
-    if (!minDate) return startOfTodayLocal;
-    const m =
-      typeof minDate === "string"
-        ? moment.tz(minDate, timezone)
-        : moment(minDate).tz(timezone);
-    return m.startOf("day").toDate();
-  }, [minDate, timezone, startOfTodayLocal]);
+    if (!minDate) return startOfToday;
+    return moment.tz(minDate, timezone).startOf("day").toDate();
+  }, [minDate, timezone, startOfToday]);
 
   const getDaysInMonth = (date) =>
     new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
@@ -75,71 +85,18 @@ export function DualDatePicker({
   const getFirstDayOfMonth = (date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
-  const isDateDisabled = (dateObj) => {
-    const dateMidnight = moment(dateObj).tz(timezone).startOf("day").toDate();
-    const minBoundaryMidnight = moment(minBoundary).tz(timezone).startOf("day").toDate();
+  const isDateDisabled = (mCell) => {
+    const cellMidnight = mCell.clone().startOf("day");
+    const minMidnight = moment(minBoundary).tz(timezone).startOf("day");
 
-    if (dateMidnight < minBoundaryMidnight) return true;
+    if (cellMidnight.isBefore(minMidnight)) return true;
+
     if (focusedSide === "checkout" && checkinDate) {
-      const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day").toDate();
-      return dateMidnight <= checkinMidnight;
-    }
-    return false;
-  };
-
-  const isDateInRange = (dateObj) => {
-    if (!checkinDate) return false;
-
-    const mStart = moment.tz(checkinDate, timezone).startOf("day");
-    const mCurrent = moment(dateObj).tz(timezone).startOf("day");
-
-    if (checkoutDate) {
-      const mEnd = moment.tz(checkoutDate, timezone).startOf("day");
-      return mCurrent.isBetween(mStart, mEnd, "day", "[]");
-    }
-
-    if (hoveredDate && focusedSide === "checkout") {
-      const mHovered = moment(hoveredDate).tz(timezone).startOf("day");
-      if (mHovered.isAfter(mStart)) {
-        return mCurrent.isBetween(mStart, mHovered, "day", "[]");
-      }
+      const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day");
+      if (cellMidnight.isBefore(checkinMidnight)) return true;
     }
 
     return false;
-  };
-
-  const navigateMonth = (direction, side) => {
-    if (side === "left") {
-      setLeftMonth((prev) => {
-        const m = moment(prev).tz(timezone).startOf("month");
-        const next =
-          direction === "prev" ? m.subtract(1, "month") : m.add(1, "month");
-        const newDate = next.toDate();
-
-        // Ensure right month is always after left month
-        const rightMoment = moment(rightMonth).tz(timezone).startOf("month");
-        if (next.isSameOrAfter(rightMoment)) {
-          setRightMonth(next.add(1, "month").toDate());
-        }
-
-        return newDate;
-      });
-    } else {
-      setRightMonth((prev) => {
-        const m = moment(prev).tz(timezone).startOf("month");
-        const next =
-          direction === "prev" ? m.subtract(1, "month") : m.add(1, "month");
-        const newDate = next.toDate();
-
-        // Ensure right month is always after left month
-        const leftMoment = moment(leftMonth).tz(timezone).startOf("month");
-        if (next.isSameOrBefore(leftMoment)) {
-          setLeftMonth(leftMoment.subtract(1, "month").toDate());
-        }
-
-        return newDate;
-      });
-    }
   };
 
   const handleDateClick = (mCell) => {
@@ -148,30 +105,115 @@ export function DualDatePicker({
     if (focusedSide === "checkout") {
       if (checkinDate) {
         const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day");
-        const currentMidnight = moment(mCell).tz(timezone).startOf("day");
-        if (currentMidnight <= checkinMidnight) {
+        const cellMidnight = mCell.clone().startOf("day");
+
+        if (cellMidnight.isBefore(checkinMidnight)) {
+          onCheckinSelect(isoDate);
+          if (setFocusedSide) setFocusedSide("checkout");
           return;
         }
+
+        if (cellMidnight.isSame(checkinMidnight)) {
+          return;
+        }
+
+        // Valid checkout date strictly after checkin
+        onCheckoutSelect(isoDate);
+        if (setFocusedSide) setFocusedSide("checkout");
+      } else {
+        onCheckinSelect(isoDate);
+        if (setFocusedSide) setFocusedSide("checkout");
       }
-      onCheckoutSelect(isoDate);
-      setFocusedSide("checkin");
-      if (onClose) onClose();
     } else {
       onCheckinSelect(isoDate);
-      setFocusedSide("checkout");
+      if (checkoutDate) {
+        const cellMidnight = mCell.clone().startOf("day");
+        const checkoutMidnight = moment
+          .tz(checkoutDate, timezone)
+          .startOf("day");
+        if (cellMidnight.isSameOrAfter(checkoutMidnight)) {
+          onCheckoutSelect(null);
+        }
+      }
+      if (setFocusedSide) setFocusedSide("checkout");
     }
   };
 
-  const renderCalendar = (currentMonth, isRightSide = false) => {
-    const mCurrent = moment(currentMonth).tz(timezone);
-    const daysInMonth = getDaysInMonth(currentMonth);
-    const firstDay = getFirstDayOfMonth(currentMonth);
-    const days = [];
+  // Quick Weekend Selection
+  const handleSelectWeekend = (offsetWeeks = 0) => {
+    const now = moment().tz(timezone);
+    const dayOfWeek = now.isoWeekday();
+    let thisFriday =
+      dayOfWeek <= 5
+        ? now.clone().isoWeekday(5)
+        : now.clone().add(1, "week").isoWeekday(5);
 
-    // Empty cells before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="w-8 h-8 md:w-9 md:h-9" />);
+    if (offsetWeeks > 0) {
+      thisFriday = thisFriday.add(offsetWeeks, "weeks");
     }
+
+    const sunday = thisFriday.clone().add(2, "days");
+
+    onCheckinSelect(thisFriday.startOf("day").format());
+    onCheckoutSelect(sunday.startOf("day").format());
+    if (setFocusedSide) setFocusedSide("checkout");
+  };
+
+  // Jump to specific Indian Holiday: select as Check-in and focus Checkout
+  const handleSelectHoliday = (holiday) => {
+    const mHol = moment.tz(holiday.date, timezone).startOf("day");
+    onCheckinSelect(mHol.format());
+
+    // Jump calendar to that month
+    setLeftMonth(mHol.clone().startOf("month").toDate());
+    setRightMonth(mHol.clone().add(1, "month").startOf("month").toDate());
+
+    // Explicitly focus checkout so the user selects their checkout date
+    if (setFocusedSide) setFocusedSide("checkout");
+  };
+
+  // Jump to upcoming Long Weekend
+  const handleSelectUpcomingLongWeekend = () => {
+    const nextLw = getNextLongWeekend();
+    if (!nextLw) return;
+
+    const [sYear, sMonth, sDay] = nextLw.startDate.split("-").map(Number);
+    const [eYear, eMonth, eDay] = nextLw.endDate.split("-").map(Number);
+
+    const mStart = moment
+      .tz({ year: sYear, month: sMonth - 1, day: sDay }, timezone)
+      .startOf("day");
+    const mEnd = moment
+      .tz({ year: eYear, month: eMonth - 1, day: eDay }, timezone)
+      .startOf("day");
+
+    onCheckinSelect(mStart.format());
+    onCheckoutSelect(mEnd.format());
+
+    setLeftMonth(mStart.clone().startOf("month").toDate());
+    setRightMonth(mStart.clone().add(1, "month").startOf("month").toDate());
+    if (setFocusedSide) setFocusedSide("checkin");
+  };
+
+  const clearDates = () => {
+    onCheckinSelect(null);
+    onCheckoutSelect(null);
+    setHoveredDate(null);
+    if (setFocusedSide) setFocusedSide("checkin");
+  };
+
+  const nightsCount = useMemo(() => {
+    if (!checkinDate || !checkoutDate) return null;
+    const mIn = moment.tz(checkinDate, timezone).startOf("day");
+    const mOut = moment.tz(checkoutDate, timezone).startOf("day");
+    const diff = mOut.diff(mIn, "days");
+    return diff > 0 ? diff : null;
+  }, [checkinDate, checkoutDate, timezone]);
+
+  const renderMonth = (monthDate) => {
+    const mCurrent = moment(monthDate).tz(timezone);
+    const daysInMonth = getDaysInMonth(monthDate);
+    const firstDay = getFirstDayOfMonth(monthDate);
 
     const mCheckin = checkinDate
       ? moment.tz(checkinDate, timezone).startOf("day")
@@ -179,73 +221,47 @@ export function DualDatePicker({
     const mCheckout = checkoutDate
       ? moment.tz(checkoutDate, timezone).startOf("day")
       : null;
+    const mHovered =
+      hoveredDate && focusedSide === "checkout"
+        ? moment(hoveredDate).tz(timezone).startOf("day")
+        : null;
+
+    const days = [];
+
+    // Empty start cells
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="h-8 sm:h-8.5 w-full" />);
+    }
 
     for (let day = 1; day <= daysInMonth; day++) {
-      const mCell = moment
-        .tz(
-          {
-            year: mCurrent.year(),
-            month: mCurrent.month(),
-            day,
-          },
-          timezone
-        )
-        .startOf("day");
+      const mCell = mCurrent.clone().date(day).startOf("day");
+      const dateStr = mCell.format("YYYY-MM-DD");
+      const isDisabled = isDateDisabled(mCell);
+      const isToday = mCell.isSame(startOfToday, "day");
 
-      const dateObj = mCell.toDate();
-      const isDisabled = isDateDisabled(dateObj);
-      const isCheckinDate = mCheckin ? mCell.isSame(mCheckin, "day") : false;
-      const isCheckoutDate = mCheckout ? mCell.isSame(mCheckout, "day") : false;
-      const isInRange = isDateInRange(dateObj);
-      const isToday = mCell.isSame(moment.tz(timezone).startOf("day"), "day");
+      const isStart = mCheckin ? mCell.isSame(mCheckin, "day") : false;
+      const isEnd = mCheckout ? mCell.isSame(mCheckout, "day") : false;
 
-      let buttonClasses = [
-        "w-8 h-8 md:w-9 md:h-9 text-xs md:text-sm font-semibold transition-all duration-200 flex items-center justify-center relative",
-      ];
-
-      if (isDisabled) {
-        buttonClasses.push("text-gray-300 cursor-not-allowed");
-      } else if (isCheckinDate || isCheckoutDate) {
-        buttonClasses.push(
-          "bg-black text-white rounded-full z-10 shadow-md"
-        );
-      } else if (isInRange) {
-        buttonClasses.push("bg-black/10 text-black");
-
-        // Add range styling
-        if (mCheckin && mCell.isSame(mCheckin.clone().add(1, "day"), "day")) {
-          buttonClasses.push("rounded-l-full");
-        }
-        if (
-          mCheckout &&
-          mCell.isSame(mCheckout.clone().subtract(1, "day"), "day")
-        ) {
-          buttonClasses.push("rounded-r-full");
-        }
-        if (hoveredDate && !checkoutDate && focusedSide === "checkout") {
-          const mHovered = moment(hoveredDate).tz(timezone).startOf("day");
-          if (mCell.isSame(mHovered.clone().subtract(1, "day"), "day")) {
-            buttonClasses.push("rounded-r-full");
-          }
-        }
-      } else {
-        buttonClasses.push(
-          "hover:bg-black/20 text-foreground hover:rounded-full hover:scale-105"
-        );
+      let isInRange = false;
+      if (mCheckin && mCheckout) {
+        isInRange = mCell.isAfter(mCheckin) && mCell.isBefore(mCheckout);
+      } else if (mCheckin && mHovered && mHovered.isAfter(mCheckin)) {
+        isInRange = mCell.isAfter(mCheckin) && mCell.isBefore(mHovered);
       }
 
-      if (isToday && !isCheckinDate && !isCheckoutDate) {
-        buttonClasses.push("border border-black");
-      }
+      const holidayName = getHolidayName(dateStr);
+      const isHolidayDate = Boolean(holidayName);
+      const isLwDate = isLongWeekend(dateStr);
+
+      const isRangeLeading =
+        isStart && (mCheckout || (mHovered && mHovered.isAfter(mCheckin)));
+      const isRangeTrailing =
+        isEnd || (mHovered && mCell.isSame(mHovered) && mCheckin);
 
       days.push(
-        <button
+        <div
           key={day}
-          onClick={() => {
-            if (!isDisabled) {
-              handleDateClick(mCell);
-            }
-          }}
+          className="relative h-8 sm:h-8.5 w-full flex items-center justify-center"
           onMouseEnter={() => {
             if (
               !isDisabled &&
@@ -253,158 +269,324 @@ export function DualDatePicker({
               !checkoutDate &&
               focusedSide === "checkout"
             ) {
-              setHoveredDate(dateObj);
+              setHoveredDate(mCell.toDate());
             }
           }}
-          onMouseLeave={() => {
-            setHoveredDate(null);
-          }}
-          disabled={isDisabled}
-          aria-label={`Select ${mCell.format("YYYY-MM-DD")}`}
-          className={buttonClasses.join(" ")}
+          onMouseLeave={() => setHoveredDate(null)}
         >
-          {day}
-        </button>
+          {/* Continuous Airbnb Range Highlight Strip */}
+          {(isInRange || isRangeLeading || isRangeTrailing) && (
+            <div
+              className={`absolute inset-y-0.5 transition-all duration-150 ${
+                isInRange
+                  ? "inset-x-0 bg-neutral-100"
+                  : isRangeLeading
+                  ? "left-1/2 right-0 bg-neutral-100"
+                  : isRangeTrailing
+                  ? "left-0 right-1/2 bg-neutral-100"
+                  : ""
+              }`}
+            />
+          )}
+
+          {/* Date Circular Button with Indian Holiday Styling */}
+          <button
+            type="button"
+            onClick={() => !isDisabled && handleDateClick(mCell)}
+            disabled={isDisabled}
+            onMouseEnter={() => {
+              if (isHolidayDate) {
+                setTooltipHoliday({
+                  name: holidayName,
+                  date: mCell.format("MMM DD"),
+                });
+              }
+            }}
+            onMouseLeave={() => setTooltipHoliday(null)}
+            className={`relative z-10 w-7.5 h-7.5 sm:w-8 sm:h-8 rounded-full flex flex-col items-center justify-center transition-all duration-150 ${
+              isDisabled
+                ? "text-neutral-300 cursor-not-allowed line-through text-xs"
+                : isStart || isEnd
+                ? "bg-black text-white font-bold shadow-sm scale-105"
+                : isInRange
+                ? "text-neutral-900 font-semibold hover:bg-neutral-200"
+                : isHolidayDate
+                ? "bg-amber-100/80 text-amber-950 font-bold border border-amber-300 hover:bg-amber-200 hover:scale-105 shadow-2xs"
+                : isToday
+                ? "border-2 border-black text-black font-bold hover:bg-neutral-100"
+                : "text-neutral-800 font-medium hover:bg-neutral-100 hover:scale-105"
+            }`}
+          >
+            <span className="text-xs leading-none select-none">{day}</span>
+
+            {/* Prominent Star for Indian Gazetted Holidays */}
+            {isHolidayDate && !isStart && !isEnd && (
+              <span className="absolute -top-1 -right-0.5 text-[8px] leading-none select-none">
+                ⭐
+              </span>
+            )}
+            {!isHolidayDate && isLwDate && !isStart && !isEnd && (
+              <span
+                className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-white"
+                title="Long Weekend Date"
+              />
+            )}
+          </button>
+        </div>
       );
     }
 
     return days;
   };
 
+  const nextLw = getNextLongWeekend();
+
+  // Filter upcoming holidays for horizontal carousel
+  const upcomingHolidays = useMemo(() => {
+    const todayStr = moment().tz(timezone).format("YYYY-MM-DD");
+    return (allHolidays || [])
+      .filter((h) => h.date >= todayStr)
+      .slice(0, 6);
+  }, [allHolidays, timezone]);
+
   return (
-    <div className="relative animate-fade-in ">
-      {/* Tooltip Arrow */}
-      <div className="absolute bg-white -top-1.5 md:-top-2 left-1/2 -translate-x-1/2 bg-card border-l border-t border-gray-200 rotate-45 z-10 w-3 h-3 md:w-4 md:h-4" />
-
-      <div
-        className={`bg-card border border-gray-200 rounded-2xl shadow-elegant relative z-20 bg-white ${
-          isMobile ? "p-4 w-80" : "p-5 w-[660px]"
-        }`}
-      >
-        {/* Headers */}
-        <div className="grid grid-cols-2 gap-3 mb-4">
-          {/* Check-in Header */}
-          <div
-            className={`text-center p-2 rounded-lg border transition-all ${
-              focusedSide === "checkin"
-                ? "border-black bg-gray-100"
-                : "border-gray-200"
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 450, damping: 32 }}
+      className={`relative z-50 bg-white rounded-3xl border border-neutral-200/90 shadow-[0_20px_60px_rgba(0,0,0,0.16)] overflow-hidden ${
+        isMobile ? "w-[330px] p-3.5" : "w-[640px] max-w-[95vw] p-4 sm:p-4.5"
+      }`}
+    >
+      {/* Airbnb Sliding Header: Check-in vs Check-out Tabs */}
+      <div className="flex items-center justify-between pb-2.5 mb-2.5 border-b border-neutral-150">
+        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-full relative">
+          <button
+            type="button"
+            onClick={() => setFocusedSide && setFocusedSide("checkin")}
+            className={`relative z-10 px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              focusedSide === "checkin" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            <h3 className="font-semibold text-foreground text-xs">Check-in</h3>
-            <p className="text-xs text-muted-foreground font-medium">
-              {checkinDate
-                ? moment(checkinDate).format("MMM DD, YYYY")
-                : "Select date"}
-            </p>
-          </div>
+            Check in: {checkinDate ? moment(checkinDate).format("MMM DD") : "Select date"}
+            {focusedSide === "checkin" && (
+              <motion.div
+                layoutId="activeDateHeaderPill"
+                className="absolute inset-0 bg-white rounded-full shadow-xs -z-10"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+              />
+            )}
+          </button>
 
-          {/* Check-out Header */}
-          <div
-            className={`text-center p-2 rounded-lg border transition-all ${
-              focusedSide === "checkout"
-                ? "border-black bg-gray-100"
-                : "border-gray-200"
+          <button
+            type="button"
+            onClick={() => setFocusedSide && setFocusedSide("checkout")}
+            className={`relative z-10 px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
+              focusedSide === "checkout" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
             }`}
           >
-            <h3 className="font-semibold text-foreground text-xs">Check-out</h3>
-            <p className="text-xs text-muted-foreground font-medium">
-              {checkoutDate
-                ? moment(checkoutDate).format("MMM DD, YYYY")
-                : "Select date"}
-            </p>
-          </div>
+            Check out: {checkoutDate ? moment(checkoutDate).format("MMM DD") : "Select date"}
+            {focusedSide === "checkout" && (
+              <motion.div
+                layoutId="activeDateHeaderPill"
+                className="absolute inset-0 bg-white rounded-full shadow-xs -z-10"
+                transition={{ type: "spring", stiffness: 500, damping: 35 }}
+              />
+            )}
+          </button>
         </div>
 
-        {/* Dual Calendar */}
-        <div className="grid grid-cols-2 gap-6">
-          {/* Left Calendar (Check-in) */}
-          <div>
-            {/* Left Month Header */}
-            <div className="flex items-center justify-between mb-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigateMonth("prev", "left")}
-                className="w-7 h-7 rounded-full hover:bg-muted"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </Button>
-              <h4 className="font-bold text-foreground text-xs md:text-sm">
-                {monthNames[leftMonth.getMonth()]} {leftMonth.getFullYear()}
-              </h4>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigateMonth("next", "left")}
-                className="w-7 h-7 rounded-full hover:bg-muted"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-
-            {/* Left Weekdays */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                <div
-                  key={day}
-                  className="w-8 h-6 md:w-9 md:h-6 flex items-center justify-center text-xs font-semibold text-muted-foreground"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Left Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1">
-              {renderCalendar(leftMonth, false)}
-            </div>
-          </div>
-
-          {/* Right Calendar (Check-out) */}
-          <div>
-            {/* Right Month Header */}
-            <div className="flex items-center justify-between mb-3">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigateMonth("prev", "right")}
-                className="w-7 h-7 rounded-full hover:bg-muted"
-              >
-                <ChevronLeft className="w-3.5 h-3.5" />
-              </Button>
-              <h4 className="font-bold text-foreground text-xs md:text-sm">
-                {monthNames[rightMonth.getMonth()]} {rightMonth.getFullYear()}
-              </h4>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigateMonth("next", "right")}
-                className="w-7 h-7 rounded-full hover:bg-muted"
-              >
-                <ChevronRight className="w-3.5 h-3.5" />
-              </Button>
-            </div>
-
-            {/* Right Weekdays */}
-            <div className="grid grid-cols-7 gap-1 mb-2">
-              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((day) => (
-                <div
-                  key={day}
-                  className="w-8 h-6 md:w-9 md:h-6 flex items-center justify-center text-xs font-semibold text-muted-foreground"
-                >
-                  {day}
-                </div>
-              ))}
-            </div>
-
-            {/* Right Calendar Grid */}
-            <div className="grid grid-cols-7 gap-1">
-              {renderCalendar(rightMonth, true)}
-            </div>
-          </div>
+        {/* Quick Weekend & Long Weekend Badges */}
+        <div className="hidden sm:flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => handleSelectWeekend(0)}
+            className="px-2.5 py-1 rounded-full text-xs font-semibold bg-neutral-100 hover:bg-neutral-200 text-neutral-800 cursor-pointer transition-colors"
+          >
+            This Weekend
+          </button>
+          {nextLw && (
+            <button
+              type="button"
+              onClick={handleSelectUpcomingLongWeekend}
+              className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 cursor-pointer transition-colors flex items-center gap-1"
+            >
+              <Sparkles className="w-3 h-3 text-amber-600" />
+              {nextLw.title}
+            </button>
+          )}
         </div>
       </div>
-    </div>
+
+      {/* Prominent Indian Holidays Strip (Tap to Auto-Select, Hidden Scrollbar) */}
+      {upcomingHolidays.length > 0 && (
+        <div className="mb-2.5 pb-2 border-b border-neutral-150">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1">
+              <span>⭐</span> Upcoming Indian Gazetted Holidays
+            </span>
+            <span className="text-[10px] text-amber-700 font-medium">Tap to jump & select</span>
+          </div>
+
+          <div className="flex gap-1.5 overflow-x-auto no-scrollbar pb-0.5 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+            {upcomingHolidays.map((h) => {
+              const formattedDate = moment(h.date).format("MMM D");
+              return (
+                <button
+                  key={h.date + h.name}
+                  type="button"
+                  onClick={() => handleSelectHoliday(h)}
+                  className="px-2.5 py-1 rounded-lg text-[11px] bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-950 font-medium shrink-0 cursor-pointer transition-all hover:scale-102 flex items-center gap-1.5 shadow-2xs"
+                >
+                  <Tag className="w-2.5 h-2.5 text-amber-600 shrink-0" />
+                  <span>{h.name}</span>
+                  <span className="text-[10px] text-amber-700 font-normal">({formattedDate})</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Dual Month Calendar View */}
+      <div className={`grid ${isMobile ? "grid-cols-1 gap-3.5" : "grid-cols-2 gap-5 sm:gap-6"} relative`}>
+        {/* Left Month */}
+        <div>
+          <div className="flex items-center justify-between mb-2 px-1">
+            <button
+              type="button"
+              onClick={() => navigateMonth("prev")}
+              className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-700 transition-colors cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <h4 className="font-bold text-neutral-900 text-xs sm:text-sm">
+              {monthNames[leftMonth.getMonth()]} {leftMonth.getFullYear()}
+            </h4>
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => navigateMonth("next")}
+                className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-700 transition-colors cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            )}
+            {!isMobile && <div className="w-7" />}
+          </div>
+
+          <div className="grid grid-cols-7 text-center mb-1">
+            {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+              <span key={d} className="text-[10px] font-bold text-neutral-400 uppercase">
+                {d}
+              </span>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-7">{renderMonth(leftMonth)}</div>
+        </div>
+
+        {/* Right Month (Desktop) */}
+        {!isMobile && (
+          <div>
+            <div className="flex items-center justify-between mb-2 px-1">
+              <div className="w-7" />
+              <h4 className="font-bold text-neutral-900 text-xs sm:text-sm">
+                {monthNames[rightMonth.getMonth()]} {rightMonth.getFullYear()}
+              </h4>
+              <button
+                type="button"
+                onClick={() => navigateMonth("next")}
+                className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-700 transition-colors cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-7 text-center mb-1">
+              {["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"].map((d) => (
+                <span key={d} className="text-[10px] font-bold text-neutral-400 uppercase">
+                  {d}
+                </span>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-7">{renderMonth(rightMonth)}</div>
+          </div>
+        )}
+      </div>
+
+      {/* Holiday Hover Tooltip Banner */}
+      <div className="h-5 mt-1.5 flex items-center">
+        <AnimatePresence>
+          {tooltipHoliday ? (
+            <motion.div
+              initial={{ opacity: 0, y: 4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex items-center gap-1.5 text-[11px] text-amber-900 bg-amber-100/80 px-2 py-0.5 rounded-md border border-amber-300 font-semibold"
+            >
+              <span>⭐</span>
+              <span>{tooltipHoliday.date}:</span>
+              <span>{tooltipHoliday.name} (Gazetted Holiday)</span>
+            </motion.div>
+          ) : (
+            <div className="flex items-center gap-3 text-[10px] text-neutral-500">
+              <span className="flex items-center gap-1 font-medium">
+                <span className="text-amber-500">⭐</span> Amber background = Indian Gazetted Holiday
+              </span>
+              <span className="flex items-center gap-1 font-medium">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 inline-block" />
+                Long Weekend
+              </span>
+            </div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Bottom Bar: Selection Summary & Actions */}
+      <div className="flex items-center justify-between pt-2.5 mt-1.5 border-t border-neutral-150">
+        <div className="text-xs text-neutral-600">
+          {nightsCount ? (
+            <span className="font-semibold text-neutral-900">
+              {nightsCount} {nightsCount === 1 ? "night" : "nights"} selected
+            </span>
+          ) : checkinDate ? (
+            <span>Select check-out date</span>
+          ) : (
+            <span>Select check-in date</span>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          {(checkinDate || checkoutDate) && (
+            <button
+              type="button"
+              onClick={clearDates}
+              className="text-xs font-semibold text-neutral-600 hover:text-black underline cursor-pointer transition-colors"
+            >
+              Clear dates
+            </button>
+          )}
+
+          {onClose && (
+            <button
+              type="button"
+              onClick={() => {
+                if (checkinDate && checkoutDate) {
+                  onCheckoutSelect(checkoutDate);
+                } else {
+                  onClose();
+                }
+              }}
+              className="bg-black hover:bg-neutral-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl cursor-pointer transition-all shadow-xs"
+            >
+              Done
+            </button>
+          )}
+        </div>
+      </div>
+    </motion.div>
   );
 }

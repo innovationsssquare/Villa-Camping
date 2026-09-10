@@ -104,7 +104,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   }, [dispatch]);
 
   useEffect(() => {
-    if (!categoryId & !propertyId) {
+    if (!categoryId && !propertyId) {
       setopenmodal(true);
     }
   }, [categoryId, propertyId]);
@@ -320,9 +320,9 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
             }
           },
           prefill: {
-            name: customerDetails.fullName,
+            name: `${customerDetails.firstName || ""} ${customerDetails.lastName || ""}`.trim(),
             email: customerDetails.email,
-            contact: customerDetails.phone,
+            contact: customerDetails.mobile,
           },
           theme: {
             color: "black",

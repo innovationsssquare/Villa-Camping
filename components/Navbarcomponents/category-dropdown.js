@@ -1,134 +1,149 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useSelector, useDispatch } from "react-redux"
-import { Tag, Clock } from "lucide-react"
-import { setSelectedCategory, } from "@/Redux/Slices/bookingSlice"
-import Image from "next/image"
-
+import { useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { motion } from "framer-motion";
+import { Search, Compass, Home, Tent, Trees, Hotel, Sparkles } from "lucide-react";
+import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import Image from "next/image";
 
 export function CategorySearch({ onCategorySelect, isMobile = false }) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const dispatch = useDispatch()
-  const { categories, loading, error } = useSelector((state) => state.category)
+  const [searchTerm, setSearchTerm] = useState("");
+  const dispatch = useDispatch();
+  const { categories, loading } = useSelector((state) => state.category);
 
+  const defaultCategories = [
+    {
+      id: "all",
+      name: "All Stays",
+      description: "Anywhere in Maharashtra",
+      icon: Compass,
+      image: "/Productasset/Villaimg.png",
+    },
+    {
+      id: "villa",
+      name: "Villas",
+      description: "Private pools & luxury estates",
+      icon: Home,
+      image: "/Productasset/Villaimg.png",
+    },
+    {
+      id: "camping",
+      name: "Campings",
+      description: "Lakeside tents & bonfire nights",
+      icon: Tent,
+      image: "/Productasset/Campimg.png",
+    },
+    {
+      id: "cottage",
+      name: "Cottages",
+      description: "Cozy nature & hill retreats",
+      icon: Trees,
+      image: "/Productasset/Villaimg.png",
+    },
+    {
+      id: "hotel",
+      name: "Hotels",
+      description: "Resorts & boutique suites",
+      icon: Hotel,
+      image: "/Productasset/Campimg.png",
+    },
+  ];
 
+  const handleSelect = (catId, catName) => {
+    dispatch(setSelectedCategory(catId === "all" ? null : catId));
+    dispatch(setSelectedCategoryname(catName));
+    if (onCategorySelect) onCategorySelect(catId, catName);
+  };
 
-
-  const filteredCategories =
-    categories?.filter((category) => category.name.toLowerCase().includes(searchTerm.toLowerCase())) || []
-
-  const handleCategorySelect = (categoryId, categoryName) => {
-    dispatch(setSelectedCategory(categoryId))
-    onCategorySelect(categoryId,categoryName)
-  }
-
-  if (loading) {
-    return (
-      <div className="relative">
-        <div
-          className={`absolute -top-1.5 md:-top-2 bg-white border-l border-t border-gray-200 rotate-45 z-10 ${
-            isMobile
-              ? "w-3 h-3 left-1/4 transform -translate-x-1/2"
-              : "w-3 h-3 md:w-4 md:h-4 left-1/2 transform -translate-x-1/2"
-          }`}
-        ></div>
-        <div
-          className={`bg-white border border-gray-200 rounded-2xl shadow-lg relative z-20 ${
-            isMobile ? "p-4 w-72" : "p-4 md:p-6 w-72 md:w-80"
-          }`}
-        >
-          <div className="text-center py-4 text-gray-500">Loading categories...</div>
-        </div>
-      </div>
-    )
-  }
+  const filtered = (categories || []).filter((c) =>
+    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="relative animate-fade-in">
-      {/* Tooltip Arrow - Responsive sizing and positioning */}
-      <div
-        className={`absolute -top-1.5 md:-top-2 bg-white border-l border-t border-gray-200 rotate-45 z-10 ${
-          isMobile
-            ? "w-3 h-3 left-1/4 transform -translate-x-1/2"
-            : "w-3 h-3 md:w-4 md:h-4 left-1/2 transform -translate-x-1/2"
-        }`}
-      ></div>
-
-      <div
-        className={`bg-white border border-gray-200 rounded-2xl shadow-lg relative z-20 ${
-          isMobile ? "p-4 w-72" : "p-4 md:p-6 w-72 md:w-80"
-        }`}
-      >
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className={`relative z-50 bg-white rounded-3xl border border-neutral-200/90 shadow-[0_16px_48px_rgba(0,0,0,0.14)] p-6 ${
+        isMobile ? "w-80" : "w-[480px]"
+      }`}
+    >
+      {/* Search Input */}
+      <div className="relative mb-5">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
         <input
           type="text"
-          placeholder="Search categories"
+          placeholder="Search by stay type (Villa, Camping, Cottage...)"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className={`w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent ${
-            isMobile ? "p-2.5 text-sm" : "p-2.5 md:p-3 text-sm md:text-base"
-          }`}
+          className="w-full pl-10 pr-4 py-2.5 rounded-full border border-neutral-200 bg-neutral-50/80 focus:bg-white focus:outline-none focus:ring-2 focus:ring-black text-xs md:text-sm font-medium transition-all"
         />
+      </div>
 
-        {searchTerm === "" && (
-          <>
-          
-            <div className={isMobile ? "mt-4" : "mt-4 md:mt-6"}>
-              <h4 className={`font-medium text-gray-900 mb-2 md:mb-3 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
-                All categories
-              </h4>
-              {categories?.slice(0, 4).map((category) => (
+      {/* Categories Grid (Airbnb Style Destination Cards) */}
+      <div>
+        <div className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-3">
+          Explore by Stay Type
+        </div>
+
+        {searchTerm === "" ? (
+          <div className="grid grid-cols-2 gap-3">
+            {defaultCategories.map((item) => {
+              const matchedBackend = categories?.find(
+                (c) => c.name.toLowerCase() === item.name.toLowerCase()
+              );
+              const targetId = matchedBackend ? matchedBackend._id : item.id;
+
+              return (
                 <button
-                  key={category._id}
-                  onClick={() => handleCategorySelect(category._id, category.name)}
-                  className={`flex items-center w-full hover:bg-gray-50 rounded-lg transition-colors ${
-                    isMobile ? "p-1.5" : "p-1.5 md:p-2"
-                  }`}
+                  key={item.id}
+                  type="button"
+                  onClick={() => handleSelect(targetId, item.name)}
+                  className="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200/90 hover:border-black hover:shadow-sm transition-all duration-200 text-left cursor-pointer group bg-neutral-50/40 hover:bg-white"
                 >
-                  <Image height={40} width={40} src={category?.image} alt={category.name} className="w-3 h-3 md:w-4 md:h-4 text-gray-400 mr-2 md:mr-3" />
-                  <div className="text-left">
-                    <div className={`text-gray-700 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
-                      {category.name}
+                  <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:bg-black group-hover:text-white transition-colors shrink-0">
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="text-xs md:text-sm font-bold text-neutral-900 line-clamp-1">
+                      {item.name}
                     </div>
-                   
+                    <div className="text-[11px] text-neutral-500 line-clamp-1">
+                      {item.description}
+                    </div>
                   </div>
                 </button>
-              ))}
-            </div>
-          </>
-        )}
-
-        {searchTerm !== "" && (
-          <div className={isMobile ? "mt-3" : "mt-3 md:mt-4"}>
-            {filteredCategories.map((category) => (
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
+            {filtered.map((cat) => (
               <button
-                key={category._id}
-                onClick={() => handleCategorySelect(category._id, category.name)}
-                className={`flex items-center w-full hover:bg-gray-50 rounded-lg transition-colors ${
-                  isMobile ? "p-1.5" : "p-1.5 md:p-2"
-                }`}
+                key={cat._id}
+                type="button"
+                onClick={() => handleSelect(cat._id, cat.name)}
+                className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-100 transition-colors text-left cursor-pointer"
               >
-                <Tag className="w-3 h-3 md:w-4 md:h-4 text-gray-400 mr-2 md:mr-3" />
-                <div className="text-left">
-                  <div className={`text-gray-700 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
-                    {category.name}
-                  </div>
-                  {category.description && (
-                    <div className={`text-gray-500 ${isMobile ? "text-xs" : "text-xs md:text-sm"}`}>
-                      {category.description}
-                    </div>
-                  )}
+                <div className="flex items-center gap-3">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span className="text-sm font-semibold text-neutral-900">
+                    {cat.name}
+                  </span>
                 </div>
+                <span className="text-xs text-neutral-400">Select →</span>
               </button>
             ))}
-            {filteredCategories.length === 0 && (
-              <div className={`text-gray-500 text-center py-4 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>
-                No categories found
+            {filtered.length === 0 && (
+              <div className="text-center py-6 text-xs text-neutral-500">
+                No matching stay types found
               </div>
             )}
           </div>
         )}
       </div>
-    </div>
-  )
+    </motion.div>
+  );
 }

@@ -126,7 +126,8 @@ const FixedBookingBar = () => {
         propertyId={villa?._id}
         ownerId={villa?.owner}
         propertyType="Villa"
-        pricing={villa.pricing}
+        pricing={villa?.pricing}
+        maxCapacity={villa?.maxCapacity}
         // customerId:={}
       />
     </>

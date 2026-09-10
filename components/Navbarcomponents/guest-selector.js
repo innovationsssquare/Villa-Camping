@@ -1,87 +1,106 @@
-"use client"
+"use client";
 
-import { Minus, Plus } from "lucide-react"
-import { Button } from "@/components/ui/button"
-
+import { motion } from "framer-motion";
+import { Minus, Plus } from "lucide-react";
 
 export function GuestSelector({
-  adults,
-  childrenn,
-  infants,
-  pets,
+  adults = 1,
+  childrenn = 0,
+  infants = 0,
+  pets = 0,
   onGuestChange,
+  onClose,
   isMobile = false,
 }) {
-  const GuestRow = ({
-    title,
-    description,
-    count,
-    type,
-    min = 0,
-    max = 16,
-  }) => (
-    <div className={`flex items-center justify-between ${isMobile ? "py-3" : "py-3 md:py-4"}`}>
-      <div className="flex-1">
-        <div className={`font-medium text-gray-900 ${isMobile ? "text-sm" : "text-sm md:text-base"}`}>{title}</div>
-        <div className={`text-gray-500 ${isMobile ? "text-xs" : "text-xs md:text-sm"}`}>{description}</div>
+  const GuestRow = ({ title, description, count, type, min = 0, max = 16 }) => (
+    <div className="flex items-center justify-between py-4">
+      <div className="flex-1 pr-4">
+        <div className="text-sm font-semibold text-neutral-900">{title}</div>
+        <div className="text-xs text-neutral-500 mt-0.5">{description}</div>
       </div>
-      <div className="flex items-center space-x-2 md:space-x-3">
-        <Button
-          variant="outline"
-          size="icon"
+
+      <div className="flex items-center gap-3">
+        <button
+          type="button"
           onClick={() => onGuestChange(type, Math.max(min, count - 1))}
           disabled={count <= min}
-          className={`rounded-full border-gray-300 hover:border-red-500 disabled:opacity-30 ${
-            isMobile ? "w-7 h-7" : "w-7 h-7 md:w-8 md:h-8"
-          }`}
+          className="w-8 h-8 rounded-full border border-neutral-300 hover:border-neutral-800 disabled:opacity-25 disabled:hover:border-neutral-300 flex items-center justify-center text-neutral-700 transition-all cursor-pointer disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+          aria-label={`Decrease ${title}`}
         >
-          <Minus className="w-3 h-3" />
-        </Button>
-        <span className={`text-center font-medium ${isMobile ? "w-6 text-sm" : "w-6 md:w-8 text-sm md:text-base"}`}>
+          <Minus className="w-3.5 h-3.5" />
+        </button>
+
+        <span className="w-6 text-center text-sm font-bold text-neutral-900 select-none">
           {count}
         </span>
-        <Button
-          variant="outline"
-          size="icon"
+
+        <button
+          type="button"
           onClick={() => onGuestChange(type, Math.min(max, count + 1))}
           disabled={count >= max}
-          className={`rounded-full border-gray-300 hover:border-red-500 disabled:opacity-30 ${
-            isMobile ? "w-7 h-7" : "w-7 h-7 md:w-8 md:h-8"
-          }`}
+          className="w-8 h-8 rounded-full border border-neutral-300 hover:border-neutral-800 disabled:opacity-25 disabled:hover:border-neutral-300 flex items-center justify-center text-neutral-700 transition-all cursor-pointer disabled:cursor-not-allowed hover:scale-105 active:scale-95"
+          aria-label={`Increase ${title}`}
         >
-          <Plus className="w-3 h-3" />
-        </Button>
+          <Plus className="w-3.5 h-3.5" />
+        </button>
       </div>
     </div>
-  )
+  );
 
   return (
-    <div className="relative animate-fade-in">
-      {/* Tooltip Arrow - Responsive sizing and positioning */}
-      <div
-        className={`absolute -top-1.5 md:-top-2 bg-white border-l border-t border-gray-200 rotate-45 z-10 ${
-          isMobile
-            ? "w-3 h-3 left-3/4 transform -translate-x-1/2"
-            : "w-3 h-3 md:w-4 md:h-4 left-1/2 transform -translate-x-1/2"
-        }`}
-      ></div>
-
-      <div
-        className={`bg-white border border-gray-200 rounded-2xl shadow-lg relative z-20 ${
-          isMobile ? "p-4 w-72" : "p-4 md:p-6 w-72 md:w-80"
-        }`}
-      >
-        <GuestRow title="Adults" description="Ages 13 or above" count={adults} type="adults" min={1} />
-        <div className="border-t border-gray-200">
-          <GuestRow title="Children" description="Ages 2-12" count={childrenn} type="childrenn" />
-        </div>
-        <div className="border-t border-gray-200">
-          <GuestRow title="Infants" description="Under 2" count={infants} type="infants" max={5} />
-        </div>
-        <div className="border-t border-gray-200">
-          <GuestRow title="Pets" description="Bringing a service animal?" count={pets} type="pets" max={5} />
-        </div>
+    <motion.div
+      initial={{ opacity: 0, y: 12, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: 8, scale: 0.98 }}
+      transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      className={`relative z-50 bg-white rounded-3xl border border-neutral-200/90 shadow-[0_16px_48px_rgba(0,0,0,0.14)] ${
+        isMobile ? "w-80 p-5" : "w-96 p-6"
+      }`}
+    >
+      <div className="divide-y divide-neutral-150">
+        <GuestRow
+          title="Adults"
+          description="Ages 13 or above"
+          count={adults}
+          type="adults"
+          min={1}
+        />
+        <GuestRow
+          title="Children"
+          description="Ages 2–12"
+          count={childrenn}
+          type="childrenn"
+          min={0}
+        />
+        <GuestRow
+          title="Infants"
+          description="Under 2"
+          count={infants}
+          type="infants"
+          min={0}
+          max={5}
+        />
+        <GuestRow
+          title="Pets"
+          description="Bringing a companion animal?"
+          count={pets}
+          type="pets"
+          min={0}
+          max={5}
+        />
       </div>
-    </div>
-  )
+
+      {onClose && (
+        <div className="pt-3 mt-2 border-t border-neutral-150 flex justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            className="bg-black hover:bg-neutral-800 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer transition-all shadow-xs"
+          >
+            Done
+          </button>
+        </div>
+      )}
+    </motion.div>
+  );
 }

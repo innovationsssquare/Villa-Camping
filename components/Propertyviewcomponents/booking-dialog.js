@@ -48,7 +48,8 @@ import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import RoomSelectionDrawer from "../Hotelscreen/RoomSelectionDrawer";
 import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
 import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
-import { calculateVillaTotal } from "@/lib/calculateVillaBasePrice";
+import { calculateBasePriceForRange, useHolidayDates } from "@/lib/pricingUtils";
+import { Checkvillaavailability } from "@/lib/API/category/Villa/Villa";
 
 export default function BookingDialog({
   isOpen,
@@ -64,8 +65,10 @@ export default function BookingDialog({
   cottages,
   rooms,
   pricing,
+  maxCapacity,
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const holidayDates = useHolidayDates();
   const [preBookMeals, setPreBookMeals] = useState(false);
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
@@ -162,10 +165,21 @@ export default function BookingDialog({
     );
     nightsForCoupon = 1;
   } else if (propertyType === "Villa") {
-    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
+    baseAmountForCoupon = calculateBasePriceForRange(
+      checkinISO,
+      checkoutISO,
+      pricing || {},
+      holidayDates
+    );
     nightsForCoupon = 1;
   } else {
-    baseAmountForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
+    baseAmountForCoupon = calculateBasePriceForRange(
+      checkinISO,
+      checkoutISO,
+      pricing || {},
+      holidayDates
+    );
+    nightsForCoupon = 1;
   }
 
   const { discountAmount, finalTotal } = calculateBookingPrice(
@@ -253,7 +267,7 @@ export default function BookingDialog({
 
     if (totalGuests > totalCapacity) {
       setTentError(
-        `Selected cottages allow ${totalCapacity} guests, but you selected ${totalGuests}`
+        `Selected rooms allow ${totalCapacity} guests, but you selected ${totalGuests}`
       );
       return false;
     }
@@ -369,6 +383,32 @@ export default function BookingDialog({
         return;
       }
     }
+
+    // 🏰 VILLA
+    if (propertyType === "Villa") {
+      const maxCap = maxCapacity || pricing?.maxCapacity || 10;
+      if (totalGuests > maxCap) {
+        setTentError(`Selected guests (${totalGuests}) exceed maximum property capacity of ${maxCap}`);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const availabilityRes = await Checkvillaavailability({
+          propertyId,
+          checkIn: checkinISO,
+          checkOut: checkoutISO,
+        });
+
+        if (availabilityRes && availabilityRes.available === false) {
+          setIsLoading(false);
+          setTentError(availabilityRes?.message || "Villa is not available for selected dates");
+          return;
+        }
+      } catch (e) {
+        console.warn("Villa availability check failed:", e);
+      }
+    }
     setIsLoading(false);
     router.push("/checkout");
   };
@@ -391,7 +431,8 @@ export default function BookingDialog({
     finalTotal <= 0 ||
     (propertyType === "Camping" && totalTentQty === 0) ||
     (propertyType === "Hotel" && totalRoomQty === 0) ||
-    (propertyType === "Cottage" && totalCottageQty === 0);
+    (propertyType === "Cottage" && totalCottageQty === 0) ||
+    (propertyType === "Villa" && totalGuests > (maxCapacity || pricing?.maxCapacity || 10));
 
  
 
@@ -489,35 +530,7 @@ export default function BookingDialog({
     0
   );
 
-  let subtotalForCoupon = 0;
-
-  if (propertyType === "Camping") {
-    subtotalForCoupon = calculateCampingTentTotal(
-      reduxSelectedTents,
-      dayTents,
-      checkinISO,
-      checkoutISO
-    );
-  } else if (propertyType === "Cottage") {
-    subtotalForCoupon = calculateCottageTotal(
-      reduxSelectedCottages,
-      dayCottages,
-      checkinISO,
-      checkoutISO
-    );
-  } else if (propertyType === "Hotel") {
-    subtotalForCoupon = calculateHotelTotal(
-      reduxSelectedRooms,
-      dayRooms,
-      checkinISO,
-      checkoutISO
-    );
-  } else if (propertyType === "Villa") {
-    subtotalForCoupon = calculateVillaTotal(pricing, checkinISO, checkoutISO);
-    nightsForCoupon = 1;
-  } else {
-    subtotalForCoupon = price * nights;
-  }
+  const subtotalForCoupon = baseAmountForCoupon;
 
  const handleApplyCoupon = (coupon) => {
     if (subtotalForCoupon <= 0) {

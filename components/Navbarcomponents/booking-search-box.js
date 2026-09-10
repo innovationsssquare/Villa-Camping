@@ -1,118 +1,59 @@
 "use client";
 
-import { useState } from "react";
-import { Search } from "lucide-react";
-import { Button } from "@heroui/react";
+import { Search, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { BsCalendar2CheckFill } from "react-icons/bs";
-import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { useSelector } from "react-redux";
-import { FaHome } from "react-icons/fa";
 
 export function BookingSearchBox() {
   const {
-    selectedCategoryId,
+    selectedCategoryName,
     checkin,
     checkout,
     selectedGuest,
-    selectedCategoryName,
   } = useSelector((state) => state.booking);
 
-  const { isVisible } = useScrollDirection();
-
   const router = useRouter();
- 
 
   const formatDate = (date) => {
-    if (!date) return "Add dates";
+    if (!date) return null;
     return new Date(date).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
     });
   };
 
+  const totalGuests = (selectedGuest?.adults || 1) + (selectedGuest?.childrenn || 0);
+
+  const subtitleParts = [
+    selectedCategoryName || "Anywhere",
+    checkin && checkout ? `${formatDate(checkin)} – ${formatDate(checkout)}` : "Any week",
+    totalGuests > 1 ? `${totalGuests} guests` : "Add guests",
+  ];
+
   return (
-    <Button
-    size=""
-      onPress={() => router.push("/search-stay")}
-      className={`
-        bg-[#FFFFFF4D] rounded-full border border-gray-300 shadow-sm py-0.5 flex gap-2 justify-between w-full items-center
-        transition-all duration-300 ease-in-out transform-gpu
-        ${isVisible ? "scale-100 opacity-100" : "scale-95 mt-1"}
-      `}
+    <div
+      onClick={() => router.push("/search-stay")}
+      className="w-full bg-white rounded-full border border-neutral-200/90 shadow-2xs hover:shadow-sm transition-all duration-200 cursor-pointer px-2.5 py-1 h-9 flex items-center justify-between"
     >
-      <div
-        className={`
-        flex-1 justify-center items-center  py-1 
-        transition-all duration-300 ease-in-out
-        ${isVisible ? "opacity-100" : "opacity-70"}
-      `}
-      >
-        <div className="flex justify-center items-center gap-2 text-xs font-medium text-gray-600 mb-1 ">
-          <FaHome className="h-3 w-3 text-black" />
-          {selectedCategoryName || "Category"}{" "}
+      <div className="flex items-center gap-2 min-w-0">
+        <div className="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-800 shrink-0">
+          <Search className="w-3 h-3" />
         </div>
-        {/* <DatePicker date={checkIn} onDateChange={setCheckIn} placeholder="Add dates" className="text-sm" /> */}
+
+        <div className="min-w-0 flex items-center gap-1.5 overflow-hidden">
+          <span className="text-[11px] font-bold text-neutral-900 shrink-0">
+            Where to?
+          </span>
+          <span className="text-neutral-300 text-[10px]">•</span>
+          <span className="text-[10px] text-neutral-500 font-medium truncate">
+            {subtitleParts.join(" • ")}
+          </span>
+        </div>
       </div>
 
-      <div
-        className={`
-        w-px h-8 bg-gray-200
-        transition-all duration-300 ease-in-out
-        ${isVisible ? "opacity-100" : "opacity-50"}
-      `}
-      />
-
-      {/* Check-in */}
-      <div
-        className={`
-        flex-1 justify-center items-center  py-2 
-        transition-all duration-300 ease-in-out
-        ${isVisible ? "opacity-100" : "opacity-70"}
-      `}
-      >
-        <div className="flex justify-center items-center gap-2 text-xs font-medium text-gray-600 mb-1 ">
-          <BsCalendar2CheckFill className="h-3 w-3 text-black" />
-          {formatDate(checkin)}
-        </div>
-        {/* <DatePicker date={checkIn} onDateChange={setCheckIn} placeholder="Add dates" className="text-sm" /> */}
+      <div className="w-6 h-6 rounded-full border border-neutral-200/80 flex items-center justify-center text-neutral-600 shrink-0">
+        <SlidersHorizontal className="w-2.5 h-2.5" />
       </div>
-
-      {/* Divider */}
-      <div
-        className={`
-        w-px h-8 bg-gray-200
-        transition-all duration-300 ease-in-out
-        ${isVisible ? "opacity-100" : "opacity-50"}
-      `}
-      />
-
-      {/* Check-out */}
-      <div
-        className={`
-        flex-1  py-2
-        transition-all duration-300 ease-in-out
-        ${isVisible ? "opacity-100" : "opacity-70"}
-      `}
-      >
-        <div className="flex justify-center items-center gap-2 text-xs font-medium text-gray-600 mb-1">
-          <BsCalendar2CheckFill className="h-3 w-3 text-black" />
-          {formatDate(checkout)}
-        </div>
-        {/* <DatePicker date={checkOut} onDateChange={setCheckOut} placeholder="Add dates" className="text-sm" /> */}
-      </div>
-
-      {/* Search Button */}
-      {/* <Button
-        size="icon"
-        className={`
-          rounded-full bg-black hover:bg-black h-8 w-8
-          transition-all duration-300 ease-in-out transform-gpu
-          ${isVisible ? "scale-100 opacity-100" : "scale-90 opacity-90"}
-        `}
-      >
-        <Search className="h-4 w-4" />
-      </Button> */}
-    </Button>
+    </div>
   );
 }

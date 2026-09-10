@@ -70,7 +70,7 @@ export default function CampingDetails() {
   }
 
   return (
-    <CampingProvider  camping={camping}>
+    <CampingProvider camping={camping}>
       <div
         className="min-h-screen bg-gray-50 hidden md:block"
         style={{

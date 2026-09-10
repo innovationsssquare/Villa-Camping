@@ -32,12 +32,12 @@ const Viewhotel = () => {
   const [showStickyTabs, setShowStickyTabs] = useState(false);
   const tabsRef = useRef(null);
 
- const dispatch = useDispatch();
+  const dispatch = useDispatch();
   const params = useParams();
   const { id } = params;
   const { hotel, loading, error } = useSelector((state) => state.hotel);
   const router = useRouter();
-  
+
   useEffect(() => {
     dispatch(fetchHotelById(id));
   }, [id]);
@@ -116,7 +116,7 @@ const Viewhotel = () => {
     }
   };
 
- if (loading) {
+  if (loading) {
     return <VillaScreenSkeleton />;
   }
 
@@ -135,7 +135,7 @@ const Viewhotel = () => {
     return (
       <div className="flex justify-center items-center h-screen bg-black/10">
         <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader/>
+          <ButtonLoader />
         </div>
       </div>
     );
@@ -146,48 +146,48 @@ const Viewhotel = () => {
   return (
     <HotelProvider hotel={hotel}>
 
-    <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
-      <HotelHeader />
-      <HotelHero />
-      <HotelDetails />
+      <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
+        <HotelHeader />
+        <HotelHero />
+        <HotelDetails />
 
-      <div ref={tabsRef}>
-        <StickyTabs
-          tabs={tabs}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-          isSticky={false}
-        />
-      </div>
-
-      {showStickyTabs && (
-        <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+        <div ref={tabsRef}>
           <StickyTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            isSticky={true}
+            isSticky={false}
           />
         </div>
-      )}
 
-      <div>
-        <AllTabsContent
-          refs={{
-            highlightsRef,
-            refundRef,
-            // spacesRef,
-            reviewsRef,
-            amenitiesRef,
-            locationRef,
-            experiencesRef,
-            faqsRef,
-          }}
-        />
+        {showStickyTabs && (
+          <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+            <StickyTabs
+              tabs={tabs}
+              activeTab={activeTab}
+              onTabChange={handleTabChange}
+              isSticky={true}
+            />
+          </div>
+        )}
+
+        <div>
+          <AllTabsContent
+            refs={{
+              highlightsRef,
+              refundRef,
+              // spacesRef,
+              reviewsRef,
+              amenitiesRef,
+              locationRef,
+              experiencesRef,
+              faqsRef,
+            }}
+          />
+        </div>
+
+        <FixedBookingBar />
       </div>
-
-      <FixedBookingBar />
-    </div>
     </HotelProvider>
   );
 };

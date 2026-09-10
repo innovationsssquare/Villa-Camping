@@ -710,7 +710,7 @@ export default function Villascreen() {
           <div className="flex flex-col leading-tight">
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold">
-                ₹{villa?.basePricePerNight}
+                ₹{(villa?.pricing?.weekdayPrice ?? villa?.basePricePerNight)?.toLocaleString("en-IN")}
               </span>
               <span className="text-xs text-muted-foreground">/ night</span>
             </div>
@@ -748,14 +748,16 @@ export default function Villascreen() {
 
       <BookingDialog
         isOpen={isBookingOpen}
+        Setopen={setIsBookingOpen}
         onClose={() => setIsBookingOpen(false)}
         propertyName={villa?.name}
-        price={villa?.basePricePerNight}
-        originalPrice={villa?.basePricePerNight}
+        price={villa?.pricing?.weekdayPrice ?? villa?.basePricePerNight}
+        originalPrice={villa?.pricing?.weekdayPrice ?? villa?.basePricePerNight}
         propertyId={villa?._id}
         ownerId={villa?.owner}
         propertyType="Villa"
-        // customerId:={}
+        pricing={villa?.pricing}
+        maxCapacity={villa?.maxCapacity}
       />
     </div>
   );

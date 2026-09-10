@@ -26,21 +26,21 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 w-full  rounded-b-2xl px-4 py-1 z-50 transition-transform duration-300 ease-in-out md:hidden ",
+        "fixed top-0 left-0 right-0 w-full rounded-b-xl px-3 pt-1 pb-1.5 z-50 transition-transform duration-300 ease-in-out md:hidden shadow-xs",
         isVisible
-          ? "translate-y-0 bg-white backdrop-blur-2xl"
+          ? "translate-y-0 bg-white/95 backdrop-blur-md"
           : "-translate-y-12 bg-white"
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <UserSidebar />
           {pathname === "/" ||
           pathname === "/explore" ||
           pathname.startsWith("/products/") ||
           pathname.startsWith("/category/") ? (
-            <div>
-              <div className="text-xs font-medium">Location</div>
+            <div className="flex items-center gap-1 text-[10px]">
+              <span className="uppercase font-bold text-neutral-400">Location:</span>
               <UserLocationDisplay />
             </div>
           ) : (
@@ -48,31 +48,13 @@ export function AppHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5">
           <NotificationSheet />
-
-          {/* <Button
-            onClick={() => router.push("/bag")}
-            variant="outline"
-            size="icon"
-            className="rounded-md  border-gray-300 relative bg-[#FFFFFF4D]"
-          >
-            <IoBag className="h-5 w-5" />
-            {cartItemCount > 0 && (
-              <Badge
-                className="absolute -top-2 -right-2 px-1.5 py-0.5 bg-black text-white border-1 border-white min-w-[1.25rem] h-5"
-                variant="default"
-              >
-                {cartItemCount}
-              </Badge>
-            )}
-            <span className="sr-only">Shopping cart</span>
-          </Button> */}
         </div>
       </div>
 
       {(pathname === "/" || pathname.startsWith("/category/")) && (
-        <div className="py-1 mt-2 flex  w-full justify-between items-center gap-2">
+        <div className="mt-1 flex w-full justify-between items-center">
           <div className="w-full">
             <BookingSearchBox />
           </div>

@@ -1,8 +1,6 @@
 import { Providers } from "@/Redux/provider";
 import "./globals.css";
 import { NextuiProviderWrapper } from "./Nextuiprovider";
-import { AuthProvider } from "@/lib/auth-provider";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 import Script from "next/script";
 import ConsentGTM from "@/components/Seo/ConsentGTM";
 import { ToastProvider } from "@/components/ui/toast-provider";
@@ -14,7 +12,7 @@ const geist = Inter({
   subsets: ["latin"],
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
-const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID || "GTM-XXXX";
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export const metadata = {
   metadataBase: new URL("https://thevillacamp.com"),
@@ -49,9 +47,9 @@ export const metadata = {
     images: ["/og-default.jpg"],
   },
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
-    apple: '/apple-touch-icon.png',
+    icon: "/favicon.ico",
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   alternates: {
     canonical: "https://thevillacamp.com",
@@ -63,50 +61,60 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
-  return (
-    <Providers>
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <meta
-            name="viewport"
-            content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
-          />
-          {process.env.GOOGLE_SITE_VERIFICATION ? (
-            <meta name="google-site-verification" content={process.env.GOOGLE_SITE_VERIFICATION} />
-          ) : null}
-          {process.env.BING_SITE_VERIFICATION ? (
-            <meta name="msvalidate.01" content={process.env.BING_SITE_VERIFICATION} />
-          ) : null}
-        </head>
-        <Script
-          src="https://checkout.razorpay.com/v1/checkout.js"
-          strategy="lazyOnload"
-        />
-        {/* GTM will be injected after user consent by `ConsentGTM` */}
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
 
-        <body className={geist.className} suppressHydrationWarning>
-          <ConsentGTM
-            gtmId={GTM_ID}
-            measurementId={process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID || process.env.GA4_MEASUREMENT_ID}
-          />
-          <Suspense
-            fallback={
-              <div className="h-screen bg-white w-full flex justify-center items-center">
-                <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
-                  <ButtonLoader />
-                </div>
-              </div>
-            }
-          >
-            <NextuiProviderWrapper>
-              <GoogleOAuthProvider clientId={process.env.GOOGLE_CLIENT_ID}>
-                <ToastProvider>{children}</ToastProvider>
-              </GoogleOAuthProvider>
-            </NextuiProviderWrapper>
-          </Suspense>
-        </body>
-      </html>
+export default function RootLayout({ children }) {
+  const appTree = (
+    <Providers>
+      <ConsentGTM
+        gtmId={GTM_ID}
+        measurementId={
+          process.env.NEXT_PUBLIC_GA4_MEASUREMENT_ID ||
+          process.env.GA4_MEASUREMENT_ID
+        }
+      />
+      <Suspense
+        fallback={
+          <div className="h-screen bg-white w-full flex justify-center items-center">
+            <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
+              <ButtonLoader />
+            </div>
+          </div>
+        }
+      >
+        <NextuiProviderWrapper>
+          <ToastProvider>{children}</ToastProvider>
+        </NextuiProviderWrapper>
+      </Suspense>
     </Providers>
+  );
+
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {process.env.GOOGLE_SITE_VERIFICATION ? (
+          <meta
+            name="google-site-verification"
+            content={process.env.GOOGLE_SITE_VERIFICATION}
+          />
+        ) : null}
+        {process.env.BING_SITE_VERIFICATION ? (
+          <meta
+            name="msvalidate.01"
+            content={process.env.BING_SITE_VERIFICATION}
+          />
+        ) : null}
+      </head>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+      />
+      <body className={geist.className} suppressHydrationWarning>
+        {appTree}
+      </body>
+    </html>
   );
 }

@@ -34,11 +34,10 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
 
   if (horizontal) {
     return (
-      <Card className={`w-full p-0 relative bg-white rounded-2xl overflow-hidden border animate-scale-in h-48 md:h-52 transition-all duration-300 ${
-        isHovered
+      <Card className={`w-full p-0 relative bg-white rounded-2xl overflow-hidden border animate-scale-in h-48 md:h-52 transition-all duration-300 ${isHovered
           ? "ring-2 ring-black border-black shadow-xl scale-[1.01] bg-gray-50/50"
           : "border-gray-150 shadow-sm hover:shadow-md hover:scale-[1.005]"
-      }`}>
+        }`}>
         <CardContent className="p-0 h-full flex flex-row">
           {/* Image Section on the left */}
           <div className="relative w-44 md:w-60 h-full flex-shrink-0">
@@ -84,8 +83,8 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
           <div className="flex-1 p-4 md:p-5 flex flex-col justify-between min-w-0">
             <div>
               <div className="flex items-start justify-between gap-3 mb-1">
-                <h3 
-                  className="text-base md:text-lg font-bold text-villa-text truncate hover:text-villa-primary transition-colors cursor-pointer" 
+                <h3
+                  className="text-base md:text-lg font-bold text-villa-text truncate hover:text-villa-primary transition-colors cursor-pointer"
                   onClick={() => {
                     if (property?.type === "villa") router.push(`/view-Villa/${property?.id}`);
                     else if (property?.type === "camping") router.push(`/view-Camping/${property?.id}`);
@@ -125,9 +124,8 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                   className="p-2 min-w-8 w-8 h-8 rounded-full border border-gray-100 bg-gray-50/50 hover:bg-gray-100"
                 >
                   <Heart
-                    className={`w-4 h-4 ${
-                      isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-                    }`}
+                    className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
+                      }`}
                   />
                 </Button>
 
@@ -171,14 +169,13 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
       </Card>
     );
   }
-  
+
   if (compact) {
     return (
-      <Card className={`w-full p-0 bg-white border rounded-xl overflow-hidden transition-all duration-300 animate-fade-in ${
-        isHovered
+      <Card className={`w-full p-0 bg-white border rounded-xl overflow-hidden transition-all duration-300 animate-fade-in ${isHovered
           ? "ring-2 ring-black border-black shadow-md scale-[1.01] bg-gray-50/50"
           : "border-gray-200 shadow-none"
-      }`}>
+        }`}>
         <CardContent className="p-0">
           <div className="flex justify-between w-full">
             <Image
@@ -212,16 +209,16 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                 <MapPin className="w-3 h-3 mr-1" />
                 <span className="line-clamp-1">{property.location}</span>
               </div>
-              
+
             </div>
             <div className="justify-center items-center flex px-4">
-               {property?.type === "villa" ? (
+              {property?.type === "villa" ? (
                 <Button
                   onPress={() => router.push(`/view-Villa/${property?.id}`)}
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View 
+                  View
                 </Button>
               ) : property?.type === "camping" ? (
                 <Button
@@ -229,7 +226,7 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View 
+                  View
                 </Button>
               ) : property?.type === "cottage" ? (
                 <Button
@@ -237,7 +234,7 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View 
+                  View
                 </Button>
               ) : property?.type === "hotel" ? (
                 <Button
@@ -245,7 +242,7 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                   className="flex-1 bg-black text-white hover:bg-villa-primary/90"
                 >
                   <Eye className="w-4 h-4 mr-2" />
-                  View 
+                  View
                 </Button>
               ) : (
                 ""
@@ -258,11 +255,10 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
   }
 
   return (
-    <Card className={`w-full p-0 relative bg-white rounded-2xl overflow-hidden border animate-scale-in h-auto transition-all duration-300 mx-auto ${
-      isHovered
+    <Card className={`w-full p-0 relative bg-white rounded-2xl overflow-hidden border animate-scale-in h-auto transition-all duration-300 mx-auto ${isHovered
         ? "ring-2 ring-black border-black shadow-2xl scale-[1.01] bg-gray-50/50"
         : "border-gray-150 shadow-md hover:shadow-xl hover:scale-[1.005]"
-    }`}>
+      }`}>
       <CardContent className="p-0">
         {onClose && (
           <button
@@ -335,9 +331,8 @@ export const PropertyCard = ({ property, onClose, compact = false, horizontal = 
                   className="p-2"
                 >
                   <Heart
-                    className={`w-4 h-4 ${
-                      isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
-                    }`}
+                    className={`w-4 h-4 ${isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"
+                      }`}
                   />
                 </Button>
                 <Button isIconOnly variant="light" className="p-2">

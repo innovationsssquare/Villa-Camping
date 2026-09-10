@@ -372,11 +372,10 @@ export default function PropertyFilterListing({ categorySlug }) {
 
       <div className="flex flex-col md:flex-row gap-8 h-auto  ">
         <div
-          className={`w-full shrink-0 hidden md:block order-1 md:order-1 transition-all duration-300 ease-in-out ${
-            showFilterSidebar
+          className={`w-full shrink-0 hidden md:block order-1 md:order-1 transition-all duration-300 ease-in-out ${showFilterSidebar
               ? "md:w-64 opacity-100"
               : "md:w-0 opacity-0 overflow-hidden -ml-8"
-          }`}
+            }`}
         >
           <FilterSidebar />
         </div>
@@ -468,11 +467,11 @@ export default function PropertyFilterListing({ categorySlug }) {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
                 {dataloading
                   ? Array.from({ length: 6 }).map((_, index) => (
-                      <PropertyCardSkeletonnew key={`skeleton-${index}`} />
-                    ))
+                    <PropertyCardSkeletonnew key={`skeleton-${index}`} />
+                  ))
                   : data?.map((property) => (
-                      <PropertyCardnew key={property._id} property={property} />
-                    ))}
+                    <PropertyCardnew key={property._id} property={property} />
+                  ))}
               </div>
 
               {totalPages > 1 && (
@@ -487,7 +486,7 @@ export default function PropertyFilterListing({ categorySlug }) {
                     totalPages={totalPages}
                     totalItems={totalCount}
                     itemsPerPage={itemsPerPage}
-                    // onPageChange={(page) => dispatch(setCurrentPage(page))}
+                  // onPageChange={(page) => dispatch(setCurrentPage(page))}
                   />
                 </div>
               )}
