@@ -360,25 +360,30 @@ div.spinner div.bar12 {
   animation: heart-pop 0.3s ease-out;
 }
 
-/* Custom Google Maps marker active styling */
+/* Custom Google Maps marker active styling (Airbnb / Modern Booking Style) */
 .villa-marker {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
 }
 
 .villa-marker.marker-active {
-  background-color: #000000 !important;
+  background-color: #ff6900 !important;
   color: #ffffff !important;
-  border-color: #000000 !important;
-  transform: scale(1.18) !important;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4) !important;
+  border-color: #ff6900 !important;
+  transform: scale(1.16) translateY(-2px) !important;
+  box-shadow: 0 12px 28px -4px rgba(255, 105, 0, 0.55), 0 4px 10px rgba(0, 0, 0, 0.15) !important;
+  z-index: 9999 !important;
+}
+
+.villa-marker.marker-active span {
+  color: #ffffff !important;
 }
 
 .marker-tail {
-  transition: border-top-color 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition: border-top-color 0.25s ease !important;
 }
 
 .villa-marker.marker-active + .marker-tail {
-  border-top-color: #000000 !important;
+  border-top-color: #ff6900 !important;
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */

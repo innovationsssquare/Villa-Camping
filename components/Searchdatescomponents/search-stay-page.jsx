@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronLeft, Calendar, Users, Phone, Sparkles, Search, RotateCcw } from "lucide-react";
 import { FaHome, FaCalendarCheck } from "react-icons/fa";
 import { MdPeopleAlt } from "react-icons/md";
-import { Button } from "@heroui/react";
+import { Button, addToast } from "@heroui/react";
 import { SearchInputCard } from "./search-input-card";
 import { GuestSelectionDrawer } from "./guest-selection-drawer";
 import { CategorySelectionDrawer } from "./category-selection-drawer";
@@ -179,6 +179,11 @@ export default function SearchStayPage() {
 
   const handleSearch = async () => {
     if (checkin && !checkout) {
+      addToast({
+        title: "Select check-out date",
+        description: "Please choose your departure date to complete search dates",
+        color: "warning",
+      });
       router.push("/date-selection");
       return;
     }
@@ -335,7 +340,27 @@ export default function SearchStayPage() {
           label="Total Guests"
           value={guestSummary}
           subtitle="Adults, children, infants & pets"
-          onClick={() => setIsGuestDrawerOpen(true)}
+          onClick={() => {
+            if (!checkin) {
+              addToast({
+                title: "Select check-in date first",
+                description: "Please choose your stay dates before customizing guests",
+                color: "warning",
+              });
+              router.push("/date-selection");
+              return;
+            }
+            if (!checkout) {
+              addToast({
+                title: "Select check-out date first",
+                description: "Please choose your departure date before customizing guests",
+                color: "warning",
+              });
+              router.push("/date-selection");
+              return;
+            }
+            setIsGuestDrawerOpen(true);
+          }}
         />
 
         {/* Search CTA Button */}

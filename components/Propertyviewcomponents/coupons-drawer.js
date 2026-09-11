@@ -295,12 +295,12 @@ const CouponsDrawer = ({
                 placeholder="Enter coupon code"
                 value={couponCode}
                 onChange={(e) => setCouponCode(e.target.value)}
-                className="w-full p-3 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                className="w-full p-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-orange-100 focus:border-[#ff6900] font-mono font-bold text-sm"
               />
               <Button
                 onPress={handleManualApply}
                 disabled={!couponCode.trim() || isApplyingManual}
-                className="w-full bg-black text-white py-3 rounded-lg font-medium disabled:bg-black disabled:cursor-not-allowed hover:bg-gray-800 transition-colors"
+                className="w-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed shadow-md transition-all active:scale-98"
               >
                 {isApplyingManual ? "Applying..." : "APPLY"}
               </Button>
@@ -309,10 +309,10 @@ const CouponsDrawer = ({
             {/* Offers header */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <h3 className="text-sm font-medium text-gray-600">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-gray-500">
                   Offers Available
                 </h3>
-                <span className="text-xs text-gray-400">T&C</span>
+                <span className="text-[10px] text-gray-400">T&C Apply</span>
               </div>
 
               {/* {fetchStatus === "loading" && (
@@ -329,24 +329,24 @@ const CouponsDrawer = ({
                 return (
                   <div
                     key={coupon.code}
-                    className="border border-white bg-gray-200 rounded-lg p-4 space-y-3"
+                    className="border border-orange-100 bg-orange-50/30 rounded-2xl p-4 space-y-3 hover:border-orange-300 transition-all duration-200"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
-                        <p className="text-xs text-gray-500 mb-1">
-                          valid till: {coupon.validTillReadable}
+                        <p className="text-[11px] text-gray-500 mb-1">
+                          Valid till: {coupon.validTillReadable}
                         </p>
-                        <p className="text-sm text-gray-700 mb-2">
+                        <p className="text-xs text-gray-700 mb-2 leading-relaxed">
                           {coupon.description}
                         </p>
                         {coupon.minNights && (
-                          <p className="text-xs text-orange-600 mb-1">
+                          <p className="text-xs text-[#ff6900] font-semibold mb-1">
                             Min nights: {coupon.minNights}
                           </p>
                         )}
                         <div className="flex items-center gap-2">
-                          <FaTicketAlt className="w-4 h-4 text-gray-600" />
-                          <span className="font-bold text-black text-lg">
+                          <FaTicketAlt className="w-4 h-4 text-[#ff6900]" />
+                          <span className="font-mono font-bold text-gray-900 text-base">
                             {coupon.code}
                           </span>
                         </div>
@@ -355,14 +355,14 @@ const CouponsDrawer = ({
                       <button
                         onClick={() => handleCouponApply(coupon)}
                         disabled={isThisApplying || isApplied}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium ${
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                           isApplied
-                            ? "bg-gray-300 text-gray-700 cursor-not-allowed"
-                            : "bg-black text-white hover:bg-gray-800"
+                            ? "bg-emerald-50 text-emerald-700 border border-emerald-300 cursor-not-allowed"
+                            : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white shadow-xs"
                         }`}
                       >
                         {isApplied
-                          ? "APPLIED"
+                          ? "✓ APPLIED"
                           : isThisApplying
                           ? "Applying..."
                           : "APPLY"}

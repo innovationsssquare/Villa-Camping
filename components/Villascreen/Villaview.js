@@ -21,6 +21,7 @@ const tabs = [
   { id: "spaces", label: "Spaces" },
   { id: "reviews", label: "Reviews" },
   { id: "amenities", label: "Amenities" },
+  { id: "meals", label: "Meals" },
   { id: "location", label: "Location" },
   { id: "experiences", label: "Experiences" },
   { id: "faqs", label: "FAQ's" },
@@ -56,6 +57,9 @@ const Villaview = () => {
   const { ref: amenitiesRef, inView: amenitiesInView } = useInView({
     threshold: 0.3,
   });
+  const { ref: mealsRef, inView: mealsInView } = useInView({
+    threshold: 0.3,
+  });
   const { ref: locationRef, inView: locationInView } = useInView({
     threshold: 0.3,
   });
@@ -71,6 +75,7 @@ const Villaview = () => {
     else if (spacesInView) setActiveTab("spaces");
     else if (reviewsInView) setActiveTab("reviews");
     else if (amenitiesInView) setActiveTab("amenities");
+    else if (mealsInView) setActiveTab("meals");
     else if (locationInView) setActiveTab("location");
     else if (experiencesInView) setActiveTab("experiences");
     else if (faqsInView) setActiveTab("faqs");
@@ -80,6 +85,7 @@ const Villaview = () => {
     spacesInView,
     reviewsInView,
     amenitiesInView,
+    mealsInView,
     locationInView,
     experiencesInView,
     faqsInView,
@@ -172,6 +178,7 @@ const Villaview = () => {
               spacesRef,
               reviewsRef,
               amenitiesRef,
+              mealsRef,
               locationRef,
               experiencesRef,
               faqsRef,

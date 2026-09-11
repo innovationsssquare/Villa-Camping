@@ -21,7 +21,9 @@ export default function StickyTabsNavigation({ onTabChange }) {
     { id: "spacess", label: "Spaces" },
     { id: "reviewss", label: "Reviews" },
     { id: "amenitiess", label: "Amenities" },
+    { id: "mealss", label: "Meals" },
     { id: "locationn", label: "Location" },
+    { id: "experiencess", label: "Experiences" },
     { id: "faqss", label: "FAQ's" },
   ]
 
@@ -173,10 +175,10 @@ export default function StickyTabsNavigation({ onTabChange }) {
     >
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Tabs with hidden scrollbar */}
+          {/* Tabs with hidden scrollbar and equal spacing */}
           <div
             ref={tabsContainerRef}
-            className="flex space-x-0 overflow-x-auto relative"
+            className="flex items-center justify-between w-full overflow-x-auto relative scrollbar-none"
             style={{
               /* Hide scrollbar for Chrome, Safari and Opera */
               WebkitOverflowScrolling: "touch",
@@ -197,24 +199,24 @@ export default function StickyTabsNavigation({ onTabChange }) {
                   }
                 }}
                 onClick={() => scrollToSection(tab.id)}
-                className={`px-4 py-4 text-sm font-medium whitespace-nowrap transition-all duration-300 ease-out relative z-10 ${
+                className={`flex-1 min-w-max px-2.5 sm:px-3.5 lg:px-4 py-4 text-center text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-out relative z-10 ${
                   activeTab === tab.id
-                    ? "text-black transform scale-105"
-                    : "text-gray-700 hover:text-black hover:transform hover:scale-102"
+                    ? "text-[#ff6900] font-bold"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 {tab.label}
               </button>
             ))}
 
-            {/* Smooth sliding indicator with better positioning */}
+            {/* Smooth sliding indicator with brand #ff6900 gradient */}
             <div
-              className="absolute bottom-0 h-0.5 bg-black transition-all duration-500 ease-out"
+              className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#ff6900] to-[#e05d00] transition-all duration-500 ease-out rounded-full"
               style={{
                 left: `${indicatorStyle.left}px`,
                 width: `${indicatorStyle.width}px`,
                 transform: "translateZ(0)", // Force GPU acceleration
-                boxShadow: "0 0 8px rgba(59, 130, 246, 0.5)",
+                boxShadow: "0 2px 8px rgba(255, 105, 0, 0.45)",
               }}
             />
           </div>
@@ -224,7 +226,7 @@ export default function StickyTabsNavigation({ onTabChange }) {
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center space-x-2 bg-transparent transition-all duration-300 hover:bg-blue-50 hover:border-blue-300"
+              className="flex items-center space-x-2 bg-transparent transition-all duration-300 hover:bg-orange-50 hover:border-orange-300"
             >
               <span className="text-sm">Menu</span>
               <ChevronDown className="w-4 h-4 transition-transform duration-300 hover:rotate-180" />
@@ -233,19 +235,9 @@ export default function StickyTabsNavigation({ onTabChange }) {
         </div>
       </div>
 
-      {/* Animated sticky indicator */}
-      {/* <div
-        className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 transition-all duration-700 ease-out ${
-          isSticky ? "opacity-100 transform scale-x-100" : "opacity-0 transform scale-x-0"
-        }`}
-        style={{
-          transformOrigin: "center",
-        }}
-      /> */}
-
       {/* Subtle glow effect when sticky */}
       <div
-        className={`absolute inset-0 bg-gradient-to-b from-blue-50/20 to-transparent transition-all duration-500 ease-out ${
+        className={`absolute inset-0 bg-gradient-to-b from-orange-50/10 to-transparent pointer-events-none transition-all duration-500 ease-out ${
           isSticky ? "opacity-100" : "opacity-0"
         }`}
       />

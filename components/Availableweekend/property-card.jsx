@@ -236,7 +236,7 @@ export function PropertyCard({ property }) {
         </div>
 
         <Button
-          onPress={() => router.push(`/view-villa/${property._id}`)}
+          onPress={() => router.push(`/view-Villa/${property._id}`)}
           size="sm"
           radius="full"
           className="bg-transparent text-sm font-bold border border-white text-white hover:bg-white/90 transition-all duration-200 absolute right-6 bottom-6"

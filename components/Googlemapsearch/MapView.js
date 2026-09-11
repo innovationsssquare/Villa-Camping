@@ -1,13 +1,9 @@
+"use client";
+
 import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { PropertyMarker } from "./PropertyMarker";
 import { PropertyCard } from "./PropertyCard";
-import { PropertyHoverCard } from "./PropertyHoverCard";
-
-import villa1 from "@/public/Productasset/Villaimg.png";
-import villa2 from "@/public/Productasset/Campimg.png";
-import house1 from "@/public/Productasset/Villaimg.png";
-import villa3 from "@/public/Productasset/Campimg.png";
 import { getDisplayPrice } from "./getDisplayPrice";
 
 const MapView = ({
@@ -16,16 +12,24 @@ const MapView = ({
   selectedLocation,
   properties,
   loading,
-  hoveredPropertyId,
-  onPropertyHover,
+  activePropertyId,
+  selectedProperty: controlledSelectedProperty,
 }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   const overlaysRef = useRef([]);
-  const [selectedProperty, setSelectedProperty] = useState(null);
-  const [hoveredProperty, setHoveredProperty] = useState(null);
-  const [hoverPosition, setHoverPosition] = useState(null);
+  const [internalSelectedProperty, setInternalSelectedProperty] = useState(null);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+
+  const selectedProperty =
+    controlledSelectedProperty !== undefined
+      ? controlledSelectedProperty
+      : internalSelectedProperty;
+
+  const handleSelectProperty = (property) => {
+    setInternalSelectedProperty(property);
+    onPropertySelect?.(property);
+  };
 
   useEffect(() => {
     if (!googleMapsApiKey) return;
@@ -36,7 +40,7 @@ const MapView = ({
     });
   }, [googleMapsApiKey]);
 
-  // 1. Initialize Google Map once
+  // 1. Initialize Google Map once with rounded framing & clean controls
   useEffect(() => {
     if (!mapContainer.current || !isScriptLoaded || !window.google) return;
 
@@ -46,10 +50,50 @@ const MapView = ({
       mapTypeControl: false,
       streetViewControl: false,
       fullscreenControl: false,
+      zoomControl: true,
+      gestureHandling: "greedy",
+    });
+
+    // Dismiss open popup card when clicking on map background
+    map.current.addListener("click", () => {
+      handleSelectProperty(null);
     });
   }, [isScriptLoaded]);
 
-  // 2. Draw and update markers dynamically when properties change
+  // 2. Clear open popup card whenever loading starts or location changes
+  useEffect(() => {
+    if (loading) {
+      setInternalSelectedProperty(null);
+      onPropertySelect?.(null);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    setInternalSelectedProperty(null);
+    onPropertySelect?.(null);
+  }, [selectedLocation]);
+
+  // 3. Sync activePropertyId from parent (card click, marker click, or filter reset)
+  useEffect(() => {
+    if (!activePropertyId) {
+      setInternalSelectedProperty(null);
+      return;
+    }
+    const target = properties?.find((p) => p.id === activePropertyId);
+    if (target) {
+      setInternalSelectedProperty(target);
+      if (map.current && target.coordinates?.length >= 2) {
+        map.current.panTo({
+          lat: target.coordinates[0],
+          lng: target.coordinates[1],
+        });
+      }
+    } else {
+      setInternalSelectedProperty(null);
+    }
+  }, [activePropertyId, properties]);
+
+  // 4. Draw and update markers dynamically when properties change
   useEffect(() => {
     if (!map.current || !window.google) return;
 
@@ -59,7 +103,6 @@ const MapView = ({
     });
     overlaysRef.current = [];
 
-    let moveHandler = null;
     properties?.forEach((property) => {
       if (!property.coordinates || property.coordinates.length < 2) return;
 
@@ -78,31 +121,20 @@ const MapView = ({
         root.render(
           <PropertyMarker
             price={getDisplayPrice(property.price)}
-            onClick={() => {
-              setSelectedProperty(property);
-              onPropertySelect?.(property);
+            onClick={(e) => {
+              e?.stopPropagation?.();
+              handleSelectProperty(property);
+              if (map.current && property.coordinates?.length >= 2) {
+                map.current.panTo({
+                  lat: property.coordinates[0],
+                  lng: property.coordinates[1],
+                });
+              }
             }}
-            image={property.image}
+            image={property.images?.[0] || property.image}
             has3DTour={property.has3DTour}
           />
         );
-
-        div.addEventListener("mouseenter", () => {
-          onPropertyHover?.(property.id, "map");
-          setHoveredProperty(property);
-          moveHandler = (e) => setHoverPosition({ x: e.clientX, y: e.clientY });
-          window.addEventListener("mousemove", moveHandler);
-        });
-
-        div.addEventListener("mouseleave", () => {
-          onPropertyHover?.(null, null);
-          setHoveredProperty(null);
-          setHoverPosition(null);
-          if (moveHandler) {
-            window.removeEventListener("mousemove", moveHandler);
-            moveHandler = null;
-          }
-        });
 
         const panes = this.getPanes();
         panes?.overlayMouseTarget.appendChild(div);
@@ -134,7 +166,7 @@ const MapView = ({
       overlaysRef.current.push(overlay);
     });
 
-    // Fit map bounds to encompass all active property markers
+    // Fit map bounds to encompass active markers
     if (properties && properties.length > 0) {
       const bounds = new window.google.maps.LatLngBounds();
       let hasValidCoords = false;
@@ -152,8 +184,7 @@ const MapView = ({
 
       if (hasValidCoords) {
         map.current.fitBounds(bounds);
-        
-        // Prevent map from zooming in too close if there's only 1 marker
+
         const listener = window.google.maps.event.addListener(
           map.current,
           "bounds_changed",
@@ -166,22 +197,18 @@ const MapView = ({
         );
       }
     }
-
-    return () => {
-      if (moveHandler) {
-        window.removeEventListener("mousemove", moveHandler);
-      }
-    };
   }, [properties, isScriptLoaded]);
 
-  // 3. Lightweight style updating effect when hoveredPropertyId changes
+  // 5. Highlight active marker on the map
+  const currentActiveId = selectedProperty?.id || activePropertyId;
+
   useEffect(() => {
     properties?.forEach((property) => {
       const el = document.getElementById(`map-marker-${property.id}`);
       if (el) {
         const innerMarker = el.querySelector(".villa-marker");
         if (innerMarker) {
-          if (property.id === hoveredPropertyId) {
+          if (property.id === currentActiveId) {
             innerMarker.classList.add("marker-active");
             el.style.zIndex = "1000";
           } else {
@@ -191,45 +218,41 @@ const MapView = ({
         }
       }
     });
-  }, [hoveredPropertyId, properties]);
+  }, [currentActiveId, properties]);
 
   if (!googleMapsApiKey) {
     return (
-      <div className="flex items-center justify-center h-full bg-gray-100"></div>
+      <div className="flex items-center justify-center h-full bg-neutral-100 rounded-3xl"></div>
     );
   }
 
   return (
-    <div className="relative w-full  h-full">
+    <div className="relative w-full h-full rounded-3xl overflow-hidden border border-neutral-200/90 shadow-sm bg-neutral-100">
+      {/* Loading Spinner Overlay */}
       {loading && (
-        <div className="absolute inset-0 z-40 flex items-center justify-center bg-white/10 backdrop-blur-xs">
-          <div className="flex flex-col items-center gap-3">
-            <div className="h-10 w-10 rounded-full border-4 border-gray-300 border-t-black animate-spin" />
-            <p className="text-sm font-medium text-gray-700">
-              Loading properties...
+        <div className="absolute inset-0 z-40 flex items-center justify-center bg-white/40 backdrop-blur-xs rounded-3xl">
+          <div className="flex flex-col items-center gap-2.5 bg-white/95 px-5 py-3.5 rounded-2xl shadow-lg border border-neutral-200">
+            <div className="h-7 w-7 rounded-full border-3 border-orange-200 border-t-[#ff6900] animate-spin" />
+            <p className="text-xs font-bold text-neutral-800">
+              Searching map stays...
             </p>
           </div>
         </div>
       )}
 
-      <div ref={mapContainer} className="w-full h-full " />
+      {/* Google Maps Canvas with Rounded Corners */}
+      <div
+        ref={mapContainer}
+        className="w-full h-full rounded-3xl overflow-hidden"
+        style={{ borderRadius: "24px" }}
+      />
 
-      {/* Hover Card */}
-      {hoveredProperty && hoverPosition && (
-        <PropertyHoverCard
-          property={hoveredProperty}
-          position={hoverPosition}
-        />
-      )}
-
-      {/* Property Card Overlay */}
-      {selectedProperty && (
-        <div className="absolute bottom-28 left-1/2 -translate-x-1/2 z-50 w-[260px]">
+      {/* Redesigned Airbnb Map Popup Card (Dismisses on loading, location change, or filter change) */}
+      {!loading && selectedProperty && (
+        <div className="absolute top-5 left-5 z-50 pointer-events-auto">
           <PropertyCard
             property={selectedProperty}
-            onClose={() => {
-              setSelectedProperty(null);
-            }}
+            onClose={() => handleSelectProperty(null)}
           />
         </div>
       )}

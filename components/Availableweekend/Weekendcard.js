@@ -101,9 +101,17 @@ export function PropertyCard({ property }) {
     );
   };
 
+  const getCategoryRoute = (raw) => {
+    const str = String(raw || "").toLowerCase();
+    if (str.includes("camp")) return "Camping";
+    if (str.includes("cottage")) return "Cottage";
+    if (str.includes("hotel")) return "Hotel";
+    return "Villa";
+  };
+
   const handleCardClick = () => {
-    const catName = selectedCategoryName || property.category?.name || "Villa";
-    router.push(`/view-${catName}/${property?._id}`);
+    const route = getCategoryRoute(selectedCategoryName || property.category?.name);
+    router.push(`/view-${route}/${property?._id}`);
     dispatch(removeCoupon());
     dispatch(clearSelectedTents());
   };
@@ -153,8 +161,8 @@ export function PropertyCard({ property }) {
 
         {/* Top Left: "Guest favourite" badge (matches Airbnb screenshot) */}
         {isGuestFavourite && (
-          <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 bg-white/95 backdrop-blur-md px-2.5 py-0.5 sm:py-1 rounded-full shadow-sm flex items-center border border-black/5">
-            <span className="text-[10px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
+          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-white/95 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm flex items-center border border-black/5">
+            <span className="text-[9px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
               Guest favourite
             </span>
           </div>
@@ -167,12 +175,12 @@ export function PropertyCard({ property }) {
             e.stopPropagation();
             handleWishlist();
           }}
-          className="absolute top-2 right-2 sm:top-2.5 sm:right-2.5 z-10 p-1.5 rounded-full hover:scale-115 active:scale-90 transition-transform cursor-pointer"
+          className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10 p-1 sm:p-1.5 rounded-full hover:scale-115 active:scale-90 transition-transform cursor-pointer"
           aria-label="Save to wishlist"
         >
           <Heart
             className={cn(
-              "w-5 h-5 sm:w-5.5 sm:h-5.5 transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]",
+              "w-4 h-4 sm:w-5 sm:h-5 transition-colors drop-shadow-[0_2px_4px_rgba(0,0,0,0.4)]",
               isLiked
                 ? "fill-[#ff6900] text-[#ff6900] stroke-[#ff6900]"
                 : "fill-black/30 text-white stroke-[2]"
@@ -244,18 +252,19 @@ export function PropertyCard({ property }) {
         </h3>
 
         {/* Line 2: Price for 2 nights · Star Rating */}
-        <div className="text-[10px] sm:text-[11px] md:text-xs text-neutral-600 truncate mt-0.5 flex items-center flex-wrap gap-x-1 leading-tight">
-          <span className="font-semibold text-neutral-900">
-            {twoNightsPrice > 0
-              ? formatRupee(twoNightsPrice)
-              : formatRupee(nightPrice)}
-          </span>
-          <span className="text-neutral-500 font-normal">
-            {twoNightsPrice > 0 ? "for 2 nights" : "night"}
-          </span>
-          <span className="text-neutral-400">·</span>
-          <span className="inline-flex items-center gap-0.5 text-neutral-900 font-medium">
-            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-neutral-900 text-neutral-900 inline -mt-0.5" />
+        <div className="text-[10px] sm:text-[11px] md:text-xs text-neutral-600 mt-0.5 flex items-center justify-between gap-1 leading-tight">
+          <div className="flex items-baseline gap-1 truncate">
+            <span className="font-semibold text-neutral-900">
+              {twoNightsPrice > 0
+                ? formatRupee(twoNightsPrice)
+                : formatRupee(nightPrice)}
+            </span>
+            <span className="text-neutral-500 font-normal text-[9px] sm:text-[10px]">
+              {twoNightsPrice > 0 ? "2 nights" : "night"}
+            </span>
+          </div>
+          <span className="inline-flex items-center gap-0.5 text-neutral-900 font-medium flex-shrink-0">
+            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-neutral-900 text-neutral-900 -mt-0.5" />
             <span>{rating}</span>
           </span>
         </div>

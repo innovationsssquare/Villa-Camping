@@ -1,58 +1,59 @@
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Home, ChevronUp } from 'lucide-react';
+"use client";
 
+import React from "react";
+import { List, ChevronUp, MapPin, Sparkles } from "lucide-react";
 
-
-export const PropertyCountHeader = ({ 
-  count, 
-  location, 
-  onToggleDrawer, 
-  isDrawerOpen 
+export const PropertyCountHeader = ({
+  count,
+  location,
+  onToggleDrawer,
+  isDrawerOpen,
 }) => {
-  const formatCount = (num) => {
-    if (num >= 1000000) {
-      return `${(num / 1000000).toFixed(1)}M`;
-    }
-    if (num >= 1000) {
-      return `${(num / 1000).toFixed(1)}K`;
-    }
-    return num.toString();
-  };
-console.log(count,location)
   return (
-    <div className="fixed bottom-0  left-0 right-0 z-20">
-      <Button
+    <div className="w-full">
+      {/* Bottom Sheet Trigger Bar */}
+      <button
+        type="button"
         onClick={onToggleDrawer}
-        className="w-full bg-white relative hover:bg-gray-50 text-villa-text border border-gray-200 shadow-lg rounded-t-2xl  h-auto transition-all duration-300"
-        variant="outline"
-      > 
-      <div className='w-16 h-1 bg-gray-300 absolute top-1 rounded-full'>
+        className="w-full bg-white/95 backdrop-blur-md hover:bg-white text-neutral-900 border-t border-neutral-200/90 shadow-[0_-8px_30px_rgba(0,0,0,0.12)] rounded-t-3xl pt-2.5 pb-4 px-5 transition-all duration-300 cursor-pointer flex flex-col items-center select-none"
+      >
+        {/* Subtle Drag Handle */}
+        <div className="w-10 h-1 bg-neutral-300 rounded-full mb-2.5 transition-colors group-hover:bg-neutral-400" />
 
-      </div>
         <div className="flex items-center justify-between w-full">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-villa-primary/10 rounded-full flex items-center justify-center">
-              <Home className="w-5 h-5 text-villa-primary" />
+            <div className="w-9 h-9 bg-orange-50 text-[#ff6900] rounded-full flex items-center justify-center border border-orange-200/80 shrink-0">
+              <List className="w-4 h-4" />
             </div>
+
             <div className="text-left">
-              <div className="text-lg font-bold text-villa-text">
-                {count > 1 ? `${count} Properties`:`${count} Property`} 
+              <div className="text-sm font-bold text-neutral-900 leading-tight flex items-center gap-1.5">
+                <span>
+                  {count > 1 ? `${count} Stays found` : `${count} Stay found`}
+                </span>
+                {count > 0 && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                )}
               </div>
               {location && (
-                <div className="text-sm text-villa-text-muted">
-                  in {location}
+                <div className="text-xs text-neutral-500 font-medium truncate flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-3 h-3 text-[#ff6900] shrink-0" />
+                  <span>in {location}</span>
                 </div>
               )}
             </div>
           </div>
-          <ChevronUp 
-            className={`w-5 h-5 text-villa-primary hidden transition-transform duration-200 ${
-              isDrawerOpen ? 'rotate-180' : ''
-            }`} 
-          />
+
+          <div className="flex items-center gap-1.5 bg-neutral-100 hover:bg-orange-50 text-neutral-700 hover:text-[#ff6900] px-3 py-1.5 rounded-full text-xs font-bold transition-colors">
+            <span>{isDrawerOpen ? "Map" : "View List"}</span>
+            <ChevronUp
+              className={`w-4 h-4 transition-transform duration-300 ${
+                isDrawerOpen ? "rotate-180" : ""
+              }`}
+            />
+          </div>
         </div>
-      </Button>
+      </button>
     </div>
   );
-};
+};

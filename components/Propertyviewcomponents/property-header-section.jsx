@@ -16,175 +16,108 @@ import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const villa = useVilla();
-  const basePrice =
-    Number(villa?.basePricePerNight) ||
-    Number(villa?.pricing?.weekdayPrice) ||
-    Number(villa?.pricing?.weekendPrice) ||
-    0;
-  const taxes = Math.round(basePrice * 0.18);
-  const totalPerNight = basePrice + taxes;
 
   const allAmenities = villa?.amenities || [];
-
   const displayedAmenities = showAllAmenities
     ? allAmenities
     : allAmenities.slice(0, 5);
-
   const remainingCount = Math.max(0, (allAmenities.length || 0) - 5);
 
   return (
-    <div id="overview" className="bg-white min-h-[400px] relative">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
-          <div className="flex-1">
-            {/* Property Title & Location */}
-            <div className="mb-6">
-              <h1 className="text-3xl lg:text-3xl font-bold text-gray-900 mb-3 tracking-tight drop-shadow-lg">
-                {villa?.name} - {villa?.address?.addressLine}
-              </h1>
-              <div className="flex items-center gap-2 text-gray-600">
-                <FaMapMarkerAlt className="w-5 h-5 text-black" />
-                <span className="text-sm font-medium drop-shadow">
-                  {villa?.address?.area}, {villa?.address?.city}
-                </span>
-              </div>
-            </div>
-
-            {/* Rating & Reviews */}
-            <div className="flex items-center gap-6 mb-8">
-              <Badge
-                variant="secondary"
-                className="bg-white/20 backdrop-blur-sm text-black border-white/30 px-3 py-1.5"
-              >
-                <FaAward className="w-4 h-4 mr-1.5 text-black" />
-                Like a 5⭐ Hotel
-              </Badge>
-
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <FaStar className="w-5 h-5 text-amber-400" />
-                  <span className="font-bold text-lg text-black drop-shadow">
-                    {villa?.averageRating}
-                  </span>
-                  <span className="text-black/80">/5</span>
-                </div>
-                <Button
-                  variant="link"
-                  className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow"
-                >
-                  {villa?.totalReviews} Reviews
-                </Button>
-              </div>
-            </div>
-
-            {/* Property Details Grid */}
-            <div className="flex flex-wrap items-center gap-3 mb-8">
-              <Badge
-                variant="secondary"
-                className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-              >
-                <FaUsers className="w-4 h-4 mr-2 text-black" />
-                Up to {villa?.maxCapacity} Guests
-              </Badge>
-              {villa?.bhkType && (
-                <Badge
-                  variant="secondary"
-                  className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-                >
-                  <FaHome className="w-4 h-4 mr-2 text-black" />
-                  {villa.bhkType}
-                </Badge>
-              )}
-              {villa?.topamenities?.slice(0, 3).map((amenity, index) => (
-                <Badge
-                  key={index}
-                  variant="secondary"
-                  className="bg-gray-100 text-gray-800 px-4 py-2 rounded-full"
-                >
-                  <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-2 text-black" />
-                  {amenity}
-                </Badge>
-              ))}
-            </div>
-
-            {/* Great For Section */}
-            {/* <div className="mb-8">
-              <div className="flex items-center gap-3">
-                <span className="text-lg font-medium text-gray-900">Great for:</span>
-                <div className="flex items-center gap-2">
-                  <FaMountain className="w-5 h-5 text-gray-600" />
-                  <span className="text-gray-800 font-medium">Mountain Retreat</span>
-                </div>
-              </div>
-            </div> */}
-
-            {/* Premium Amenities */}
-            <div className="flex flex-wrap items-center gap-3 w-full">
-              {displayedAmenities.map((amenity, index) => (
-                <Badge
-                  key={index}
-                  variant="outline"
-                  className="bg-gray-200 border-white text-black px-3 py-2 rounded-md hover:bg-gray-300"
-                >
-                  <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-2 text-black" />
-                  {amenity}
-                </Badge>
-              ))}
-              <Button
-                variant="link"
-                className="text-blue-600 hover:text-blue-800 p-0 h-auto font-medium"
-                onClick={() => setShowAllAmenities(!showAllAmenities)}
-              >
-                {showAllAmenities
-                  ? "Show Less"
-                  : `+${remainingCount} Amenities`}
-              </Button>
-            </div>
-          </div>
-
-          <div className="lg:w-80 flex-shrink-0">
-            <div className="border-white border bg-gray-200 rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all hover:bg-white">
-              <div className="text-center">
-                <div className="mb-4">
-                  <div className="flex items-baseline justify-center gap-1">
-                    <span className="text-4xl font-bold text-gray-900">
-                      ₹{basePrice.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Per Night + Taxes
-                  </p>
-                </div>
-
-                <div className="space-y-3 text-sm text-gray-600">
-                  <div className="flex justify-between">
-                    <span>Base price </span>
-                    <span>₹{basePrice.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Service fee</span>
-                    <span>0</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Cleaning fee</span>
-                    <span>0</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Taxes</span>
-                    <span>₹{taxes.toLocaleString("en-IN")}</span>
-                  </div>
-                  <hr className="border-gray-200" />
-                  <div className="flex justify-between font-semibold text-gray-900">
-                    <span>Total per night</span>
-                    <span>
-                      ₹{totalPerNight.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div id="overview" className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-150 shadow-xs relative">
+      {/* Property Title & Location */}
+      <div className="mb-5">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 mb-2.5 tracking-tight">
+          {villa?.name} {villa?.address?.addressLine ? `- ${villa.address.addressLine}` : ""}
+        </h1>
+        <div className="flex items-center gap-2 text-gray-600">
+          <FaMapMarkerAlt className="w-4 h-4 text-[#ff6900] flex-shrink-0" />
+          <span className="text-sm font-medium text-gray-700">
+            {villa?.address?.area ? `${villa.address.area}, ` : ""}{villa?.address?.city || "Destination"}
+          </span>
         </div>
+      </div>
+
+      {/* Rating & Reviews */}
+      <div className="flex items-center gap-4 mb-6 flex-wrap">
+        <Badge
+          variant="secondary"
+          className="bg-amber-50/80 text-amber-900 border border-amber-200/70 px-3.5 py-1.5 rounded-full font-semibold shadow-xs"
+        >
+          <FaAward className="w-4 h-4 mr-1.5 text-amber-600" />
+          Like a 5⭐ Hotel
+        </Badge>
+
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200/80">
+            <FaStar className="w-4 h-4 text-amber-400" />
+            <span className="font-bold text-base text-gray-900">
+              {villa?.averageRating || "4.8"}
+            </span>
+            <span className="text-gray-400 text-xs">/5</span>
+          </div>
+          <Button
+            variant="link"
+            className="text-gray-700 hover:text-[#ff6900] p-0 h-auto font-medium text-sm transition-colors underline-offset-4 hover:underline"
+          >
+            {villa?.totalReviews || 0} Verified Reviews
+          </Button>
+        </div>
+      </div>
+
+      {/* Property Details Badges */}
+      <div className="flex flex-wrap items-center gap-2.5 mb-6">
+        <Badge
+          variant="secondary"
+          className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+        >
+          <FaUsers className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+          Up to {villa?.maxCapacity || 10} Guests
+        </Badge>
+        {villa?.bhkType && (
+          <Badge
+            variant="secondary"
+            className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+          >
+            <FaHome className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {villa.bhkType}
+          </Badge>
+        )}
+        {villa?.topamenities?.slice(0, 3).map((amenity, index) => (
+          <Badge
+            key={index}
+            variant="secondary"
+            className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+          >
+            <CustomAmenityIcon name={amenity} className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {amenity}
+          </Badge>
+        ))}
+      </div>
+
+      {/* Premium Amenities Preview */}
+      <div className="flex flex-wrap items-center gap-2.5 w-full pt-4 border-t border-neutral-100">
+        {displayedAmenities.map((amenity, index) => (
+          <Badge
+            key={index}
+            variant="outline"
+            className="bg-neutral-50 border border-neutral-200/80 text-gray-800 px-3.5 py-2 rounded-xl hover:border-orange-200 hover:bg-orange-50/40 transition-all font-normal text-xs"
+          >
+            <CustomAmenityIcon name={amenity} className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {amenity}
+          </Badge>
+        ))}
+        {remainingCount > 0 && (
+          <Button
+            variant="link"
+            className="text-[#ff6900] hover:text-[#e05d00] p-0 h-auto font-semibold text-sm transition-colors ml-2"
+            onClick={() => setShowAllAmenities(!showAllAmenities)}
+          >
+            {showAllAmenities
+              ? "Show Less"
+              : `+${remainingCount} More Amenities`}
+          </Button>
+        )}
       </div>
     </div>
   );

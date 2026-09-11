@@ -11,8 +11,8 @@ const initialState = {
   selectedCategoryImage: null,
 
   selectedSubtype: { type: "", quantity: 1 },
-  checkin: today.format(),
-  checkout: tomorrow.format(),
+  checkin: null,
+  checkout: null,
   selectedGuest: {
     adults: 1,
     childrenn: 0,

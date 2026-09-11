@@ -6,14 +6,19 @@ import {
   Users,
   Home,
   ChevronDown,
+  ChevronRight,
   Star,
   Gift,
+  Tag,
+  Receipt,
   Minus,
   Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { DualDatePicker } from "../Navbarcomponents/dual-date-picker";
+import { GuestSelector } from "../Navbarcomponents/guest-selector";
 import {
   Popover,
   PopoverContent,
@@ -59,10 +64,7 @@ import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function StickyBookingWidget() {
-  const [stickyState, setStickyState] = useState("normal");
-  const [dateRange, setDateRange] = useState();
-  const [guests, setGuests] = useState({ adults: 2, children: 0 });
-  const [rooms, setRooms] = useState(5);
+  const [datePopoverOpen, setDatePopoverOpen] = useState(false);
   const [couponCode, setCouponCode] = useState("");
   const [couponError, setCouponError] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -71,37 +73,57 @@ export default function StickyBookingWidget() {
   const villa = useVilla();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { checkin, checkout, selectedGuest, selectedSubtype, appliedCoupon } =
+  const { checkin, checkout, selectedGuest, appliedCoupon } =
     useSelector((state) => state.booking);
+
+  const [widgetFocusedSide, setWidgetFocusedSide] = useState(() => {
+    return checkin && !checkout ? "checkout" : "checkin";
+  });
+
+  useEffect(() => {
+    if (checkin && !checkout) {
+      setWidgetFocusedSide("checkout");
+    } else if (!checkin) {
+      setWidgetFocusedSide("checkin");
+    }
+  }, [checkin, checkout]);
 
   const holidayDates = useHolidayDates();
 
-  const checkInDate = checkin ? new Date(checkin) : new Date();
-  const checkOutDate = checkout
-    ? new Date(checkout)
-    : new Date(Date.now() + 24 * 60 * 60 * 1000);
+  const areDatesSelected = Boolean(checkin && checkout);
+  const checkInDate = checkin ? new Date(checkin) : null;
+  const checkOutDate = checkout ? new Date(checkout) : null;
 
   const msPerDay = 1000 * 60 * 60 * 24;
-  const nights = Math.max(
-    1,
-    Math.round((+checkOutDate - +checkInDate) / msPerDay)
-  );
+  const nights = (checkInDate && checkOutDate)
+    ? Math.max(1, Math.round((+checkOutDate - +checkInDate) / msPerDay))
+    : 1;
 
-  // Compute the base amount using weekday/weekend/holiday pricing with dynamic holiday dates
   const villaPricing = villa?.pricing ?? {};
-  const baseAmount = calculateBasePriceForRange(
-    checkInDate?.toISOString(),
-    checkOutDate?.toISOString(),
-    villaPricing,
-    holidayDates
-  );
+  const basePricePerNight =
+    Number(villa?.basePricePerNight) ||
+    Number(villaPricing?.weekdayPrice) ||
+    Number(villaPricing?.weekendPrice) ||
+    0;
 
-  const nightBreakdown = calculateNightBreakdown(
-    checkInDate?.toISOString(),
-    checkOutDate?.toISOString(),
-    villaPricing,
-    holidayDates
-  );
+  // Compute the base amount using range pricing if dates selected, else 1-night base price
+  const baseAmount = areDatesSelected
+    ? calculateBasePriceForRange(
+        checkInDate?.toISOString(),
+        checkOutDate?.toISOString(),
+        villaPricing,
+        holidayDates
+      )
+    : basePricePerNight;
+
+  const nightBreakdown = areDatesSelected
+    ? calculateNightBreakdown(
+        checkInDate?.toISOString(),
+        checkOutDate?.toISOString(),
+        villaPricing,
+        holidayDates
+      )
+    : [];
 
   // Pass base=1 night multiplier since calculateBasePriceForRange already totals all nights
   const { discountAmount, finalTotal, taxAmount } = calculateBookingPrice(
@@ -110,12 +132,29 @@ export default function StickyBookingWidget() {
     appliedCoupon
   );
 
-  const totalGuests = (selectedGuest?.adults || 0) + (selectedGuest?.childrenn || 0);
+  const totalGuests = (selectedGuest?.adults || 1) + (selectedGuest?.childrenn || 0);
   const maxCapacity = Number(villa?.maxCapacity || 10);
   const isOverCapacity = totalGuests > maxCapacity;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
+  const scrollContainerRef = useRef(null);
+  const [canScroll, setCanScroll] = useState(false);
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  const checkScrollability = () => {
+    if (scrollContainerRef.current) {
+      const { scrollHeight, clientHeight, scrollTop } = scrollContainerRef.current;
+      setCanScroll(scrollHeight > clientHeight + 6);
+      setHasScrolled(scrollTop > 15);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollability();
+    window.addEventListener("resize", checkScrollability);
+    return () => window.removeEventListener("resize", checkScrollability);
+  }, [areDatesSelected, appliedCoupon]);
 
   const defaultAvailableCoupons = [
     {
@@ -196,14 +235,18 @@ export default function StickyBookingWidget() {
     };
   }, [villa?._id]);
 
-  const applyCoupon = async (code) => {
+  const applyCoupon = async (codeOrObj) => {
+    const rawCode =
+      typeof codeOrObj === "string" ? codeOrObj : codeOrObj?.code || "";
+    if (!rawCode.trim()) return;
+
     setIsApplyingCoupon(true);
     setCouponError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 400));
 
     const coupon = couponsList.find(
-      (c) => c.code.toLowerCase() === code.toLowerCase()
+      (c) => c.code.toLowerCase() === rawCode.toLowerCase()
     );
 
     if (!coupon) {
@@ -312,452 +355,271 @@ export default function StickyBookingWidget() {
     });
   };
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (!widgetRef.current || !containerRef.current) return;
-
-      const widgetRect = widgetRef.current.getBoundingClientRect();
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const footerElement =
-        document.querySelector("footer") ||
-        document.querySelector("[data-footer]");
-
-      const scrollY = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const widgetHeight = widgetRef.current.offsetHeight;
-
-      const stickyStartPoint = 600;
-
-      let footerTop = document.body.scrollHeight;
-      if (footerElement) {
-        footerTop = footerElement.getBoundingClientRect().top + scrollY;
-      }
-
-      const stickyWidgetBottom = scrollY + windowHeight - 24;
-      const widgetWouldHitFooter =
-        stickyWidgetBottom + widgetHeight > footerTop;
-
-      let newState;
-      if (scrollY < stickyStartPoint) {
-        newState = "normal";
-      } else if (widgetWouldHitFooter) {
-        newState = "bottom";
-      } else {
-        newState = "sticky";
-      }
-
-      if (newState !== stickyState) {
-        setStickyState(newState);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    window.addEventListener("resize", handleScroll, { passive: true });
-
-    handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-      window.removeEventListener("resize", handleScroll);
-    };
-  }, [stickyState]);
-
-  const getWidgetStyles = () => {
-    switch (stickyState) {
-      case "sticky":
-        return {
-          position: "fixed",
-          top: "120px",
-          right: "0px",
-          width: "400px",
-          zIndex: 30,
-        };
-      case "bottom":
-        return {
-          position: "absolute",
-          bottom: "0",
-          right: "0",
-          width: "100%",
-        };
-      default:
-        return {
-          position: "relative",
-          width: "100%",
-        };
-    }
-  };
-
   return (
-    <div ref={containerRef} className="relative">
-      <div
-        ref={widgetRef}
-        style={getWidgetStyles()}
-        className="transition-all duration-500 ease-out transform"
-      >
-        <Card
-          className={`shadow-xl border border-gray-200 bg-white/95 backdrop-blur-sm transition-all duration-500 ease-out ${
-            stickyState === "sticky"
-              ? "shadow-none transform scale-100 bg-white/98"
-              : "shadow-none transform scale-100"
-          }`}
+    <div id="booking-widget" className="lg:sticky lg:top-[120px] z-30 w-full transition-all duration-300">
+      <Card className="shadow-xl shadow-gray-200/50 border border-gray-150 bg-white/98 backdrop-blur-md rounded-2xl flex flex-col lg:max-h-[calc(100vh-8.5rem)] overflow-hidden">
+        {/* Scrollable Upper Body with subtle custom scrollbar */}
+        <div
+          ref={scrollContainerRef}
+          onScroll={checkScrollability}
+          className="relative flex-1 overflow-y-auto p-4 sm:p-4.5 space-y-3 scrollbar-thin [scrollbar-width:thin] [scrollbar-color:#e5e7eb_transparent] [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300"
         >
-          <CardContent className="px-4">
-            {/* Date Selection */}
-            <div className="mb-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="border-2 border-gray-300 rounded-lg p-2 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
-                    <label className="text-xs font-bold text-black uppercase block mb-2 transition-all duration-300">
-                      Select Dates
-                    </label>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-3">
-                        <CalendarIcon className="w-5 h-5 text-black transition-all duration-300" />
-                        <div className="flex items-center space-x-2">
+          {/* Instant Confirmation Badge & Rating */}
+          <div className="flex items-center justify-between">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              Instant Confirmation
+            </span>
+            <div className="flex items-center space-x-1 text-xs bg-neutral-50 px-2 py-0.5 rounded-full border border-neutral-200/80">
+              <Star className="w-3.5 h-3.5 fill-current text-amber-400" />
+              <span className="font-bold text-xs text-gray-900">{villa?.averageRating || "4.8"}</span>
+              <span className="text-gray-400 text-[10px]">/5</span>
+            </div>
+          </div>
+
+          {/* Pricing Header */}
+          <div>
+            <div className="flex items-baseline space-x-2">
+              <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
+                ₹{areDatesSelected ? finalTotal.toLocaleString("en-IN") : basePricePerNight.toLocaleString("en-IN")}
+              </span>
+              <span className="text-gray-500 text-xs font-medium">
+                {areDatesSelected
+                  ? nights === 1
+                    ? "(1 night · Incl. taxes)"
+                    : `(${nights} nights · Incl. taxes)`
+                  : "Per Night + Taxes"}
+              </span>
+            </div>
+            {!areDatesSelected && (
+              <p className="text-[11px] text-amber-600 font-medium mt-0.5">
+                Select stay dates to calculate total stay price
+              </p>
+            )}
+          </div>
+
+          {/* Unified Compact Dates & Guests Selector (Airbnb Style) */}
+          <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-2xs divide-y divide-gray-150">
+            {/* Top Row: Dates */}
+            <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
+              <PopoverTrigger asChild>
+                <div
+                  onClick={() => {
+                    if (checkin && !checkout) {
+                      setWidgetFocusedSide("checkout");
+                    }
+                  }}
+                  className={`p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-neutral-50/80 ${
+                    !areDatesSelected ? "bg-amber-50/30" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                        Dates {!areDatesSelected && <span className="text-red-500">*</span>}
+                      </span>
+                      <div className="flex items-center space-x-2 mt-0.5">
+                        <CalendarIcon className="w-3.5 h-3.5 text-[#ff6900]" />
+                        <span className="text-xs sm:text-sm font-semibold text-gray-900">
                           {checkin ? (
                             <>
-                              <span className="text-sm font-medium text-black">
-                                {format(new Date(checkin), "MMM dd")}
-                              </span>
-                              {checkout && (
-                                <>
-                                  <span className="text-gray-400">→</span>
-                                  <span className="text-sm font-medium text-black">
-                                    {format(new Date(checkout), "MMM dd, yyyy")}
-                                  </span>
-                                </>
+                              {format(new Date(checkin), "MMM dd")}
+                              {checkout ? (
+                                <> → {format(new Date(checkout), "MMM dd, yyyy")}</>
+                              ) : (
+                                <span className="text-amber-600"> → Select check-out</span>
                               )}
                             </>
                           ) : (
-                            <span className="text-sm text-gray-500">
-                              Check-in → Check-out
-                            </span>
+                            <span className="text-gray-500 font-normal">Add stay dates</span>
                           )}
-                        </div>
-                      </div>
-                      <ChevronDown className="w-4 h-4 text-black" />
-                    </div>
-                  </div>
-                </PopoverTrigger>
-                <PopoverContent
-                  className="w-auto p-0 bg-white border-2 border-gray-200"
-                  align="start"
-                >
-                  <CalendarComponent
-                    mode="range"
-                    selected={{
-                      from: checkin ? new Date(checkin) : undefined,
-                      to: checkout ? new Date(checkout) : undefined,
-                    }}
-                    onSelect={(range) => {
-                      if (range?.from)
-                        dispatch(setCheckin(range.from.toISOString()));
-                      if (range?.to)
-                        dispatch(setCheckout(range.to.toISOString()));
-                    }}
-                    disabled={(date) => date < new Date()}
-                    numberOfMonths={2}
-                    className="bg-white"
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Guests and Rooms Selection */}
-            <div className="grid grid-cols-1 gap-3 mb-6">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <div className="border-2 border-gray-300 rounded-lg p-3 cursor-pointer hover:border-black transition-all duration-300 hover:shadow-md bg-white">
-                    <label className="text-xs font-bold text-black uppercase block mb-1 transition-all duration-300">
-                      Guests
-                    </label>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <Users className="w-4 h-4 text-black transition-all duration-300" />
-                        <span className="text-sm font-medium text-black transition-all duration-300">
-                          {selectedGuest.adults} Adults,{" "}
-                          {selectedGuest.childrenn} Children
                         </span>
                       </div>
-                      <ChevronDown className="w-4 h-4 text-black transition-transform duration-300" />
                     </div>
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
                   </div>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 bg-white border-2 border-gray-200">
-                  <div className="space-y-4">
-                    <div className="text-xs text-gray-500 font-medium">
-                      Property capacity: Up to {maxCapacity} guests
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-bold text-black">Adults</Label>
-                        <p className="text-sm text-gray-600">
-                          Ages 13 or above
-                        </p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            dispatch(
-                              updateGuestCount({
-                                type: "adults",
-                                value: Math.max(1, selectedGuest.adults - 1),
-                              })
-                            )
-                          }
-                          disabled={selectedGuest.adults <= 1}
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-
-                        <span>{selectedGuest.adults}</span>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (totalGuests < maxCapacity) {
-                              dispatch(
-                                updateGuestCount({
-                                  type: "adults",
-                                  value: selectedGuest.adults + 1,
-                                })
-                              );
-                            }
-                          }}
-                          disabled={totalGuests >= maxCapacity}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <Label className="font-bold text-black">Children</Label>
-                        <p className="text-sm text-gray-600">Ages 2-12</p>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            dispatch(
-                              updateGuestCount({
-                                type: "childrenn",
-                                value: Math.max(0, selectedGuest.childrenn - 1),
-                              })
-                            )
-                          }
-                        >
-                          <Minus className="w-4 h-4" />
-                        </Button>
-
-                        <span>{selectedGuest.childrenn}</span>
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            if (totalGuests < maxCapacity) {
-                              dispatch(
-                                updateGuestCount({
-                                  type: "childrenn",
-                                  value: selectedGuest.childrenn + 1,
-                                })
-                              );
-                            }
-                          }}
-                          disabled={totalGuests >= maxCapacity}
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-
-            {/* Coupon Code Section */}
-            <div className="mb-4">
-              {!appliedCoupon && (
-                <div
-                  className="mb-3 p-4 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-between"
-                  data-main-coupon-input
-                >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-gray-900 font-bold text-sm">%</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-sm text-white">
-                        VILLACAMP10
-                      </div>
-                      <div className="text-gray-300 text-sm">
-                        Apply to save upto ₹4,000
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    className="bg-white hover:bg-gray-100 text-gray-900 font-semibold px-4 py-2"
-                    onClick={() => applyCoupon("VILLACAMP10")}
-                  >
-                    Apply
-                  </Button>
                 </div>
-              )}
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto p-0 border-0 bg-transparent shadow-none z-50"
+                align="end"
+                sideOffset={8}
+                collisionPadding={16}
+              >
+                <DualDatePicker
+                  checkinDate={checkin}
+                  checkoutDate={checkout}
+                  onCheckinSelect={(date) => {
+                    dispatch(setCheckin(date));
+                    dispatch(setCheckout(null));
+                    setWidgetFocusedSide("checkout");
+                  }}
+                  onCheckoutSelect={(date) => {
+                    dispatch(setCheckout(date));
+                  }}
+                  minDate={new Date()}
+                  isMobile={false}
+                  timezone="Asia/Kolkata"
+                  onClose={() => setDatePopoverOpen(false)}
+                  focusedSide={widgetFocusedSide}
+                  setFocusedSide={setWidgetFocusedSide}
+                />
+              </PopoverContent>
+            </Popover>
 
-              <div className="flex items-center justify-between mb-3">
+            {/* Bottom Row: Guests */}
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-neutral-50/80">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                        Guests
+                      </span>
+                      <div className="flex items-center space-x-2 mt-0.5">
+                        <Users className="w-3.5 h-3.5 text-[#ff6900]" />
+                        <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                          {selectedGuest?.adults || 1} Adults, {selectedGuest?.childrenn || 0} Children
+                          {selectedGuest?.pets > 0 ? `, ${selectedGuest.pets} Pet${selectedGuest.pets > 1 ? "s" : ""}` : ""}
+                          {selectedGuest?.infants > 0 ? `, ${selectedGuest.infants} Inf.` : ""}
+                        </span>
+                      </div>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                  </div>
+                </div>
+              </PopoverTrigger>
+              <PopoverContent
+                className="w-auto p-0 border-0 bg-transparent shadow-none z-50"
+                align="end"
+              >
+                <GuestSelector
+                  adults={selectedGuest?.adults || 1}
+                  childrenn={selectedGuest?.childrenn || 0}
+                  infants={selectedGuest?.infants || 0}
+                  pets={selectedGuest?.pets || 0}
+                  onGuestChange={(type, value) => {
+                    dispatch(updateGuestCount({ type, value }));
+                  }}
+                  isMobile={false}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+
+          {/* Sleek, High-Converting Coupon Strip */}
+          <div>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl text-xs">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <Tag className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                  <span className="font-bold text-emerald-950 truncate">{appliedCoupon.code}</span>
+                  <span className="text-emerald-700 font-semibold text-[11px]">
+                    (-₹{discountAmount.toLocaleString("en-IN")} applied)
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeCouponHandler}
+                  className="text-red-500 hover:text-red-700 font-semibold text-xs cursor-pointer ml-2"
+                >
+                  Remove
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between px-3 py-2 bg-gradient-to-r from-orange-50 to-amber-50/60 border border-orange-200/70 rounded-xl">
+                <div className="flex items-center space-x-2 min-w-0">
+                  <Gift className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                  <span className="text-xs font-semibold text-gray-800 truncate">Coupons & Offers</span>
+                  <span className="text-[10px] font-bold bg-[#ff6900]/10 text-[#ff6900] px-1.5 py-0.5 rounded-full">
+                    Up to 15% OFF
+                  </span>
+                </div>
                 <Sheet>
                   <SheetTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="text-black hover:text-gray-700 p-0 font-bold"
+                    <button
+                      type="button"
+                      className="text-xs font-bold text-[#ff6900] hover:text-[#e05d00] flex items-center gap-0.5 cursor-pointer ml-2"
                     >
-                      <Gift className="w-4 h-4 mr-2" />
-                      View more coupons →
-                    </Button>
+                      <span>View (3)</span>
+                      <ChevronRight className="w-3 h-3" />
+                    </button>
                   </SheetTrigger>
-                  <SheetContent
-                    side="right"
-                    className="w-[400px] sm:w-[540px] bg-white border-l-2 border-gray-200 p-0"
-                    data-sheet-content
-                  >
-                    <div className="flex flex-col h-full">
-                      <SheetHeader className="border-b-2 border-gray-200 p-6 pb-4 bg-white">
-                        <SheetTitle className="text-lg font-bold text-black">
-                          Coupons and Offers
-                        </SheetTitle>
-                      </SheetHeader>
+                  <SheetContent side="right" className="w-full sm:max-w-md p-0 bg-white">
+                    <SheetHeader className="p-6 border-b border-gray-100">
+                      <SheetTitle className="text-xl font-bold text-gray-900 flex items-center space-x-2">
+                        <Gift className="w-5 h-5 text-[#ff6900]" />
+                        <span>Available Coupons</span>
+                      </SheetTitle>
+                    </SheetHeader>
 
-                      <ScrollArea className="flex-1 px-6 bg-white h-[80vh]">
-                        <div className="py-3 space-y-6">
-                          <div className="space-y-4" data-coupon-input>
-                            <div className="relative">
-                              <Input
-                                placeholder="Enter coupon code"
-                                value={couponCode}
-                                onChange={(e) =>
-                                  setCouponCode(e.target.value.toUpperCase())
-                                }
-                                className="h-12 text-base border-2 border-gray-300 bg-white text-black rounded-xl focus:border-black focus:ring-2 focus:ring-gray-200 transition-all duration-200 shadow-sm placeholder:text-gray-500"
-                              />
-                              <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                                <Gift className="w-5 h-5 text-gray-400" />
-                              </div>
-                            </div>
-                            <Button
-                              className="w-full bg-black  text-white h-10 text-base font-bold rounded-xl  transition-all hover:bg-black"
-                              onClick={() => applyCoupon(couponCode)}
-                              disabled={!couponCode || isApplyingCoupon}
-                            >
-                              {isApplyingCoupon ? (
-                                <div className="flex items-center space-x-2">
-                                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                                  <span>APPLYING...</span>
-                                </div>
-                              ) : (
-                                "APPLY"
-                              )}
-                            </Button>
-                            {couponError && (
-                              <div className="bg-red-50 border-2 border-red-200 rounded-lg p-3">
-                                <p className="text-sm text-red-600 font-medium">
-                                  {couponError}
-                                </p>
-                              </div>
-                            )}
-                          </div>
+                    <div className="p-6">
+                      <div className="flex gap-2 mb-6">
+                        <Input
+                          placeholder="Enter coupon code"
+                          value={couponCode}
+                          onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                          className="flex-1 uppercase font-semibold text-sm"
+                        />
+                        <Button
+                          onClick={() => applyCoupon(couponCode)}
+                          disabled={isApplyingCoupon || !couponCode.trim()}
+                          className="bg-[#ff6900] hover:bg-[#e05d00] text-white font-bold px-5"
+                        >
+                          {isApplyingCoupon ? "Applying..." : "Apply"}
+                        </Button>
+                      </div>
 
-                          <div className="border-t-2 border-gray-200 pt-6">
-                            <div className="flex items-center space-x-4 mb-6">
-                              <h3 className="text-sm font-bold text-black">
-                                Offers Available
-                              </h3>
-                              <div className="flex items-center space-x-3 text-sm">
-                                <span className="px-3  bg-gray-100 text-black rounded-full font-bold border-2 border-gray-200">
-                                  Prime Discounts
-                                </span>
-                              </div>
-                            </div>
+                      {couponError && (
+                        <div className="text-xs text-red-600 mb-4 p-2.5 bg-red-50 rounded-xl border border-red-200 flex items-center space-x-1.5">
+                          <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                          <span>{couponError}</span>
+                        </div>
+                      )}
 
-                            <div className="space-y-4 pb-6">
-                              {couponsList.map((coupon, index) => (
-                                <Card
-                                  key={coupon.code}
-                                  className="p-6 border border-white bg-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 "
-                                >
-                                  <div className="space-y-2">
-                                    <div className="flex items-start justify-between">
-                                      <div className="flex items-center space-x-2">
-                                        <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-sm">
-                                            %
-                                          </span>
-                                        </div>
-                                        <div>
-                                          <h4 className="font-bold text-black text-sm">
-                                            {coupon.title}
-                                          </h4>
-                                          <p className="text-xs text-gray-600">
-                                            valid till: {coupon.validUntil}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="text-right">
-                                        <div className="text-sm font-bold text-black">
-                                          {coupon.type === "percentage"
-                                            ? `${coupon.discount}% OFF`
-                                            : `₹${coupon.discount} OFF`}
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                      {coupon.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between">
-                                      <div className="bg-white border-2 border-dashed border-gray-400 px-4 py-2 rounded-lg">
-                                        <span className="font-mono text-sm font-bold text-black">
-                                          {coupon.code}
-                                        </span>
-                                      </div>
-                                      <Button
-                                        className={`px-6 py-2 rounded-lg font-bold transition-all duration-200 ${
-                                          appliedCoupon?.code === coupon.code
-                                            ? "bg-gray-100 text-gray-500 border-2 border-gray-300"
-                                            : "bg-black hover:bg-gray-800 text-white shadow-md hover:shadow-lg transform hover:scale-105"
-                                        }`}
-                                        onClick={() =>
-                                          applyCouponFromSheet(coupon)
-                                        }
-                                        disabled={
-                                          appliedCoupon?.code === coupon.code
-                                        }
-                                      >
-                                        {appliedCoupon?.code === coupon.code ? (
-                                          <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                              <span className="text-white text-xs">
-                                                ✓
-                                              </span>
-                                            </div>
-                                            <span>APPLIED</span>
-                                          </div>
-                                        ) : (
-                                          "APPLY"
-                                        )}
-                                      </Button>
-                                    </div>
+                      <ScrollArea className="h-[calc(100vh-260px)] pr-2">
+                        <div className="space-y-4">
+                          <h4 className="font-bold text-sm text-gray-900">Coupons for you</h4>
+                          <div className="space-y-3">
+                            {defaultAvailableCoupons.map((coupon) => (
+                              <Card
+                                key={coupon.code}
+                                className={`p-4 border transition-all duration-200 ${
+                                  appliedCoupon?.code === coupon.code
+                                    ? "border-emerald-300 bg-emerald-50/50 shadow-xs"
+                                    : "border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 shadow-xs"
+                                }`}
+                              >
+                                <div className="space-y-2">
+                                  <div className="flex items-center justify-between">
+                                    <h5 className="font-bold text-sm text-gray-900">{coupon.title}</h5>
+                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                      {coupon.type === "percentage"
+                                        ? `${coupon.discount}% OFF`
+                                        : `₹${coupon.discount} OFF`}
+                                    </span>
                                   </div>
-                                </Card>
-                              ))}
-                            </div>
+                                  <p className="text-xs text-gray-600">{coupon.description}</p>
+                                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                    <span className="font-mono text-xs font-bold bg-neutral-100 text-neutral-800 px-2.5 py-1 rounded-md border border-neutral-200">
+                                      {coupon.code}
+                                    </span>
+                                    <Button
+                                      size="sm"
+                                      className={`px-5 py-2 rounded-xl font-bold text-xs transition-all duration-200 ${
+                                        appliedCoupon?.code === coupon.code
+                                          ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
+                                          : "bg-[#ff6900] hover:bg-[#e05d00] text-white shadow-xs hover:shadow-md"
+                                      }`}
+                                      onClick={() => applyCouponFromSheet(coupon)}
+                                      disabled={appliedCoupon?.code === coupon.code}
+                                    >
+                                      {appliedCoupon?.code === coupon.code ? "✓ APPLIED" : "APPLY"}
+                                    </Button>
+                                  </div>
+                                </div>
+                              </Card>
+                            ))}
                           </div>
                         </div>
                       </ScrollArea>
@@ -765,133 +627,182 @@ export default function StickyBookingWidget() {
                   </SheetContent>
                 </Sheet>
               </div>
+            )}
+          </div>
 
-              {appliedCoupon ? (
-                <div className="flex items-center justify-between p-4 bg-gray-900 border border-gray-700 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <span className="text-gray-900 font-bold text-sm">%</span>
-                    </div>
-                    <div>
-                      <div className="font-semibold text-sm text-white">
-                        {appliedCoupon.code}
-                      </div>
-                      <div className="text-gray-300 text-sm">
-                        ₹{discountAmount.toLocaleString()} Discount applied!
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={removeCouponHandler}
-                    className="text-red-400 hover:text-red-300 font-medium hover:bg-red-900/20"
-                  >
-                    Remove
-                  </Button>
-                </div>
-              ) : null}
+          {/* Detailed Price Breakdown */}
+          <div className="bg-neutral-50/90 rounded-xl p-3 border border-neutral-200/80 space-y-2 text-xs">
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="font-medium">
+                Base price {areDatesSelected ? (nights === 1 ? "(1 night)" : `(${nights} nights)`) : "(1 night)"}
+              </span>
+              <span className="font-bold text-gray-900">₹{baseAmount.toLocaleString("en-IN")}</span>
             </div>
-
-            {/* Best Price Banner */}
-            <div className="flex items-center justify-between transition-all duration-300">
-              <div>
-                {appliedCoupon && (
-                  <div className="flex items-center space-x-2">
-                    <span className="text-gray-400 line-through text-sm transition-all duration-300">
-                      ₹{(finalTotal + discountAmount).toLocaleString("en-IN")}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-baseline space-x-1">
-                  <span className="text-xl font-bold text-black transition-all duration-300">
-                    ₹{finalTotal.toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-gray-600 text-sm transition-all duration-300">
-                    {nights === 1 ? "(1 night)" : `(${nights} nights)`}
-                  </span>
-                </div>
-                <span className="text-gray-500 text-xs transition-all duration-300">
-                  Incl. taxes · {totalGuests} {totalGuests === 1 ? "guest" : "guests"}
-                </span>
-                {appliedCoupon && (
-                  <div className="text-green-600 text-xs font-medium">
-                    Saved ₹{discountAmount.toLocaleString("en-IN")} with{" "}
-                    {appliedCoupon.code}
-                  </div>
-                )}
-              </div>
-              <div className="flex items-center space-x-1 text-sm transition-all duration-300">
-                <Star className="w-4 h-4 fill-current text-yellow-400 transition-all duration-300" />
-                <span className="font-medium text-black">4.8</span>
-                <span className="text-gray-500">/5</span>
-              </div>
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="font-medium">Service fee</span>
+              <span className="font-bold text-emerald-600">Free</span>
             </div>
-
-            {/* Capacity & Availability Alerts */}
-            {isOverCapacity && (
-              <div className="mt-3 p-2.5 bg-red-50 border border-red-200 rounded-lg flex items-center space-x-2 text-red-700 text-xs">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-500" />
-                <span>Max property capacity is {maxCapacity} guests. Please reduce guest count to proceed.</span>
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="font-medium">Cleaning fee</span>
+              <span className="font-bold text-emerald-600">Free</span>
+            </div>
+            {appliedCoupon && discountAmount > 0 && (
+              <div className="flex justify-between items-center text-emerald-600 font-semibold">
+                <span>Coupon discount ({appliedCoupon.code})</span>
+                <span>-₹{discountAmount.toLocaleString("en-IN")}</span>
               </div>
             )}
-            {availabilityError && (
-              <div className="mt-3 p-2.5 bg-amber-50 border border-amber-200 rounded-lg flex items-center space-x-2 text-amber-800 text-xs">
-                <AlertCircle className="w-4 h-4 flex-shrink-0 text-amber-600" />
-                <span>{availabilityError}</span>
-              </div>
-            )}
+            <div className="flex justify-between items-center text-gray-600">
+              <span className="font-medium">Taxes & GST (18%)</span>
+              <span className="font-bold text-gray-900">₹{taxAmount.toLocaleString("en-IN")}</span>
+            </div>
+          </div>
+        </div>
 
-            {/* Reserve Button */}
-            <Button
-              onClick={async () => {
-                if (isOverCapacity) return;
-                setAvailabilityError("");
-                setAvailabilityChecking(true);
-                try {
-                  const avail = await Checkvillaavailability({
-                    propertyId: villa?._id,
-                    checkIn: checkInDate.toISOString(),
-                    checkOut: checkOutDate.toISOString(),
+        {/* Pinned Bottom CTA Section - Fixed at the bottom of the card, ALWAYS visible without scrolling */}
+        <div className="shrink-0 border-t border-gray-150 bg-white/98 backdrop-blur-sm p-4 pt-3 shadow-[0_-4px_16px_rgba(0,0,0,0.05)] rounded-b-2xl">
+          {/* Scroll Affordance Button placed cleanly at the bottom without overlapping any content */}
+          {canScroll && !hasScrolled && (
+            <button
+              type="button"
+              onClick={() => {
+                if (scrollContainerRef.current) {
+                  scrollContainerRef.current.scrollTo({
+                    top: scrollContainerRef.current.scrollHeight,
+                    behavior: "smooth",
                   });
-                  if (avail && avail.available === false) {
-                    setAvailabilityError(avail.message || "This villa is not available for the selected dates.");
-                    setAvailabilityChecking(false);
-                    return;
-                  }
-                } catch (e) {
-                  console.warn("Availability pre-check failed:", e);
                 }
-                setAvailabilityChecking(false);
-
-                dispatch(setPropertyId(villa?._id));
-                dispatch(setcategoryId(villa?.category));
-                dispatch(setOwnerId(villa?.owner));
-                dispatch(setPropertyType("Villa"));
-                router.push("/checkout");
               }}
-              disabled={isOverCapacity || finalTotal <= 0 || availabilityChecking}
-              className="w-full mt-2 bg-black hover:bg-gray-800 text-white py-4 rounded-lg mb-4 transition-all duration-300 hover:shadow-lg hover:transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+              className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 mb-2.5 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-orange-100/70 hover:to-amber-100/70 text-[#ff6900] text-[11px] font-bold rounded-xl border border-orange-200/80 transition-all cursor-pointer shadow-2xs"
             >
-              {availabilityChecking
-                ? "Checking Availability..."
-                : isOverCapacity
-                ? `Max ${maxCapacity} Guests Allowed`
-                : "Reserve Now"}
-            </Button>
-          </CardContent>
-        </Card>
+              <span>View coupons & calculation</span>
+              <ChevronDown className="w-3 h-3 animate-bounce" />
+            </button>
+          )}
 
-        {/* Sticky state indicator */}
-        <div
-          className={`absolute -top-1 left-0 right-0 h-0.5 rounded-full transition-all duration-500 ease-out ${
-            stickyState === "sticky"
-              ? "opacity-100 transform scale-x-100"
-              : "opacity-0 transform scale-x-0"
-          }`}
-          style={{ transformOrigin: "center" }}
-        />
-      </div>
+          {/* Total Row with Price Breakdown Link */}
+          <div className="flex justify-between items-baseline mb-2.5">
+            <div>
+              <span className="font-bold text-gray-900 text-sm block">
+                {areDatesSelected
+                  ? nights === 1
+                    ? "Total (1 night)"
+                    : `Total (${nights} nights)`
+                  : "Total per night"}
+              </span>
+              <div className="flex items-center gap-1.5 text-[11px] text-gray-500">
+                <span>{totalGuests} {totalGuests === 1 ? "guest" : "guests"}{selectedGuest?.pets > 0 ? `, ${selectedGuest.pets} pet` : ""}</span>
+                <span>·</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollTo({
+                        top: scrollContainerRef.current.scrollHeight,
+                        behavior: "smooth",
+                      });
+                    }
+                  }}
+                  className="font-medium text-[#ff6900] hover:underline cursor-pointer flex items-center gap-0.5"
+                >
+                  <Receipt className="w-3 h-3 inline" />
+                  <span>Price details</span>
+                </button>
+              </div>
+            </div>
+            <span className="font-black text-xl text-[#ff6900] tracking-tight">
+              ₹{finalTotal.toLocaleString("en-IN")}
+            </span>
+          </div>
+
+          {/* Capacity & Availability Alerts */}
+          {isOverCapacity && (
+            <div className="mb-2.5 p-2 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2 text-red-700 text-xs">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
+              <span className="text-[11px] leading-tight">Max property capacity is {maxCapacity} guests. Please reduce guest count to proceed.</span>
+            </div>
+          )}
+          {availabilityError && (
+            <div className="mb-2.5 p-2 bg-amber-50 border border-amber-200 rounded-xl flex items-center space-x-2 text-amber-800 text-xs">
+              <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-amber-600" />
+              <span className="text-[11px] leading-tight">{availabilityError}</span>
+            </div>
+          )}
+
+          {/* Reserve / Proceed Button with strict Date Selection validation */}
+          <Button
+            onClick={async () => {
+              if (isOverCapacity) return;
+
+              // Strictly enforce check-in and check-out selection
+              if (!checkin || !checkout) {
+                setDatePopoverOpen(true);
+                if (!checkin) {
+                  setWidgetFocusedSide("checkin");
+                } else {
+                  setWidgetFocusedSide("checkout");
+                }
+                setAvailabilityError("Please select both check-in and check-out dates to proceed.");
+                return;
+              }
+
+              setAvailabilityError("");
+              setAvailabilityChecking(true);
+              try {
+                const avail = await Checkvillaavailability({
+                  propertyId: villa?._id,
+                  checkIn: checkInDate.toISOString(),
+                  checkOut: checkOutDate.toISOString(),
+                });
+                if (avail && avail.available === false) {
+                  setAvailabilityError(avail.message || "This villa is not available for the selected dates.");
+                  setAvailabilityChecking(false);
+                  return;
+                }
+              } catch (e) {
+                console.warn("Availability pre-check failed:", e);
+              }
+              setAvailabilityChecking(false);
+
+              dispatch(setPropertyId(villa?._id));
+              dispatch(setcategoryId(villa?.category));
+              dispatch(setOwnerId(villa?.owner));
+              dispatch(setPropertyType("Villa"));
+              router.push("/checkout");
+            }}
+            disabled={isOverCapacity || availabilityChecking}
+            className={`w-full text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md ${
+              !areDatesSelected
+                ? "bg-neutral-900 hover:bg-black shadow-neutral-800/20"
+                : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.99]"
+            }`}
+          >
+            {availabilityChecking ? (
+              "Checking Availability..."
+            ) : isOverCapacity ? (
+              `Max ${maxCapacity} Guests Allowed`
+            ) : !checkin ? (
+              <>
+                <CalendarIcon className="w-4 h-4" />
+                <span>Select Check-in Date</span>
+              </>
+            ) : !checkout ? (
+              <>
+                <CalendarIcon className="w-4 h-4" />
+                <span>Select Check-out Date</span>
+              </>
+            ) : (
+              "Reserve Now"
+            )}
+          </Button>
+
+          <p className="text-center text-[10px] sm:text-[11px] text-gray-400 mt-1.5">
+            {!areDatesSelected
+              ? "You won't be charged yet · Dates required to proceed"
+              : "You won't be charged yet"}
+          </p>
+        </div>
+      </Card>
     </div>
   );
 }

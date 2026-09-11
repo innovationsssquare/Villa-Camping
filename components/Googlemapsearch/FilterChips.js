@@ -1,32 +1,40 @@
+"use client";
+
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Badge } from "@/components/ui/badge";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/ui/carousel";
 import {
   Bed,
   HouseWifi,
   Tent,
   House,
+  Sparkles,
 } from "lucide-react";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 import { setSelectedCategory } from "@/Redux/Slices/bookingSlice";
 
-/**
- * Optional icon mapper by category name
- * (You can improve this later)
- */
-const CATEGORY_ICON_MAP = {
-  villa: <HouseWifi className="h-3 w-3 text-red-500" />,
-  camping: <Tent className="h-3 w-3 text-green-500" />,
-  cottage: <House className="h-3 w-3 text-yellow-500" />,
-  hotel: <Bed className="h-3 w-3 text-purple-500" />,
+const getCategoryIcon = (slug, isActive) => {
+  const iconClass = `h-3.5 w-3.5 transition-colors ${
+    isActive ? "text-white" : "text-[#ff6900]"
+  }`;
+
+  switch (slug?.toLowerCase()) {
+    case "villa":
+      return <HouseWifi className={iconClass} />;
+    case "camping":
+      return <Tent className={iconClass} />;
+    case "cottage":
+      return <House className={iconClass} />;
+    case "hotel":
+      return <Bed className={iconClass} />;
+    default:
+      return <Sparkles className={iconClass} />;
+  }
 };
 
-export const FilterChips = ({ onFilterSelect, className = "px-2 py-3 md:py-8" }) => {
+export const FilterChips = ({
+  onFilterSelect,
+  className = "px-2 py-2",
+}) => {
   const dispatch = useDispatch();
 
   const { categories = [], loading } = useSelector(
@@ -43,50 +51,57 @@ export const FilterChips = ({ onFilterSelect, className = "px-2 py-3 md:py-8" })
     }
   }, [dispatch]);
 
-  const handleCategoryClick = (category) => {
-    const categoryId =
-      selectedCategoryId === category._id ? null : category._id;
-
-    // 1️⃣ Save selected category globally
-    dispatch(setSelectedCategory(categoryId));
-
-    // 2️⃣ Notify parent (Mappropertyview)
-    onFilterSelect?.(categoryId);
+  const handleCategoryClick = (categoryId) => {
+    const nextCategoryId = selectedCategoryId === categoryId ? null : categoryId;
+    dispatch(setSelectedCategory(nextCategoryId));
+    onFilterSelect?.(nextCategoryId);
   };
 
   if (loading || !categories.length) return null;
 
   return (
     <div className={className}>
-      <Carousel className="w-full">
-        <CarouselContent className="-ml-2 md:-ml-4">
-          {categories.map((category) => {
-            const isActive = selectedCategoryId === category._id;
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
+        {/* "All" category pill */}
+        <button
+          type="button"
+          onClick={() => handleCategoryClick(null)}
+          className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
+            selectedCategoryId === null
+              ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-[1.02]"
+              : "bg-white text-neutral-700 border border-neutral-200/90 hover:border-[#ff6900]/40 hover:bg-neutral-50 shadow-xs"
+          }`}
+        >
+          <Sparkles
+            className={`h-3.5 w-3.5 ${
+              selectedCategoryId === null ? "text-white" : "text-[#ff6900]"
+            }`}
+          />
+          <span>All Stays</span>
+        </button>
 
-            return (
-              <CarouselItem
-                key={category._id}
-                className="pl-2 md:pl-4 basis-auto"
-              >
-                <Badge
-                  variant="outline"
-                  onClick={() => handleCategoryClick(category)}
-                  className={`villa-filter-chip cursor-pointer rounded-full px-3 py-2 shadow-md flex items-center gap-2 whitespace-nowrap
-                    ${
-                      isActive
-                        ? "bg-orange-50 text-black border-orange-500 border-2"
-                        : "bg-white border-gray-300"
-                    }
-                  `}
-                >
-                  {CATEGORY_ICON_MAP[category.slug] || null}
-                  {category.name}
-                </Badge>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-      </Carousel>
+        {/* Dynamic Category Pills */}
+        {categories.map((category) => {
+          const isActive = selectedCategoryId === category._id;
+
+          return (
+            <button
+              key={category._id}
+              type="button"
+              onClick={() => handleCategoryClick(category._id)}
+              className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${
+                isActive
+                  ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-[1.02]"
+                  : "bg-white text-neutral-700 border border-neutral-200/90 hover:border-[#ff6900]/40 hover:bg-neutral-50 shadow-xs"
+              }`}
+            >
+              {getCategoryIcon(category.slug || category.name, isActive)}
+              <span>{category.name}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
+

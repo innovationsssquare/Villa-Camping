@@ -117,12 +117,12 @@ const VillaDetails = () => {
           {villa?.name} - {villa?.address?.addressLine}
         </h1>
         <div className="flex justify-between items-center">
-          <p className="text-xs font-medium">
+          <p className="text-xs font-medium text-gray-500">
             {villa?.address?.addressLine}, {villa?.address?.city}
           </p>
           <Button
-            size=""
-            className="mt-2 flex justify-center items-center gap-2 text-red-500/60 text-xs font-medium bg-orange-500/10 px-3 py-1 rounded-lg"
+            size="sm"
+            className="mt-1 flex justify-center items-center gap-1.5 text-[#ff6900] text-xs font-semibold bg-orange-50 border border-orange-200/80 hover:bg-orange-100 px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
           >
             <FaFilePdf /> View Brochure
           </Button>
@@ -130,39 +130,36 @@ const VillaDetails = () => {
       </div>
 
       {/* Rating and Reviews */}
-      <div className="flex items-center space-x-4">
-        <div className="bg-villa-orange/10  py-1 rounded-full">
-          <span className="text-sm font-medium">Guest Favourite</span>
+      <div className="flex items-center space-x-3">
+        <div className="bg-orange-50/80 border border-orange-200/70 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-orange-800">Guest Favourite</span>
         </div>
         <div className="flex items-center space-x-1">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-semibold">{villa?.averageRating}</span>
-          <span className="text-villa-text-light font-light">/ 5</span>
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <span className="font-bold text-sm text-gray-900">{villa?.averageRating || "4.8"}</span>
+          <span className="text-gray-400 text-xs">/ 5</span>
         </div>
         <Link
           href={"#reviews"}
           scroll={true}
-          className="text-blue-500 text-sm underline"
+          className="text-[#ff6900] text-xs font-semibold underline underline-offset-2"
         >
-          {villa?.totalReviews} Reviews
+          {villa?.totalReviews || 0} Reviews
         </Link>
       </div>
 
       {/* Property Details */}
-      <div className="flex items-center w-full space-x-3 text-xs">
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Users className="w-4 h-4 font-light" />
+      <div className="flex items-center w-full space-x-2 text-xs">
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Users className="w-3.5 h-3.5 text-[#ff6900]" />
           <span>Up to {villa?.maxCapacity} Guests</span>
         </div>
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bed className="w-4 h-4 text-villa-text-light" />
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800 relative">
+          <Bed className="w-3.5 h-3.5 text-[#ff6900]" />
           <span>{villa?.rooms} Rooms</span>
-          <div className="w-4 h-4 bg-villa-blue rounded-full flex items-center justify-center">
-            <span className="text-white text-xs">i</span>
-          </div>
         </div>
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bath className="w-4 h-4 text-villa-text-light" />
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Bath className="w-3.5 h-3.5 text-[#ff6900]" />
           <span>{villa?.baths} Baths</span>
         </div>
       </div>
@@ -171,16 +168,16 @@ const VillaDetails = () => {
       {villa?.greatFor?.length > 0 && (
         <div className="flex flex-col">
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-sm text-villa-text-light ">Great for:</p>
+            <p className="text-xs text-gray-500 font-medium">Great for:</p>
             {villa.greatFor.slice(0, 1).map((item, index) => (
               <div
                 key={index}
-                className="bg-villa-green/10 px-3 py-1 rounded-full flex items-center gap-1"
+                className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1 font-medium text-xs"
               >
                 {greatForIcons[item] || (
-                  <Sun className="w-4 h-4 text-gray-600" />
+                  <Sun className="w-3.5 h-3.5 text-emerald-600" />
                 )}
-                <span className="text-xs">{item}</span>
+                <span>{item}</span>
               </div>
             ))}
           </div>
@@ -189,23 +186,23 @@ const VillaDetails = () => {
 
       {/* Amenities Icons */}
       {villa?.topamenities?.length > 0 && (
-        <div className="grid grid-cols-5 gap-4 mt-2">
-          {villa?.topamenities.slice(0, 6).map((amenity, index) => (
+        <div className="grid grid-cols-5 gap-3 mt-2">
+          {villa?.topamenities.slice(0, 5).map((amenity, index) => (
             <div
               key={index}
               className="text-center relative flex flex-col items-center"
             >
-              <div className="w-12 h-12 border border-gray-400 rounded-md flex items-center justify-center mb-2 relative">
-                <CustomAmenityIcon name={amenity} className="w-6 h-6 text-gray-600" />
-                {index === 5 && villa.topamenities.length > 6 && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      +{villa?.amenities?.length - 5}
+              <div className="w-12 h-12 bg-white border border-neutral-200 rounded-xl flex items-center justify-center mb-1.5 shadow-2xs relative">
+                <CustomAmenityIcon name={amenity} className="w-5 h-5 text-[#ff6900]" />
+                {index === 4 && villa.topamenities.length > 5 && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#ff6900] text-white rounded-full flex items-center justify-center shadow-xs">
+                    <span className="text-[10px] font-bold">
+                      +{villa?.amenities?.length - 4}
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-[0.67rem] text-center">{amenity}</p>
+              <p className="text-[0.65rem] text-center font-medium text-gray-700 truncate w-full">{amenity}</p>
             </div>
           ))}
         </div>

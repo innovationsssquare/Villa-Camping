@@ -2,19 +2,45 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Search,
   Star,
-  Filter,
-  X,
-  Menu,
   SlidersHorizontal,
+  X,
   PanelLeftClose,
+  RotateCcw,
+  MapPin,
+  ArrowUpDown,
+  Sparkles,
+  ChevronRight,
+  ChevronLeft,
+  Filter,
+  Check,
 } from "lucide-react";
-import { Button } from "@heroui/react";
-import { Checkbox } from "@/components/ui/checkbox";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
+import { FaMapMarkedAlt } from "react-icons/fa";
+import { useRouter } from "next/navigation";
+import {
+  addPriceRange,
+  removePriceRange,
+  setRating,
+  setSearchQuery,
+  setSortBy,
+  clearAllFilters,
+  setPriceMin,
+  setPriceMax,
+  setPropertyType,
+  clearPropertyType,
+  setCurrentPage,
+} from "@/Redux/Slices/propertyFilterSlice";
+import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
+import {
+  setSelectedCategory,
+  setSelectedCategoryname,
+} from "@/Redux/Slices/bookingSlice";
+import { SortDrawer } from "./SortDrawer";
+import PropertyCardnew from "../Availableweekend/PropertyCard";
+import PropertyCardSkeletonnew from "../Availableweekend/PropertyCardSkeleton";
 import {
   Select,
   SelectContent,
@@ -22,57 +48,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
+import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
-import { Pagination } from "@/components/ui/pagination";
-import {
-  addPriceRange,
-  removePriceRange,
-  addCategory,
-  removeCategory,
-  addPropertyType,
-  removePropertyType,
-  setRating,
-  setSearchQuery,
-  setSortBy,
-  setShowPopular,
-  setShowSeasonal,
-  setFilteredProperties,
-  setTotalCount,
-  setTotalPages,
-  setLoading,
-  setShowMobileFilters,
-  clearAllFilters,
-  setPriceMin,
-  setPriceMax,
-  setPropertyTypes,
-  setPropertyType,
-  clearPropertyType,
-} from "@/Redux/Slices/propertyFilterSlice";
-import PropertyCardSkeleton from "../Availableweekend/property-card-skeleton";
-import { IoSearchCircle } from "react-icons/io5";
-import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
-import { SortDrawer } from "./SortDrawer";
-import { Separator } from "@/components/ui/separator";
-import { FaMapMarkedAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
-import PropertyCardnew from "../Availableweekend/PropertyCard";
-import PropertyCardSkeletonnew from "../Availableweekend/PropertyCardSkeleton";
-import { NavigationCarousel } from "../Availableweekend/NavigationCarousel";
-import {
-  setSelectedCategory,
-  setSelectedCategoryname,
-} from "@/Redux/Slices/bookingSlice";
+import { cn } from "@/lib/utils";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -81,36 +60,68 @@ export const PROPERTY_TYPES_BY_SLUG = {
   hotel: ["Standard Room", "Deluxe Room", "Suite", "Presidential Suite"],
 };
 
+const PRICE_RANGE_OPTIONS = [
+  { id: "all", label: "All Prices", min: null, max: null },
+  { id: "under-10k", label: "Under ₹10,000", min: 0, max: 10000 },
+  { id: "10k-20k", label: "₹10,000 – ₹20,000", min: 10000, max: 20000 },
+  { id: "20k-30k", label: "₹20,000 – ₹30,000", min: 20000, max: 30000 },
+  { id: "30k-40k", label: "₹30,000 – ₹40,000", min: 30000, max: 40000 },
+  { id: "above-40k", label: "Above ₹40,000", min: 40000, max: null },
+];
+
+const SORT_OPTIONS = [
+  { id: "popular", label: "Most Popular" },
+  { id: "low-high", label: "Price: Low → High" },
+  { id: "high-low", label: "Price: High → Low" },
+  { id: "rating", label: "Top Rated" },
+];
+
 export default function PropertyFilterListing({ categorySlug }) {
-  const [showFilterSidebar, setShowFilterSidebar] = useState(false);
+  const [showFilterSidebar, setShowFilterSidebar] = useState(true);
+  const [showFloatingBar, setShowFloatingBar] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
+  const { isVisible: isNavVisible } = useScrollDirection();
+
+  // Butter-smooth scroll tracking with hysteresis to prevent edge jitter
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentY = window.scrollY;
+          setShowFloatingBar((prev) => {
+            if (!prev && currentY > 80) return true;
+            if (prev && currentY < 40) return false;
+            return prev;
+          });
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const {
     selectedPriceRanges,
-    selectedCategories,
     selectedPropertyTypes,
-    selectedRating,
     searchQuery,
     sortBy,
-    showPopular,
-    showSeasonal,
-    filteredProperties,
     currentPage,
-    itemsPerPage,
-    totalCount,
-    totalPages,
-    loading,
-    showMobileFilters,
     priceMin,
     priceMax,
   } = useSelector((state) => state.propertyFilter);
+
   const { categories } = useSelector((state) => state.category);
-  const { selectedCategoryId, checkin, checkout, selectedGuest } = useSelector(
-    (state) => state.booking
-  );
-  const { dataloading, error, data, pagination } = useSelector(
+  const { selectedCategoryId, selectedCategoryName, checkin, checkout } =
+    useSelector((state) => state.booking);
+  const { dataloading, data, pagination } = useSelector(
     (state) => state.properties
   );
-  const router = useRouter();
 
   // Sync categorySlug parameter with Redux category state
   useEffect(() => {
@@ -118,6 +129,7 @@ export default function PropertyFilterListing({ categorySlug }) {
       dispatch(setSelectedCategory(null));
       dispatch(setSelectedCategoryname("All Stays"));
       dispatch(clearPropertyType());
+      dispatch(setCurrentPage(1));
     } else if (categorySlug && categories?.length > 0) {
       const matchedCategory = categories.find(
         (cat) => cat.slug?.toLowerCase() === categorySlug.toLowerCase()
@@ -126,395 +138,639 @@ export default function PropertyFilterListing({ categorySlug }) {
         dispatch(setSelectedCategory(matchedCategory._id));
         dispatch(setSelectedCategoryname(matchedCategory.name));
         dispatch(clearPropertyType());
+        dispatch(setCurrentPage(1));
       }
     }
   }, [categorySlug, categories, dispatch]);
 
+  // Fetch properties from backend with pagination & filters
   useEffect(() => {
-    dispatch(
-      fetchAllProperties({
-        categoryId: selectedCategoryId,
-        checkIn: checkin,
-        checkOut: checkout,
-        subtype: selectedPropertyTypes,
-        priceMin: priceMin,
-        priceMax: priceMax,
-        sortBy: sortBy,
-        search: searchQuery,
-        page: 1,
-        limit: 10,
-      })
-    );
+    // If no category is selected (e.g. "all"), fallback to first category if available
+    const effectiveCategory =
+      selectedCategoryId || (categories?.length > 0 ? categories[0]._id : null);
+    const effectiveCheckIn = checkin || new Date().toISOString();
+    const effectiveCheckOut =
+      checkout || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+
+    if (effectiveCategory) {
+      dispatch(
+        fetchAllProperties({
+          categoryId: effectiveCategory,
+          checkIn: effectiveCheckIn,
+          checkOut: effectiveCheckOut,
+          subtype: selectedPropertyTypes,
+          priceMin: priceMin,
+          priceMax: priceMax,
+          sortBy: sortBy,
+          search: searchQuery,
+          page: currentPage || 1,
+          limit: 6,
+        })
+      );
+    }
   }, [
     dispatch,
     selectedCategoryId,
+    categories,
     checkin,
     checkout,
+    selectedPropertyTypes,
     priceMin,
     priceMax,
     sortBy,
-    selectedPropertyTypes,
     searchQuery,
+    currentPage,
   ]);
 
-  const propertyTypesByCategory = {
-    villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
-    camping: ["Single Tent", "Couple Tent", "Family Tent"],
-    cottage: ["Single Cottage", "Couple Cottage", "Family Cottage"],
-    hotel: ["Standard Room", "Deluxe Room", "Suite", "Presidential Suite"],
-  };
+  // Resolve Active Category Object
+  const activeCategory = useMemo(() => {
+    if (!selectedCategoryId || !categories?.length) return null;
+    return categories.find((c) => c._id === selectedCategoryId) || null;
+  }, [selectedCategoryId, categories]);
 
-  const priceRangeOptions = [
-    { id: "under-10k", label: "Under ₹10,000", min: 0, max: 10000 },
-    { id: "10k-20k", label: "₹10,000 - ₹20,000", min: 10000, max: 20000 },
-    { id: "20k-30k", label: "₹20,000 - ₹30,000", min: 20000, max: 30000 },
-    { id: "30k-40k", label: "₹30,000 - ₹40,000", min: 30000, max: 40000 },
-    { id: "40k-60k", label: "₹40,000 - ₹60,000", min: 40000, max: 60000 },
-    {
-      id: "above-60k",
-      label: "Above ₹60,000",
-      min: 60000,
-      max: Number.POSITIVE_INFINITY,
-    },
-  ];
+  // Subtypes based on active category
+  const availableSubtypes = useMemo(() => {
+    if (!activeCategory) return [];
+    return PROPERTY_TYPES_BY_SLUG[activeCategory.slug] || [];
+  }, [activeCategory]);
 
-  const getAvailablePropertyTypes = () => {
-    if (selectedCategories.length === 0) {
-      return Object.values(propertyTypesByCategory).flat();
-    }
-    return selectedCategories.flatMap(
-      (category) => propertyTypesByCategory[category] || []
-    );
-  };
-
-  const availablePropertyTypes = getAvailablePropertyTypes();
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (selectedCategoryId) count++;
+    if (selectedPropertyTypes) count++;
+    if (priceMin != null || priceMax != null) count++;
+    if (searchQuery) count++;
+    if (sortBy && sortBy !== "popular") count++;
+    return count;
+  }, [selectedCategoryId, selectedPropertyTypes, priceMin, priceMax, searchQuery, sortBy]);
 
   const handlePriceRangeChange = (rangeId) => {
-    // clear previous selected range
     selectedPriceRanges.forEach((r) => dispatch(removePriceRange(r)));
+    dispatch(setCurrentPage(1));
 
-    // reset price filter
     if (rangeId === "all") {
       dispatch(setPriceMin(null));
       dispatch(setPriceMax(null));
       return;
     }
 
-    const range = priceRangeOptions.find((r) => r.id === rangeId);
+    const range = PRICE_RANGE_OPTIONS.find((r) => r.id === rangeId);
     if (!range) return;
 
-    // UI state (dropdown highlight)
     dispatch(addPriceRange(rangeId));
-
-    // 🔑 ACTUAL FILTER VALUES
     dispatch(setPriceMin(range.min));
-    dispatch(setPriceMax(range.max === Infinity ? null : range.max));
+    dispatch(setPriceMax(range.max));
   };
 
   const clearAllFiltersHandler = () => {
     dispatch(clearAllFilters());
+    dispatch(clearPropertyType());
+    dispatch(setCurrentPage(1));
   };
 
-  // useEffect(() => {
-  //   console.log("[v0] Redux state updated:", {
-  //     selectedCategories,
-  //     selectedPropertyTypes,
-  //     selectedPriceRanges,
-  //     selectedRating,
-  //     searchQuery,
-  //     sortBy,
-  //     showPopular,
-  //     showSeasonal,
-  //     currentPage,
-  //     loading,
-  //     propertiesCount: filteredProperties.length,
-  //   });
-  // }, [
-  //   selectedCategories,
-  //   selectedPropertyTypes,
-  //   selectedPriceRanges,
-  //   selectedRating,
-  //   searchQuery,
-  //   sortBy,
-  //   showPopular,
-  //   showSeasonal,
-  //   currentPage,
-  //   loading,
-  //   filteredProperties.length,
-  // ]);
+  const formatPrice = (val) => {
+    if (val == null) return "0";
+    return Number(val).toLocaleString("en-IN");
+  };
 
-  function FilterSidebar() {
-    const dispatch = useDispatch();
+  const activePriceRangeId = useMemo(() => {
+    if (selectedPriceRanges.length > 0) return selectedPriceRanges[0];
+    return "all";
+  }, [selectedPriceRanges]);
 
-    /* ===== REDUX STATE ===== */
-    const { categories } = useSelector((state) => state.category);
-    const { selectedCategoryId } = useSelector((state) => state.booking);
-    const { selectedPropertyTypes } = useSelector(
-      (state) => state.propertyFilter
-    );
+  // Pagination calculation
+  const totalItems =
+    pagination?.total != null ? pagination.total : data?.length || 0;
+  const limit = pagination?.limit || 6;
+  const totalPages =
+    pagination?.totalPages != null
+      ? pagination.totalPages
+      : Math.max(1, Math.ceil(totalItems / limit));
+  const currentActivePage =
+    pagination?.page != null ? pagination.page : currentPage || 1;
 
-    /* ===== RESOLVE ACTIVE CATEGORY (ID → OBJECT) ===== */
-    const activeCategory = useMemo(() => {
-      if (!selectedCategoryId || !categories?.length) return null;
-      return categories.find((c) => c._id === selectedCategoryId) || null;
-    }, [selectedCategoryId, categories]);
+  const handlePageChange = (newPage) => {
+    if (newPage < 1 || newPage > totalPages || newPage === currentActivePage)
+      return;
+    dispatch(setCurrentPage(newPage));
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 100, behavior: "smooth" });
+    }
+  };
 
-    /* ===== SUBTYPES FROM SLUG ===== */
-    const availablePropertyTypes = useMemo(() => {
-      if (!activeCategory) return [];
-      return PROPERTY_TYPES_BY_SLUG[activeCategory.slug] || [];
-    }, [activeCategory]);
-
-    return (
-      <div className="p-4 bg-gray-50 h-screen sticky top-20 border border-gray-200">
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Filter className="h-5 w-5" />
-            Filters
-          </h2>
-          <Button
-            size="sm"
-            variant="ghost"
-            onPress={() => dispatch(clearAllFilters())}
-          >
-            Clear
-          </Button>
-        </div>
-
-        {/* CATEGORY */}
-        <div className="mb-6">
-          <h3 className="font-semibold mb-3">Category</h3>
-
-          <div className="space-y-2">
-            {categories.map((cat) => (
-              <div key={cat._id} className="flex items-center gap-3">
-                <Checkbox
-                  checked={selectedCategoryId === cat._id}
-                  onCheckedChange={() => {
-                    dispatch(setSelectedCategory(cat?._id));
-                    dispatch(setSelectedCategoryname(cat?.name));
-                    dispatch(clearPropertyType());
-                    router.push(`/category/${cat.slug}`);
-                  }}
-                />
-                <Label>{cat.name}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* PROPERTY TYPE */}
-        <div>
-          <h3 className="font-semibold mb-3">Property Type</h3>
-
-          {!activeCategory && (
-            <p className="text-sm text-gray-500">
-              Select a category to see property types
-            </p>
-          )}
-
-          <div className="space-y-2">
-            {availablePropertyTypes.map((type) => (
-              <div key={type} className="flex items-center gap-3">
-                <Checkbox
-                  checked={selectedPropertyTypes === type}
-                  onCheckedChange={(checked) =>
-                    checked
-                      ? dispatch(setPropertyType(type))
-                      : dispatch(clearPropertyType())
-                  }
-                />
-                <Label>{type}</Label>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const PriceRangeSelect = () => (
-    <Select
-      value={selectedPriceRanges.length > 0 ? selectedPriceRanges[0] : "all"}
-      onValueChange={handlePriceRangeChange}
-    >
-      <SelectTrigger className="w-[160px] h-9 text-sm bg-white border-gray-300 text-gray-900">
-        <SelectValue placeholder="Price Range" />
-      </SelectTrigger>
-      <SelectContent className="bg-white border-gray-300">
-        <SelectItem value="all" className="text-gray-900 hover:bg-gray-50">
-          All Prices
-        </SelectItem>
-        {priceRangeOptions.map((range) => (
-          <SelectItem
-            key={range.id}
-            value={range.id}
-            className="text-gray-900 hover:bg-gray-50"
-          >
-            {range.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
+  const getPageNumbers = (current, total) => {
+    if (total <= 5) {
+      return Array.from({ length: total }, (_, i) => i + 1);
+    }
+    if (current <= 3) {
+      return [1, 2, 3, 4, "...", total];
+    }
+    if (current >= total - 2) {
+      return [1, "...", total - 3, total - 2, total - 1, total];
+    }
+    return [1, "...", current - 1, current, current + 1, "...", total];
+  };
 
   return (
-    <div className="w-full mx-auto px-0 md:px-4  md:py-8 py-4 bg-gray-50 h-auto ">
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow-lg">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-            <p className="text-gray-900 text-sm">Loading properties...</p>
-          </div>
-        </div>
-      )}
-
-      <div className="flex flex-col md:flex-row gap-8 h-auto  ">
-        <div
-          className={`w-full shrink-0 hidden md:block order-1 md:order-1 transition-all duration-300 ease-in-out ${showFilterSidebar
-              ? "md:w-64 opacity-100"
-              : "md:w-0 opacity-0 overflow-hidden -ml-8"
-            }`}
-        >
-          <FilterSidebar />
-        </div>
-
-        <div className="flex-1 order-2 md:order-2 flex flex-col min-h-full ">
-          <NavigationCarousel />
-
-          <div className="md:sticky hidden md:block md:top-16 fixed w-[90%] px-2 md:w-full transform -translate-x-1/2 md:translate-0 -translate-y-1/2 md:left-0 left-1/2  -bottom-6 z-40 bg-white backdrop-blur-2xl h-13 md:h-auto  md:py-4 py-1 md:mb-6 shrink-0 md:border-b md:border-0 border border-gray-200   rounded-full md:rounded-none">
-            <div className="flex md:hidden justify-around  gap-2 items-center   ">
-              <SortDrawer />
-              <Button
-                onPress={() => router.push("/search-your-gateway")}
-                className="rounded-full bg-white border border-gray-200 uppercase font-medium"
+    <div className="w-full bg-neutral-50/60 min-h-screen pb-28 md:pb-16 text-neutral-900">
+      {/* ========================================================================= */}
+      {/* DESKTOP TOP STICKY FILTER & SEARCH BAR (Sticks Flush to Navbar with 0 Gap)*/}
+      {/* ========================================================================= */}
+      <div className="hidden md:block sticky md:top-16 z-30 w-full bg-white/98 backdrop-blur-md border-b border-neutral-200/90 shadow-2xs mb-5 transition-all">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2.5">
+          {/* Desktop Toolbar */}
+          <div className="flex items-center justify-between gap-4">
+            {/* Left: Filter Toggle & Search Input */}
+            <div className="flex items-center gap-2.5">
+              <button
+                type="button"
+                onClick={() => setShowFilterSidebar(!showFilterSidebar)}
+                className={`h-10 px-4 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
+                  showFilterSidebar
+                    ? "bg-neutral-900 text-white border-neutral-900 hover:bg-black"
+                    : "bg-white text-neutral-800 border-neutral-200/90 hover:border-neutral-400"
+                }`}
+                title={showFilterSidebar ? "Hide Filters" : "Show Filters"}
               >
-                <FaMapMarkedAlt size={24} />
-                map
-              </Button>
-            </div>
+                {showFilterSidebar ? (
+                  <PanelLeftClose className="w-4 h-4 text-[#ff6900]" />
+                ) : (
+                  <SlidersHorizontal className="w-4 h-4 text-[#ff6900]" />
+                )}
+                <span>{showFilterSidebar ? "Hide Filters" : "Filters"}</span>
+                {activeFiltersCount > 0 && (
+                  <span className="w-5 h-5 rounded-full bg-[#ff6900] text-white text-[10px] flex items-center justify-center font-bold ml-0.5">
+                    {activeFiltersCount}
+                  </span>
+                )}
+              </button>
 
-            <div className="hidden md:flex justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onPress={() => setShowFilterSidebar(!showFilterSidebar)}
-                  className="bg-black text-white border-gray-300  hover:bg-black h-9 px-3"
-                  title={showFilterSidebar ? "Hide filters" : "Show filters"}
-                >
-                  {showFilterSidebar ? (
-                    <PanelLeftClose className="h-4 w-4 " />
-                  ) : (
-                    <SlidersHorizontal className="h-4 w-4" />
-                  )}
-                </Button>
-
-                <div className="relative w-60">
-                  <Input
-                    type="text"
-                    placeholder="Search properties..."
-                    className="w-full bg-white border-gray-300 text-gray-900 placeholder-gray-500 pl-10 pr-4 py-2 text-sm focus:border-blue-500"
-                    value={searchQuery}
-                    onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-                  />
-                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <PriceRangeSelect />
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => dispatch(setSortBy(value))}
-                >
-                  <SelectTrigger className="w-[100px] h-9 text-sm bg-white border-gray-300 text-gray-900">
-                    <SelectValue placeholder="Sort by" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white border-gray-300">
-                    <SelectItem
-                      value="popular"
-                      className="text-gray-900 hover:bg-gray-50"
-                    >
-                      Most Popular
-                    </SelectItem>
-                    <SelectItem
-                      value="low-high"
-                      className="text-gray-900 hover:bg-gray-50"
-                    >
-                      Price: Low to High
-                    </SelectItem>
-                    <SelectItem
-                      value="high-low"
-                      className="text-gray-900 hover:bg-gray-50"
-                    >
-                      Price: High to Low
-                    </SelectItem>
-                    <SelectItem
-                      value="rating"
-                      className="text-gray-900 hover:bg-gray-50"
-                    >
-                      Highest Rated
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-hidden">
-            <div className="h-auto mt-24 md:mt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-1 gap-6 mb-4 px-3 md:px-0 bg-gray-50">
-                {dataloading
-                  ? Array.from({ length: 6 }).map((_, index) => (
-                    <PropertyCardSkeletonnew key={`skeleton-${index}`} />
-                  ))
-                  : data?.map((property) => (
-                    <PropertyCardnew key={property._id} property={property} />
-                  ))}
-              </div>
-
-              {totalPages > 1 && (
-                <div className="space-y-2 mb-4 pr-4">
-                  <div className="text-sm text-gray-600 text-center">
-                    Showing {currentPage * itemsPerPage - itemsPerPage + 1} to{" "}
-                    {Math.min(currentPage * itemsPerPage, totalCount)} of{" "}
-                    {totalCount} properties
-                  </div>
-                  <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    totalItems={totalCount}
-                    itemsPerPage={itemsPerPage}
-                  // onPageChange={(page) => dispatch(setCurrentPage(page))}
-                  />
-                </div>
-              )}
-
-              {!dataloading && (!data || data.length === 0) && (
-                <div className="text-center py-12 pr-4">
-                  <div className="text-gray-600 mb-4">
-                    <Search className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <h3 className="text-lg font-medium mb-2 text-gray-900">
-                      No properties found
-                    </h3>
-                    <p className="text-sm">
-                      Try adjusting your filters or search criteria
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onPress={clearAllFiltersHandler}
-                    className="bg-white border-gray-300 text-gray-900 hover:bg-gray-50"
+              <div className="relative w-64 lg:w-72">
+                <input
+                  type="text"
+                  placeholder="Search by name or area..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    dispatch(setSearchQuery(e.target.value));
+                    dispatch(setCurrentPage(1));
+                  }}
+                  className="w-full h-10 pl-9 pr-8 bg-neutral-50 hover:bg-neutral-100/70 focus:bg-white rounded-xl border border-neutral-200/90 focus:border-[#ff6900] text-xs font-medium placeholder-neutral-400 text-neutral-900 outline-none transition-all"
+                />
+                <Search className="w-4 h-4 text-[#ff6900] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      dispatch(setSearchQuery(""));
+                      dispatch(setCurrentPage(1));
+                    }}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
                   >
-                    Clear All Filters
-                  </Button>
-                </div>
-              )}
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Quick Price Range, Sort, and Map View */}
+            <div className="flex items-center gap-2.5">
+              {/* Price Range Select */}
+              <Select
+                value={activePriceRangeId}
+                onValueChange={handlePriceRangeChange}
+              >
+                <SelectTrigger className="w-[160px] h-10 text-xs font-semibold bg-white border-neutral-200/90 hover:border-neutral-400 rounded-xl text-neutral-800 shadow-2xs">
+                  <SelectValue placeholder="Price Range" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-neutral-200 rounded-xl shadow-lg">
+                  {PRICE_RANGE_OPTIONS.map((range) => (
+                    <SelectItem
+                      key={range.id}
+                      value={range.id}
+                      className="text-xs font-medium text-neutral-800 hover:bg-orange-50 hover:text-[#ff6900] cursor-pointer"
+                    >
+                      {range.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Sort Select */}
+              <Select
+                value={sortBy || "popular"}
+                onValueChange={(value) => {
+                  dispatch(setSortBy(value));
+                  dispatch(setCurrentPage(1));
+                }}
+              >
+                <SelectTrigger className="w-[150px] h-10 text-xs font-semibold bg-white border-neutral-200/90 hover:border-neutral-400 rounded-xl text-neutral-800 shadow-2xs">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-neutral-200 rounded-xl shadow-lg">
+                  {SORT_OPTIONS.map((opt) => (
+                    <SelectItem
+                      key={opt.id}
+                      value={opt.id}
+                      className="text-xs font-medium cursor-pointer"
+                    >
+                      {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {/* Map Button */}
+              <button
+                type="button"
+                onClick={() => router.push("/search-your-gateway")}
+                className="h-10 px-4 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold flex items-center gap-2 transition-all shadow-xs cursor-pointer"
+              >
+                <FaMapMarkedAlt className="w-3.5 h-3.5 text-[#ff6900]" />
+                <span>Map View</span>
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* PAGE BODY (Banner, Sidebar, Property Cards & Pagination)                 */}
+      {/* ========================================================================= */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Mobile Quick Search Bar */}
+        <div className="md:hidden relative w-full mb-3 mt-1">
+          <input
+            type="text"
+            placeholder="Search stays by name or area..."
+            value={searchQuery}
+            onChange={(e) => {
+              dispatch(setSearchQuery(e.target.value));
+              dispatch(setCurrentPage(1));
+            }}
+            className="w-full h-10 pl-9 pr-8 bg-white rounded-2xl border border-neutral-200/90 shadow-2xs text-xs font-medium placeholder-neutral-400 text-neutral-900 outline-none focus:border-[#ff6900]"
+          />
+          <Search className="w-4 h-4 text-[#ff6900] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+          {searchQuery && (
+            <button
+              type="button"
+              onClick={() => {
+                dispatch(setSearchQuery(""));
+                dispatch(setCurrentPage(1));
+              }}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+
+        {/* Category Header Banner */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-3 mb-6">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-[10px] font-bold tracking-wider uppercase text-[#ff6900] bg-orange-50 border border-orange-200/80 px-2.5 py-0.5 rounded-full">
+                Handpicked Getaways
+              </span>
+              {checkin && checkout && (
+                <span className="text-[10px] font-semibold text-neutral-500 bg-white border border-neutral-200 px-2 py-0.5 rounded-full">
+                  Dates Selected
+                </span>
+              )}
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
+              {selectedCategoryName || "All Stays"}
+            </h1>
+            <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
+              Verified premium stays with private pools, mountain views & instant confirmation
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-neutral-700 bg-white border border-neutral-200/90 shadow-2xs px-3 py-1.5 rounded-full">
+              ✨ {totalItems} {totalItems === 1 ? "Stay" : "Stays"} Available
+            </span>
+          </div>
+        </div>
+
+        {/* Main Layout: Desktop Sidebar + Property Cards */}
+        <div className="flex flex-col md:flex-row items-start gap-6 lg:gap-8">
+          {/* Desktop Filter Sidebar */}
+          {showFilterSidebar && (
+            <div className="hidden md:block w-72 lg:w-80 shrink-0 sticky top-32">
+              <div className="bg-white rounded-3xl border border-neutral-200/90 shadow-xs overflow-hidden">
+                <ScrollArea className="h-[calc(100vh-150px)]">
+                  <div className="p-5 space-y-6">
+                    {/* Header */}
+                    <div className="flex items-center justify-between pb-3 border-b border-neutral-150">
+                      <div className="flex items-center gap-2">
+                        <Filter className="w-4 h-4 text-[#ff6900]" />
+                        <span className="font-bold text-sm text-neutral-900">
+                          Filters
+                        </span>
+                        {activeFiltersCount > 0 && (
+                          <span className="w-5 h-5 rounded-full bg-[#ff6900] text-white text-[11px] font-bold flex items-center justify-center">
+                            {activeFiltersCount}
+                          </span>
+                        )}
+                      </div>
+
+                      {activeFiltersCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={clearAllFiltersHandler}
+                          className="text-xs font-semibold text-[#ff6900] hover:underline flex items-center gap-1 cursor-pointer"
+                        >
+                          <RotateCcw className="w-3 h-3" />
+                          <span>Reset</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Stay Categories */}
+                    <div>
+                      <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider mb-3">
+                        Category
+                      </h4>
+                      <div className="space-y-1.5">
+                        {categories?.map((cat) => {
+                          const isSelected = selectedCategoryId === cat._id;
+                          return (
+                            <button
+                              key={cat._id}
+                              type="button"
+                              onClick={() => {
+                                dispatch(setSelectedCategory(cat._id));
+                                dispatch(setSelectedCategoryname(cat.name));
+                                dispatch(clearPropertyType());
+                                dispatch(setCurrentPage(1));
+                                router.push(
+                                  `/category/${cat.slug || cat.name.toLowerCase()}`
+                                );
+                              }}
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-orange-50 text-[#ff6900] border border-orange-200/80 shadow-2xs"
+                                  : "text-neutral-700 hover:bg-neutral-100"
+                              }`}
+                            >
+                              <span>{cat.name}</span>
+                              {isSelected && (
+                                <Check className="w-3.5 h-3.5 text-[#ff6900]" />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Subtype / Room Type */}
+                    {availableSubtypes.length > 0 && (
+                      <div className="pt-3 border-t border-neutral-150">
+                        <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider mb-3">
+                          Property Type
+                        </h4>
+                        <div className="flex flex-wrap gap-1.5">
+                          {availableSubtypes.map((type) => {
+                            const isSelected = selectedPropertyTypes === type;
+                            return (
+                              <button
+                                key={type}
+                                type="button"
+                                onClick={() => {
+                                  if (isSelected) {
+                                    dispatch(clearPropertyType());
+                                  } else {
+                                    dispatch(setPropertyType(type));
+                                  }
+                                  dispatch(setCurrentPage(1));
+                                }}
+                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                                  isSelected
+                                    ? "bg-neutral-900 text-white shadow-xs"
+                                    : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700"
+                                }`}
+                              >
+                                {type}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Price Range Slider */}
+                    <div className="pt-3 border-t border-neutral-150">
+                      <div className="flex items-baseline justify-between mb-2">
+                        <h4 className="text-xs font-bold text-neutral-800 uppercase tracking-wider">
+                          Price Range
+                        </h4>
+                        <span className="text-xs font-bold text-[#ff6900]">
+                          ₹{formatPrice(priceMin ?? 0)} – ₹
+                          {formatPrice(priceMax ?? 60000)}
+                        </span>
+                      </div>
+
+                      <div className="py-2">
+                        <Slider
+                          min={0}
+                          max={60000}
+                          step={1000}
+                          value={[priceMin ?? 0, priceMax ?? 60000]}
+                          onValueChange={([min, max]) => {
+                            dispatch(setPriceMin(min));
+                            dispatch(setPriceMax(max));
+                            dispatch(setCurrentPage(1));
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
+          )}
+
+          {/* Main Properties List Column */}
+          <div className="flex-1 w-full min-w-0">
+            {/* Property Cards Container */}
+            <div className="flex flex-col gap-6 mb-8">
+              {dataloading ? (
+                Array.from({ length: 4 }).map((_, index) => (
+                  <PropertyCardSkeletonnew key={`skeleton-${index}`} />
+                ))
+              ) : data && data.length > 0 ? (
+                data.map((property) => (
+                  <PropertyCardnew key={property._id} property={property} />
+                ))
+              ) : (
+                /* Empty Results State */
+                <div className="bg-white rounded-3xl border border-neutral-200/90 p-8 sm:p-12 text-center shadow-xs">
+                  <div className="w-16 h-16 rounded-full bg-orange-50 border border-orange-200/80 text-[#ff6900] flex items-center justify-center mx-auto mb-4">
+                    <Search className="w-7 h-7" />
+                  </div>
+                  <h3 className="text-lg font-bold text-neutral-900 mb-1">
+                    No properties match your filters
+                  </h3>
+                  <p className="text-xs sm:text-sm text-neutral-500 max-w-sm mx-auto mb-5">
+                    Try adjusting your price range, clearing subtype options, or browsing another stay category.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={clearAllFiltersHandler}
+                    className="px-5 py-2.5 rounded-xl bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold shadow-sm transition-all cursor-pointer inline-flex items-center gap-2"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Clear All Filters</span>
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* ========================================================================= */}
+            {/* PAGINATION COMPONENT                                                      */}
+            {/* ========================================================================= */}
+            {totalPages > 1 ? (
+              <div className="mt-8 pt-6 border-t border-neutral-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
+                {/* Results Count Summary */}
+                <div className="text-xs font-medium text-neutral-500">
+                  Showing{" "}
+                  <span className="font-bold text-neutral-800">
+                    {(currentActivePage - 1) * limit + 1}
+                  </span>
+                  –
+                  <span className="font-bold text-neutral-800">
+                    {Math.min(currentActivePage * limit, totalItems)}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-bold text-neutral-800">
+                    {totalItems}
+                  </span>{" "}
+                  stays
+                </div>
+
+                {/* Pagination Controls */}
+                <div className="flex items-center gap-1.5">
+                  {/* Previous Button */}
+                  <button
+                    type="button"
+                    disabled={currentActivePage <= 1 || dataloading}
+                    onClick={() => handlePageChange(currentActivePage - 1)}
+                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${
+                      currentActivePage <= 1
+                        ? "opacity-40 cursor-not-allowed border-neutral-200 text-neutral-400 bg-neutral-50"
+                        : "border-neutral-200/90 hover:border-[#ff6900] text-neutral-800 bg-white hover:bg-orange-50/50 cursor-pointer shadow-2xs"
+                    }`}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+
+                  {/* Page Numbers */}
+                  {getPageNumbers(currentActivePage, totalPages).map((p, idx) => {
+                    if (p === "...") {
+                      return (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="w-8 text-center text-neutral-400 text-xs font-bold"
+                        >
+                          ...
+                        </span>
+                      );
+                    }
+                    const isActive = p === currentActivePage;
+                    return (
+                      <button
+                        key={`page-${p}`}
+                        type="button"
+                        disabled={dataloading}
+                        onClick={() => handlePageChange(p)}
+                        className={`w-9 h-9 rounded-xl text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-105"
+                            : "bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-200/80 hover:border-neutral-300"
+                        }`}
+                      >
+                        {p}
+                      </button>
+                    );
+                  })}
+
+                  {/* Next Button */}
+                  <button
+                    type="button"
+                    disabled={currentActivePage >= totalPages || dataloading}
+                    onClick={() => handlePageChange(currentActivePage + 1)}
+                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${
+                      currentActivePage >= totalPages
+                        ? "opacity-40 cursor-not-allowed border-neutral-200 text-neutral-400 bg-neutral-50"
+                        : "border-neutral-200/90 hover:border-[#ff6900] text-neutral-800 bg-white hover:bg-orange-50/50 cursor-pointer shadow-2xs"
+                    }`}
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              totalItems > 0 && (
+                <div className="mt-8 pt-5 border-t border-neutral-200/60 text-center text-xs text-neutral-400 font-medium">
+                  Showing all {totalItems} available {totalItems === 1 ? "stay" : "stays"}
+                </div>
+              )
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MOBILE FLOATING ACTION PILL: FILTERS & MAP (Airbnb Signature UX)         */}
+      {/* ========================================================================= */}
+      <AnimatePresence>
+        {showFloatingBar && (
+          <motion.div
+            key="mobile-floating-action-pill"
+            initial={{ opacity: 0, y: 22, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.92 }}
+            transition={{
+              duration: 0.28,
+              ease: [0.16, 1, 0.3, 1],
+            }}
+            className={cn(
+              "fixed left-1/2 -translate-x-1/2 z-40 md:hidden flex items-center h-10 rounded-full bg-neutral-950/95 backdrop-blur-md border border-white/20 shadow-[0_6px_24px_rgba(0,0,0,0.35)] px-1.5 py-1 text-white transition-[bottom] duration-300 whitespace-nowrap min-w-max",
+              isNavVisible ? "bottom-20" : "bottom-5"
+            )}
+          >
+            <SortDrawer
+              trigger={
+                <button
+                  type="button"
+                  className="h-8 px-4 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors text-xs font-semibold flex items-center gap-1.5 cursor-pointer select-none whitespace-nowrap shrink-0"
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                  <span className="whitespace-nowrap">Filters</span>
+                  {activeFiltersCount > 0 && (
+                    <span className="w-4 h-4 rounded-full bg-[#ff6900] text-white text-[10px] flex items-center justify-center font-bold ml-0.5 shrink-0">
+                      {activeFiltersCount}
+                    </span>
+                  )}
+                </button>
+              }
+            />
+
+            <div className="w-px h-3.5 bg-white/20 shrink-0 mx-0.5" />
+
+            <button
+              type="button"
+              onClick={() => router.push("/search-your-gateway")}
+              className="h-8 px-4 rounded-full hover:bg-white/10 active:bg-white/20 transition-colors text-xs font-semibold flex items-center gap-1.5 cursor-pointer select-none whitespace-nowrap shrink-0"
+            >
+              <FaMapMarkedAlt className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+              <span className="whitespace-nowrap">Map View</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

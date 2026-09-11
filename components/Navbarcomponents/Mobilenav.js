@@ -10,7 +10,6 @@ import { NotificationSheet } from "./Notificationsheet";
 
 import { BookingSearchBox } from "./booking-search-box";
 import UserLocationDisplay from "../Homecomponets/user-location-display";
-import { NavigationCarousel } from "../Availableweekend/NavigationCarousel";
 
 export function AppHeader() {
   const pathname = usePathname();

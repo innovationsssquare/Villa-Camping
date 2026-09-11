@@ -10,18 +10,22 @@ import { useEffect, useState } from "react";
 import { ToastProvider } from "@heroui/toast";
 import { SocketProvider } from "@/lib/context/SocketProvider";
 
-const hideChrome = (pathname) =>
-  pathname === "/Signin" ||
-  pathname === "/shorts" ||
-  pathname === "/date-selection" ||
-  pathname === "/search-stay" ||
-  pathname === "/checkout" ||
-  pathname === "/camping-checkout" ||
-  pathname === "/search-your-gateway" ||
-  pathname?.startsWith("/view-Camping") ||
-  pathname?.startsWith("/view-Cottage") ||
-  pathname?.startsWith("/view-Hotel") ||
-  pathname?.startsWith("/view-Villa");
+const hideChrome = (pathname) => {
+  const p = pathname?.toLowerCase() || "";
+  return (
+    pathname === "/Signin" ||
+    pathname === "/shorts" ||
+    pathname === "/date-selection" ||
+    pathname === "/search-stay" ||
+    pathname === "/checkout" ||
+    pathname === "/camping-checkout" ||
+    pathname === "/search-your-gateway" ||
+    p.startsWith("/view-camping") ||
+    p.startsWith("/view-cottage") ||
+    p.startsWith("/view-hotel") ||
+    p.startsWith("/view-villa")
+  );
+};
 
 const hideMobileHeader = (pathname) =>
   hideChrome(pathname) ||

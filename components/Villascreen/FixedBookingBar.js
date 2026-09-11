@@ -20,6 +20,7 @@ const FixedBookingBar = () => {
 
   const villa = useVilla();
   const [isBookingOpen, setIsBookingOpen] = useState(false);
+  const [bookingTab, setBookingTab] = useState("dates");
   const { checkin, checkout } = useSelector((state) => state.booking);
   const checkInDate = checkin ? new Date(checkin) : new Date();
   const checkOutDate = checkout
@@ -64,55 +65,54 @@ const FixedBookingBar = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-gray-200 p-2 z-40">
-        <div className="flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-150 px-3.5 py-2 z-40 shadow-[0_-3px_12px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center justify-between gap-2">
           <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-price-original line-through">
+            <div className="flex items-baseline space-x-1.5">
+              <span className="text-lg font-extrabold text-gray-900 tracking-tight">
+                {formatRupee(basePrice)}
+              </span>
+              <span className="text-[11px] text-gray-400 line-through font-normal">
                 {formatRupee(basePrice + 3000)}
               </span>
-              <span className="text-lg font-bold text-price-current">
-                <div className="text-xl font-bold text-price-text">
-                  {formatRupee(basePrice)}
-                </div>
-              </span>
             </div>
-            <div className="flex items-center space-x-1 text-xs text-villa-text-light">
-              <span>
-                {" "}
+            <div className="flex items-center space-x-1 text-[10.5px] text-gray-500 mt-0.5">
+              <span className="font-semibold text-gray-700">
                 {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
               </span>
-              <Button
-                onPress={() => {
+              <button
+                type="button"
+                onClick={() => {
                   dispatch(setPropertyId(villa?._id));
                   dispatch(setcategoryId(villa?.category));
                   dispatch(setOwnerId(villa?.owner));
                   dispatch(setPropertyType("Villa"));
+                  setBookingTab("guests");
                   setIsBookingOpen(true);
                 }}
-                isIconOnly
-                variant="light"
-                size=""
-                className=""
+                className="p-0.5 text-[#ff6900] hover:text-[#e05d00] transition-colors cursor-pointer inline-flex items-center"
+                aria-label="Edit guests"
               >
-                <SquarePen size={15} />
-              </Button>
+                <SquarePen className="w-2.5 h-2.5 text-[#ff6900]" />
+              </button>
+              <span className="text-gray-400">·</span>
+              <span className="text-gray-500 text-[10px]">Per night + taxes</span>
             </div>
-            <p className="text-xs text-villa-text-light">Per night + taxes</p>
           </div>
-          <Button
-            onPress={() => {
+          <button
+            type="button"
+            onClick={() => {
               dispatch(setPropertyId(villa?._id));
               dispatch(setcategoryId(villa?.category));
               dispatch(setOwnerId(villa?.owner));
               dispatch(setPropertyType("Villa"));
+              setBookingTab("dates");
               setIsBookingOpen(true);
             }}
-            className="bg-black text-white px-4 py-1 rounded-full text-sm hover:bg-villa-text-dark/90"
-            size="lg"
+            className="bg-[#ff6900] hover:bg-[#e05d00] text-white px-4 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap shadow-xs shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center shrink-0"
           >
             Select Dates
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -128,6 +128,7 @@ const FixedBookingBar = () => {
         propertyType="Villa"
         pricing={villa?.pricing}
         maxCapacity={villa?.maxCapacity}
+        initialTab={bookingTab}
         // customerId:={}
       />
     </>

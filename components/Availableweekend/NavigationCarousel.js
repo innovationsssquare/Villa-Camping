@@ -125,8 +125,8 @@ export const NavigationCarousel = ({
   return (
     <div
       className={cn(
-        "sticky top-24 z-40  bg-white md:hidden transition-transform duration-300 ease-in-out",
-        isVisible ? "translate-y-0 bg-white " : "-translate-y-12 bg-white"
+        "sticky top-[82px] z-40 bg-white md:hidden border-b border-neutral-200/80 shadow-2xs transition-all duration-200",
+        "translate-y-0"
       )}
     >
       <div className="flex items-center gap-3 p-2 mt-1">
@@ -147,26 +147,26 @@ export const NavigationCarousel = ({
                   data-active={isActive}
                   onPress={() => handleTabClick(tab.id)}
                   className={cn(
-                    "flex-shrink-0 transition-all duration-200 animate-fade-in",
+                    "flex-shrink-0 transition-all duration-200 cursor-pointer",
                     isActive
-                      ? "bg-tab-active text-tab-active-foreground shadow-soft border border-gray-300"
-                      : "bg-tab-inactive text-tab-inactive-foreground hover:bg-secondary/80 border border-gray-300",
-                    "rounded-lg px-3 py-2 h-auto",
+                      ? "bg-[#ff6900] text-white shadow-xs font-bold border border-transparent"
+                      : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 border border-neutral-200/80",
+                    "rounded-xl px-3 py-1.5 h-auto",
                     tab.id === "map" && "relative overflow-hidden"
                   )}
                 >
                   {tab.id === "map" && (
-                    <div className="absolute inset-0 opacity-90">
+                    <div className="absolute inset-0 opacity-80">
                       <Image
                         src={mapp}
                         alt="Map"
-                        className="w-full h-full object-cover rounded-lg"
+                        className="w-full h-full object-cover rounded-xl"
                       />
                     </div>
                   )}
-                  <div className="flex items-center gap-2 relative z-10">
+                  <div className="flex items-center gap-1.5 relative z-10">
                     {tab.icon}
-                    <span className="text-xs font-normal whitespace-nowrap">
+                    <span className="text-xs font-medium whitespace-nowrap">
                       {tab.label}
                     </span>
                   </div>

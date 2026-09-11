@@ -27,11 +27,13 @@ import PropertyContentSections from "./property-content-sections";
 import StickyBookingWidget from "./sticky-booking-widget";
 import Logo from "../../public/Productasset/Logo2.png";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { fetchVillaById } from "@/Redux/Slices/villaSlice";
 import { useDispatch, useSelector } from "react-redux";
 import VillaScreenSkeleton from "./villa-screen-skeleton";
 import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaDetailHeader from "./villa-detail-header";
 import { VillaProvider } from "@/lib/context/VillaContext";
 
 export default function PropertyDetails() {
@@ -78,46 +80,21 @@ export default function PropertyDetails() {
             'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
         }}
       >
-        {/* Header */}
-        <header className="bg-white backdrop-blur-2xl border-b border-gray-200 sticky top-0 z-40 ">
-          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2">
-                    <Image
-                      src={Logo}
-                      alt="Thevillacamp"
-                      className="h-12 w-12 object-contain mt-2"
-                    />
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm">
-                  Become a host
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Users className="w-5 h-5" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </header>
+        {/* Modern StayVista-style Header */}
+        <VillaDetailHeader />
 
         <main className="w-full mx-auto">
           <PremiumPropertyHero />
           <StickyTabsNavigation />
-          <PropertyHeaderSection />
-
           <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Content Sections */}
-              <div className="lg:col-span-2">
+              {/* Left Column: Overview Header + Content Sections */}
+              <div className="lg:col-span-2 space-y-8">
+                <PropertyHeaderSection />
                 <PropertyContentSections />
               </div>
 
-              {/* Sticky Booking Widget */}
+              {/* Right Column: Sticky Booking Widget in place of Instant Confirmation card */}
               <div className="lg:col-span-1 relative">
                 <StickyBookingWidget />
               </div>

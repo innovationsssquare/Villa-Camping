@@ -37,6 +37,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import { ProfileSheet } from "./ProfileSheet";
+import { addToast } from "@heroui/react";
 
 export default function AirbnbNavbar() {
   const dispatch = useDispatch();
@@ -175,14 +176,88 @@ export default function AirbnbNavbar() {
   };
 
   const handleCheckoutSelect = (date) => {
+    if (!date) {
+      dispatch(setCheckout(null));
+      return;
+    }
     dispatch(setCheckout(date));
-    // Auto-advance to Guest selector immediately after date selection
-    setTimeout(() => {
-      setActiveDropdown("guests");
-    }, 120);
+    // Auto-advance to Guest selector strictly when both checkin and valid checkout date are present
+    if (checkin) {
+      setTimeout(() => {
+        setActiveDropdown("guests");
+      }, 120);
+    }
   };
 
+  const handleCheckinClick = () => {
+    setActiveDropdown(activeDropdown === "checkin" ? null : "checkin");
+    setFocusedSide("checkin");
+  };
+
+  const handleCheckoutClick = () => {
+    if (!checkin) {
+      addToast({
+        title: "Select check-in date first",
+        description: "Please choose your check-in date before selecting check-out",
+        color: "warning",
+      });
+      setActiveDropdown("checkin");
+      setFocusedSide("checkin");
+      return;
+    }
+    setActiveDropdown(activeDropdown === "checkout" ? null : "checkout");
+    setFocusedSide("checkout");
+  };
+
+  const handleGuestsClick = () => {
+    if (!checkin) {
+      addToast({
+        title: "Select check-in date first",
+        description: "Please choose your arrival date before adding guests",
+        color: "warning",
+      });
+      setActiveDropdown("checkin");
+      setFocusedSide("checkin");
+      return;
+    }
+    if (!checkout) {
+      addToast({
+        title: "Select check-out date first",
+        description: "Please choose your departure date before proceeding to guest selection",
+        color: "warning",
+      });
+      setActiveDropdown("checkout");
+      setFocusedSide("checkout");
+      return;
+    }
+    setActiveDropdown(activeDropdown === "guests" ? null : "guests");
+  };
+
+  // Enforce validation: Never allow "guests" dropdown to stay active if check-out date is missing
+  useEffect(() => {
+    if (activeDropdown === "guests" && (!checkin || !checkout)) {
+      if (!checkin) {
+        setActiveDropdown("checkin");
+        setFocusedSide("checkin");
+      } else {
+        setActiveDropdown("checkout");
+        setFocusedSide("checkout");
+      }
+    }
+  }, [activeDropdown, checkin, checkout]);
+
   const handleSearch = async () => {
+    if (checkin && !checkout) {
+      addToast({
+        title: "Select check-out date",
+        description: "Please choose a check-out date to complete your search dates",
+        color: "warning",
+      });
+      setActiveDropdown("checkout");
+      setFocusedSide("checkout");
+      return;
+    }
+
     setIsSearching(true);
     setActiveDropdown(null);
     if (isScrolled) {
@@ -227,10 +302,11 @@ export default function AirbnbNavbar() {
     <>
       <header
         ref={navbarRef}
-        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-250 ease-out ${isScrolled && !isExpanded
-          ? "shadow-sm border-b border-neutral-200/80 h-16"
-          : "border-b border-neutral-200/60 h-[136px]"
-          }`}
+        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-250 ease-out ${
+          isScrolled && !isExpanded
+            ? "shadow-sm border-b border-neutral-200/80 h-16"
+            : "border-b border-neutral-200/60 h-[136px]"
+        }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar: Logo, Navigation Tabs, Host/Profile */}
@@ -460,10 +536,7 @@ export default function AirbnbNavbar() {
 
                     {/* Segment 2: Check in */}
                     <div
-                      onClick={() => {
-                        setActiveDropdown(activeDropdown === "checkin" ? null : "checkin");
-                        setFocusedSide("checkin");
-                      }}
+                      onClick={handleCheckinClick}
                       onMouseEnter={() => setHoveredSegment("checkin")}
                       onMouseLeave={() => setHoveredSegment(null)}
                       className={`relative flex-1 px-4 py-2.5 rounded-full cursor-pointer transition-colors duration-150 ${activeDropdown === "checkin" ? "z-20" : "z-10"
@@ -504,10 +577,7 @@ export default function AirbnbNavbar() {
 
                     {/* Segment 3: Check out */}
                     <div
-                      onClick={() => {
-                        setActiveDropdown(activeDropdown === "checkout" ? null : "checkout");
-                        setFocusedSide("checkout");
-                      }}
+                      onClick={handleCheckoutClick}
                       onMouseEnter={() => setHoveredSegment("checkout")}
                       onMouseLeave={() => setHoveredSegment(null)}
                       className={`relative flex-1 px-4 py-2.5 rounded-full cursor-pointer transition-colors duration-150 ${activeDropdown === "checkout" ? "z-20" : "z-10"
@@ -548,9 +618,7 @@ export default function AirbnbNavbar() {
 
                     {/* Segment 4: Who / Guests & Search Button */}
                     <div
-                      onClick={() =>
-                        setActiveDropdown(activeDropdown === "guests" ? null : "guests")
-                      }
+                      onClick={handleGuestsClick}
                       onMouseEnter={() => setHoveredSegment("guests")}
                       onMouseLeave={() => setHoveredSegment(null)}
                       className={`relative flex-[1.1] pl-4 pr-1.5 py-1.5 rounded-full cursor-pointer transition-colors duration-150 flex items-center justify-between ${activeDropdown === "guests" ? "z-20" : "z-10"
@@ -651,7 +719,7 @@ export default function AirbnbNavbar() {
 
                   {/* Dropdown 4: Who / Guest Selector Popover */}
                   <AnimatePresence>
-                    {activeDropdown === "guests" && (
+                    {activeDropdown === "guests" && Boolean(checkin) && Boolean(checkout) && (
                       <div className="absolute top-full right-0 mt-3 z-50">
                         <GuestSelector
                           adults={selectedGuest?.adults || 1}

@@ -443,7 +443,11 @@ const PropertyBooking = () => {
 
   const handlePropertyClick = () => {
     if (propertyType && propertyId) {
-      const normalizedType = propertyType.charAt(0).toUpperCase() + propertyType.slice(1).toLowerCase();
+      const str = String(propertyType).toLowerCase();
+      let normalizedType = "Villa";
+      if (str.includes("camp")) normalizedType = "Camping";
+      else if (str.includes("cottage")) normalizedType = "Cottage";
+      else if (str.includes("hotel")) normalizedType = "Hotel";
       router.push(`/view-${normalizedType}/${propertyId}`);
     }
   };

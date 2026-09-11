@@ -81,7 +81,7 @@ const ReviewsTab = ({ Reviews }) => {
                     >
                       <div className="flex items-start space-x-3">
                         <div className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-medium">
-                          {review?.userId?.fullName[0]}
+                          {(review?.userId?.fullName || review?.name || "Guest")[0]}
                         </div>
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
@@ -190,7 +190,7 @@ const ReviewsTab = ({ Reviews }) => {
             <div key={review._id} className="bg-villa-grey/30 p-4 rounded-lg">
               <div className="flex items-start space-x-3">
                 <div className="w-10 h-10 bg-orange-400 rounded-full flex items-center justify-center text-white font-medium">
-                  {review?.userId?.fullName[0]}
+                  {(review?.userId?.fullName || review?.name || "Guest")[0]}
                 </div>
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">

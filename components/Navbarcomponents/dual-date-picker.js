@@ -21,7 +21,7 @@ export function DualDatePicker({
   isMobile = false,
   timezone = "Asia/Kolkata",
   onClose,
-  focusedSide = "checkin",
+  focusedSide,
   setFocusedSide,
 }) {
   const currentYear = useMemo(() => {
@@ -85,57 +85,102 @@ export function DualDatePicker({
   const getFirstDayOfMonth = (date) =>
     new Date(date.getFullYear(), date.getMonth(), 1).getDay();
 
+  const [internalSide, setInternalSide] = useState(() => {
+    if (checkinDate && !checkoutDate) return "checkout";
+    return focusedSide || "checkin";
+  });
+
+  useEffect(() => {
+    if (focusedSide) {
+      setInternalSide(focusedSide);
+    }
+  }, [focusedSide]);
+
+  useEffect(() => {
+    if (!checkinDate) {
+      setInternalSide("checkin");
+      if (setFocusedSide) setFocusedSide("checkin");
+    } else if (checkinDate && !checkoutDate) {
+      setInternalSide("checkout");
+      if (setFocusedSide) setFocusedSide("checkout");
+    }
+  }, [checkinDate, checkoutDate, setFocusedSide]);
+
+  const currentSide = focusedSide || internalSide;
+
+  const updateSide = (side) => {
+    setInternalSide(side);
+    if (setFocusedSide) setFocusedSide(side);
+  };
+
   const isDateDisabled = (mCell) => {
     const cellMidnight = mCell.clone().startOf("day");
     const minMidnight = moment(minBoundary).tz(timezone).startOf("day");
 
+    // Only dates before today (or minBoundary) are disabled
     if (cellMidnight.isBefore(minMidnight)) return true;
-
-    if (focusedSide === "checkout" && checkinDate) {
-      const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day");
-      if (cellMidnight.isBefore(checkinMidnight)) return true;
-    }
 
     return false;
   };
 
   const handleDateClick = (mCell) => {
     const isoDate = mCell.format();
+    const cellMidnight = mCell.clone().startOf("day");
+    const checkinMidnight = checkinDate
+      ? moment.tz(checkinDate, timezone).startOf("day")
+      : null;
 
-    if (focusedSide === "checkout") {
-      if (checkinDate) {
-        const checkinMidnight = moment.tz(checkinDate, timezone).startOf("day");
-        const cellMidnight = mCell.clone().startOf("day");
-
-        if (cellMidnight.isBefore(checkinMidnight)) {
-          onCheckinSelect(isoDate);
-          if (setFocusedSide) setFocusedSide("checkout");
-          return;
-        }
-
-        if (cellMidnight.isSame(checkinMidnight)) {
-          return;
-        }
-
-        // Valid checkout date strictly after checkin
-        onCheckoutSelect(isoDate);
-        if (setFocusedSide) setFocusedSide("checkout");
-      } else {
+    // SCENARIO 1: Check-in is selected, waiting for Check-out
+    if (checkinDate && !checkoutDate) {
+      // If user clicks a date on or before check-in date:
+      // Treat as new check-in date and continue waiting for check-out
+      if (cellMidnight.isSameOrBefore(checkinMidnight)) {
         onCheckinSelect(isoDate);
-        if (setFocusedSide) setFocusedSide("checkout");
+        onCheckoutSelect(null);
+        updateSide("checkout");
+        return;
       }
-    } else {
+
+      // Valid checkout date strictly after check-in
+      onCheckoutSelect(isoDate);
+      updateSide("checkin");
+
+      // BOTH CHECK-IN AND CHECK-OUT DATES ARE NOW SELECTED!
+      // Dismiss popup after a smooth delay
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 280);
+      }
+      return;
+    }
+
+    // SCENARIO 2: Currently selecting Check-in (or starting fresh / re-selecting range)
+    if (!checkinDate || (checkinDate && checkoutDate) || currentSide === "checkin") {
       onCheckinSelect(isoDate);
-      if (checkoutDate) {
-        const cellMidnight = mCell.clone().startOf("day");
-        const checkoutMidnight = moment
-          .tz(checkoutDate, timezone)
-          .startOf("day");
-        if (cellMidnight.isSameOrAfter(checkoutMidnight)) {
-          onCheckoutSelect(null);
-        }
+      onCheckoutSelect(null);
+      updateSide("checkout");
+      // NEVER dismiss on check-in selection; wait for checkout selection
+      return;
+    }
+
+    // SCENARIO 3: Explicit checkout side
+    if (currentSide === "checkout") {
+      if (checkinMidnight && cellMidnight.isSameOrBefore(checkinMidnight)) {
+        onCheckinSelect(isoDate);
+        onCheckoutSelect(null);
+        updateSide("checkout");
+        return;
       }
-      if (setFocusedSide) setFocusedSide("checkout");
+
+      onCheckoutSelect(isoDate);
+      updateSide("checkin");
+
+      if (onClose) {
+        setTimeout(() => {
+          onClose();
+        }, 280);
+      }
     }
   };
 
@@ -156,20 +201,26 @@ export function DualDatePicker({
 
     onCheckinSelect(thisFriday.startOf("day").format());
     onCheckoutSelect(sunday.startOf("day").format());
-    if (setFocusedSide) setFocusedSide("checkout");
+    updateSide("checkin");
+    if (onClose) {
+      setTimeout(() => {
+        onClose();
+      }, 280);
+    }
   };
 
   // Jump to specific Indian Holiday: select as Check-in and focus Checkout
   const handleSelectHoliday = (holiday) => {
     const mHol = moment.tz(holiday.date, timezone).startOf("day");
     onCheckinSelect(mHol.format());
+    onCheckoutSelect(null);
 
     // Jump calendar to that month
     setLeftMonth(mHol.clone().startOf("month").toDate());
     setRightMonth(mHol.clone().add(1, "month").startOf("month").toDate());
 
     // Explicitly focus checkout so the user selects their checkout date
-    if (setFocusedSide) setFocusedSide("checkout");
+    updateSide("checkout");
   };
 
   // Jump to upcoming Long Weekend
@@ -192,14 +243,19 @@ export function DualDatePicker({
 
     setLeftMonth(mStart.clone().startOf("month").toDate());
     setRightMonth(mStart.clone().add(1, "month").startOf("month").toDate());
-    if (setFocusedSide) setFocusedSide("checkin");
+    updateSide("checkin");
+    if (onClose) {
+      setTimeout(() => {
+        onClose();
+      }, 280);
+    }
   };
 
   const clearDates = () => {
     onCheckinSelect(null);
     onCheckoutSelect(null);
     setHoveredDate(null);
-    if (setFocusedSide) setFocusedSide("checkin");
+    updateSide("checkin");
   };
 
   const nightsCount = useMemo(() => {
@@ -222,7 +278,7 @@ export function DualDatePicker({
       ? moment.tz(checkoutDate, timezone).startOf("day")
       : null;
     const mHovered =
-      hoveredDate && focusedSide === "checkout"
+      hoveredDate && currentSide === "checkout"
         ? moment(hoveredDate).tz(timezone).startOf("day")
         : null;
 
@@ -263,12 +319,7 @@ export function DualDatePicker({
           key={day}
           className="relative h-8 sm:h-8.5 w-full flex items-center justify-center"
           onMouseEnter={() => {
-            if (
-              !isDisabled &&
-              checkinDate &&
-              !checkoutDate &&
-              focusedSide === "checkout"
-            ) {
+            if (!isDisabled && checkinDate && !checkoutDate) {
               setHoveredDate(mCell.toDate());
             }
           }}
@@ -364,13 +415,13 @@ export function DualDatePicker({
         <div className="flex items-center gap-1.5 p-1 bg-neutral-100 rounded-full relative">
           <button
             type="button"
-            onClick={() => setFocusedSide && setFocusedSide("checkin")}
+            onClick={() => updateSide("checkin")}
             className={`relative z-10 px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-              focusedSide === "checkin" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
+              currentSide === "checkin" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
             }`}
           >
             Check in: {checkinDate ? moment(checkinDate).format("MMM DD") : "Select date"}
-            {focusedSide === "checkin" && (
+            {currentSide === "checkin" && (
               <motion.div
                 layoutId="activeDateHeaderPill"
                 className="absolute inset-0 bg-white rounded-full shadow-xs -z-10"
@@ -381,13 +432,13 @@ export function DualDatePicker({
 
           <button
             type="button"
-            onClick={() => setFocusedSide && setFocusedSide("checkout")}
+            onClick={() => updateSide("checkout")}
             className={`relative z-10 px-3 py-1 rounded-full text-xs font-bold transition-colors cursor-pointer ${
-              focusedSide === "checkout" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
+              currentSide === "checkout" ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
             }`}
           >
             Check out: {checkoutDate ? moment(checkoutDate).format("MMM DD") : "Select date"}
-            {focusedSide === "checkout" && (
+            {currentSide === "checkout" && (
               <motion.div
                 layoutId="activeDateHeaderPill"
                 className="absolute inset-0 bg-white rounded-full shadow-xs -z-10"
@@ -553,7 +604,10 @@ export function DualDatePicker({
               {nightsCount} {nightsCount === 1 ? "night" : "nights"} selected
             </span>
           ) : checkinDate ? (
-            <span>Select check-out date</span>
+            <span className="text-[#ff6900] font-semibold flex items-center gap-1.5 animate-pulse">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ff6900]" />
+              Select check-out date to continue
+            </span>
           ) : (
             <span>Select check-in date</span>
           )}
@@ -573,14 +627,17 @@ export function DualDatePicker({
           {onClose && (
             <button
               type="button"
+              disabled={!checkinDate || !checkoutDate}
               onClick={() => {
                 if (checkinDate && checkoutDate) {
-                  onCheckoutSelect(checkoutDate);
-                } else {
                   onClose();
                 }
               }}
-              className="bg-black hover:bg-neutral-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl cursor-pointer transition-all shadow-xs"
+              className={`text-xs font-semibold px-4 py-1.5 rounded-xl transition-all shadow-xs ${
+                checkinDate && checkoutDate
+                  ? "bg-black hover:bg-neutral-800 text-white cursor-pointer"
+                  : "bg-neutral-200 text-neutral-400 cursor-not-allowed opacity-60"
+              }`}
             >
               Done
             </button>
