@@ -51,7 +51,7 @@
     "mongodb": "^6.16.0",
     "mongoose": "^8.15.0",
     "motion": "^12.23.22",
-    "next": "^16.1.1",
+    "next": "^16.3.5",
     "next-auth": "^4.24.11",
     "react": "^19.2.3",
     "react-day-picker": "^9.9.0",
@@ -71,7 +71,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
-    "eslint-config-next": "^15.4.0-canary.51",
+    "eslint-config-next": "^16.3.5",
     "tailwindcss": "^4"
   }
 }
