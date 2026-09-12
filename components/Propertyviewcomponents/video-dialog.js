@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
-import { Play, X, Volume2, VolumeX, Maximize, Minimize } from "lucide-react"
+import { Play, Volume2, VolumeX, Maximize, Minimize } from "lucide-react"
 
 
 
@@ -51,17 +51,8 @@ export default function VideoDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className=" w-full p-0 bg-black border-none">
+      <DialogContent className="w-full p-0 bg-black border-none text-white [&_[data-slot=dialog-close]]:text-white [&_[data-slot=dialog-close]]:bg-black/60 [&_[data-slot=dialog-close]]:hover:bg-black/80 [&_[data-slot=dialog-close]]:rounded-full [&_[data-slot=dialog-close]]:p-2 [&_[data-slot=dialog-close]]:z-30">
         <div className="relative">
-          {/* Close Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 z-10 bg-black/50 hover:bg-black/70 text-white rounded-full"
-            onClick={onClose}
-          >
-            <X className="w-4 h-4" />
-          </Button>
 
           {/* Video Title */}
           <div className="absolute top-4 left-4 z-10 bg-black/50 text-white px-3 py-1 rounded-lg backdrop-blur-sm">

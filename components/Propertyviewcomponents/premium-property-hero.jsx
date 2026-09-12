@@ -115,11 +115,11 @@ export default function PremiumPropertyHero() {
     <div className="h-auto bg-gray-50">
       {/* Main Content */}
       <div className="w-full mx-auto px-4 sm:px-2 lg:px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[70vh] overflow-hidden">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 h-[60vh] sm:h-[65vh] lg:h-[70vh] min-h-[420px] max-h-[640px] overflow-hidden">
           {/* Main Hero Image */}
-          <div className="lg:col-span-3 relative rounded-2xl overflow-hidden group">
+          <div className="md:col-span-3 lg:col-span-3 relative rounded-2xl overflow-hidden group h-full min-h-0 bg-neutral-900">
             <div
-              className={`w-full h-full transition-all duration-300 ${
+              className={`absolute inset-0 overflow-hidden transition-all duration-300 ${
                 isZoomed ? "cursor-grab" : "cursor-zoom-in"
               } ${isDragging ? "cursor-grabbing" : ""}`}
               onMouseDown={handleMouseDown}
@@ -128,14 +128,15 @@ export default function PremiumPropertyHero() {
               onMouseLeave={handleMouseUp}
               onDoubleClick={handleDoubleClick}
             >
-              <Image
-                width={300}
-                height={300}
+              <img
                 ref={imageRef}
-                src={villa?.images[currentImageIndex] || "/placeholder.svg"}
-                alt="Gardenéa Villa"
+                src={villa?.images?.[currentImageIndex] || "/placeholder.svg"}
+                alt={villa?.name || "Property photo"}
                 className="w-full h-full object-cover transition-all duration-500 ease-out select-none"
                 style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                   transform: `scale(${zoomLevel}) translate(${
                     zoomPosition.x / zoomLevel
                   }px, ${zoomPosition.y / zoomLevel}px)`,
@@ -244,56 +245,60 @@ export default function PremiumPropertyHero() {
 
             {/* Image Counter */}
             <div className="absolute bottom-6 right-6 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm z-10 border border-white/10">
-              {currentImageIndex + 1} / {villa?.images?.length}
+              {currentImageIndex + 1} / {villa?.images?.length || 1}
             </div>
           </div>
 
           {/* Sidebar Images */}
-          <div className="lg:col-span-1 flex flex-col space-y-4">
+          <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-4 h-full min-h-0">
             <div
-              className="relative flex-1 rounded-2xl overflow-hidden group cursor-pointer bg-black"
+              className="relative flex-1 min-h-0 rounded-2xl overflow-hidden group cursor-pointer bg-neutral-900"
               onClick={() => setIsVideoOpen(true)}
             >
               <img
-                src={villa?.images[0] || "/placeholder.svg"}
+                src={villa?.images?.[0] || "/placeholder.svg"}
                 alt="Property Video Tour"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80 select-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
 
               {/* Video Play Button Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/95 hover:bg-white rounded-full p-4 transition-all duration-300 group-hover:scale-110 shadow-xl group-hover:shadow-orange-500/25">
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-white/95 hover:bg-white rounded-full p-4 transition-all duration-300 group-hover:scale-110 shadow-xl group-hover:shadow-orange-500/25 pointer-events-auto">
                   <Play className="w-7 h-7 text-gray-900 group-hover:text-[#ff6900] ml-1 transition-colors fill-current" />
                 </div>
               </div>
 
               {/* Video Label */}
-              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-xs font-medium backdrop-blur-sm border border-white/10">
+              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-xs font-medium backdrop-blur-sm border border-white/10 pointer-events-none">
                 Video Tour
               </div>
             </div>
 
             {/* Bottom Sidebar Image with More Count */}
-           {villa?.images.length >1 && <div
-              className="relative flex-1 rounded-2xl overflow-hidden group cursor-pointer"
-              onClick={() => openGallery(2)}
-            >
-              <img
-                src={villa?.images[1] || "/placeholder.svg"}
-                alt="Spa Pool Area"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+            {(villa?.images?.length || 0) > 1 && (
+              <div
+                className="relative flex-1 min-h-0 rounded-2xl overflow-hidden group cursor-pointer bg-neutral-900"
+                onClick={() => openGallery(1)}
+              >
+                <img
+                  src={villa?.images?.[1] || villa?.images?.[0] || "/placeholder.svg"}
+                  alt="Property photos"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 select-none"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
 
-              {/* More Photos Overlay */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center text-white">
-                  <div className="text-3xl font-bold mb-1">+{villa?.images?.length}</div>
-                  <div className="text-lg font-medium">More</div>
+                {/* More Photos Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="text-center text-white">
+                    <div className="text-3xl font-bold mb-1">
+                      +{(villa?.images?.length || 0)}
+                    </div>
+                    <div className="text-lg font-medium">More</div>
+                  </div>
                 </div>
               </div>
-            </div>}
+            )}
           </div>
         </div>
 

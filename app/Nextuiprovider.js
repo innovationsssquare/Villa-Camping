@@ -6,9 +6,10 @@ import { AppHeader } from "@/components/Navbarcomponents/Mobilenav";
 import { HeroUIProvider } from "@heroui/react";
 import { usePathname } from "next/navigation";
 import SplashScreen from "@/components/Homecomponets/SplashScreen";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { ToastProvider } from "@heroui/toast";
 import { SocketProvider } from "@/lib/context/SocketProvider";
+import BookingParamsSync from "@/components/Bookingcomponent/BookingParamsSync";
 
 const hideChrome = (pathname) => {
   const p = pathname?.toLowerCase() || "";
@@ -65,6 +66,9 @@ export function NextuiProviderWrapper({ children }) {
   return (
     <SocketProvider>
       <HeroUIProvider>
+        <Suspense fallback={null}>
+          <BookingParamsSync />
+        </Suspense>
         {hideChrome(pathname) ? null : <Navbar />}
         {hideMobileHeader(pathname) ? null : <AppHeader />}
         <div className="z-[400]">

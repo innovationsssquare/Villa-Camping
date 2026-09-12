@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { ArrowLeft, Share, Bell, User } from "lucide-react";
 import { useCamping } from "@/lib/context/CampingContext";
@@ -5,39 +6,55 @@ import { Button } from "@heroui/react";
 import { useRouter } from "next/navigation";
 
 const TentHeader = () => {
-    const camping = useCamping();
-    const router = useRouter();
+  const camping = useCamping();
+  const router = useRouter();
+
   return (
-    <div className="flex items-center  justify-between p-2 bg-background w-full  overflow-hidden">
+    <div className="flex items-center justify-between px-3 h-12 bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 w-full overflow-hidden">
       <div className="flex items-center w-2/3">
-       <Button
+        <Button
           isIconOnly
           variant="light"
           onPress={() => router.back()}
-          className="p-2 -ml-2"
+          className="p-1.5 -ml-1 text-gray-700 hover:text-[#ff6900] rounded-full"
         >
-          <ArrowLeft className="w-6 h-6" />
+          <ArrowLeft className="w-5 h-5" />
         </Button>
-        <div className="ml-2 flex items-center truncate ">
-          <span className="text-md font-medium truncate">
-            {camping?.name} - {camping?.address?.addressLine},{camping?.address?.city}
+        <div className="ml-1.5 flex items-center truncate">
+          <span className="text-sm font-bold text-gray-900 truncate">
+            {camping?.name}
+          </span>
+          <span className="text-xs text-gray-400 mx-1">•</span>
+          <span className="text-xs text-gray-500 truncate">
+            {camping?.address?.city || "Pawana"}
           </span>
         </div>
       </div>
 
-      <div className="flex items-center  ">
-        <button className="p-2">
-          <Share className="w-5 h-5" />
-        </button>
-        <button className="p-2 relative">
-          <Bell className="w-5 h-5" />
-          <div className="absolute -top-1 -right-1 w-3 h-3 bg-villa-red rounded-full"></div>
-        </button>
-        <button className="p-2">
-          <div className="w-8 h-8 bg-foreground rounded-full flex items-center justify-center">
-            <User className="w-4 h-4 text-background" />
+      <div className="flex items-center space-x-1">
+        <Button isIconOnly variant="light" className="p-1.5 text-gray-600 hover:text-[#ff6900] rounded-full">
+          <Share className="w-4 h-4" />
+        </Button>
+        <Button
+          onPress={() => router.push("/notifications")}
+          isIconOnly
+          variant="light"
+          className="p-1.5 relative text-gray-600 hover:text-[#ff6900] rounded-full"
+        >
+          <Bell className="w-4 h-4" />
+          <div className="absolute top-1 right-1 w-2 h-2 bg-[#ff6900] ring-2 ring-white rounded-full"></div>
+        </Button>
+        <Button
+          onPress={() => router.push("/account")}
+          isIconOnly
+          radius="full"
+          variant="light"
+          className="p-1"
+        >
+          <div className="w-7 h-7 bg-gradient-to-br from-[#ff8533] to-[#ff6900] rounded-full flex items-center justify-center shadow-xs">
+            <User className="w-3.5 h-3.5 text-white" />
           </div>
-        </button>
+        </Button>
       </div>
     </div>
   );

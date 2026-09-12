@@ -1,5 +1,5 @@
 "use client";
-import React, { forwardRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Accordion,
@@ -7,615 +7,788 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import CottageDetailsDrawer from "./CottageDetailsDrawer";
+import CottageSelectionDrawer from "./cottage-selection-drawer";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
 } from "@/components/ui/carousel";
 import {
   Drawer,
   DrawerContent,
   DrawerHeader,
   DrawerTitle,
-  DrawerTrigger,
 } from "@/components/ui/drawer";
-import fullyServicedImage from "@/public/Homeasset/fully-serviced.jpg";
-import fourCourseMealImage from "@/public/Homeasset/four-course-meal.jpg";
-import nearbyVillaImage from "@/public/Homeasset/nearby-villa.jpg";
 import Image from "next/image";
-import { FaSwimmer } from "react-icons/fa";
 import GoogleMap from "../Propertyviewcomponents/google-map";
 import ReviewsTab from "./ReviewsTab";
 import ExperiencesTab from "./ExperiencesTab";
-// import HighlightsTab from "./HighlightsTab";
-// import SpacesTab from "./SpacesTab";
-import { useCamping } from "@/lib/context/CampingContext";
-import {
-  Wifi,
-  Wind,
-  WavesLadder,
-  CookingPot,
-  Car,
-  Fence,
-  AirVent,
-  Tv,
-  Shield,
-  Droplets,
-  BatteryCharging,
-  Building2,
-  Snowflake,
-  Key,
-  Flame,
-  Refrigerator,
-  Sun,
-  ShowerHead,
-  Dumbbell,
-  Coffee,
-  Utensils,
-  Waves,
-  Bath,
-  WashingMachine,
-  ShieldCheck,
-  FlameKindling,
-  Mountain,
-  Table,
-  Trees,
-  Droplet,
-  Users,
-  Bed,
-} from "lucide-react";
-import { FaUmbrellaBeach, FaPeopleRoof, FaBroom } from "react-icons/fa6";
-import { Button } from "@heroui/react";
-import { Tent, Backpack, Music, Footprints } from "lucide-react";
-import { TbKayak } from "react-icons/tb";
-import { MdKayaking, MdOutlineSpeaker } from "react-icons/md";
-
-// react-icons (better semantics for some amenities)
-import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
-import { MdOutlineLocalDrink } from "react-icons/md";
-import {
-  FaSquareParking,
-  FaTv,
-  FaFilePdf,
-  FaPeopleGroup,
-  FaChild,
-} from "react-icons/fa6";
-import { BiBlanket } from "react-icons/bi";
-import { GiSleepingBag } from "react-icons/gi";
-import {
-  Card,
-  CardAction,
-  CardBody,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-} from "@heroui/react";
-import { calculateBasePriceForRange } from "@/lib/datePricing";
-import { useSelector } from "react-redux";
 import { useCottage } from "@/lib/context/CottageContext";
-import CottageDetailsDrawer from "./CottageDetailsDrawer";
-// import TentDetailsDrawer from "./TentDetailsDrawer";
+import PropertyCard from "@/components/Availableweekend/Weekendcard";
+import { BaseUrl } from "@/lib/API/Baseurl";
+import {
+  Trees,
+  Home,
+  Waves,
+  Sparkles,
+  Clock,
+  Utensils,
+  Coffee,
+  CookingPot,
+  MapPin,
+  CheckCircle2,
+  Users,
+  Search,
+  Flame,
+} from "lucide-react";
+import { Button } from "@heroui/react";
+import { useSelector, useDispatch } from "react-redux";
 
-const AllTabsContent = ({ refs, tents, onBookTent }) => {
-  const [expandedDescription, setExpandedDescription] = useState(false);
+const defaultCottageExperiences = [
+  {
+    title: "PRIVATE",
+    subtitle: "VERANDA",
+    image:
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&q=80",
+  },
+  {
+    title: "NATURE",
+    subtitle: "RETREAT",
+    image:
+      "https://images.unsplash.com/photo-1510798831971-661eb04b3739?w=800&q=80",
+  },
+  {
+    title: "BONFIRE &",
+    subtitle: "BARBECUE",
+    image:
+      "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+  },
+  {
+    title: "SERENE",
+    subtitle: "PANORAMA",
+    image:
+      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&q=80",
+  },
+];
+
+const AllTabsContent = ({ refs = {} }) => {
   const cottage = useCottage();
-  const [showAll, setShowAll] = useState(false);
-  const { checkin, checkout } = useSelector((state) => state.booking);
-  const checkInDate = checkin ? new Date(checkin) : new Date();
-  const checkOutDate = checkout
-    ? new Date(checkout)
-    : new Date(Date.now() + 24 * 60 * 60 * 1000);
-
-  const [selectedTent, setSelectedTent] = useState(null);
+  const dispatch = useDispatch();
+  const [expandedDescription, setExpandedDescription] = useState(false);
+  const [showAllAmenitiesDrawer, setShowAllAmenitiesDrawer] = useState(false);
+  const [amenitySearchQuery, setAmenitySearchQuery] = useState("");
+  const [selectedCottage, setSelectedCottage] = useState(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [showCottageSelectionDrawer, setShowCottageSelectionDrawer] = useState(false);
+  const [nearbyCottages, setNearbyCottages] = useState([]);
 
-  const getAmenityIcon = (amenity) => {
-    const lowerAmenity = amenity.toLowerCase();
-    if (lowerAmenity.includes("wifi")) return <Wifi className="w-4 h-4" />;
-    if (lowerAmenity.includes("mountain") || lowerAmenity.includes("view"))
-      return <Mountain className="w-4 h-4" />;
-    if (lowerAmenity.includes("kitchen") || lowerAmenity.includes("coffee"))
-      return <Coffee className="w-4 h-4" />;
-    return <Coffee className="w-4 h-4" />;
+  const { checkin, checkout, selectedGuest } = useSelector((state) => state.booking);
+  const reduxSelectedCottages = useSelector((state) => state.booking.selectedCottages);
+
+  const amenities = cottage?.amenities || [];
+
+  // Fetch nearby cottages
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchNearby() {
+      if (!cottage) return;
+      try {
+        const res = await fetch(`${BaseUrl}/Cottage/get/cottages`);
+        if (res.ok) {
+          const data = await res.json();
+          const list = data?.data || data?.properties || (Array.isArray(data) ? data : []);
+          const others = list.filter((p) => String(p._id) !== String(cottage?._id));
+          if (isMounted) {
+            setNearbyCottages(others);
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to fetch nearby cottages:", err);
+      }
+    }
+    fetchNearby();
+    return () => {
+      isMounted = false;
+    };
+  }, [cottage?._id]);
+
+  // Categorize amenities
+  const categorizedAmenities = {
+    "Cottage Essentials": amenities.filter((a) =>
+      /bed|mattress|blanket|pillow|linen|ac|heating|water|power|light|wardrobe/i.test(a)
+    ),
+    "Comfort & Living": amenities.filter((a) =>
+      /veranda|balcony|patio|couch|sofa|table|chair|tv|wifi|geyser|washroom|bath/i.test(a)
+    ),
+    "Outdoor & Leisure": amenities.filter((a) =>
+      /lawn|garden|bonfire|barbeque|bbq|hammock|pool|swing|nature|view|outdoor/i.test(a)
+    ),
+    "Dining & Kitchen": amenities.filter((a) =>
+      /kitchen|fridge|refrigerator|microwave|cook|dining|tea|coffee|kettle|breakfast/i.test(a)
+    ),
+    "Safety & Hygiene": amenities.filter((a) =>
+      /security|cctv|parking|caretaker|first aid|fire|clean|housekeeping/i.test(a)
+    ),
   };
 
-  const amenityIcons = {
-    WiFi: <Wifi className="w-4 h-4 text-black" />,
-    "Air Conditioning": <Wind className="w-4 h-4 text-black" />,
-    "Swimming Pool": <WavesLadder className="w-4 h-4 text-black" />,
-    Parking: <Car className="w-4 h-4 text-black" />,
-    TV: <Tv className="w-4 h-4 text-black" />,
-    Kitchen: <CookingPot className="w-4 h-4 text-black" />,
-    "Washing Machine": <WashingMachine className="w-4 h-4 text-black" />,
-    Balcony: <FaPeopleRoof className="w-4 h-4 text-black" />,
-    Security: <Shield className="w-4 h-4 text-black" />,
-    Garden: <Fence className="w-4 h-4 text-black" />,
-    "Water Supply": <Droplets className="w-4 h-4 text-black" />,
-    "Power Backup": <BatteryCharging className="w-4 h-4 text-black" />,
-    Heater: <Snowflake className="w-4 h-4 text-black" />,
-    "Beach Access": <FaUmbrellaBeach className="w-4 h-4 text-black" />,
-    Housekeeping: <FaBroom className="w-4 h-4 text-black" />,
-    Jacuzzi: <Bath className="w-4 h-4 text-black" />,
-    "Mini Bar": <Coffee className="w-4 h-4 text-black" />,
-    "Dining Area": <Utensils className="w-4 h-4 text-black" />,
-    Refrigerator: <Refrigerator className="w-4 h-4 text-black" />,
-    "Private Entrance": <Key className="w-4 h-4 text-black" />,
-    "Hot Water": <Flame className="w-4 h-4 text-black" />,
-    Shower: <ShowerHead className="w-4 h-4 text-black" />,
-    Gym: <Dumbbell className="w-4 h-4 text-black" />,
-    "Sun Deck": <Sun className="w-4 h-4 text-black" />,
-    Spa: <Waves className="w-4 h-4 text-black" />,
-    "Drinking Water": <MdOutlineLocalDrink className="w-6 h-6 text-gray-600" />,
-    "Charging Point": <BatteryCharging className="w-6 h-6 text-gray-600" />,
-    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
-    "Private Parking": <FaParking className="w-6 h-6 text-gray-600" />,
+  const allCategorizedFlat = Object.values(categorizedAmenities).flat();
+  const uncategorized = amenities.filter((a) => !allCategorizedFlat.includes(a));
+  if (uncategorized.length > 0) {
+    categorizedAmenities["More Inclusions"] = uncategorized;
+  }
 
-    // Activities
-    Barbeque: <FlameKindling className="w-6 h-6 text-gray-600" />,
-    Bonfire: <FaFireAlt className="w-6 h-6 text-gray-600" />,
-    Trekking: <Footprints className="w-6 h-6 text-gray-600" />,
-
-    // Views
-    "Mountain View": <Mountain className="w-6 h-6 text-gray-600" />,
-    "Lake View": <Waves className="w-6 h-6 text-gray-600" />,
-
-    // Common areas
-    "Outdoor Seating": <Table className="w-6 h-6 text-gray-600" />,
-    "Garden Area": <Trees className="w-6 h-6 text-gray-600" />,
-    "Play Area": <FaChild className="w-6 h-6 text-gray-600" />,
-    "Music System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
-    "Rain Dance Area": <Droplet className="w-6 h-6 text-gray-600" />,
-    "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
-    Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
-    "Tent Stay": <Tent className="w-6 h-6 text-gray-600" />,
-    Blankets: <BiBlanket className="w-6 h-6 text-gray-600" />,
-    "Sleeping Bags": <GiSleepingBag className="w-6 h-6 text-gray-600" />,
-  };
-
-  const displayedAmenities = showAll
-    ? cottage?.amenities
-    : cottage?.amenities?.slice(0, 8);
+  const filteredCategorized = Object.entries(categorizedAmenities).reduce(
+    (acc, [category, items]) => {
+      const filtered = items.filter((item) =>
+        item.toLowerCase().includes(amenitySearchQuery.toLowerCase())
+      );
+      if (filtered.length > 0) {
+        acc[category] = filtered;
+      }
+      return acc;
+    },
+    {}
+  );
 
   return (
-    <>
-      <div className="pb-20">
-        {/* Highlights Section */}
-        <section
-          ref={refs.highlightsRef}
-          id="highlights"
-          className="p-3 space-y-6 scroll-mt-16"
-        >
-          {/* The StayVista Experience */}
-          <div className="">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-base font-semibold border-l-3 border-orange-500 pl-2">
-                The Villacamp Experience
-              </h3>
-              <div className="flex space-x-2"></div>
+    <div className="pb-24">
+      {/* 1. HIGHLIGHTS SECTION */}
+      <section
+        ref={refs?.highlightsRef}
+        id="highlights"
+        className="p-3.5 space-y-4 scroll-mt-16"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-2 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Cottage Highlights
+          </h3>
+          <p className="text-xs text-gray-500 mb-3">
+            Peaceful rustic cottages with modern comforts
+          </p>
+
+          {/* Signature Experience Cards Carousel */}
+          <div className="overflow-x-auto scrollbar-hide -mx-3.5 px-3.5 pb-2">
+            <div className="flex space-x-3 w-max">
+              {defaultCottageExperiences.map((exp, idx) => {
+                const displayImg =
+                  (cottage?.cottageimages && cottage.cottageimages[idx]) ||
+                  (cottage?.images && cottage.images[idx]) ||
+                  exp.image;
+                return (
+                  <div
+                    key={idx}
+                    className="relative w-44 aspect-[4/3] rounded-2xl overflow-hidden bg-neutral-100 shadow-2xs shrink-0"
+                  >
+                    <Image
+                      src={displayImg}
+                      alt={`${exp.title} ${exp.subtitle}`}
+                      fill
+                      unoptimized
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent flex flex-col justify-end p-2.5 text-white">
+                      <span className="text-[9px] font-extrabold tracking-wider uppercase text-orange-400">
+                        {exp.title}
+                      </span>
+                      <span className="text-xs font-black tracking-tight leading-tight">
+                        {exp.subtitle}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
-
-            <Carousel className="w-full">
-              <CarouselContent className="-ml-2 md:-ml-4">
-                <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                  <div className="min-w-48 relative rounded-lg overflow-hidden">
-                    <Image
-                      src={fullyServicedImage}
-                      alt="Fully-Serviced Villas"
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <h4 className="text-md font-bold">FULLY-SERVICED</h4>
-                        <p className="text-sm">COTTAGES</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-                <CarouselItem className="pl-2 md:pl-4 basis-auto">
-                  <div className="min-w-48 relative rounded-lg overflow-hidden">
-                    <Image
-                      src={fourCourseMealImage}
-                      alt="Four Course Meals"
-                      className="w-full h-32 object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                      <div className="text-center text-white">
-                        <h4 className="text-md font-bold">FOUR COURSE</h4>
-                        <p className="text-sm">MEALS</p>
-                      </div>
-                    </div>
-                  </div>
-                </CarouselItem>
-              </CarouselContent>
-            </Carousel>
           </div>
 
-          {/* Villa Description */}
-          <div className="">
-            <h3 className="text-lg font-semibold mb-3 border-l-3 border-orange-500 pl-2">
-              {cottage?.name} - {cottage?.address?.area} - cottage in{" "}
-              {cottage?.address?.city}
-            </h3>
-            <p className="text-villa-text-light text-sm leading-relaxed">
-              {expandedDescription ? cottage?.description : cottage?.description}
-            </p>
-            <button
-              onClick={() => setExpandedDescription(!expandedDescription)}
-              className="text-villa-text-dark font-medium text-sm mt-2 underline"
-            >
-              {expandedDescription ? "Read Less" : "Read More"}
-            </button>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex space-x-4">
-            <Drawer>
-              <DrawerTrigger asChild>
-                <button className="bg-black text-white px-6 py-2 rounded-full text-sm font-medium">
-                  View Brochure
+          {/* About Cottage Description Card */}
+          <div className="bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-2xs space-y-2.5 mt-3">
+            <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+              About This Cottage
+            </h4>
+            <div className="relative">
+              <p
+                className={`text-xs text-gray-600 leading-relaxed ${
+                  !expandedDescription ? "line-clamp-3" : ""
+                }`}
+              >
+                {cottage?.description ||
+                  "Unwind in cozy, private cottages immersed in lush green surroundings. Featuring serene verandas, bonfire sit-outs, modern en-suite washrooms, and comforting home-style hospitality."}
+              </p>
+              {cottage?.description && cottage.description.length > 150 && (
+                <button
+                  type="button"
+                  onClick={() => setExpandedDescription(!expandedDescription)}
+                  className="mt-1 text-xs font-bold text-[#ff6900] hover:text-[#e05d00] cursor-pointer"
+                >
+                  {expandedDescription ? "Show less" : "Read more..."}
                 </button>
-              </DrawerTrigger>
-              <DrawerContent>
-                <DrawerHeader>
-                  <DrawerTitle>Villa Brochure</DrawerTitle>
-                </DrawerHeader>
-                <div className="p-4 space-y-4">
-                  <div className="bg-villa-grey/30 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Property Highlights</h4>
-                    <ul className="text-sm text-villa-text-light space-y-1">
-                      <li>• 5 Bedroom Villa with Mountain Views</li>
-                      <li>• Fully Furnished & Serviced</li>
-                      <li>• Private Garden & BBQ Area</li>
-                      <li>• Chef Services Available</li>
-                    </ul>
-                  </div>
-                  <div className="bg-villa-grey/30 p-4 rounded-lg">
-                    <h4 className="font-semibold mb-2">Location Benefits</h4>
-                    <ul className="text-sm text-villa-text-light space-y-1">
-                      <li>• 15 minutes to Nainital Lake</li>
-                      <li>• Peaceful hill station setting</li>
-                      <li>• Easy access to trekking trails</li>
-                    </ul>
-                  </div>
-                </div>
-              </DrawerContent>
-            </Drawer>
-            <button className="bg-villa-grey text-villa-text-dark px-6 py-2 rounded-full text-sm font-medium">
-              {`  FAQ's`}
-            </button>
-          </div>
-        </section>
-
-        {/* Refund Policy Section */}
-        <section
-          ref={refs.refundRef}
-          id="refund-policy"
-          className="p-3 space-y-6 scroll-mt-16"
-        >
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-              Rules and Refund Policy
-            </h3>
-
-            <div className="space-y-4 text-sm">
-              <div>
-                <h4 className="font-medium mb-2">Cancellation Policy</h4>
-                {cottage?.cancellationPolicy &&
-                  cottage?.cancellationPolicy.map((policy, index) => (
-                    <ul key={index} className="space-y-1 text-villa-text-light">
-                      <li>• {policy}</li>
-                    </ul>
-                  ))}
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-2">Cottage Rules</h4>
-                {cottage?.CampingRules &&
-                  cottage?.CampingRules.map((rules, index) => (
-                    <ul key={index} className="space-y-1 text-villa-text-light">
-                      <li>• {rules}</li>
-                    </ul>
-                  ))}
-              </div>
-
-              <div>
-                <h4 className="font-medium mb-2">Payment Terms</h4>
-                {cottage?.paymentTerms &&
-                  cottage?.paymentTerms.map((rules, index) => (
-                    <ul key={index} className="space-y-1 text-villa-text-light">
-                      <li>• {rules}</li>
-                    </ul>
-                  ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Spaces Section */}
-        {/* <section ref={refs.spacesRef} id="spaces" className="scroll-mt-16">
-          <SpacesTab tents={tents} onBookTent={onBookTent} />
-        </section> */}
-
-        {/* Reviews Section */}
-        <section ref={refs.reviewsRef} id="reviews" className="scroll-mt-16">
-        <ReviewsTab Reviews={cottage?.reviews}/>
-        </section>
-
-        {/* Amenities Section */}
-        <section
-          ref={refs?.amenitiesRef}
-          id="amenities"
-          className="p-3 space-y-6 scroll-mt-16"
-        >
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-              Amenities
-            </h3>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 transition-all duration-300 ease-in-out">
-              {displayedAmenities?.map((amenity, index) => (
-                <div
-                  key={index}
-                  className="flex items-center space-x-3 p-3 bg-villa-grey/30 rounded-lg"
-                >
-                  <div className="w-10 h-10 border-gray-400 bg-gray-100 rounded-sm border flex items-center justify-center">
-                  <CustomAmenityIcon name={amenity} className="w-6 h-6 text-black" />
-                  </div>
-                  <span className="text-sm font-medium">{amenity}</span>
-                </div>
-              ))}
+              )}
             </div>
 
-            {/* Show More / Show Less */}
-            {cottage?.amenities?.length > 8 && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  onPress={() => setShowAll(!showAll)}
-                  variant="flat"
-                  className="bg-orange-500/10 text-orange-600 font-medium text-sm"
-                >
-                  {showAll ? "Show Less" : "Show More"}
-                </Button>
+            {/* Things to do chips */}
+            {cottage?.highlights?.thingsToDo?.length > 0 && (
+              <div className="pt-2.5 border-t border-neutral-100">
+                <span className="text-[10.5px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
+                  Things to do
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {cottage.highlights.thingsToDo.map((item, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-orange-50 text-orange-950 font-medium text-[11px] border border-orange-200/60"
+                    >
+                      <Sparkles className="w-2.5 h-2.5 text-[#ff6900]" />
+                      {item}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Location Section */}
-        <section
-          ref={refs.locationRef}
-          id="location"
-          className="p-3 space-y-6 scroll-mt-16"
-        >
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-              Location
-            </h3>
+      {/* 2. REFUND POLICY SECTION */}
+      <section
+        ref={refs?.refundRef}
+        id="refund-policy"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-3 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Rules & Refund Policy
+          </h3>
 
-            <div className="bg-gray-100 border border-gray-200 p-2 h-auto touch-auto  rounded-lg flex items-center justify-center mb-4">
-              <GoogleMap coordinates={cottage?.coordinates} />
+          <div className="bg-white rounded-2xl p-4 border border-neutral-200/90 shadow-2xs space-y-4">
+            {/* Visual Step-by-Step Cancellation Timeline */}
+            <div>
+              <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-[#ff6900]" />
+                Cancellation Timeline
+              </h4>
+              <div className="space-y-2">
+                <div className="p-2.5 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-between text-xs text-emerald-950">
+                  <span className="font-bold">100% Refund</span>
+                  <span className="text-[11px] text-emerald-800">Up to 7 days before check-in</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-between text-xs text-amber-950">
+                  <span className="font-bold">50% Refund</span>
+                  <span className="text-[11px] text-amber-800">7 days to 48 hrs before check-in</span>
+                </div>
+                <div className="p-2.5 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between text-xs text-rose-950">
+                  <span className="font-bold">No Refund</span>
+                  <span className="text-[11px] text-rose-800">Within 48 hrs of check-in</span>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <h4 className="font-medium mb-2">Address</h4>
-                <p className="text-sm text-villa-text-light">
-                  {cottage?.address.addressLine},{cottage?.address.area},
-                  {cottage?.address.city}
-                </p>
+            {/* Check-in / Out Timings */}
+            <div className="grid grid-cols-2 gap-2 pt-2 border-t border-neutral-100">
+              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-150">
+                <span className="text-[10px] text-gray-400 font-bold uppercase block">Check-in</span>
+                <span className="text-xs font-bold text-gray-900">{cottage?.checkInTime || "1:00 PM"}</span>
               </div>
+              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-150">
+                <span className="text-[10px] text-gray-400 font-bold uppercase block">Check-out</span>
+                <span className="text-xs font-bold text-gray-900">{cottage?.checkOutTime || "11:00 AM"}</span>
+              </div>
+            </div>
 
-              <div>
-                <h4 className="font-medium mb-2">Nearby Attractions</h4>
-                <ul className="space-y-1 text-sm text-villa-text-light">
-                  {cottage?.nearbyattractions?.map((loc, index) => (
-                    <li key={index}>
-                      • {loc?.nearbylocation} - {loc?.distance} km
+            {/* House Rules */}
+            {cottage?.HouseRules && cottage.HouseRules.length > 0 && (
+              <div className="pt-2 border-t border-neutral-100">
+                <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider mb-2">
+                  Cottage Guidelines
+                </h4>
+                <ul className="space-y-1.5 text-xs text-gray-600">
+                  {cottage.HouseRules.map((rule, idx) => (
+                    <li key={idx} className="flex items-start gap-1.5">
+                      <span className="text-[#ff6900] font-bold">•</span>
+                      <span>{rule}</span>
                     </li>
                   ))}
                 </ul>
               </div>
-            </div>
+            )}
           </div>
-        </section>
+        </div>
+      </section>
 
-        {/* Experiences Section */}
-        <section
-          ref={refs.experiencesRef}
-          id="experiences"
-          className="scroll-mt-16"
-        >
-          <ExperiencesTab experiences={cottage?.experiences} />
-        </section>
+      {/* 3. SPACES & COTTAGES SECTION */}
+      <section
+        ref={refs?.spacesRef}
+        id="spaces"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-1 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Available Cottages
+          </h3>
+          <p className="text-xs text-gray-500 mb-3 pl-3">
+            Select your preferred cottage type and units
+          </p>
 
-        {/* FAQ Section */}
-        <section
-          ref={refs.faqsRef}
-          id="faqs"
-          className="p-3 space-y-6 scroll-mt-16"
-        >
-          {/* <button className="bg-villa-grey text-villa-text-dark px-6 py-2 rounded-lg text-sm font-medium">
-          View Experiences
-        </button> */}
+          {Array.isArray(cottage?.cottages) && cottage.cottages.length > 0 ? (
+            <Carousel className="w-full" opts={{ align: "start" }}>
+              <CarouselContent className="-ml-2.5">
+                {cottage.cottages.map((cotItem, idx) => {
+                  const cKey = cotItem.cottageType || cotItem.tentType || cotItem._id || `cottage-${idx}`;
+                  const currentSelectedQty = reduxSelectedCottages?.[cKey]?.quantity || 0;
+                  const cotPrice = Number(
+                    cotItem.pricing?.weekdayPrice ||
+                    cotItem.price ||
+                    cottage?.pricing?.weekdayPrice ||
+                    2500
+                  );
+                  const unitCount =
+                    cotItem.totalcottage ||
+                    cotItem.totaltents ||
+                    cotItem.totalCottages ||
+                    1;
+                  const cotImages =
+                    cotItem.cottageimages || cotItem.images || cottage?.images || ["/placeholder.svg"];
 
-          {/* FAQ Section */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-              {` FAQ's related to ${cottage?.name} -  ${cottage?.address?.addressLine}, ${cottage?.address?.city}`}
-            </h3>
-            {cottage?.faqs &&
-              cottage?.faqs.map((faq, index) => (
-                <Accordion
-                  key={faq._id || index}
-                  type="single"
-                  collapsible
-                  className="space-y-3"
-                >
-                  <AccordionItem
-                    value={`faq-${index}`}
-                    className="bg-gray-100 rounded-lg px-4 border-0"
-                  >
-                    <AccordionTrigger className="font-medium hover:no-underline">
-                      {faq?.question}?
-                    </AccordionTrigger>
-                    <AccordionContent className="text-sm text-villa-text-light">
-                      {faq?.answer}.
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              ))}
-          </div>
-
-          {/* Explore Your Stay */}
-          <div className=" space-y-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-2">
-                Explore Your Stay
-              </h3>
-
-              {cottage?.exploreStay?.length > 0 ? (
-                <Accordion type="single" collapsible className="space-y-3">
-                  {cottage?.exploreStay?.map((item, index) => (
-                    <AccordionItem
-                      key={item._id || index}
-                      value={`explore-${index}`}
-                      className="bg-gray-100 rounded-lg px-4 border-0"
-                    >
-                      <AccordionTrigger className="font-medium hover:no-underline">
-                        {item.title}
-                      </AccordionTrigger>
-                      <AccordionContent className="text-sm text-villa-text-light">
-                        {item.description}
-                      </AccordionContent>
-                    </AccordionItem>
-                  ))}
-                </Accordion>
-              ) : (
-                <p className="text-sm text-gray-400">No details available</p>
-              )}
-            </div>
-          </div>
-
-          {/* Tent Types Carousel */}
-          {cottage?.cottages?.length > 0 && (
-            <div className="bg-white">
-              <h3 className="text-lg font-semibold mb-4 border-l-3 border-orange-500 pl-3">
-                Available Cottage
-              </h3>
-              <Carousel className="w-full ">
-                <CarouselContent className="-ml-4 bg-white">
-                  {cottage?.cottages?.map((tent) => (
+                  return (
                     <CarouselItem
-                      key={tent._id}
-                      className="pl-4 md:pl-4 basis-2/3 md:basis-1/2 lg:basis-1/4 xl:basis-1/4 "
+                      key={cotItem._id || idx}
+                      className="pl-2.5 basis-[48%] sm:basis-1/3"
                     >
-                      <Card className="overflow-hidden border border-gray-100  h-full p-0">
-                        <CardHeader className="p-0">
-                          {tent.cottageimages && tent.cottageimages.length > 0 ? (
+                      <div className="bg-white rounded-2xl border border-neutral-200/90 overflow-hidden shadow-2xs hover:shadow-xs transition-all h-full flex flex-col justify-between select-none">
+                        <div
+                          className="cursor-pointer"
+                          onClick={() => {
+                            setSelectedCottage(cotItem);
+                            setDrawerOpen(true);
+                          }}
+                        >
+                          <div className="relative aspect-[4/3] w-full bg-neutral-100 overflow-hidden">
                             <Image
+                              src={cotImages[0] || "/placeholder.svg"}
+                              alt={cotItem.cottageType || "Cottage"}
+                              fill
                               unoptimized
-                              height={50}
-                              width={50}
-                              src={tent.cottageimages[0]}
-                              alt={tent.cottageType}
-                              className="w-full h-36 object-cover"
+                              className="object-cover"
                             />
-                          ) : (
-                            <div className="w-full h-40 bg-muted flex items-center justify-center">
-                              <Mountain className="w-12 h-12 text-muted-foreground" />
+                            <div className="absolute top-1.5 left-1.5 bg-white/95 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[9px] font-bold text-gray-900 shadow-xs border border-black/5 flex items-center gap-1">
+                              <Home className="w-2.5 h-2.5 text-[#ff6900]" />
+                              <span className="truncate max-w-[75px]">{cotItem.cottageType || "Cottage"}</span>
                             </div>
-                          )}
-                        </CardHeader>
-                        <CardBody className="py-2">
-                          <div className="flex justify-between items-start py-0">
-                            <div className="text-md font-medium p-0">
-                              <p className="text-md font-medium p-0">
-                                {tent.cottageType}
-                              </p>
-                              <p className="text-xs border rounded-full  p-1">
-                                Total cottages : {tent.totalcottage}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-md font-bold text-orange-500">
-                                ₹
-                                {calculateBasePriceForRange(
-                                  checkInDate,
-                                  checkOutDate,
-                                  tent.pricing
-                                )}
-                              </p>
-                              <p className="text-xs text-muted-foreground">
-                                per night
-                              </p>
+                            <div className="absolute bottom-1.5 right-1.5 bg-black/60 backdrop-blur-xs px-1.5 py-0.5 rounded-full text-[9px] font-semibold text-white">
+                              {unitCount} Available
                             </div>
                           </div>
 
-                          {/* <div className="flex gap-4 text-sm">
-                          <div className="flex items-center gap-1">
-                            <Users className="w-4 h-4 text-muted-foreground" />
-                            <span>
-                              {tent.min_capacity}-{tent.max_capacity} guests
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Bed className="w-4 h-4 text-muted-foreground" />
-                            <span>{camping?.tents?.length} tents</span>
+                          <div className="p-2 space-y-1">
+                            <h4 className="text-xs font-bold text-gray-900 truncate">
+                              {cotItem.cottageType || "Cottage Unit"}
+                            </h4>
+                            <div className="flex items-center gap-1 text-[10px] text-gray-500">
+                              <Users className="w-3 h-3 text-[#ff6900] shrink-0" />
+                              <span className="truncate">Up to {cotItem.maxCapacity || 2} Guests</span>
+                            </div>
+                            <div className="pt-0.5 flex items-baseline gap-1">
+                              <span className="text-xs sm:text-sm font-extrabold text-gray-900">
+                                ₹{cotPrice.toLocaleString()}
+                              </span>
+                              <span className="text-[9px] text-gray-400 font-normal">/ night</span>
+                            </div>
                           </div>
                         </div>
 
-                        {tent.amenities && tent.amenities.length > 0 && (
-                          <div className="flex flex-wrap gap-2">
-                            {tent.amenities
-                              .slice(0, 3)
-                              .map((amenity, index) => (
-                                <div
-                                  key={index}
-                                  className="flex items-center gap-1 border px-2 py-1 rounded text-xs"
-                                >
-                                  {getAmenityIcon(amenity)}
-                                  <span>{amenity}</span>
-                                </div>
-                              ))}
-                            {tent.amenities.length > 3 && (
-                              <div className="px-2 py-1 border rounded text-xs">
-                                +{tent.amenities.length - 3} more
-                              </div>
-                            )}
+                        <div className="p-2 pt-0">
+                          <div className="grid grid-cols-2 gap-1.5 pt-1.5 border-t border-neutral-100">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSelectedCottage(cotItem);
+                                setDrawerOpen(true);
+                              }}
+                              className="w-full py-1 text-[10px] font-semibold text-gray-700 bg-neutral-100 hover:bg-neutral-200 active:bg-neutral-300 rounded-lg transition-colors text-center cursor-pointer"
+                            >
+                              Details
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setShowCottageSelectionDrawer(true);
+                              }}
+                              className="w-full py-1 text-[10px] font-bold text-white bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] active:scale-95 rounded-lg shadow-xs transition-all text-center truncate px-0.5 cursor-pointer"
+                            >
+                              {currentSelectedQty > 0 ? `${currentSelectedQty} Selected` : "Select"}
+                            </button>
                           </div>
-                        )} */}
-                        </CardBody>
-                        <CardFooter className="p-2 pt-0">
-                          <Button
-                            onPress={() => {
-                              setSelectedTent(tent);
-                              setDrawerOpen(true);
-                            }}
-                            className="w-full bg-black text-white"
-                          >
-                            View Details
-                          </Button>
-                        </CardFooter>
-                      </Card>
+                        </div>
+                      </div>
                     </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden md:flex" />
-                <CarouselNext className="hidden md:flex" />
-              </Carousel>
-            </div>
+                  );
+                })}
+              </CarouselContent>
+            </Carousel>
+          ) : (
+            <p className="text-xs text-gray-400">Cottage units information will be available shortly.</p>
           )}
-        </section>
-      </div>
+        </div>
+      </section>
 
+      {/* 4. REVIEWS SECTION */}
+      <section
+        ref={refs?.reviewsRef}
+        id="reviews"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <ReviewsTab Reviews={cottage?.reviews} />
+      </section>
+
+      {/* 5. AMENITIES SECTION */}
+      <section
+        ref={refs?.amenitiesRef}
+        id="amenities"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-bold border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+              Amenities & Inclusions
+            </h3>
+            <button
+              type="button"
+              onClick={() => setShowAllAmenitiesDrawer(true)}
+              className="text-xs font-bold text-[#ff6900] hover:text-[#e05d00] cursor-pointer"
+            >
+              View All ({amenities.length})
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2.5">
+            {amenities.slice(0, 8).map((amenity, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-neutral-200/80 shadow-2xs"
+              >
+                <div className="w-7 h-7 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <CustomAmenityIcon name={amenity} className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-semibold text-gray-800 truncate">
+                  {amenity}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. DINING & MEALS SECTION */}
+      <section
+        ref={refs?.mealsRef}
+        id="meals"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-1 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Meals & Dining
+          </h3>
+          <p className="text-xs text-gray-500 mb-3 pl-3">
+            Authentic home-cooked meals prepared with local ingredients
+          </p>
+
+          <div className="space-y-2.5">
+            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                <Coffee className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-900">Morning Breakfast</h4>
+                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
+                    8:30 AM – 10:30 AM
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  Fresh breakfast options, hot tea & brewed coffee
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                <Flame className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-900">Evening Bonfire & Tea</h4>
+                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
+                    6:00 PM – 7:30 PM
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  Evening tea, warm cookies, and cozy outdoor campfire sit-out
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
+              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                <Utensils className="w-4 h-4" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-900">Dinner Service</h4>
+                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
+                    8:30 PM – 10:30 PM
+                  </span>
+                </div>
+                <p className="text-[11px] text-gray-600 mt-0.5">
+                  Wholesome Indian cuisine cooked fresh to order
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 7. LOCATION SECTION */}
+      <section
+        ref={refs?.locationRef}
+        id="location"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-3 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Location & Getting There
+          </h3>
+
+          <div className="bg-white rounded-2xl overflow-hidden border border-neutral-200/90 shadow-2xs">
+            <div className="h-48 w-full">
+              <GoogleMap coordinates={cottage?.coordinates} />
+            </div>
+            <div className="p-3.5 space-y-2.5">
+              <div>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block">Address</span>
+                <p className="text-xs font-semibold text-gray-800 mt-0.5">
+                  {cottage?.address?.addressLine}, {cottage?.address?.area}, {cottage?.address?.city}
+                </p>
+              </div>
+
+              {cottage?.nearbyattractions && cottage.nearbyattractions.length > 0 && (
+                <div className="pt-2 border-t border-neutral-100">
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider block mb-1.5">
+                    Nearby Attractions
+                  </span>
+                  <div className="space-y-1.5">
+                    {cottage.nearbyattractions.map((loc, index) => (
+                      <div key={index} className="flex items-center justify-between text-xs text-gray-700">
+                        <span className="flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3 text-[#ff6900]" />
+                          <span>{loc?.nearbylocation}</span>
+                        </span>
+                        <span className="text-gray-400 font-medium">{loc?.distance} km</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. EXPERIENCES SECTION */}
+      <section
+        ref={refs?.experiencesRef}
+        id="experiences"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <ExperiencesTab experiences={cottage?.experiences} />
+      </section>
+
+      {/* 9. FAQs SECTION */}
+      <section
+        ref={refs?.faqsRef}
+        id="faqs"
+        className="p-3.5 space-y-4 scroll-mt-16 border-t border-neutral-100"
+      >
+        <div>
+          <h3 className="text-base font-bold mb-3 border-l-4 border-[#ff6900] pl-2.5 text-gray-900">
+            Frequently Asked Questions
+          </h3>
+
+          <Accordion type="single" collapsible className="space-y-2">
+            {cottage?.faqs && cottage.faqs.length > 0 ? (
+              cottage.faqs.map((faq, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`faq-${index}`}
+                  className="bg-white border border-neutral-200/80 rounded-xl px-4 py-0 shadow-2xs"
+                >
+                  <AccordionTrigger className="font-bold hover:no-underline text-xs text-gray-900 py-3 text-left">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs text-gray-600 leading-relaxed pb-3">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))
+            ) : (
+              <>
+                <AccordionItem
+                  value="faq-1"
+                  className="bg-white border border-neutral-200/80 rounded-xl px-4 shadow-2xs"
+                >
+                  <AccordionTrigger className="font-bold hover:no-underline text-xs text-gray-900 py-3 text-left">
+                    What are the check-in and check-out timings?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs text-gray-600 leading-relaxed pb-3">
+                    Check-in starts at {cottage?.checkInTime || "1:00 PM"} and check-out is by {cottage?.checkOutTime || "11:00 AM"}.
+                  </AccordionContent>
+                </AccordionItem>
+                <AccordionItem
+                  value="faq-2"
+                  className="bg-white border border-neutral-200/80 rounded-xl px-4 shadow-2xs"
+                >
+                  <AccordionTrigger className="font-bold hover:no-underline text-xs text-gray-900 py-3 text-left">
+                    Are the cottages private with attached washrooms?
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs text-gray-600 leading-relaxed pb-3">
+                    Yes, each cottage unit has a private entrance, veranda, and private hygienic attached washroom with running water.
+                  </AccordionContent>
+                </AccordionItem>
+              </>
+            )}
+          </Accordion>
+        </div>
+
+        {/* Explore Your Stay Accordion */}
+        {cottage?.exploreStay && cottage.exploreStay.length > 0 && (
+          <div className="space-y-2 pt-2">
+            <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+              Explore Your Stay
+            </h4>
+            <Accordion type="single" collapsible className="space-y-2">
+              {cottage.exploreStay.map((item, index) => (
+                <AccordionItem
+                  key={index}
+                  value={`explore-${index}`}
+                  className="bg-neutral-50 rounded-xl px-4 border border-neutral-200/70"
+                >
+                  <AccordionTrigger className="font-semibold hover:no-underline text-xs text-gray-900 py-3 text-left">
+                    {item.title}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-xs text-gray-600 leading-relaxed pb-3">
+                    {item.description}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        )}
+
+        {/* 10. NEARBY COTTAGES CAROUSEL: 2 CARDS PER VIEW ON MOBILE */}
+        {nearbyCottages.length > 0 && (
+          <div className="mt-6 pt-5 border-t border-neutral-200/80">
+            <div className="mb-3 border-l-4 border-[#ff6900] pl-2.5">
+              <h3 className="text-base font-bold text-gray-900">
+                Nearby Cottages in {cottage?.address?.city || "the Area"}
+              </h3>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Swipe to explore more handpicked stays
+              </p>
+            </div>
+
+            <Carousel className="w-full" opts={{ align: "start" }}>
+              <CarouselContent className="-ml-2.5">
+                {nearbyCottages.map((cotItem) => (
+                  <CarouselItem
+                    key={cotItem._id}
+                    className="pl-2.5 basis-[48%] sm:basis-1/3"
+                  >
+                    <div className="w-full">
+                      <PropertyCard property={cotItem} />
+                    </div>
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+            </Carousel>
+          </div>
+        )}
+      </section>
+
+      {/* ALL AMENITIES DRAWER FOR MOBILE */}
+      <Drawer
+        open={showAllAmenitiesDrawer}
+        onOpenChange={setShowAllAmenitiesDrawer}
+      >
+        <DrawerContent className="max-h-[85vh] h-[85vh] bg-white rounded-t-[28px] p-5 flex flex-col focus:outline-none">
+          <DrawerTitle className="sr-only">All Amenities</DrawerTitle>
+          <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mb-3 shrink-0" />
+          <DrawerHeader className="p-0 border-b border-neutral-150 pb-3">
+            <div className="text-base font-bold text-gray-900">
+              All Amenities ({amenities.length})
+            </div>
+            <div className="relative mt-2.5">
+              <Search className="w-3.5 h-3.5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                placeholder="Search amenities..."
+                value={amenitySearchQuery}
+                onChange={(e) => setAmenitySearchQuery(e.target.value)}
+                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl bg-neutral-100 border-none focus:outline-none focus:ring-1 focus:ring-[#ff6900]"
+              />
+            </div>
+          </DrawerHeader>
+
+          <div className="flex-1 overflow-y-auto py-3 space-y-4">
+            {Object.keys(filteredCategorized).length > 0 ? (
+              Object.entries(filteredCategorized).map(([category, items]) => (
+                <div key={category} className="space-y-2">
+                  <h4 className="text-[11px] font-bold text-[#ff6900] uppercase tracking-wider">
+                    {category}
+                  </h4>
+                  <div className="grid grid-cols-2 gap-2">
+                    {items.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 p-2 rounded-xl bg-neutral-50 border border-neutral-150"
+                      >
+                        <CustomAmenityIcon name={item} className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                        <span className="text-[11px] text-gray-800 font-medium truncate">
+                          {item}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-center text-xs text-gray-400 py-6">
+                No matching amenities found.
+              </p>
+            )}
+          </div>
+        </DrawerContent>
+      </Drawer>
+
+      {/* Cottage Details Mobile Drawer */}
       <CottageDetailsDrawer
-        tent={selectedTent}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        isOpen={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        cottage={selectedCottage}
+        onSelectCottage={() => {
+          setDrawerOpen(false);
+          setShowCottageSelectionDrawer(true);
+        }}
       />
-    </>
+
+      {/* Cottage Selection Mobile Drawer */}
+      <CottageSelectionDrawer
+        isOpen={showCottageSelectionDrawer}
+        onClose={() => setShowCottageSelectionDrawer(false)}
+        cottages={cottage?.cottages || []}
+        totalGuests={selectedGuest?.totalGuests || 2}
+        dateStr={checkin || new Date().toISOString()}
+        id={cottage?._id}
+      />
+    </div>
   );
 };
 

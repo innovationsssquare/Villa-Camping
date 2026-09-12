@@ -19,7 +19,7 @@ import {
   Check,
 } from "lucide-react";
 import { FaMapMarkedAlt } from "react-icons/fa";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   addPriceRange,
   removePriceRange,
@@ -37,7 +37,11 @@ import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import {
   setSelectedCategory,
   setSelectedCategoryname,
+  setCheckin,
+  setCheckout,
+  setSelectedGuest,
 } from "@/Redux/Slices/bookingSlice";
+import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
 import { SortDrawer } from "./SortDrawer";
 import PropertyCardnew from "../Availableweekend/PropertyCard";
 import PropertyCardSkeletonnew from "../Availableweekend/PropertyCardSkeleton";
@@ -52,6 +56,7 @@ import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import { KNOWN_CATEGORY_IDS } from "@/lib/categoryUtils";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -116,6 +121,12 @@ export default function PropertyFilterListing({ categorySlug }) {
     priceMax,
   } = useSelector((state) => state.propertyFilter);
 
+  const searchParams = useSearchParams();
+  const paramCheckin = searchParams?.get("checkin") || searchParams?.get("checkIn");
+  const paramCheckout = searchParams?.get("checkout") || searchParams?.get("checkOut");
+  const paramAdults = searchParams?.get("adults");
+  const paramChildren = searchParams?.get("children");
+
   const { categories } = useSelector((state) => state.category);
   const { selectedCategoryId, selectedCategoryName, checkin, checkout } =
     useSelector((state) => state.booking);
@@ -123,7 +134,28 @@ export default function PropertyFilterListing({ categorySlug }) {
     (state) => state.properties
   );
 
-  // Sync categorySlug parameter with Redux category state
+  // 1. Ensure categories are loaded
+  useEffect(() => {
+    if (!categories || categories.length === 0) {
+      dispatch(fetchAllCategories());
+    }
+  }, [categories, dispatch]);
+
+  // 2. Sync URL search params (dates and guests) into Redux
+  useEffect(() => {
+    if (paramCheckin) dispatch(setCheckin(paramCheckin));
+    if (paramCheckout) dispatch(setCheckout(paramCheckout));
+    if (paramAdults || paramChildren) {
+      dispatch(
+        setSelectedGuest({
+          adults: Number(paramAdults) || 1,
+          childrenn: Number(paramChildren) || 0,
+        })
+      );
+    }
+  }, [paramCheckin, paramCheckout, paramAdults, paramChildren, dispatch]);
+
+  // 3. Sync categorySlug parameter with Redux category state
   useEffect(() => {
     if (categorySlug === "all") {
       dispatch(setSelectedCategory(null));
@@ -132,7 +164,9 @@ export default function PropertyFilterListing({ categorySlug }) {
       dispatch(setCurrentPage(1));
     } else if (categorySlug && categories?.length > 0) {
       const matchedCategory = categories.find(
-        (cat) => cat.slug?.toLowerCase() === categorySlug.toLowerCase()
+        (cat) =>
+          cat.slug?.toLowerCase() === categorySlug.toLowerCase() ||
+          cat.name?.toLowerCase() === categorySlug.toLowerCase()
       );
       if (matchedCategory) {
         dispatch(setSelectedCategory(matchedCategory._id));
@@ -143,14 +177,49 @@ export default function PropertyFilterListing({ categorySlug }) {
     }
   }, [categorySlug, categories, dispatch]);
 
-  // Fetch properties from backend with pagination & filters
+  // 4. Fetch properties from backend with pagination & filters
   useEffect(() => {
-    // If no category is selected (e.g. "all"), fallback to first category if available
-    const effectiveCategory =
-      selectedCategoryId || (categories?.length > 0 ? categories[0]._id : null);
-    const effectiveCheckIn = checkin || new Date().toISOString();
-    const effectiveCheckOut =
-      checkout || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString();
+    // Resolve category ID with immediate fallback to slug or KNOWN_CATEGORY_IDS
+    let effectiveCategory = null;
+    if (categorySlug && categorySlug !== "all") {
+      const matched = categories?.find(
+        (c) =>
+          c.slug?.toLowerCase() === categorySlug.toLowerCase() ||
+          c.name?.toLowerCase() === categorySlug.toLowerCase()
+      );
+      if (matched) {
+        effectiveCategory = matched._id;
+      } else {
+        const upper = categorySlug.toUpperCase();
+        if (KNOWN_CATEGORY_IDS[upper]) {
+          effectiveCategory = KNOWN_CATEGORY_IDS[upper];
+        }
+      }
+    }
+    if (!effectiveCategory) {
+      effectiveCategory =
+        selectedCategoryId ||
+        (categories?.length > 0 ? categories[0]._id : KNOWN_CATEGORY_IDS.VILLA);
+    }
+    if (effectiveCategory) {
+      const upper = String(effectiveCategory).trim().toUpperCase();
+      if (KNOWN_CATEGORY_IDS[upper]) {
+        effectiveCategory = KNOWN_CATEGORY_IDS[upper];
+      }
+    }
+
+    let effectiveCheckIn = paramCheckin || checkin;
+    let effectiveCheckOut = paramCheckout || checkout;
+
+    if (!effectiveCheckIn) {
+      effectiveCheckIn = new Date().toISOString();
+    }
+    if (!effectiveCheckOut) {
+      const inDate = new Date(effectiveCheckIn);
+      effectiveCheckOut = new Date(
+        inDate.getTime() + 24 * 60 * 60 * 1000
+      ).toISOString();
+    }
 
     if (effectiveCategory) {
       dispatch(
@@ -171,9 +240,12 @@ export default function PropertyFilterListing({ categorySlug }) {
   }, [
     dispatch,
     selectedCategoryId,
+    categorySlug,
     categories,
     checkin,
     checkout,
+    paramCheckin,
+    paramCheckout,
     selectedPropertyTypes,
     priceMin,
     priceMax,
@@ -503,8 +575,16 @@ export default function PropertyFilterListing({ categorySlug }) {
                                 dispatch(setSelectedCategoryname(cat.name));
                                 dispatch(clearPropertyType());
                                 dispatch(setCurrentPage(1));
+                                const p = new URLSearchParams();
+                                const inD = paramCheckin || checkin;
+                                const outD = paramCheckout || checkout;
+                                if (inD) p.set("checkin", inD);
+                                if (outD) p.set("checkout", outD);
+                                if (paramAdults) p.set("adults", paramAdults);
+                                if (paramChildren) p.set("children", paramChildren);
+                                const q = p.toString();
                                 router.push(
-                                  `/category/${cat.slug || cat.name.toLowerCase()}`
+                                  `/category/${cat.slug || cat.name.toLowerCase()}${q ? `?${q}` : ""}`
                                 );
                               }}
                               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${

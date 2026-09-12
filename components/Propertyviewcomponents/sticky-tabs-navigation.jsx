@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import { ChevronDown } from "lucide-react"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect, useRef, useCallback } from "react";
+import { Button } from "@/components/ui/button";
 
 export default function StickyTabsNavigation({ onTabChange }) {
-  const [activeTab, setActiveTab] = useState("overview")
-  const [isSticky, setIsSticky] = useState(false)
-  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 })
-  const tabsRef = useRef(null)
-  const tabsContainerRef = useRef(null)
-  const tabRefs = useRef({})
-  const observerRef = useRef(null)
-  const sectionRefs = useRef({})
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isSticky, setIsSticky] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  const tabsRef = useRef(null);
+  const tabsContainerRef = useRef(null);
+  const tabRefs = useRef({});
+  const isManualScrollingRef = useRef(false);
+  const manualScrollTimerRef = useRef(null);
 
   const tabs = [
     { id: "overview", label: "Overview" },
@@ -25,222 +25,188 @@ export default function StickyTabsNavigation({ onTabChange }) {
     { id: "locationn", label: "Location" },
     { id: "experiencess", label: "Experiences" },
     { id: "faqss", label: "FAQ's" },
-  ]
+  ];
 
-  // Update indicator position smoothly with better calculation
-  const updateIndicator = (tabId) => {
-    const tabElement = tabRefs.current[tabId]
-    const tabsContainer = tabsContainerRef.current
+  // Update sliding indicator position
+  const updateIndicator = useCallback((tabId) => {
+    const tabElement = tabRefs.current[tabId];
+    const container = tabsContainerRef.current;
+    if (tabElement && container) {
+      const containerRect = container.getBoundingClientRect();
+      const tabRect = tabElement.getBoundingClientRect();
+      const left = tabRect.left - containerRect.left + container.scrollLeft;
+      const width = tabRect.width;
 
-    if (tabElement && tabsContainer) {
-      // Get the bounding rectangles
-      const containerRect = tabsContainer.getBoundingClientRect()
-      const tabRect = tabElement.getBoundingClientRect()
+      setIndicatorStyle({ left, width });
 
-      // Calculate position relative to the tabs container
-      const left = tabRect.left - containerRect.left
-      const width = tabRect.width
+      // Ensure tab is visible in horizontal scroll
+      const tabOffsetLeft = tabElement.offsetLeft;
+      const tabWidth = tabElement.offsetWidth;
+      const containerWidth = container.offsetWidth;
+      const currentScroll = container.scrollLeft;
 
-      setIndicatorStyle({
-        left: left,
-        width: width,
-      })
+      if (tabOffsetLeft < currentScroll) {
+        container.scrollTo({ left: tabOffsetLeft - 16, behavior: "smooth" });
+      } else if (tabOffsetLeft + tabWidth > currentScroll + containerWidth) {
+        container.scrollTo({
+          left: tabOffsetLeft + tabWidth - containerWidth + 16,
+          behavior: "smooth",
+        });
+      }
     }
-  }
+  }, []);
 
   useEffect(() => {
-    // Find and store section elements
-    tabs.forEach((tab) => {
-      const element = document.getElementById(tab.id)
-      if (element) {
-        sectionRefs.current[tab.id] = element
-      }
-    })
+    updateIndicator(activeTab);
+  }, [activeTab, updateIndicator]);
 
-    // Intersection Observer for scroll spy
-    const observerOptions = {
-      root: null,
-      rootMargin: "-100px 0px -60% 0px",
-      threshold: [0, 0.1, 0.5, 1],
-    }
+  useEffect(() => {
+    let ticking = false;
 
-    observerRef.current = new IntersectionObserver((entries) => {
-      let mostVisibleSection = ""
-      let maxIntersectionRatio = 0
-
-      entries.forEach((entry) => {
-        if (entry.isIntersecting && entry.intersectionRatio > maxIntersectionRatio) {
-          maxIntersectionRatio = entry.intersectionRatio
-          mostVisibleSection = entry.target.id
-        }
-      })
-
-      if (!mostVisibleSection) {
-        const scrollY = window.scrollY + 200
-        let closestSection = ""
-        let minDistance = Number.POSITIVE_INFINITY
-
-        Object.entries(sectionRefs.current).forEach(([id, element]) => {
-          const rect = element.getBoundingClientRect()
-          const elementTop = rect.top + window.scrollY
-          const distance = Math.abs(elementTop - scrollY)
-
-          if (distance < minDistance) {
-            minDistance = distance
-            closestSection = id
-          }
-        })
-
-        mostVisibleSection = closestSection
-      }
-
-      if (mostVisibleSection && mostVisibleSection !== activeTab) {
-        setActiveTab(mostVisibleSection)
-        // Delay indicator update to ensure DOM is ready
-        setTimeout(() => updateIndicator(mostVisibleSection), 50)
-        onTabChange?.(mostVisibleSection)
-      }
-    }, observerOptions)
-
-    // Observe all sections
-    Object.values(sectionRefs.current).forEach((element) => {
-      if (observerRef.current) {
-        observerRef.current.observe(element)
-      }
-    })
-
-    // Sticky behavior
     const handleScroll = () => {
-      if (tabsRef.current) {
-        const shouldBeSticky = window.scrollY > 600
-        if (shouldBeSticky !== isSticky) {
-          setIsSticky(shouldBeSticky)
-          // Update indicator position after sticky state changes
-          setTimeout(() => updateIndicator(activeTab), 100)
-        }
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          // 1. Sticky bar detection
+          if (tabsRef.current) {
+            const tabsTop = tabsRef.current.getBoundingClientRect().top;
+            setIsSticky(tabsTop <= 74);
+          }
+
+          // If manual smooth scrolling from tab click, don't override
+          if (isManualScrollingRef.current) {
+            ticking = false;
+            return;
+          }
+
+          // 2. Sequential Scroll-Spy Calculation
+          const headerOffset = 130;
+          const isNearBottom =
+            window.innerHeight + window.scrollY >=
+            document.documentElement.scrollHeight - 70;
+
+          let targetTab = "overview";
+
+          if (isNearBottom) {
+            targetTab = tabs[tabs.length - 1].id;
+          } else {
+            // Check sequentially from top to bottom
+            for (const tab of tabs) {
+              const el = document.getElementById(tab.id);
+              if (el) {
+                const rect = el.getBoundingClientRect();
+                if (rect.top <= headerOffset + 40) {
+                  targetTab = tab.id;
+                }
+              }
+            }
+          }
+
+          setActiveTab((prev) => {
+            if (prev !== targetTab) {
+              onTabChange?.(targetTab);
+              return targetTab;
+            }
+            return prev;
+          });
+
+          ticking = false;
+        });
+        ticking = true;
       }
-    }
+    };
 
-    // Handle resize to recalculate indicator position
     const handleResize = () => {
-      setTimeout(() => updateIndicator(activeTab), 100)
-    }
+      updateIndicator(activeTab);
+    };
 
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    window.addEventListener("resize", handleResize, { passive: true })
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
-    handleScroll()
-
-    // Initial indicator position with delay to ensure DOM is ready
-    const initIndicator = () => {
-      setTimeout(() => updateIndicator(activeTab), 200)
-    }
-
-    initIndicator()
+    // Initial check
+    handleScroll();
+    setTimeout(() => updateIndicator(activeTab), 150);
 
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect()
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+      if (manualScrollTimerRef.current) {
+        clearTimeout(manualScrollTimerRef.current);
       }
-      window.removeEventListener("scroll", handleScroll)
-      window.removeEventListener("resize", handleResize)
-    }
-  }, [activeTab, onTabChange, isSticky])
+    };
+  }, [onTabChange, updateIndicator, activeTab]);
 
   const scrollToSection = (tabId) => {
-    const element = sectionRefs.current[tabId] || document.getElementById(tabId)
+    isManualScrollingRef.current = true;
+    setActiveTab(tabId);
+    updateIndicator(tabId);
+    onTabChange?.(tabId);
+
+    const element = document.getElementById(tabId);
     if (element) {
-      const offset = isSticky ? 80 : 180
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+      const offset = 125;
+      const elementPosition =
+        element.getBoundingClientRect().top + window.pageYOffset;
 
       window.scrollTo({
-        top: elementPosition - offset,
+        top: Math.max(0, elementPosition - offset),
         behavior: "smooth",
-      })
-
-      setActiveTab(tabId)
-      // Update indicator immediately for better UX
-      setTimeout(() => updateIndicator(tabId), 50)
+      });
     }
-  }
+
+    if (manualScrollTimerRef.current) {
+      clearTimeout(manualScrollTimerRef.current);
+    }
+    manualScrollTimerRef.current = setTimeout(() => {
+      isManualScrollingRef.current = false;
+    }, 850);
+  };
 
   return (
     <div
       ref={tabsRef}
-      className={`bg-white border-b border-gray-200 transition-all duration-500 ease-out z-40 ${
-        isSticky
-          ? "fixed top-16 left-0 right-0 shadow-sm backdrop-blur-md bg-white/95 transform translate-y-0"
-          : "relative transform translate-y-0"
+      className={`w-full sticky top-16 md:top-[72px] z-30 transition-all duration-200 bg-white/95 backdrop-blur-md border-b border-gray-200 ${
+        isSticky ? "shadow-sm" : ""
       }`}
     >
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          {/* Tabs with hidden scrollbar and equal spacing */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative">
           <div
             ref={tabsContainerRef}
-            className="flex items-center justify-between w-full overflow-x-auto relative scrollbar-none"
-            style={{
-              /* Hide scrollbar for Chrome, Safari and Opera */
-              WebkitOverflowScrolling: "touch",
-              scrollbarWidth: "none" /* Firefox */,
-              msOverflowStyle: "none" /* Internet Explorer 10+ */,
-            }}
+            className="flex items-center space-x-1 sm:space-x-2 overflow-x-auto no-scrollbar py-2 scroll-smooth"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                ref={(el) => {
-                  if (el) {
-                    tabRefs.current[tab.id] = el
-                    // Update indicator when ref is set and this is the active tab
-                    if (tab.id === activeTab) {
-                      setTimeout(() => updateIndicator(tab.id), 50)
-                    }
-                  }
-                }}
-                onClick={() => scrollToSection(tab.id)}
-                className={`flex-1 min-w-max px-2.5 sm:px-3.5 lg:px-4 py-4 text-center text-sm font-semibold whitespace-nowrap transition-all duration-300 ease-out relative z-10 ${
-                  activeTab === tab.id
-                    ? "text-[#ff6900] font-bold"
-                    : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-
-            {/* Smooth sliding indicator with brand #ff6900 gradient */}
-            <div
-              className="absolute bottom-0 h-0.5 bg-gradient-to-r from-[#ff6900] to-[#e05d00] transition-all duration-500 ease-out rounded-full"
-              style={{
-                left: `${indicatorStyle.left}px`,
-                width: `${indicatorStyle.width}px`,
-                transform: "translateZ(0)", // Force GPU acceleration
-                boxShadow: "0 2px 8px rgba(255, 105, 0, 0.45)",
-              }}
-            />
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={(el) => {
+                    if (el) tabRefs.current[tab.id] = el;
+                  }}
+                  type="button"
+                  onClick={() => scrollToSection(tab.id)}
+                  className={`relative px-3.5 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors rounded-full cursor-pointer ${
+                    isActive
+                      ? "text-[#ff6900] bg-orange-50/60 font-bold"
+                      : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden">
-            <Button
-              variant="outline"
-              size="sm"
-              className="flex items-center space-x-2 bg-transparent transition-all duration-300 hover:bg-orange-50 hover:border-orange-300"
-            >
-              <span className="text-sm">Menu</span>
-              <ChevronDown className="w-4 h-4 transition-transform duration-300 hover:rotate-180" />
-            </Button>
-          </div>
+          {/* Smooth orange indicator underline */}
+          <div
+            className="absolute bottom-0 h-0.5 bg-[#ff6900] transition-all duration-300 ease-out rounded-full"
+            style={{
+              left: `${indicatorStyle.left}px`,
+              width: `${indicatorStyle.width}px`,
+            }}
+          />
         </div>
       </div>
-
-      {/* Subtle glow effect when sticky */}
-      <div
-        className={`absolute inset-0 bg-gradient-to-b from-orange-50/10 to-transparent pointer-events-none transition-all duration-500 ease-out ${
-          isSticky ? "opacity-100" : "opacity-0"
-        }`}
-      />
     </div>
-  )
+  );
 }

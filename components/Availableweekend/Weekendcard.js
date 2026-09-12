@@ -15,13 +15,17 @@ import {
   optimisticToggle,
   fetchWishlistIds,
 } from "@/Redux/Slices/wishlistSlice";
+import { buildPropertyViewUrl } from "@/lib/categoryUtils";
 
 export function PropertyCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
   const router = useRouter();
-  const { selectedCategoryName } = useSelector((state) => state.booking);
+  const { selectedCategoryName, checkin, checkout } = useSelector(
+    (state) => state.booking || {}
+  );
+  const categories = useSelector((state) => state.category?.categories || []);
   const dispatch = useDispatch();
 
   // Extract display images
@@ -101,17 +105,15 @@ export function PropertyCard({ property }) {
     );
   };
 
-  const getCategoryRoute = (raw) => {
-    const str = String(raw || "").toLowerCase();
-    if (str.includes("camp")) return "Camping";
-    if (str.includes("cottage")) return "Cottage";
-    if (str.includes("hotel")) return "Hotel";
-    return "Villa";
-  };
-
   const handleCardClick = () => {
-    const route = getCategoryRoute(selectedCategoryName || property.category?.name);
-    router.push(`/view-${route}/${property?._id}`);
+    const url = buildPropertyViewUrl(
+      property,
+      categories,
+      selectedCategoryName,
+      checkin,
+      checkout
+    );
+    router.push(url);
     dispatch(removeCoupon());
     dispatch(clearSelectedTents());
   };

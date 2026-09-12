@@ -1,60 +1,23 @@
+"use client";
 import React from "react";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
-  Wifi,
-  Snowflake,
-  AirVent,
-  BatteryCharging,
-  GlassWater,
-  ShieldCheck,
-  Bed,
-  Droplet,
-  Tv as LucideTv,
-  Table,
-  Bath,
-  Waves,
-  Volume2,
-  Utensils as LucideUtensils,
-  Coffee,
-  Trees,
-  Home,
-  Flame,
-  Fire,
-  Lightbulb,
   Star,
-  MapPin,
   Users,
-  BadgeCheck,
+  Hotel,
+  Bath,
   Heart,
-  Share2,
-  FlameKindling,
-  Camera,
+  Trees,
   Mountain,
-  Building2,
-  Sun,
-  Utensils,
-  Footprints,
 } from "lucide-react";
-
-// react-icons for items lucide doesn't provide (or where a better semantic icon exists)
 import {
-  FaSquareParking,
-  FaTv,
   FaFilePdf,
   FaPeopleGroup,
   FaChild,
   FaUmbrellaBeach,
 } from "react-icons/fa6";
-import {
-  MdKitchen,
-  MdOutlineLocalDining,
-  MdOutlineFreeBreakfast,
-  MdOutlineSpeaker,
-  MdPool,
-  MdOutlineLocalLaundryService,
-} from "react-icons/md";
-import { Button } from "@heroui/react";
-import Link from "next/link";
 import { useHotel } from "@/lib/context/HotelContext";
+import Link from "next/link";
 
 const HotelDetails = () => {
   const hotel = useHotel();
@@ -68,155 +31,121 @@ const HotelDetails = () => {
     "Romantic Getaway": <Heart className="w-4 h-4 text-gray-600" />,
   };
 
-  const amenitiesIcons = {
-    WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
-    Heating: <Snowflake className="w-6 h-6 text-gray-600" />,
-    AC: <AirVent className="w-6 h-6 text-gray-600" />,
-    "Power Backup": <BatteryCharging className="w-6 h-6 text-gray-600" />,
-    "Water Supply": <GlassWater className="w-6 h-6 text-gray-600" />,
-    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
-    CCTV: <Camera className="w-6 h-6 text-gray-600" />, // If you don't have Camera from lucide, use another (see note below)
-    Parking: <FaSquareParking className="w-6 h-6 text-gray-600" />,
-    "AC Bedrooms/Hall": <AirVent className="w-6 h-6 text-gray-600" />,
-    "Aquagaurd for drinking water": (
-      <Droplet className="w-6 h-6 text-gray-600" />
-    ),
-    "Extra mattresses": <Bed className="w-6 h-6 text-gray-600" />,
+  const totalRoomsCount =
+    hotel?.rooms?.reduce(
+      (acc, r) => acc + (r?.totaltents || r?.totalRooms || 1),
+      0
+    ) ||
+    hotel?.totalRooms ||
+    hotel?.rooms?.length ||
+    1;
 
-    "LED TV Mobile Connect": <FaTv className="w-6 h-6 text-gray-600" />,
-    "Board Games": <Star className="w-6 h-6 text-gray-600" />, // fallback to star if no specific game icon
-    "Sunset Point": <Star className="w-6 h-6 text-gray-600" />,
-    "Table & Chairs": <Table className="w-6 h-6 text-gray-600" />,
-    "Geyser in all Bathrooms": <Bath className="w-6 h-6 text-gray-600" />,
-
-    "Swimming Pool": <MdPool className="w-6 h-6 text-gray-600" />,
-    "Sound System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
-    Refrigerator: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    Kitchen: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    "Coffee Maker": <Coffee className="w-6 h-6 text-gray-600" />,
-    Microwave: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    Oven: <MdKitchen className="w-6 h-6 text-gray-600" />,
-
-    "Outdoor Dining Area": <Trees className="w-6 h-6 text-gray-600" />,
-    "Dining Area": <MdOutlineLocalDining className="w-6 h-6 text-gray-600" />,
-    "BBQ Grill": <FlameKindling className="w-6 h-6 text-gray-600" />,
-    Balcony: <Home className="w-6 h-6 text-gray-600" />,
-    Garden: <Trees className="w-6 h-6 text-gray-600" />,
-    "Terrace / Patio": <Home className="w-6 h-6 text-gray-600" />,
-
-    "Fire Extinguisher": <Flame className="w-6 h-6 text-gray-600" />,
-    "Daily Breakfast": (
-      <MdOutlineFreeBreakfast className="w-6 h-6 text-gray-600" />
-    ),
-    "Smart Lighting": <Lightbulb className="w-6 h-6 text-gray-600" />,
-    Restaurant: <Utensils className="w-6 h-6 text-gray-600" />,
-    "Laundry Service": (
-      <MdOutlineLocalLaundryService className="w-6 h-6 text-gray-600" />
-    ),
-    "Walking Area": <Footprints className="w-6 h-6 text-gray-600" />,
-  };
+  const totalMaxCapacity =
+    hotel?.maxCapacity ||
+    hotel?.rooms?.reduce(
+      (acc, r) =>
+        acc +
+        (Number(r?.maxCapacity) || 2) *
+          (r?.totaltents || r?.totalRooms || 1),
+      0
+    ) ||
+    10;
 
   return (
-    <div className="p-3  space-y-3 w-full overflow-hidden">
+    <div className="p-3 space-y-3 w-full overflow-hidden">
       {/* Title and Location */}
       <div>
-        <h1 className="text-xl font-bold text-hotel-text-dark">
-          {hotel?.name} - {hotel?.address?.addressLine}
+        <h1 className="text-xl font-bold text-neutral-900">
+          {hotel?.name} {hotel?.address?.addressLine ? `- ${hotel.address.addressLine}` : ""}
         </h1>
-        <div className="flex justify-between items-center">
-          <p className="text-xs font-medium">
-            {hotel?.address?.addressLine}, {hotel?.address?.city}
+        <div className="flex justify-between items-center mt-0.5">
+          <p className="text-xs font-medium text-gray-500">
+            {hotel?.address?.addressLine ? `${hotel.address.addressLine}, ` : ""}{hotel?.address?.city || "Destination"}
           </p>
-          <Button
-            size=""
-            className="mt-2 flex justify-center items-center gap-2 text-red-500/60 text-xs font-medium bg-orange-500/10 px-3 py-1 rounded-lg"
-          >
-            <FaFilePdf /> View Brochure
-          </Button>
+          {hotel?.brochure && (
+            <a
+              href={hotel.brochure}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 flex justify-center items-center gap-1.5 text-[#ff6900] text-xs font-semibold bg-orange-50 border border-orange-200/80 hover:bg-orange-100 px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
+            >
+              <FaFilePdf /> View Brochure
+            </a>
+          )}
         </div>
       </div>
 
       {/* Rating and Reviews */}
-      <div className="flex items-center space-x-4">
-        <div className="bg-hotel-orange/10  py-1 rounded-full">
-          <span className="text-sm font-medium">Guest Favourite</span>
+      <div className="flex items-center space-x-3">
+        <div className="bg-orange-50/80 border border-orange-200/70 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-orange-800">Guest Favourite</span>
         </div>
         <div className="flex items-center space-x-1">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-semibold">{hotel?.averageRating}</span>
-          <span className="text-hotel-text-light font-light">/ 5</span>
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <span className="font-bold text-sm text-gray-900">{hotel?.averageRating || "4.8"}</span>
+          <span className="text-gray-400 text-xs">/ 5</span>
         </div>
         <Link
-          href={"#reviews"}
+          href="#reviews"
           scroll={true}
-          className="text-blue-500 text-sm underline"
+          className="text-[#ff6900] text-xs font-semibold underline underline-offset-2"
         >
-          {hotel?.totalReviews} Reviews
+          {hotel?.totalReviews || 0} Reviews
         </Link>
       </div>
 
-      {/* Property Details */}
-      <div className="flex items-center w-full space-x-3 text-xs">
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Users className="w-4 h-4 font-light" />
-          <span>Up to {hotel?.maxCapacity} Guests</span>
+      {/* Accommodation Details Badges */}
+      <div className="flex items-center w-full space-x-2 text-xs">
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Users className="w-3.5 h-3.5 text-[#ff6900]" />
+          <span>Up to {totalMaxCapacity} Guests</span>
         </div>
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bed className="w-4 h-4 text-hotel-text-light" />
-          <span>{hotel?.rooms?.length} Rooms</span>
-          <div className="w-4 h-4 bg-hotel-blue rounded-full flex items-center justify-center">
-            <span className="text-white text-xs">i</span>
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Hotel className="w-3.5 h-3.5 text-[#ff6900]" />
+          <span>{totalRoomsCount} Rooms</span>
+        </div>
+        {hotel?.baths > 0 && (
+          <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+            <Bath className="w-3.5 h-3.5 text-[#ff6900]" />
+            <span>{hotel.baths} Baths</span>
           </div>
-        </div>
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bath className="w-4 h-4 text-hotel-text-light" />
-          <span>{hotel?.baths} Baths</span>
-        </div>
+        )}
       </div>
 
       {/* Great For Section */}
       {hotel?.greatFor?.length > 0 && (
-        <div className="flex flex-col">
-          <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-sm text-hotel-text-light ">Great for:</p>
-            {hotel.greatFor.slice(0, 1).map((item, index) => (
-              <div
+        <div className="pt-1">
+          <div className="flex flex-wrap gap-1.5 items-center">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider mr-1">Great for:</span>
+            {hotel.greatFor.map((item, index) => (
+              <span
                 key={index}
-                className="bg-hotel-green/10 px-3 py-1 rounded-full flex items-center gap-1"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-100 border border-neutral-200/70 text-gray-800 text-[11px] font-medium"
               >
-                {greatForIcons[item] || (
-                  <Sun className="w-4 h-4 text-gray-600" />
-                )}
-                <span className="text-xs">{item}</span>
-              </div>
+                {greatForIcons[item] || null}
+                <span>{item}</span>
+              </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* Amenities Icons */}
+      {/* Top Amenities Preview */}
       {hotel?.topamenities?.length > 0 && (
-        <div className="grid grid-cols-5 gap-4 mt-2">
-          {hotel?.topamenities.slice(0, 6).map((amenity, index) => (
-            <div
-              key={index}
-              className="text-center relative flex flex-col items-center"
-            >
-              <div className="w-12 h-12 border border-gray-400 rounded-md flex items-center justify-center mb-2 relative">
-                {amenitiesIcons[amenity] || (
-                  <Building2 className="w-6 h-6 text-gray-600" />
-                )}
-                {index === 5 && hotel.topamenities.length > 6 && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-hotel-blue rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      +{hotel?.amenities?.length - 5}
-                    </span>
-                  </div>
-                )}
+        <div className="pt-2 border-t border-neutral-100">
+          <div className="grid grid-cols-4 gap-2">
+            {hotel.topamenities.slice(0, 4).map((amenity, index) => (
+              <div
+                key={index}
+                className="flex flex-col items-center justify-center p-2 rounded-xl bg-neutral-50 border border-neutral-200/70 text-center"
+              >
+                <CustomAmenityIcon name={amenity} className="w-5 h-5 text-[#ff6900] mb-1" />
+                <span className="text-[10px] font-medium text-gray-700 truncate w-full">
+                  {amenity}
+                </span>
               </div>
-              <p className="text-[0.67rem] text-center">{amenity}</p>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>

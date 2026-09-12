@@ -158,7 +158,7 @@ export default function PropertyContentSections() {
             Available Rooms
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {hotel.rooms.map((room) => (
+            {Array.isArray(hotel?.rooms) && hotel.rooms.map((room) => (
               <Card
                 key={room._id}
                 className="overflow-hidden border border-gray-200 bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"

@@ -1,208 +1,228 @@
 "use client";
-import Header from "@/components/Myaccountcomponent/Header";
-import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
-import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
-import { useToast } from "@/components/ui/toast-provider";
-import { cn } from "@/lib/utils";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
-  MessageCircle,
+  MessageSquare,
   Phone,
   Mail,
-  FileText,
+  HelpCircle,
   ChevronRight,
-  ExternalLink,
+  ShieldCheck,
+  Clock,
+  Send,
+  AlertTriangle,
+  FileText,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
+import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
 
-const SupportItem = ({
-  icon,
-  title,
-  description,
-  action = "navigate",
-  onClick,
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      className="w-full flex items-center gap-4 p-4 hover:bg-secondary/50 transition-colors rounded-xl group text-left"
-    >
-      <div className="text-accent">{icon}</div>
-      <div className="flex-1">
-        <h3 className="font-medium-weight text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground mt-1">{description}</p>
-      </div>
-      {action === "external" ? (
-        <ExternalLink className="w-5 h-5 text-accent" />
-      ) : (
-        <ChevronRight className="w-5 h-5 text-accent" />
-      )}
-    </button>
+const FAQS = [
+  {
+    q: "How do I check in to my villa or campsite?",
+    a: "Standard check-in is 2:00 PM. Once your reservation is confirmed, your booking voucher includes the caretaker's direct phone number, gate PIN, and precise Google Maps location. Caretakers are available on-site for keys and luggage assistance.",
+  },
+  {
+    q: "What is the cancellation and refund timeline?",
+    a: "Standard flexible bookings can be cancelled with a full refund up to 7 days before check-in. Approved refunds are initiated within 48 business hours and credit to your original payment method in 5 to 7 business days.",
+  },
+  {
+    q: "Can I request early check-in or late check-out?",
+    a: "Early check-in and late check-out are subject to villa availability and prior cleaning schedules. You can coordinate directly with the host or message our Concierge team 24 hours prior to arrival.",
+  },
+  {
+    q: "Are private chefs and meals provided?",
+    a: "Most villas offer fully-equipped kitchens and optional private chef services for barbecue and local Maharashtrian meals. You can pre-book chef services through your booking preview or ask the on-site caretaker.",
+  },
+  {
+    q: "What if there is a power cut or Wi-Fi issue during my stay?",
+    a: "All curated ThevillaCamp properties are equipped with 100% inverter or diesel generator power backup. High-speed Wi-Fi is provided. In case of local outage, caretakers switch on backup power immediately.",
+  },
+];
+
+export default function SupportPage() {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredFaqs = FAQS.filter(
+    (item) =>
+      item.q.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.a.toLowerCase().includes(searchQuery.toLowerCase())
   );
-};
-
-const FAQItem = ({ question, answer }) => {
-  return (
-    <div className="p-4 bg-card rounded-xl border border-gray-300">
-      <h3 className="font-medium-weight text-foreground mb-2">{question}</h3>
-      <p className="text-sm text-muted-foreground leading-relaxed">{answer}</p>
-    </div>
-  );
-};
-
-const HelpSupport = () => {
-  const navigate = useRouter();
-  const { addToast } = useToast();
-
-  const handleBackClick = () => {
-    navigate.push("/");
-  };
-
-  const handleLiveChat = () => {
-    addToast({
-      title: "Live Chat",
-      description: "Connecting you to our support team...",
-    });
-  };
-
-  const handlePhoneSupport = () => {
-    addToast({
-      title: "Phone Support",
-      description: "Our support number: +1-800-TRAVEL",
-    });
-  };
-
-  const handleEmail = () => {
-    addToast({
-      title: "Email Support",
-      description: "Send us an email at support@travelapp.com",
-    });
-  };
-
-  const handleGuidesAndTips = () => {
-    addToast({
-      title: "Travel Guides",
-      description: "Opening travel guides and tips...",
-    });
-  };
-
-  const faqs = [
-    {
-      question: "How do I cancel my booking?",
-      answer:
-        "You can cancel your booking up to 24 hours before check-in from the 'My Trips' section. Cancellation fees may apply based on the property's policy.",
-    },
-    {
-      question: "When will I be charged?",
-      answer:
-        "You'll be charged when your booking is confirmed. For some properties, you may pay at the property directly.",
-    },
-    {
-      question: "How do I contact my host?",
-      answer:
-        "You can message your host directly through the app once your booking is confirmed. Go to 'My Trips' and select your booking.",
-    },
-    {
-      question: "What if I need to change my dates?",
-      answer:
-        "Contact your host or our support team to discuss date changes. Changes are subject to availability and may incur additional charges.",
-    },
-  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="w-full mx-auto bg-background min-h-screen">
-        <section
-          className={cn(
-            " w-full sticky top-0  bg-white   px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <UserSidebar />
-              Help & Support
+    <main className="min-h-screen bg-neutral-50 pb-24 pt-20 md:pt-28">
+      {/* Mobile Top Header */}
+      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-40 border-b border-neutral-150 md:hidden flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <UserSidebar />
+          <span className="text-sm font-bold text-neutral-900">Help & Support</span>
+        </div>
+        <NotificationSheet />
+      </section>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+        {/* Support Header Card */}
+        <section className="bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden border border-neutral-800">
+          <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
+          
+          <div className="relative z-10 space-y-4 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-orange-400 text-xs font-bold backdrop-blur-md">
+              <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+              <span>24/7 Dedicated Concierge Care</span>
             </div>
 
-            <div className="flex items-center gap-2">
-              <NotificationSheet />
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white">
+              How Can We Help You Today?
+            </h1>
+
+            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed">
+              Have questions about your upcoming villa booking, date rescheduling, or on-ground amenities? Our team is available 24/7.
+            </p>
+
+            {/* Quick Search */}
+            <div className="pt-2">
+              <input
+                type="text"
+                placeholder="Search check-in, refunds, food, wifi..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:max-w-md px-4 py-2.5 text-xs sm:text-sm rounded-xl border border-white/20 bg-white/10 text-white placeholder:text-neutral-400 focus:outline-none focus:ring-2 focus:ring-[#ff6900]/50 backdrop-blur-md"
+              />
             </div>
           </div>
         </section>
-        <div className="px-3 py-section-gap">
-          {/* Contact Support Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-heading-weight text-foreground mb-4">
-              Get Help
-            </h2>
-            <div className="bg-card rounded-2xl border border-gray-300 shadow-soft overflow-hidden">
-              <SupportItem
-                icon={<MessageCircle className="w-6 h-6 text-gray-500" />}
-                title="Live Chat"
-                description="Chat with our support team in real-time"
-                action="contact"
-                onClick={handleLiveChat}
-              />
-              <div className="border-t border-gray-200" />
-              <SupportItem
-                icon={<Phone className="w-6 h-6 text-gray-500" />}
-                title="Phone Support"
-                description="Call us for immediate assistance"
-                action="contact"
-                onClick={handlePhoneSupport}
-              />
-              <div className="border-t border-gray-200" />
-              <SupportItem
-                icon={<Mail className="w-6 h-6 text-gray-500" />}
-                title="Email Support"
-                description="Send us an email and we'll respond within 24 hours"
-                action="contact"
-                onClick={handleEmail}
-              />
+
+        {/* 3 Direct Support Channels */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <a
+            href="https://wa.me/919876543210?text=Hi%20ThevillaCamp%20Support%2C%20I%20need%20assistance%20with%20my%20stay"
+            target="_blank"
+            rel="noreferrer"
+            className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 mb-3 group-hover:scale-105 transition-transform">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-neutral-900">WhatsApp Live Chat</h3>
+              <p className="text-xs text-neutral-500 mt-1">
+                Fastest response for active bookings & caretaker coordination.
+              </p>
             </div>
+            <span className="text-xs font-semibold text-emerald-600 mt-3 flex items-center gap-1">
+              Chat on WhatsApp <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          </a>
+
+          <a
+            href="tel:+919876543210"
+            className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-orange-300 transition-all flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 flex items-center justify-center text-[#ff6900] mb-3 group-hover:scale-105 transition-transform">
+                <Phone className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-neutral-900">Phone Support</h3>
+              <p className="text-xs text-neutral-500 mt-1">
+                Speak directly with an on-ground stay coordinator.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-[#ff6900] mt-3 flex items-center gap-1">
+              Call Hotline <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          </a>
+
+          <a
+            href="mailto:support@thevillacamp.com"
+            className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-blue-300 transition-all flex flex-col justify-between group cursor-pointer"
+          >
+            <div>
+              <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 mb-3 group-hover:scale-105 transition-transform">
+                <Mail className="w-5 h-5" />
+              </div>
+              <h3 className="text-sm font-bold text-neutral-900">Email Inquiries</h3>
+              <p className="text-xs text-neutral-500 mt-1">
+                For corporate stays, large event bookings & formal billing.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-blue-600 mt-3 flex items-center gap-1">
+              support@thevillacamp.com <ChevronRight className="w-3.5 h-3.5" />
+            </span>
+          </a>
+        </div>
+
+        {/* FAQs Section */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200/80 shadow-xs space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <span className="text-xs font-bold text-[#ff6900] uppercase tracking-wider">
+                Instant Answers
+              </span>
+              <h2 className="text-xl font-bold text-neutral-900 mt-0.5">
+                Frequently Asked Questions
+              </h2>
+            </div>
+            <span className="text-xs text-neutral-400 font-medium">
+              {filteredFaqs.length} questions
+            </span>
           </div>
 
-          {/* Resources Section */}
-          <div className="mb-8">
-            <h2 className="text-lg font-heading-weight text-foreground mb-4">
-              Resources
-            </h2>
-            <div className="bg-card border border-gray-300 rounded-2xl shadow-soft overflow-hidden">
-              <SupportItem
-                icon={<FileText className="w-6 h-6" />}
-                title="Travel Guides & Tips"
-                description="Helpful guides for your next adventure"
-                action="external"
-                onClick={handleGuidesAndTips}
-              />
-            </div>
-          </div>
+          <Accordion type="single" collapsible className="divide-y divide-neutral-100">
+            {filteredFaqs.map((faq, idx) => (
+              <AccordionItem key={idx} value={`faq-${idx}`} className="border-none py-1">
+                <AccordionTrigger className="text-xs sm:text-sm font-semibold text-neutral-900 hover:text-[#ff6900] text-left hover:no-underline">
+                  {faq.q}
+                </AccordionTrigger>
+                <AccordionContent className="text-xs text-neutral-600 leading-relaxed">
+                  {faq.a}
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </section>
 
-          {/* FAQ Section */}
-          <div>
-            <h2 className="text-lg font-heading-weight text-foreground mb-4">
-              Frequently Asked Questions
-            </h2>
-            <div className="space-y-3 ">
-              {faqs.map((faq, index) => (
-                <FAQItem
-                  key={index}
-                  question={faq.question}
-                  answer={faq.answer}
-                />
-              ))}
+        {/* Quick Links Banner */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <Link
+            href="/cancellation-policy"
+            className="p-4 rounded-2xl bg-neutral-900 text-white flex items-center justify-between group hover:bg-neutral-800 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <RotateCcw className="w-5 h-5 text-[#ff6900]" />
+              <div>
+                <h4 className="text-xs font-bold">Cancellation Policy</h4>
+                <p className="text-[10px] text-neutral-400">View refund tiers and terms</p>
+              </div>
             </div>
-          </div>
+            <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors" />
+          </Link>
 
-          {/* App Info */}
-          <div className="mt-8 text-center">
-            <p className="text-sm text-muted-foreground">Thevillacamp</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              Need technical support? Contact our development team.
-            </p>
-          </div>
+          <Link
+            href="/terms-of-service"
+            className="p-4 rounded-2xl bg-neutral-900 text-white flex items-center justify-between group hover:bg-neutral-800 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <FileText className="w-5 h-5 text-[#ff6900]" />
+              <div>
+                <h4 className="text-xs font-bold">Terms of Service</h4>
+                <p className="text-[10px] text-neutral-400">House rules & stay guidelines</p>
+              </div>
+            </div>
+            <ChevronRight className="w-4 h-4 text-neutral-400 group-hover:text-white transition-colors" />
+          </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
-};
-
-export default HelpSupport;
+}

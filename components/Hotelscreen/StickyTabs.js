@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useRef } from "react";
-import { cn } from "@/lib/utils"; 
+import { cn } from "@/lib/utils";
 
 const StickyTabs = ({ tabs, activeTab, onTabChange, isSticky }) => {
   const scrollRef = useRef(null);
@@ -9,9 +9,9 @@ const StickyTabs = ({ tabs, activeTab, onTabChange, isSticky }) => {
   useEffect(() => {
     if (activeTabRef.current && scrollRef.current) {
       const container = scrollRef.current;
-      const activeTab = activeTabRef.current;
+      const activeTabEl = activeTabRef.current;
       const containerRect = container.getBoundingClientRect();
-      const activeTabRect = activeTab.getBoundingClientRect();
+      const activeTabRect = activeTabEl.getBoundingClientRect();
 
       const scrollLeft =
         activeTabRect.left -
@@ -43,10 +43,10 @@ const StickyTabs = ({ tabs, activeTab, onTabChange, isSticky }) => {
             ref={tab.id === activeTab ? activeTabRef : null}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "px-3 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors",
+              "px-3.5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer",
               activeTab === tab.id
-                ? "text-orange-500 border-b-2 border-orange-500"
-                : "text-villa-text-light border-transparent hover:text-villa-text-dark"
+                ? "text-[#ff6900] border-b-2 border-[#ff6900]"
+                : "text-gray-500 border-transparent hover:text-gray-900"
             )}
           >
             {tab.label}

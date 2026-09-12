@@ -1,67 +1,24 @@
 import React from "react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
-
-import { useCamping } from "@/lib/context/CampingContext";
-import { Button } from "@heroui/react";
-import Link from "next/link";
 import {
-  Wifi,
-  Snowflake, 
-  AirVent,
-  BatteryCharging,
-  GlassWater,
-  ShieldCheck,
-  Bed,
-  Droplet,
-  Tv as LucideTv,
-  Table,
-  Bath,
-  Waves,
-  Volume2,
-  Utensils as LucideUtensils,
-  Coffee,
-  Trees,
-  Home,
-  Flame,
-  Fire,
-  Lightbulb,
   Star,
-  MapPin,
   Users,
-  BadgeCheck,
-  Heart,
-  Share2,
-  FlameKindling,
-  Camera,
-  Mountain,
-  Building2,
+  Tent,
+  Bath,
   Sun,
+  Heart,
+  Trees,
+  Mountain,
 } from "lucide-react";
-
-// react-icons for items lucide doesn't provide (or where a better semantic icon exists)
 import {
-  FaSquareParking,
-  FaTv,
   FaFilePdf,
   FaPeopleGroup,
   FaChild,
   FaUmbrellaBeach,
 } from "react-icons/fa6";
-import {
-  MdKitchen,
-  MdOutlineLocalDining,
-  MdOutlineFreeBreakfast,
-  MdOutlineSpeaker ,
-  MdPool 
-} from "react-icons/md";
-// lucide-react
-import { Tent, Backpack, Music, Footprints} from "lucide-react";
-import { TbKayak } from "react-icons/tb";
-import { MdKayaking } from "react-icons/md";
-
-// react-icons (better semantics for some amenities)
-import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
-import { MdOutlineLocalDrink } from "react-icons/md";
+import { useCamping } from "@/lib/context/CampingContext";
+import { Button } from "@heroui/react";
+import Link from "next/link";
 
 const TentDetails = () => {
   const camping = useCamping();
@@ -75,170 +32,118 @@ const TentDetails = () => {
     "Romantic Getaway": <Heart className="w-4 h-4 text-gray-600" />,
   };
 
-  const amenitiesIcons = {
-    WiFi: <Wifi className="w-6 h-6 text-gray-600" />,
-    Heating: <Snowflake className="w-6 h-6 text-gray-600" />,
-    AC: <AirVent className="w-6 h-6 text-gray-600" />,
-    "Power Backup": <BatteryCharging className="w-6 h-6 text-gray-600" />,
-    "Water Supply": <GlassWater className="w-6 h-6 text-gray-600" />,
-    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
-    CCTV: <Camera className="w-6 h-6 text-gray-600" />, // If you don't have Camera from lucide, use another (see note below)
-    Parking: <FaSquareParking className="w-6 h-6 text-gray-600" />,
-    "AC Bedrooms/Hall": <AirVent className="w-6 h-6 text-gray-600" />,
-    "Aquagaurd for drinking water": (
-      <Droplet className="w-6 h-6 text-gray-600" />
-    ),
-    "Extra mattresses": <Bed className="w-6 h-6 text-gray-600" />,
+  const totalTentsCount = camping?.tents?.reduce(
+    (acc, t) => acc + (t?.totaltents || 1),
+    0
+  ) || camping?.tents?.length || 0;
 
-    "LED TV Mobile Connect": <FaTv className="w-6 h-6 text-gray-600" />,
-    "Board Games": <Star className="w-6 h-6 text-gray-600" />, // fallback to star if no specific game icon
-    "Sunset Point": <Star className="w-6 h-6 text-gray-600" />,
-    "Table & Chairs": <Table className="w-6 h-6 text-gray-600" />,
-    "Geyser in all Bathrooms": <Bath className="w-6 h-6 text-gray-600" />,
-
-    "Swimming Pool": <MdPool  className="w-6 h-6 text-gray-600" />,
-    "Sound System": <MdOutlineSpeaker  className="w-6 h-6 text-gray-600" />,
-    Refrigerator: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    Kitchen: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    "Coffee Maker": <Coffee className="w-6 h-6 text-gray-600" />,
-    Microwave: <MdKitchen className="w-6 h-6 text-gray-600" />,
-    Oven: <MdKitchen className="w-6 h-6 text-gray-600" />,
-
-    "Outdoor Dining Area": <Trees className="w-6 h-6 text-gray-600" />,
-    "Dining Area": <MdOutlineLocalDining className="w-6 h-6 text-gray-600" />,
-    "BBQ Grill": <FlameKindling className="w-6 h-6 text-gray-600" />,
-    Balcony: <Home className="w-6 h-6 text-gray-600" />,
-    Garden: <Trees className="w-6 h-6 text-gray-600" />,
-    "Terrace / Patio": <Home className="w-6 h-6 text-gray-600" />,
-
-    "Fire Extinguisher": <Flame className="w-6 h-6 text-gray-600" />,
-    "Daily Breakfast": (
-      <MdOutlineFreeBreakfast className="w-6 h-6 text-gray-600" />
-    ),
-    "Smart Lighting": <Lightbulb className="w-6 h-6 text-gray-600" />,
-     "Drinking Water": <MdOutlineLocalDrink className="w-6 h-6 text-gray-600" />,
-    "Charging Point": <BatteryCharging className="w-6 h-6 text-gray-600" />,
-    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
-    "Private Parking": <FaParking className="w-6 h-6 text-gray-600" />,
-
-    // Activities
-    Barbeque: <FlameKindling className="w-6 h-6 text-gray-600" />,
-    Bonfire: <FaFireAlt className="w-6 h-6 text-gray-600" />,
-    Trekking: <Footprints className="w-6 h-6 text-gray-600" />,
-
-    // Views
-    "Mountain View": <Mountain className="w-6 h-6 text-gray-600" />,
-    "Lake View": <Waves className="w-6 h-6 text-gray-600" />,
-
-    // Common areas
-    "Outdoor Seating": <Table className="w-6 h-6 text-gray-600" />,
-    "Garden Area": <Trees className="w-6 h-6 text-gray-600" />,
-    "Play Area": <FaChild className="w-6 h-6 text-gray-600" />,
-    "Music System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
-    "Rain Dance Area": <Droplet className="w-6 h-6 text-gray-600" />,
-    "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
-    Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
-  };
-
-
+  const totalMaxCapacity = camping?.maxCapacity || camping?.tents?.reduce(
+    (acc, t) => acc + (t?.maxCapacity * (t?.totaltents || 1)),
+    0
+  ) || 10;
 
   return (
-    <div className="p-3  space-y-3 w-full overflow-hidden">
+    <div className="p-3 space-y-3 w-full overflow-hidden">
       {/* Title and Location */}
       <div>
-        <h1 className="text-xl font-bold text-villa-text-dark">
-          {camping?.name} - {camping?.address?.addressLine}
+        <h1 className="text-xl font-bold text-neutral-900">
+          {camping?.name} {camping?.address?.addressLine ? `- ${camping.address.addressLine}` : ""}
         </h1>
-        <div className="flex justify-between items-center">
-          <p className="text-xs font-medium">
-            {camping?.address?.addressLine}, {camping?.address?.city}
+        <div className="flex justify-between items-center mt-0.5">
+          <p className="text-xs font-medium text-gray-500">
+            {camping?.address?.addressLine ? `${camping.address.addressLine}, ` : ""}{camping?.address?.city || "Pawana"}
           </p>
-          <Button
-            size=""
-            className="mt-2 flex justify-center items-center gap-2 text-red-500/60 text-xs font-medium bg-orange-500/10 px-3 py-1 rounded-lg"
-          >
-            <FaFilePdf /> View Brochure
-          </Button>
+          {camping?.brochure && (
+            <a
+              href={camping.brochure}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-1 flex justify-center items-center gap-1.5 text-[#ff6900] text-xs font-semibold bg-orange-50 border border-orange-200/80 hover:bg-orange-100 px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
+            >
+              <FaFilePdf /> View Brochure
+            </a>
+          )}
         </div>
       </div>
 
       {/* Rating and Reviews */}
-      <div className="flex items-center space-x-4">
-        <div className="bg-villa-orange/10  py-1 rounded-full">
-          <span className="text-sm font-medium">Guest Favourite</span>
+      <div className="flex items-center space-x-3">
+        <div className="bg-orange-50/80 border border-orange-200/70 px-2.5 py-0.5 rounded-full">
+          <span className="text-xs font-bold text-orange-800">Guest Favourite</span>
         </div>
         <div className="flex items-center space-x-1">
-          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-          <span className="font-semibold">{camping?.averageRating}</span>
-          <span className="text-villa-text-light font-light">/ 5</span>
+          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+          <span className="font-bold text-sm text-gray-900">{camping?.averageRating || "4.8"}</span>
+          <span className="text-gray-400 text-xs">/ 5</span>
         </div>
-         <Link
-          href={"#reviews"}
+        <Link
+          href="#reviews"
           scroll={true}
-          className="text-blue-500 text-sm underline"
+          className="text-[#ff6900] text-xs font-semibold underline underline-offset-2"
         >
-          {camping?.totalReviews} Reviews
+          {camping?.totalReviews || 0} Reviews
         </Link>
       </div>
 
-      {/* Property Details */}
-      <div className="flex items-center w-full space-x-3 text-xs">
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Tent className="w-4 h-4 font-light" />
-          <span>{camping?.tents?.length} tents</span>
+      {/* Campsite Accommodation Details Badges */}
+      <div className="flex items-center w-full space-x-2 text-xs">
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Users className="w-3.5 h-3.5 text-[#ff6900]" />
+          <span>Up to {totalMaxCapacity} Guests</span>
         </div>
-        {/* <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bed className="w-4 h-4 text-villa-text-light" />
-          <span>5 Rooms</span>
-          <div className="w-4 h-4 bg-villa-blue rounded-full flex items-center justify-center">
-            <span className="text-white text-xs">i</span>
+        <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+          <Tent className="w-3.5 h-3.5 text-[#ff6900]" />
+          <span>{totalTentsCount} Tents</span>
+        </div>
+        {camping?.baths > 0 && (
+          <div className="flex-1 flex items-center justify-center py-2 px-2 gap-1.5 rounded-xl bg-neutral-100/90 border border-neutral-200/60 font-medium text-gray-800">
+            <Bath className="w-3.5 h-3.5 text-[#ff6900]" />
+            <span>{camping.baths} Baths</span>
           </div>
-        </div>
-        <div className="flex items-center justify-center  py-2 px-1 gap-1 rounded-sm   bg-[#2f80ed1a]">
-          <Bath className="w-4 h-4 text-villa-text-light" />
-          <span>5 Baths</span>
-        </div> */}
+        )}
       </div>
 
       {/* Great For Section */}
       {camping?.greatFor?.length > 0 && (
         <div className="flex flex-col">
           <div className="flex flex-wrap gap-2 items-center">
-            <p className="text-sm text-villa-text-light ">Great for:</p>
-            {camping?.greatFor.slice(0, 1).map((item, index) => (
+            <p className="text-xs text-gray-500 font-medium">Great for:</p>
+            {camping.greatFor.slice(0, 2).map((item, index) => (
               <div
                 key={index}
-                className="bg-villa-green/10 px-3 py-1 rounded-full flex items-center gap-1"
+                className="bg-emerald-50 border border-emerald-200 text-emerald-800 px-2.5 py-0.5 rounded-full flex items-center gap-1 font-medium text-xs"
               >
                 {greatForIcons[item] || (
-                  <Sun className="w-4 h-4 text-gray-600" />
+                  <Sun className="w-3.5 h-3.5 text-emerald-600" />
                 )}
-                <span className="text-xs">{item}</span>
+                <span>{item}</span>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Amenities Icons */}
+      {/* Top Amenities Icons Grid */}
       {camping?.topamenities?.length > 0 && (
-        <div className="grid grid-cols-5 gap-4 mt-2">
-          {camping?.topamenities.slice(0, 6).map((amenity, index) => (
+        <div className="grid grid-cols-5 gap-3 mt-2">
+          {camping.topamenities.slice(0, 5).map((amenity, index) => (
             <div
               key={index}
               className="text-center relative flex flex-col items-center"
             >
-              <div className="w-12 h-12 border border-gray-400 rounded-md flex items-center justify-center mb-2 relative">
-                <CustomAmenityIcon name={amenity} className="w-6 h-6 text-gray-600" />
-                {index === 5 && camping?.topamenities?.length > 6 && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-villa-blue rounded-full flex items-center justify-center">
-                    <span className="text-white text-xs font-bold">
-                      +{camping?.amenities?.length - 5}
+              <div className="w-12 h-12 bg-white border border-neutral-200 rounded-xl flex items-center justify-center mb-1.5 shadow-2xs relative">
+                <CustomAmenityIcon name={amenity} className="w-5 h-5 text-[#ff6900]" />
+                {index === 4 && camping.topamenities.length > 5 && (
+                  <div className="absolute -top-1.5 -right-1.5 w-5 h-5 bg-[#ff6900] text-white rounded-full flex items-center justify-center shadow-xs">
+                    <span className="text-[10px] font-bold">
+                      +{camping?.amenities?.length - 4}
                     </span>
                   </div>
                 )}
               </div>
-              <p className="text-[0.67rem] text-center">{amenity}</p>
+              <p className="text-[0.65rem] text-center font-medium text-gray-700 truncate w-full">
+                {amenity}
+              </p>
             </div>
           ))}
         </div>

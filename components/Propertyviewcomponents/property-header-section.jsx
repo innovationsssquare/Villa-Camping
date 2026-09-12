@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useVilla } from "@/lib/context/VillaContext";
+import { Tent, Home, Hotel } from "lucide-react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 
 export default function PropertyHeaderSection() {
@@ -74,7 +75,31 @@ export default function PropertyHeaderSection() {
           <FaUsers className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
           Up to {villa?.maxCapacity || 10} Guests
         </Badge>
-        {villa?.bhkType && (
+        {villa?.tents && villa.tents.length > 0 ? (
+          <Badge
+            variant="secondary"
+            className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+          >
+            <Tent className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {villa.tents.length} {villa.tents.length === 1 ? "Tent Type" : "Tent Types"} ({villa.tents.reduce((s, t) => s + (t.totaltents || 1), 0)} Total Tents)
+          </Badge>
+        ) : villa?.cottages && villa.cottages.length > 0 ? (
+          <Badge
+            variant="secondary"
+            className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+          >
+            <Home className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {villa.cottages.length} {villa.cottages.length === 1 ? "Cottage Type" : "Cottage Types"} ({villa.cottages.reduce((s, c) => s + (c.totaltents || c.totalCottages || 1), 0)} Total Cottages)
+          </Badge>
+        ) : villa?.rooms && villa.rooms.length > 0 ? (
+          <Badge
+            variant="secondary"
+            className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
+          >
+            <Hotel className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
+            {villa.rooms.length} {villa.rooms.length === 1 ? "Room Type" : "Room Types"} ({villa.rooms.reduce((s, r) => s + (r.totaltents || r.totalRooms || 1), 0)} Total Rooms)
+          </Badge>
+        ) : villa?.bhkType ? (
           <Badge
             variant="secondary"
             className="bg-neutral-100/90 text-gray-800 border border-neutral-200/60 px-4 py-2 rounded-full font-medium"
@@ -82,7 +107,7 @@ export default function PropertyHeaderSection() {
             <FaHome className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
             {villa.bhkType}
           </Badge>
-        )}
+        ) : null}
         {villa?.topamenities?.slice(0, 3).map((amenity, index) => (
           <Badge
             key={index}

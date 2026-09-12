@@ -37,6 +37,7 @@ import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
 import { ProfileSheet } from "./ProfileSheet";
+import { NotificationSheet } from "./Notificationsheet";
 import { addToast } from "@heroui/react";
 
 export default function AirbnbNavbar() {
@@ -181,12 +182,7 @@ export default function AirbnbNavbar() {
       return;
     }
     dispatch(setCheckout(date));
-    // Auto-advance to Guest selector strictly when both checkin and valid checkout date are present
-    if (checkin) {
-      setTimeout(() => {
-        setActiveDropdown("guests");
-      }, 120);
-    }
+    setActiveDropdown("guests");
   };
 
   const handleCheckinClick = () => {
@@ -272,28 +268,26 @@ export default function AirbnbNavbar() {
       if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
       const queryStr = params.toString();
 
-      const targetSlug = selectedCategoryName
-        ? selectedCategoryName.toLowerCase()
-        : "all";
+      const targetSlug =
+        selectedCategoryName && selectedCategoryName !== "All Stays"
+          ? selectedCategoryName.toLowerCase()
+          : "all";
 
       router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
-
-      await dispatch(
-        fetchAllProperties({
-          categoryId: selectedCategoryId,
-          checkIn: checkin,
-          checkOut: checkout,
-          subtype: "",
-          page: 1,
-          limit: 20,
-        })
-      ).unwrap();
     } catch (err) {
       console.error("Search error:", err);
     } finally {
       setIsSearching(false);
     }
   };
+
+  // Only show expanded search bar on homepage and category/stay search routes
+  const isSearchPage =
+    pathname === "/" ||
+    pathname.startsWith("/category") ||
+    pathname.startsWith("/products");
+
+  const showExpandedSearch = isSearchPage && (!isScrolled || isExpanded);
 
   // Condition to check if any dropdown is open
   const isAnyDropdownOpen = activeDropdown !== null;
@@ -302,16 +296,16 @@ export default function AirbnbNavbar() {
     <>
       <header
         ref={navbarRef}
-        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-250 ease-out ${
-          isScrolled && !isExpanded
-            ? "shadow-sm border-b border-neutral-200/80 h-16"
-            : "border-b border-neutral-200/60 h-[136px]"
+        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-200 ease-out ${
+          showExpandedSearch
+            ? "border-b border-neutral-200/60 h-[136px]"
+            : "shadow-xs border-b border-neutral-200/80 h-16"
         }`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar: Logo, Navigation Tabs, Host/Profile */}
           <div className="flex items-center justify-between h-16">
-            {/* Logo - Sized prominently with clean cropped asset */}
+            {/* Logo */}
             <div
               onClick={() => router.push("/")}
               className="flex items-center cursor-pointer transition-transform hover:scale-[1.02] shrink-0"
@@ -326,9 +320,9 @@ export default function AirbnbNavbar() {
               />
             </div>
 
-            {/* Center: When Scrolled & Compact -> Airbnb Floating Search Pill */}
+            {/* Center: Search pill if search page and scrolled, else category navigation tabs */}
             <AnimatePresence mode="wait">
-              {isScrolled && !isExpanded ? (
+              {isSearchPage && isScrolled && !isExpanded ? (
                 <motion.div
                   key="compact-search-pill"
                   initial={{ opacity: 0, scale: 0.94, y: -6 }}
@@ -459,8 +453,8 @@ export default function AirbnbNavbar() {
               )}
             </AnimatePresence>
 
-            {/* Right Action Menu: Become a host, Profile */}
-            <div className="flex items-center gap-3 shrink-0">
+            {/* Right Action Menu: Become a host, NotificationSheet, Profile */}
+            <div className="flex items-center gap-2.5 shrink-0">
               <button
                 type="button"
                 onClick={() => router.push("/become-host")}
@@ -469,19 +463,21 @@ export default function AirbnbNavbar() {
                 Become a host
               </button>
 
+              <NotificationSheet />
+
               <ProfileSheet />
             </div>
           </div>
 
-          {/* Expanded Search Bar Container (Compact Airbnb Dimensions: max-w-[760px]) */}
+          {/* Expanded Airbnb Search Bar */}
           <AnimatePresence>
-            {(!isScrolled || isExpanded) && (
+            {showExpandedSearch && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.96, y: -8 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.96, y: -8 }}
-                transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                className="pb-2 relative"
+                initial={{ opacity: 0, y: -10, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.98 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+                className="pb-4"
               >
                 <div className="max-w-[760px] mx-auto relative">
                   {/* Outer Search Pill */}
@@ -708,6 +704,7 @@ export default function AirbnbNavbar() {
                           checkoutDate={checkout}
                           onCheckinSelect={handleCheckinSelect}
                           onCheckoutSelect={handleCheckoutSelect}
+                          onComplete={() => setActiveDropdown("guests")}
                           onClose={() => setActiveDropdown(null)}
                           focusedSide={focusedSide}
                           setFocusedSide={setFocusedSide}
@@ -719,7 +716,7 @@ export default function AirbnbNavbar() {
 
                   {/* Dropdown 4: Who / Guest Selector Popover */}
                   <AnimatePresence>
-                    {activeDropdown === "guests" && Boolean(checkin) && Boolean(checkout) && (
+                    {activeDropdown === "guests" && (
                       <div className="absolute top-full right-0 mt-3 z-50">
                         <GuestSelector
                           adults={selectedGuest?.adults || 1}

@@ -1,430 +1,463 @@
 "use client";
-import { useState, useEffect } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
-import { Button as HeroButton, Spinner } from "@heroui/react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import {
-  ShoppingBag,
-  CreditCard,
-  SettingsIcon,
-  Shield,
-  HelpCircle,
-  LogOut,
-  Pencil,
-  PhoneCall,
-  X,
-  Phone,
-} from "lucide-react";
-import { TiThMenu } from "react-icons/ti";
-import { FaUser } from "react-icons/fa";
-import { FaBook } from "react-icons/fa";
-import { IoSettings } from "react-icons/io5";
-import { IoShieldCheckmark } from "react-icons/io5";
-import { MdHelp } from "react-icons/md";
-import { FaPhoneAlt } from "react-icons/fa";
-import { IoLogOut } from "react-icons/io5";
-import { Card, CardContent } from "@/components/ui/card";
 import Listprop from "@/public/Homeasset/Listprop.jpg";
+
 import {
+  Home,
+  Compass,
+  Sparkles,
+  CalendarCheck,
+  Heart,
   User,
   MessageCircle,
   Bell,
-  MapPin,
-  Heart,
-  Gift,
-  Users,
-  Calendar,
+  ShieldCheck,
+  FileText,
+  HelpCircle,
+  LogOut,
+  LogIn,
   ChevronRight,
-  DollarSign,
-  Settings,
+  ArrowRight,
   Instagram,
   Twitter,
   Linkedin,
   Facebook,
-  Menu,
 } from "lucide-react";
-import Image from "next/image";
-import { useRef } from "react";
-
-
+import { TiThMenu } from "react-icons/ti";
 
 export function UserSidebar() {
   const pathname = usePathname();
-  const [open, setOpen] = useState(false);
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-  const touchStartX = useRef(null);
+  const [open, setOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  // Read session whenever opened
+  useEffect(() => {
+    try {
+      const token = Cookies.get("token");
+      const storedUserStr = localStorage.getItem("thevilla_user");
+      if (token && storedUserStr) {
+        setCurrentUser(JSON.parse(storedUserStr));
+        setIsLoggedIn(true);
+      } else if (token) {
+        setCurrentUser({ fullName: "Valued Guest" });
+        setIsLoggedIn(true);
+      } else {
+        setCurrentUser(null);
+        setIsLoggedIn(false);
+      }
+    } catch {
+      setIsLoggedIn(false);
+    }
+  }, [open]);
 
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
   const handleNavigate = (href) => {
-    startTransition(() => {
-      router.push(href);
-    });
     setOpen(false);
+    router.push(href);
+  };
+
+  const handleLogout = () => {
+    Cookies.remove("token");
+    Cookies.remove("customer_id");
+    localStorage.removeItem("thevilla_user");
+    localStorage.removeItem("thevilla_user_id");
+    localStorage.removeItem("customer_id");
+    setCurrentUser(null);
+    setIsLoggedIn(false);
+    setOpen(false);
+    router.push("/");
+    window.location.reload();
   };
 
   const isActive = (href) => {
-    // exact match
     if (pathname === href) return true;
-
-    // nested routes should NOT activate parent tabs
     if (href === "/account") return pathname === "/account";
-
-    return pathname.startsWith(href + "/");
+    if (href !== "/" && pathname.startsWith(href)) return true;
+    return false;
   };
 
-  const activeClass = " text-orange-500 ";
-
-  const handleTouchStart = (e) => {
-    touchStartX.current = e.touches[0].clientX;
-  };
-
-  const handleTouchEnd = (e) => {
-    if (!touchStartX.current) return;
-
-    const touchEndX = e.changedTouches[0].clientX;
-    const diff = touchStartX.current - touchEndX;
-
-    // swipe left → close
-    if (diff > 60) {
-      setOpen(false);
-    }
-
-    touchStartX.current = null;
+  const getUserInitials = (name) => {
+    if (!name) return "U";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .slice(0, 2);
   };
 
   return (
-    <>
-      {/* Mobile trigger */}
-      <Sheet open={open} onOpenChange={setOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full p-0 flex items-center justify-center hover:bg-neutral-100 text-neutral-800">
-            <TiThMenu size={16} />
-            <span className="sr-only">Menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent
-          side="left"
-          className="w-[300px] p-0 bg-gray-50 border-none"
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 rounded-full p-0 flex items-center justify-center hover:bg-neutral-100 text-neutral-800"
         >
-          <div className="flex flex-col h-full">
-            <div className="p-4 pt-12">
-              <Card className="bg-black/90 border-0 text-white p-0">
-                <CardContent className="p-4">
-                  <div className="flex items-center space-x-3">
-                    <Avatar className="h-12 w-12 border-2 border-white">
-                      <AvatarImage src="/diverse-user-avatars.png" />
-                      <AvatarFallback className="bg-gray-300 text-black font-semibold">
-                        S
-                      </AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <h2 className="text-sm font-semibold">Hi santosh</h2>
-                      <p className="text-blue-100 text-xs">
-                        santosh.sa40@gmail.com
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+          <TiThMenu size={18} />
+          <span className="sr-only">Toggle navigation menu</span>
+        </Button>
+      </SheetTrigger>
+
+      <SheetContent
+        side="left"
+        className="w-[60vw] sm:w-[60vw] max-w-[270px] min-w-[230px] p-0 bg-white border-r border-neutral-200 flex flex-col h-full z-50"
+      >
+        <SheetHeader className="sr-only">
+          <SheetTitle>Navigation Menu</SheetTitle>
+          <SheetDescription>Explore ThevillaCamp stays and options</SheetDescription>
+        </SheetHeader>
+
+        {/* User Card Header - Compact for 60% width */}
+        <div className="p-3.5 pt-8 bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-100">
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2.5">
+              <Avatar className="h-10 w-10 ring-2 ring-[#ff6900]/20 shadow-xs shrink-0">
+                {currentUser?.profilePic ? (
+                  <AvatarImage src={currentUser.profilePic} alt={currentUser?.fullName} />
+                ) : null}
+                <AvatarFallback className="bg-gradient-to-br from-[#ff6900] to-[#e05d00] text-xs font-bold text-white">
+                  {getUserInitials(currentUser?.fullName)}
+                </AvatarFallback>
+              </Avatar>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1">
+                  <h3 className="text-xs font-bold text-neutral-900 truncate">
+                    {currentUser?.fullName || "Member"}
+                  </h3>
+                  <span className="inline-flex items-center px-1 py-0.2 text-[8px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                    Verified
+                  </span>
+                </div>
+                <p className="text-[10px] text-neutral-500 truncate">
+                  {currentUser?.email || currentUser?.mobile || "Active Account"}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center gap-1.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-[#ff6900] animate-pulse" />
+                <span className="text-[9px] font-bold tracking-wider uppercase text-[#ff6900]">
+                  ThevillaCamp
+                </span>
+              </div>
+              <h3 className="text-xs font-bold text-neutral-900 leading-snug">
+                Welcome to luxury stays
+              </h3>
+              <Button
+                onClick={() => handleNavigate("/account")}
+                className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-[10px] font-semibold rounded-lg py-1.5 shadow-xs transition-all flex items-center justify-center gap-1"
+              >
+                <LogIn className="w-3 h-3" /> Sign In / Register
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Scrollable Navigation Body with shadcn ScrollArea (No native scrollbar!) */}
+        <ScrollArea className="flex-1 px-3 py-3">
+          <div className="space-y-4">
+            {/* Quick Access Row */}
+            <div className="grid grid-cols-3 gap-1.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-100">
+              <button
+                onClick={() => handleNavigate("/account")}
+                className={cn(
+                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  isActive("/account") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
+                )}
+              >
+                <User className="h-3.5 w-3.5 mb-0.5" />
+                <span className="text-[9px]">Account</span>
+              </button>
+              <button
+                onClick={() => handleNavigate("/account/support")}
+                className={cn(
+                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  isActive("/account/support") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
+                )}
+              >
+                <MessageCircle className="h-3.5 w-3.5 mb-0.5" />
+                <span className="text-[9px]">Support</span>
+              </button>
+              <button
+                onClick={() => handleNavigate("/notifications")}
+                className={cn(
+                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  isActive("/notifications") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
+                )}
+              >
+                <Bell className="h-3.5 w-3.5 mb-0.5" />
+                <span className="text-[9px]">Alerts</span>
+              </button>
             </div>
 
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto px-4 space-y-4">
-              <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
-                <CardContent className="p-2">
-                  <div className="grid grid-cols-3 gap-4">
-                    <div
-                      onClick={() => handleNavigate("/account")}
-                      className="flex flex-col items-center space-y-2"
-                    >
-                      <div className="p-3 bg-gray-100 rounded-full">
-                        <User className="h-5 w-5 text-black fill-black" />
-                      </div>
-                      <span
-                        className={cn(
-                          "text-xs text-center text-gray-600  font-semibold",
-                          isActive("/account") && activeClass
-                        )}
-                      >
-                        My Account
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => handleNavigate("/account/support")}
-                      className="flex flex-col items-center space-y-2"
-                    >
-                      <div className="p-3 bg-gray-100 rounded-full">
-                        <MessageCircle className="h-5 w-5 text-black fill-black" />
-                      </div>
-                      <span
-                        className={cn(
-                          "text-xs text-center text-gray-600  font-semibold",
-                          isActive("/account/support") && activeClass
-                        )}
-                      >
-                        Support
-                      </span>
-                    </div>
-                    <div
-                      onClick={() => handleNavigate("/notifications")}
-                      className="flex flex-col items-center space-y-2 relative"
-                    >
-                      <div className="p-3 bg-gray-100 rounded-full relative">
-                        <Bell className="h-5 w-5 text-black fill-black" />
-                        {/* <div className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full"></div> */}
-                      </div>
-                      <span
-                        className={cn(
-                          "text-xs text-center text-gray-600  font-semibold",
-                          isActive("/notifications") && activeClass
-                        )}
-                      >
-                        Notifications
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+            {/* Primary Exploration */}
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 px-1 mb-1">
+                Explore
+              </p>
 
-              <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
-                <CardContent className="p-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">My Trips</h3>
-                  <div className="space-y-3">
-                    <div
-                      onClick={() => handleNavigate("/booking")}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <MapPin className="h-5 w-5 text-gray-400" />
-                        <span
-                          className={cn(
-                            "text-xs text-center text-gray-600  font-semibold",
-                            isActive("/booking") && activeClass
-                          )}
-                        >
-                          View/Manage Trips
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div
-                      onClick={() => handleNavigate("/wishlist")}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Heart className="h-5 w-5 text-gray-400" />
-                        <span
-                          className={cn(
-                            "text-xs text-center text-gray-600  font-semibold",
-                            isActive("/wishlist") && activeClass
-                          )}
-                        >
-                          Wishlist
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card
-                onClick={() => handleNavigate("/become-host")}
-                className="shadow-none border border-gray-300 rounded-2xl p-0"
+              <button
+                onClick={() => handleNavigate("/")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  pathname === "/" ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
               >
-                <CardContent className="p-2">
-                  <div className="flex items-center space-x-3">
-                    <div className="h-12 w-12 rounded-lg overflow-hidden">
-                      <Image
-                        src={Listprop}
-                        alt="Hosting"
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900 text-sm">
-                        Get Started with Hosting
-                      </h4>
-                      <p className="text-xs text-gray-600">
-                        List your property & earn extra income
-                      </p>
-                    </div>
-                    <ChevronRight className="h-4 w-4 text-gray-400" />
-                  </div>
-                </CardContent>
-              </Card>
+                <div className="flex items-center gap-2">
+                  <Home className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Home</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
 
-              <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
-                <CardContent className="p-2">
-                  <h3 className="font-semibold text-gray-900 mb-3">
-                    Legal and Support
-                  </h3>
-                  <div className="space-y-3">
-                    <div
-                      onClick={() => handleNavigate("/account/contact-us")}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Phone className="h-5 w-5 text-gray-400" />
-                        <span
-                          className={cn(
-                            "text-xs text-center text-gray-600  font-semibold",
-                            isActive("/account/contact-us") && activeClass
-                          )}
-                        >
-                          Contact us
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div
-                      onClick={() => handleNavigate("/account/privacy-policy")}
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Users className="h-5 w-5 text-gray-400" />
-                        <span
-                          className={cn(
-                            "text-xs text-center text-gray-600  font-semibold",
-                            isActive("/account/privacy-policy") && activeClass
-                          )}
-                        >
-                          Privacy Policy
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div
-                      onClick={() =>
-                        handleNavigate("/account/Terms-Conditions")
-                      }
-                      className="flex items-center justify-between py-2"
-                    >
-                      <div className="flex items-center space-x-3">
-                        <Calendar className="h-5 w-5 text-gray-400" />
-                        <span
-                          className={cn(
-                            "text-xs text-center text-gray-600  font-semibold",
-                            isActive("/account/Terms-Conditions") && activeClass
-                          )}
-                        >
-                          Terms & Conditions
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <button
+                onClick={() => handleNavigate("/category/all")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  pathname.startsWith("/category") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Compass className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>All Stays</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
 
-              {/* <Card className="shadow-none border border-gray-300 rounded-2xl p-0">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Settings</h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-6 w-8 rounded-sm overflow-hidden">
-                          <div className="h-2 bg-orange-500"></div>
-                          <div className="h-2 bg-white"></div>
-                          <div className="h-2 bg-green-500"></div>
-                        </div>
-                        <div>
-                          <span className="text-gray-700">Country</span>
-                          <p className="text-sm text-gray-500">India</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center space-x-3">
-                        <DollarSign className="h-5 w-5 text-gray-400" />
-                        <div>
-                          <span className="text-gray-700">Currency</span>
-                          <p className="text-sm text-gray-500">INR</p>
-                        </div>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center space-x-3">
-                        <Settings className="h-5 w-5 text-gray-400" />
-                        <span className="text-gray-700">
-                          Communication Preferences
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card> */}
+              <button
+                onClick={() => handleNavigate("/experiences")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  pathname.startsWith("/experiences") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Experiences</span>
+                </div>
+                <span className="text-[8px] font-semibold bg-amber-100 text-amber-800 px-1 py-0.2 rounded-full">
+                  Lonavala
+                </span>
+              </button>
 
-              <Card className="shadow-none border border-gray-300 rounded-2xl p-0 mb-2">
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-gray-900 mb-3 text-sm">
-                    Show us your love & follow
-                  </h3>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between py-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-6 w-6 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-lg flex items-center justify-center">
-                          <Instagram className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-gray-700 text-xs font-semibold">
-                          Instagram
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex items-center justify-between py-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-6 w-6 bg-black rounded-lg flex items-center justify-center">
-                          <X className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-gray-700 text-xs font-semibold">
-                          X
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex items-center justify-between py-1">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-6 w-6 bg-blue-600 rounded-lg flex items-center justify-center">
-                          <Linkedin className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-gray-700 font-semibold text-xs">
-                          LinkedIn
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                    <div className="flex items-center justify-between py-2">
-                      <div className="flex items-center space-x-3">
-                        <div className="h-6 w-6 bg-blue-500 rounded-lg flex items-center justify-center">
-                          <Facebook className="h-4 w-4 text-white" />
-                        </div>
-                        <span className="text-gray-700 font-semibold text-xs">
-                          Facebook
-                        </span>
-                      </div>
-                      <ChevronRight className="h-4 w-4 text-gray-400" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <button
+                onClick={() => handleNavigate("/services")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  pathname.startsWith("/services") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+                  <span>Concierge</span>
+                </div>
+                <span className="text-[8px] font-semibold bg-orange-100 text-[#ff6900] px-1 py-0.2 rounded-full">
+                  Soon
+                </span>
+              </button>
+            </div>
+
+            <Separator className="bg-neutral-100" />
+
+            {/* Bookings & Wishlist */}
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 px-1 mb-1">
+                Your Trips
+              </p>
+
+              <button
+                onClick={() => handleNavigate("/booking")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  isActive("/booking") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <CalendarCheck className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>My Bookings</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate("/wishlist")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
+                  isActive("/wishlist") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <Heart className="w-3.5 h-3.5 text-neutral-500" />
+                  <span>Wishlist</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
+            </div>
+
+            <Separator className="bg-neutral-100" />
+
+            {/* Host Banner */}
+            <div
+              onClick={() => handleNavigate("/become-host")}
+              className="cursor-pointer p-2.5 rounded-xl bg-neutral-900 text-white flex items-center gap-2.5 group transition-transform active:scale-98"
+            >
+              <div className="h-9 w-9 rounded-lg overflow-hidden shrink-0 border border-white/10">
+                <Image
+                  src={Listprop}
+                  alt="Become a Host"
+                  className="h-full w-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h4 className="text-[11px] font-bold text-white flex items-center gap-1">
+                  Become a Host <ArrowRight className="w-2.5 h-2.5 text-[#ff6900]" />
+                </h4>
+                <p className="text-[9px] text-neutral-400 truncate">
+                  Earn with your villa
+                </p>
+              </div>
+            </div>
+
+            {/* Legal & Policies */}
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 px-1 mb-1">
+                Policies & Help
+              </p>
+
+              <button
+                onClick={() => handleNavigate("/privacy-policy")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  isActive("/privacy-policy") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
+                  <span className="text-[11px]">Privacy Policy</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate("/terms-of-service")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  isActive("/terms-of-service") || isActive("/terms-and-conditions")
+                    ? "bg-orange-50 text-[#ff6900] font-bold"
+                    : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5 text-neutral-500" />
+                  <span className="text-[11px]">Terms of Service</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate("/cancellation-policy")}
+                className={cn(
+                  "flex w-full items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all",
+                  isActive("/cancellation-policy") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
+                )}
+              >
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-3.5 h-3.5 text-neutral-500" />
+                  <span className="text-[11px]">Cancellation</span>
+                </div>
+                <ChevronRight className="w-3 h-3 text-neutral-400" />
+              </button>
+            </div>
+
+            {/* Social Icons */}
+            <div className="pt-1">
+              <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 px-1 mb-1.5">
+                Connect
+              </p>
+              <div className="flex items-center gap-1.5 px-1">
+                <a
+                  href="https://instagram.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-pink-600 transition-colors"
+                >
+                  <Instagram className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="https://twitter.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-500 transition-colors"
+                >
+                  <Twitter className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="https://linkedin.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-700 transition-colors"
+                >
+                  <Linkedin className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="https://facebook.com"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-600 transition-colors"
+                >
+                  <Facebook className="w-3.5 h-3.5" />
+                </a>
+              </div>
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
-    </>
+        </ScrollArea>
+
+        {/* Drawer Bottom Action */}
+        <div className="p-3 border-t border-neutral-100 bg-neutral-50/80 mt-auto">
+          {isLoggedIn ? (
+            <Button
+              variant="ghost"
+              onClick={handleLogout}
+              className="w-full justify-center text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg py-1.5 gap-1.5 transition-all"
+            >
+              <LogOut className="h-3.5 w-3.5" />
+              Log Out
+            </Button>
+          ) : (
+            <Button
+              onClick={() => handleNavigate("/account")}
+              className="w-full justify-center text-[11px] font-semibold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg py-1.5 transition-all"
+            >
+              <User className="h-3.5 w-3.5 mr-1" />
+              Sign In
+            </Button>
+          )}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }

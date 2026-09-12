@@ -17,6 +17,7 @@ export function DualDatePicker({
   checkoutDate,
   onCheckinSelect,
   onCheckoutSelect,
+  onComplete,
   minDate,
   isMobile = false,
   timezone = "Asia/Kolkata",
@@ -146,8 +147,11 @@ export function DualDatePicker({
       updateSide("checkin");
 
       // BOTH CHECK-IN AND CHECK-OUT DATES ARE NOW SELECTED!
-      // Dismiss popup after a smooth delay
-      if (onClose) {
+      if (onComplete) {
+        setTimeout(() => {
+          onComplete();
+        }, 150);
+      } else if (onClose) {
         setTimeout(() => {
           onClose();
         }, 280);
@@ -176,7 +180,11 @@ export function DualDatePicker({
       onCheckoutSelect(isoDate);
       updateSide("checkin");
 
-      if (onClose) {
+      if (onComplete) {
+        setTimeout(() => {
+          onComplete();
+        }, 150);
+      } else if (onClose) {
         setTimeout(() => {
           onClose();
         }, 280);
@@ -202,7 +210,11 @@ export function DualDatePicker({
     onCheckinSelect(thisFriday.startOf("day").format());
     onCheckoutSelect(sunday.startOf("day").format());
     updateSide("checkin");
-    if (onClose) {
+    if (onComplete) {
+      setTimeout(() => {
+        onComplete();
+      }, 150);
+    } else if (onClose) {
       setTimeout(() => {
         onClose();
       }, 280);

@@ -1,314 +1,227 @@
-import * as React from "react";
-import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
+"use client";
+
+import { useState } from "react";
 import {
   Drawer,
-  DrawerClose,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import {
   Users,
-  Tent,
-  IndianRupee,
-  Calendar,
-  Check,
-  X,
+  Hotel,
+  Bed,
+  Sparkles,
   ChevronLeft,
   ChevronRight,
-  Trash2,
-  Lightbulb,
-} from "lucide-react";
-import {
-  Wifi,
-  Wind,
-  WavesLadder,
-  CookingPot,
-  Car,
-  Fence,
-  AirVent,
-  Tv,
-  Shield,
-  Droplets,
-  BatteryCharging,
-  Building2,
-  Snowflake,
-  Key,
-  Flame,
-  Refrigerator,
-  Sun,
-  ShowerHead,
-  Dumbbell,
-  Coffee,
-  Utensils,
-  Waves,
-  Bath,
-  WashingMachine,
   ShieldCheck,
-  FlameKindling,
-  Mountain,
-  Table,
-  Trees,
-  Droplet,
-  Bed,
+  X,
 } from "lucide-react";
-import { FaUmbrellaBeach, FaPeopleRoof, FaBroom } from "react-icons/fa6";
-import { Backpack, Music, Footprints } from "lucide-react";
-import { TbKayak } from "react-icons/tb";
-import { MdKayaking, MdOutlineSpeaker } from "react-icons/md";
-import { PiFanLight } from "react-icons/pi";
-import { FaMattressPillow } from "react-icons/fa6";
+import Image from "next/image";
+import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 
-// react-icons (better semantics for some amenities)
-import { FaFireAlt, FaParking, FaWater } from "react-icons/fa";
-import { MdOutlineLocalDrink } from "react-icons/md";
-import {
-  FaSquareParking,
-  FaTv,
-  FaFilePdf,
-  FaPeopleGroup,
-  FaChild,
-} from "react-icons/fa6";
-import { BiBlanket } from "react-icons/bi";
-import { GiSleepingBag } from "react-icons/gi";
-import { GiPillow } from "react-icons/gi";
+export default function HotelDetailsDrawer({
+  isOpen,
+  open,
+  onClose,
+  onOpenChange,
+  room,
+  tent,
+  onSelectRoom,
+  onBookNow,
+}) {
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
-const HotelDetailsDrawer = ({ room, open, onOpenChange, onBookNow }) => {
-  const [currentImageIndex, setCurrentImageIndex] = React.useState(0);
+  const activeRoom = room || tent;
+  const isDrawerOpen = isOpen !== undefined ? isOpen : Boolean(open);
 
-  if (!room) return null;
-
-  const images = room.images || [];
-  const hasMultipleImages = images.length > 1;
-
-  const nextImage = () => {
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  const handleClose = () => {
+    if (onClose) onClose();
+    if (onOpenChange) onOpenChange(false);
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  const handleSelect = () => {
+    if (onSelectRoom) onSelectRoom(activeRoom);
+    else if (onBookNow) onBookNow(activeRoom);
+    else handleClose();
   };
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "available":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
-      case "booked":
-        return "bg-orange-500/10 text-orange-600 border-orange-500/20";
-      default:
-        return "bg-muted text-muted-foreground";
-    }
-  };
+  if (!activeRoom) return null;
 
-  const amenityIcons = {
-    WiFi: <Wifi className="w-4 h-4 text-black" />,
-    "Air Conditioning": <Wind className="w-4 h-4 text-black" />,
-    "Swimming Pool": <WavesLadder className="w-4 h-4 text-black" />,
-    Parking: <Car className="w-4 h-4 text-black" />,
-    TV: <Tv className="w-4 h-4 text-black" />,
-    Kitchen: <CookingPot className="w-4 h-4 text-black" />,
-    "Washing Machine": <WashingMachine className="w-4 h-4 text-black" />,
-    Balcony: <FaPeopleRoof className="w-4 h-4 text-black" />,
-    Security: <Shield className="w-4 h-4 text-black" />,
-    Garden: <Fence className="w-4 h-4 text-black" />,
-    "Water Supply": <Droplets className="w-4 h-4 text-black" />,
-    "Power Backup": <BatteryCharging className="w-4 h-4 text-black" />,
-    Heater: <Snowflake className="w-4 h-4 text-black" />,
-    "Beach Access": <FaUmbrellaBeach className="w-4 h-4 text-black" />,
-    Housekeeping: <FaBroom className="w-4 h-4 text-black" />,
-    Jacuzzi: <Bath className="w-4 h-4 text-black" />,
-    "Mini Bar": <Coffee className="w-4 h-4 text-black" />,
-    "Dining Area": <Utensils className="w-4 h-4 text-black" />,
-    Refrigerator: <Refrigerator className="w-4 h-4 text-black" />,
-    "Private Entrance": <Key className="w-4 h-4 text-black" />,
-    "Hot Water": <Flame className="w-4 h-4 text-black" />,
-    Shower: <ShowerHead className="w-4 h-4 text-black" />,
-    Gym: <Dumbbell className="w-4 h-4 text-black" />,
-    "Sun Deck": <Sun className="w-4 h-4 text-black" />,
-    Spa: <Waves className="w-4 h-4 text-black" />,
-    "Drinking Water": <MdOutlineLocalDrink className="w-6 h-6 text-gray-600" />,
-    "Charging Point": <BatteryCharging className="w-6 h-6 text-gray-600" />,
-    Security: <ShieldCheck className="w-6 h-6 text-gray-600" />,
-    "Private Parking": <FaParking className="w-6 h-6 text-gray-600" />,
+  const images =
+    activeRoom.roomimages && activeRoom.roomimages.length > 0
+      ? activeRoom.roomimages
+      : activeRoom.images && activeRoom.images.length > 0
+      ? activeRoom.images
+      : ["/placeholder.svg"];
 
-    // Activities
-    Barbeque: <FlameKindling className="w-6 h-6 text-gray-600" />,
-    Bonfire: <FaFireAlt className="w-6 h-6 text-gray-600" />,
-    Trekking: <Footprints className="w-6 h-6 text-gray-600" />,
+  const formatRupee = (amount) =>
+    `₹${new Intl.NumberFormat("en-IN", {
+      maximumFractionDigits: 0,
+    }).format(amount || 0)}`;
 
-    // Views
-    "Mountain View": <Mountain className="w-6 h-6 text-gray-600" />,
-    "Lake View": <Waves className="w-6 h-6 text-gray-600" />,
-
-    // Common areas
-    "Outdoor Seating": <Table className="w-6 h-6 text-gray-600" />,
-    "Garden Area": <Trees className="w-6 h-6 text-gray-600" />,
-    "Play Area": <FaChild className="w-6 h-6 text-gray-600" />,
-    "Music System": <MdOutlineSpeaker className="w-6 h-6 text-gray-600" />,
-    "Rain Dance Area": <Droplet className="w-6 h-6 text-gray-600" />,
-    "River Rafting": <MdKayaking className="w-6 h-6 text-gray-600" />,
-    Kayaking: <TbKayak className="w-6 h-6 text-gray-600" />,
-    "Tent Stay": <Tent className="w-6 h-6 text-gray-600" />,
-    Blanket: <BiBlanket className="w-6 h-6 text-gray-600" />,
-    "Sleeping Bags": <GiSleepingBag className="w-6 h-6 text-gray-600" />,
-    "Fan (Portable)": <PiFanLight className="w-6 h-6 text-gray-600" />,
-    Dustbin: <Trash2 className="w-6 h-6 text-gray-600" />,
-    "Light Inside Tent": <Lightbulb className="w-6 h-6 text-gray-600" />,
-    Pillow: <GiPillow className="w-6 h-6 text-gray-600" />,
-    Mattress: <FaMattressPillow className="w-6 h-6 text-gray-600" />,
-  };
+  const weekdayPrice =
+    activeRoom.pricing?.weekdayPrice || activeRoom.price || 0;
+  const weekendPrice =
+    activeRoom.pricing?.weekendPrice || weekdayPrice;
+  const totalUnits =
+    activeRoom.totalRooms ||
+    activeRoom.totaltents ||
+    1;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-lg overflow-y-auto">
-          <DrawerHeader className="text-left">
-            <div className="flex items-center justify-between">
-              <DrawerTitle className="text-xl font-bold">
-                {room.roomType} Cottage
-              </DrawerTitle>
+    <Drawer
+      open={isDrawerOpen}
+      onOpenChange={(op) => !op && handleClose()}
+      shouldScaleBackground={false}
+    >
+      <DrawerContent className="max-h-[90vh] p-0 rounded-t-3xl bg-white border-t border-gray-100 z-[160]">
+        {/* Handle */}
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
+
+        {/* Header */}
+        <div className="px-5 pb-3 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#ff6900] uppercase tracking-wider">
+              <Hotel className="w-3 h-3" />
+              <span>Room / Suite</span>
             </div>
-            <DrawerDescription>
-              Perfect for {room.maxCapacity} guests
-            </DrawerDescription>
-          </DrawerHeader>
+            <DrawerTitle className="text-xl font-bold text-gray-900">
+              {activeRoom.roomType || activeRoom.name || "Room"}
+            </DrawerTitle>
+          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 hover:text-gray-800"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-          <div className="px-4 pb-2 space-y-2">
-            {/* Image Gallery */}
-            {images.length > 0 && (
-              <div className="relative rounded-xl overflow-hidden">
-                <img
-                  src={images[currentImageIndex]}
-                  alt={`${room.roomType} room`}
-                  className="w-full h-56 object-cover"
-                />
-                {hasMultipleImages && (
-                  <>
-                    <button
-                      onClick={prevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full transition-colors"
-                    >
-                      <ChevronLeft className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={nextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-1.5 rounded-full transition-colors"
-                    >
-                      <ChevronRight className="w-5 h-5" />
-                    </button>
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                      {images.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentImageIndex(idx)}
-                          className={`w-2 h-2 rounded-full transition-colors ${
-                            idx === currentImageIndex
-                              ? "bg-white"
-                              : "bg-white/50"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
-
-            {/* Quick Info Cards */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="bg-muted/50 rounded-lg p-3 text-center">
-                <Users className="w-5 h-5 mx-auto mb-1 text-orange-500" />
-                <p className="text-xs text-muted-foreground">Capacity</p>
-                <p className="font-semibold text-sm">
-                  {room?.minCapacity}-{room.maxCapacity}
-                </p>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-3 text-center">
-                <Tent className="w-5 h-5 mx-auto mb-1 text-orange-500" />
-                <p className="text-xs text-muted-foreground">Total Rooms</p>
-                <p className="font-semibold text-sm">{room.totaltents}</p>
-              </div>
-              <div className="bg-muted/50 rounded-lg p-3 text-center">
-                <Calendar className="w-5 h-5 mx-auto mb-1 text-orange-500" />
-                <p className="text-xs text-muted-foreground">Availability</p>
-                <p className="font-semibold text-sm">
-                  {room.isAvailable ? (
-                    <Check className="w-4 h-4 inline text-green-500" />
-                  ) : (
-                    <X className="w-4 h-4 inline text-red-500" />
-                  )}
-                </p>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Pricing Section */}
-            <div>
-              <h4 className="font-semibold mb-3 flex items-center gap-2">
-                <IndianRupee className="w-4 h-4 text-orange-500" />
-                Pricing
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="border rounded-lg p-3">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Weekday Price
-                  </p>
-                  <p className="text-lg font-bold text-foreground">
-                    ₹{room.pricing.weekdayPrice.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">per night</p>
+        {/* Scroll Area */}
+        <ScrollArea data-vaul-no-drag className="max-h-[calc(88vh-140px)] px-5 py-4">
+          <div className="space-y-5 pr-2">
+          {/* Photo Gallery */}
+          <div className="relative w-full h-56 rounded-2xl overflow-hidden bg-gray-100 border border-gray-100">
+            <Image
+              src={images[activeImageIndex] || "/placeholder.svg"}
+              alt={activeRoom.roomType || "Room"}
+              fill
+              unoptimized
+              className="object-cover"
+            />
+            {images.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveImageIndex((prev) =>
+                      prev === 0 ? images.length - 1 : prev - 1
+                    )
+                  }
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() =>
+                    setActiveImageIndex((prev) =>
+                      prev === images.length - 1 ? 0 : prev + 1
+                    )
+                  }
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+                <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-md px-2 py-0.5 rounded-full text-[10px] text-white">
+                  {activeImageIndex + 1} / {images.length}
                 </div>
-                <div className="border rounded-lg p-3 bg-orange-500/5 border-orange-500/20">
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Weekend Price
-                  </p>
-                  <p className="text-lg font-bold text-orange-500">
-                    ₹{room.pricing.weekendPrice.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-muted-foreground">per night</p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            {/* Amenities Section */}
-            {room.amenities && room.amenities.length > 0 && (
-              <div>
-                <h4 className="font-semibold mb-3">Amenities Included</h4>
-                <div className="flex flex-wrap gap-2">
-                  {room.amenities.map((amenity, index) => (
-                    <Badge
-                      key={index}
-                      variant="ghost"
-                      className="text-xs py-1.5 px-3"
-                    >
-                      <CustomAmenityIcon name={amenity} className="w-4 h-4 mr-1 text-black" />
-                      {amenity}
-                    </Badge>
-                  ))}
-                </div>
-              </div>
+              </>
             )}
           </div>
 
-          <DrawerFooter className="pt-2">
-            <DrawerClose asChild>
-              <Button variant="outline" className="w-full">
-                Close
-              </Button>
-            </DrawerClose>
-          </DrawerFooter>
+          {/* Quick Specs */}
+          <div className="grid grid-cols-3 gap-2">
+            <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-150 flex flex-col items-center text-center">
+              <Users className="w-4 h-4 text-[#ff6900] mb-1" />
+              <span className="text-[10px] text-gray-500 font-medium">Capacity</span>
+              <span className="text-xs font-bold text-gray-900">
+                Up to {activeRoom.maxCapacity || 2} Guests
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-150 flex flex-col items-center text-center">
+              <Bed className="w-4 h-4 text-[#ff6900] mb-1" />
+              <span className="text-[10px] text-gray-500 font-medium">Bed Setup</span>
+              <span className="text-xs font-bold text-gray-900 truncate w-full">
+                {activeRoom.bedType || "King / Queen"}
+              </span>
+            </div>
+            <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-150 flex flex-col items-center text-center">
+              <ShieldCheck className="w-4 h-4 text-[#ff6900] mb-1" />
+              <span className="text-[10px] text-gray-500 font-medium">Inventory</span>
+              <span className="text-xs font-bold text-emerald-600">
+                {totalUnits} Available
+              </span>
+            </div>
+          </div>
+
+          {/* Description */}
+          {activeRoom.description && (
+            <div className="space-y-1.5">
+              <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                About this Room
+              </h4>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {activeRoom.description}
+              </p>
+            </div>
+          )}
+
+          {/* Amenities */}
+          {activeRoom.amenities && activeRoom.amenities.length > 0 && (
+            <div className="space-y-2">
+              <h4 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                Room Amenities
+              </h4>
+              <div className="grid grid-cols-2 gap-2">
+                {activeRoom.amenities.map((amenity, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 p-2 rounded-xl bg-neutral-50 border border-neutral-150"
+                  >
+                    <CustomAmenityIcon name={amenity} className="w-3.5 h-3.5 text-[#ff6900]" />
+                    <span className="text-xs text-gray-700 font-medium truncate">
+                      {amenity}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          </div>
+        </ScrollArea>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-100 bg-white flex items-center justify-between">
+          <div>
+            <div className="text-lg font-black text-gray-900">
+              {formatRupee(weekdayPrice)}
+            </div>
+            <div className="text-[10px] text-gray-500">Per night + taxes</div>
+          </div>
+          <Button
+            type="button"
+            onClick={handleSelect}
+            className="bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-md shadow-orange-500/20 active:scale-95 transition-all cursor-pointer"
+          >
+            Select Room
+          </Button>
         </div>
       </DrawerContent>
     </Drawer>
   );
-};
-
-export default HotelDetailsDrawer;
+}

@@ -158,7 +158,7 @@ export default function PropertyContentSections() {
             Available Cottages
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {cottage.cottages.map((tent) => (
+            {Array.isArray(cottage?.cottages) && cottage.cottages.map((tent) => (
               <Card
                 key={tent._id}
                 className="overflow-hidden border border-gray-200 bg-white hover:shadow-xl transition-all duration-300 flex flex-col h-full"

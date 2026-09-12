@@ -95,7 +95,7 @@ const Villaview = () => {
     const handleScroll = () => {
       if (tabsRef.current) {
         const rect = tabsRef.current.getBoundingClientRect();
-        setShowStickyTabs(rect.top <= 0);
+        setShowStickyTabs(rect.top <= 48);
       }
     };
 
@@ -107,7 +107,7 @@ const Villaview = () => {
     setActiveTab(tabId);
     const element = document.getElementById(tabId);
     if (element) {
-      const offset = 80; // Account for sticky header
+      const offset = 95; // Account for sticky header (48px) + tabs (44px)
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
 
@@ -119,7 +119,7 @@ const Villaview = () => {
   };
 
   if (loading) {
-    return <VillaScreenSkeleton />;
+    return <VillaScreenSkeleton view="mobile" />;
   }
 
   if (error) {
@@ -160,7 +160,7 @@ const Villaview = () => {
         </div>
 
         {showStickyTabs && (
-          <div className="fixed top-0 left-0 right-0 z-40 bg-background border-b border-gray-200 shadow-sm">
+          <div className="fixed top-12 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
             <StickyTabs
               tabs={tabs}
               activeTab={activeTab}

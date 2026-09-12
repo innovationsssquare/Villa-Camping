@@ -65,13 +65,24 @@ import {
   CookingPot,
   Receipt,
   Heart,
+  Tent,
+  Home,
+  Hotel,
 } from "lucide-react";
+import { useSelector } from "react-redux";
+import TentSelectionModal from "./tent-selection-modal";
+import TentDetailsModal from "./tent-details-modal";
+import CottageSelectionModal from "./cottage-selection-modal";
+import CottageDetailsModal from "./cottage-details-modal";
+import RoomSelectionModal from "./room-selection-modal";
+import RoomDetailsModal from "./room-details-modal";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
@@ -169,6 +180,25 @@ export default function PropertyContentSections() {
   // State for Spaces
   const [selectedSpaceIndex, setSelectedSpaceIndex] = useState(null);
 
+  // State for Tents (Camping)
+  const [tentDetailsModalOpen, setTentDetailsModalOpen] = useState(false);
+  const [activeTentForModal, setActiveTentForModal] = useState(null);
+  const [tentSelectionModalOpen, setTentSelectionModalOpen] = useState(false);
+  const { checkin, selectedGuest } = useSelector((state) => state.booking);
+  const isCamping = Boolean(villa?.tents && villa.tents.length > 0);
+
+  // State for Cottages
+  const [cottageDetailsModalOpen, setCottageDetailsModalOpen] = useState(false);
+  const [activeCottageForModal, setActiveCottageForModal] = useState(null);
+  const [cottageSelectionModalOpen, setCottageSelectionModalOpen] = useState(false);
+  const isCottage = Boolean(villa?.cottages && villa.cottages.length > 0);
+
+  // State for Hotel Rooms
+  const [roomDetailsModalOpen, setRoomDetailsModalOpen] = useState(false);
+  const [activeRoomForModal, setActiveRoomForModal] = useState(null);
+  const [roomSelectionModalOpen, setRoomSelectionModalOpen] = useState(false);
+  const isHotel = Boolean(villa?.rooms && villa.rooms.length > 0);
+
   // State for Reviews (incorporating mobile ReviewsTab logic)
   const [activeReviewFilter, setActiveReviewFilter] = useState("All");
   const [activeReviewSort, setActiveReviewSort] = useState("Most Popular");
@@ -179,7 +209,7 @@ export default function PropertyContentSections() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [allAmenitiesDialogOpen, setAllAmenitiesDialogOpen] = useState(false);
 
-  // State for Nearby Villas (in FAQ section)
+  // State for Nearby Stays (in FAQ section)
   const [nearbyVillas, setNearbyVillas] = useState([]);
   const [loadingNearby, setLoadingNearby] = useState(false);
 
@@ -192,8 +222,16 @@ export default function PropertyContentSections() {
         const queryCity = (villa?.address?.city || "").trim().toLowerCase();
         const villaLocationId = String(villa?.location?._id || villa?.location || "");
 
-        // 1. Fetch available villas from backend API
-        const res = await fetch(`${BaseUrl}/Villa/get/villas`);
+        // 1. Fetch available properties (Campings, Cottages, Hotels, or Villas)
+        let endpoint = `${BaseUrl}/Villa/get/villas`;
+        if (isCamping) {
+          endpoint = `${BaseUrl}/Camping/get/campings`;
+        } else if (isCottage) {
+          endpoint = `${BaseUrl}/Cottage/get/cottages`;
+        } else if (isHotel) {
+          endpoint = `${BaseUrl}/Hotel/get/hotels`;
+        }
+        const res = await fetch(endpoint);
         if (res.ok) {
           const data = await res.json();
           const list =
@@ -817,6 +855,516 @@ export default function PropertyContentSections() {
           }
         };
 
+        if (isCamping && Array.isArray(villa?.tents) && villa.tents.length > 0) {
+          const tents = villa.tents;
+          return (
+            <section
+              id="spacess"
+              className="scroll-mt-32 transition-all duration-500 ease-out"
+            >
+              {/* Section Header */}
+              <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-1" />
+                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                      Campsite Accommodation & Tents
+                    </h2>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-50 text-[#ff6900] border border-orange-200/80">
+                      {tents.length} {tents.length === 1 ? "Tent Type" : "Tent Types"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1 max-w-xl">
+                    Experience luxury glamping under starlit skies with comfortable bedding, private amenities, and breathtaking nature views.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => setTentSelectionModalOpen(true)}
+                  className="rounded-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-bold px-5 py-2.5 shadow-md shadow-orange-500/20 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Tent className="w-4 h-4" />
+                  <span>Choose Tents</span>
+                </Button>
+              </div>
+
+              {/* Tents Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {tents.map((tent, index) => {
+                  const tentImg =
+                    tent?.tentimages?.[0] ||
+                    tent?.images?.[0] ||
+                    villa?.images?.[0] ||
+                    "/placeholder.svg";
+                  const weekdayPrice = tent.pricing?.weekdayPrice || 1200;
+                  const weekendPrice = tent.pricing?.weekendPrice || weekdayPrice;
+
+                  return (
+                    <div
+                      key={tent._id || index}
+                      className="group relative rounded-3xl border border-gray-200/90 bg-white overflow-hidden shadow-xs hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-200 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Tent Photo */}
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+                        <Image
+                          src={tentImg}
+                          alt={tent.tentType}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent pointer-events-none" />
+
+                        {/* Top-Left Badge */}
+                        <div className="absolute top-3.5 left-3.5 z-10">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-gray-800 shadow-sm border border-white/50">
+                            <Tent className="w-3.5 h-3.5 text-[#ff6900]" />
+                            <span>{tent.tentType}</span>
+                          </span>
+                        </div>
+
+                        {/* Top-Right Maximize / Details Button */}
+                        <div className="absolute top-3.5 right-3.5 z-10">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveTentForModal(tent);
+                              setTentDetailsModalOpen(true);
+                            }}
+                            className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-sm cursor-pointer"
+                            title="View Tent Details"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Bottom Bar on image */}
+                        <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between text-white text-xs">
+                          <span className="font-semibold bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                            Up to {tent.maxCapacity || 2} Guests
+                          </span>
+                          <span className="font-semibold bg-[#ff6900]/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white">
+                            {tent.totaltents || 1} Units Available
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                          <div className="flex items-baseline justify-between mb-2">
+                            <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-[#ff6900] transition-colors">
+                              {tent.tentType} Tent
+                            </h3>
+                            <div className="text-right">
+                              <span className="text-lg font-black text-gray-900">
+                                ₹{weekdayPrice.toLocaleString("en-IN")}
+                              </span>
+                              <span className="text-xs text-gray-500 font-normal"> / night</span>
+                            </div>
+                          </div>
+
+                          {tent.description && (
+                            <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-3">
+                              {tent.description}
+                            </p>
+                          )}
+
+                          {/* Amenities Pills */}
+                          {tent.amenities && tent.amenities.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+                              {tent.amenities.slice(0, 4).map((amenity, aIdx) => (
+                                <span
+                                  key={aIdx}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-[11px] font-medium"
+                                >
+                                  <CustomAmenityIcon name={amenity} className="w-3 h-3 text-[#ff6900]" />
+                                  <span>{amenity}</span>
+                                </span>
+                              ))}
+                              {tent.amenities.length > 4 && (
+                                <span className="text-[11px] font-semibold text-[#ff6900] px-1.5 py-0.5">
+                                  +{tent.amenities.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setActiveTentForModal(tent);
+                              setTentDetailsModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl text-xs font-semibold h-9 border-gray-200 hover:border-[#ff6900] hover:text-[#ff6900]"
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setTentSelectionModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-semibold h-9 shadow-xs cursor-pointer"
+                          >
+                            Select Tents
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+
+        if (isCottage && Array.isArray(villa?.cottages) && villa.cottages.length > 0) {
+          const cottages = villa.cottages;
+          return (
+            <section
+              id="spacess"
+              className="scroll-mt-32 transition-all duration-500 ease-out"
+            >
+              {/* Section Header */}
+              <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-1" />
+                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                      Cottage Accommodation & Units
+                    </h2>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-50 text-[#ff6900] border border-orange-200/80">
+                      {cottages.length} {cottages.length === 1 ? "Cottage Type" : "Cottage Types"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1 max-w-xl">
+                    Rustic luxury cottage retreats surrounded by serene landscapes with private verandas, king beds, and complete tranquility.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => setCottageSelectionModalOpen(true)}
+                  className="rounded-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-bold px-5 py-2.5 shadow-md shadow-orange-500/20 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Home className="w-4 h-4" />
+                  <span>Choose Cottages</span>
+                </Button>
+              </div>
+
+              {/* Cottages Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {cottages.map((cottage, index) => {
+                  const cottageImg =
+                    cottage?.images?.[0] ||
+                    cottage?.tentimages?.[0] ||
+                    cottage?.cottageimages?.[0] ||
+                    villa?.images?.[0] ||
+                    "/placeholder.svg";
+                  const weekdayPrice = cottage.pricing?.weekdayPrice || 2500;
+                  const weekendPrice = cottage.pricing?.weekendPrice || weekdayPrice;
+                  const totalUnits = cottage.totaltents || cottage.totalCottages || 1;
+
+                  return (
+                    <div
+                      key={cottage._id || index}
+                      className="group relative rounded-3xl border border-gray-200/90 bg-white overflow-hidden shadow-xs hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-200 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Cottage Photo */}
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+                        <Image
+                          src={cottageImg}
+                          alt={cottage.cottageType || "Cottage"}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent pointer-events-none" />
+
+                        {/* Top-Left Badge */}
+                        <div className="absolute top-3.5 left-3.5 z-10">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-gray-800 shadow-sm border border-white/50">
+                            <Home className="w-3.5 h-3.5 text-[#ff6900]" />
+                            <span>{cottage.cottageType || "Cottage"}</span>
+                          </span>
+                        </div>
+
+                        {/* Top-Right Maximize / Details Button */}
+                        <div className="absolute top-3.5 right-3.5 z-10">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveCottageForModal(cottage);
+                              setCottageDetailsModalOpen(true);
+                            }}
+                            className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-sm cursor-pointer"
+                            title="View Cottage Details"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Bottom Bar on image */}
+                        <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between text-white text-xs">
+                          <span className="font-semibold bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                            Up to {cottage.maxCapacity || 2} Guests
+                          </span>
+                          <span className="font-semibold bg-[#ff6900]/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white">
+                            {totalUnits} Units Available
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                          <div className="flex items-baseline justify-between mb-2">
+                            <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-[#ff6900] transition-colors">
+                              {cottage.cottageType || "Cottage"}
+                            </h3>
+                            <div className="text-right">
+                              <span className="text-lg font-black text-gray-900">
+                                ₹{weekdayPrice.toLocaleString("en-IN")}
+                              </span>
+                              <span className="text-xs text-gray-500 font-normal"> / night</span>
+                            </div>
+                          </div>
+
+                          {cottage.description && (
+                            <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-3">
+                              {cottage.description}
+                            </p>
+                          )}
+
+                          {/* Amenities Pills */}
+                          {cottage.amenities && cottage.amenities.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+                              {cottage.amenities.slice(0, 4).map((amenity, aIdx) => (
+                                <span
+                                  key={aIdx}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-[11px] font-medium"
+                                >
+                                  <CustomAmenityIcon name={amenity} className="w-3 h-3 text-[#ff6900]" />
+                                  <span>{amenity}</span>
+                                </span>
+                              ))}
+                              {cottage.amenities.length > 4 && (
+                                <span className="text-[11px] font-semibold text-[#ff6900] px-1.5 py-0.5">
+                                  +{cottage.amenities.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setActiveCottageForModal(cottage);
+                              setCottageDetailsModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl text-xs font-semibold h-9 border-gray-200 hover:border-[#ff6900] hover:text-[#ff6900]"
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setCottageSelectionModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-semibold h-9 shadow-xs cursor-pointer"
+                          >
+                            Select Cottages
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+
+        if (isHotel && Array.isArray(villa?.rooms) && villa.rooms.length > 0) {
+          const rooms = villa.rooms;
+          return (
+            <section
+              id="spacess"
+              className="scroll-mt-32 transition-all duration-500 ease-out"
+            >
+              {/* Section Header */}
+              <div className="flex items-end justify-between mb-6 flex-wrap gap-4">
+                <div>
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-1" />
+                    <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                      Hotel Rooms & Suites
+                    </h2>
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-orange-50 text-[#ff6900] border border-orange-200/80">
+                      {rooms.length} {rooms.length === 1 ? "Room Type" : "Room Types"}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1 max-w-xl">
+                    Luxuriously appointed hotel rooms and executive suites with modern amenities, room service, and scenic views.
+                  </p>
+                </div>
+
+                <Button
+                  type="button"
+                  onClick={() => setRoomSelectionModalOpen(true)}
+                  className="rounded-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-bold px-5 py-2.5 shadow-md shadow-orange-500/20 cursor-pointer flex items-center gap-1.5"
+                >
+                  <Hotel className="w-4 h-4" />
+                  <span>Choose Rooms</span>
+                </Button>
+              </div>
+
+              {/* Rooms Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {rooms.map((room, index) => {
+                  const roomImg =
+                    room?.images?.[0] ||
+                    room?.roomimages?.[0] ||
+                    villa?.images?.[0] ||
+                    "/placeholder.svg";
+                  const weekdayPrice = room.pricing?.weekdayPrice || 2500;
+                  const weekendPrice = room.pricing?.weekendPrice || weekdayPrice;
+                  const totalUnits = room.totaltents || room.totalRooms || room.roomCount || 1;
+
+                  return (
+                    <div
+                      key={room._id || index}
+                      className="group relative rounded-3xl border border-gray-200/90 bg-white overflow-hidden shadow-xs hover:shadow-xl hover:shadow-orange-500/10 hover:border-orange-200 transition-all duration-300 flex flex-col"
+                    >
+                      {/* Room Photo */}
+                      <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+                        <Image
+                          src={roomImg}
+                          alt={room.roomType || "Room"}
+                          fill
+                          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          unoptimized
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent pointer-events-none" />
+
+                        {/* Top-Left Badge */}
+                        <div className="absolute top-3.5 left-3.5 z-10">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-gray-800 shadow-sm border border-white/50">
+                            <Hotel className="w-3.5 h-3.5 text-[#ff6900]" />
+                            <span>{room.roomType || "Room"}</span>
+                          </span>
+                        </div>
+
+                        {/* Top-Right Maximize / Details Button */}
+                        <div className="absolute top-3.5 right-3.5 z-10">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setActiveRoomForModal(room);
+                              setRoomDetailsModalOpen(true);
+                            }}
+                            className="w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-md text-white flex items-center justify-center transition-all duration-200 hover:scale-105 shadow-sm cursor-pointer"
+                            title="View Room Details"
+                          >
+                            <Maximize2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        {/* Bottom Bar on image */}
+                        <div className="absolute bottom-3.5 left-3.5 right-3.5 z-10 flex items-center justify-between text-white text-xs">
+                          <span className="font-semibold bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20">
+                            Up to {room.maxCapacity || 2} Guests
+                          </span>
+                          <span className="font-semibold bg-[#ff6900]/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white">
+                            {totalUnits} Units Available
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
+                        <div>
+                          <div className="flex items-baseline justify-between mb-2">
+                            <h3 className="font-extrabold text-lg text-gray-900 group-hover:text-[#ff6900] transition-colors">
+                              {room.roomType || "Room"}
+                            </h3>
+                            <div className="text-right">
+                              <span className="text-lg font-black text-gray-900">
+                                ₹{weekdayPrice.toLocaleString("en-IN")}
+                              </span>
+                              <span className="text-xs text-gray-500 font-normal"> / night</span>
+                            </div>
+                          </div>
+
+                          {room.description && (
+                            <p className="text-xs text-gray-600 line-clamp-2 leading-relaxed mb-3">
+                              {room.description}
+                            </p>
+                          )}
+
+                          {/* Amenities Pills */}
+                          {room.amenities && room.amenities.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 pt-2 border-t border-gray-100">
+                              {room.amenities.slice(0, 4).map((amenity, aIdx) => (
+                                <span
+                                  key={aIdx}
+                                  className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-gray-700 text-[11px] font-medium"
+                                >
+                                  <CustomAmenityIcon name={amenity} className="w-3 h-3 text-[#ff6900]" />
+                                  <span>{amenity}</span>
+                                </span>
+                              ))}
+                              {room.amenities.length > 4 && (
+                                <span className="text-[11px] font-semibold text-[#ff6900] px-1.5 py-0.5">
+                                  +{room.amenities.length - 4} more
+                                </span>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-2 pt-2 border-t border-gray-100">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              setActiveRoomForModal(room);
+                              setRoomDetailsModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl text-xs font-semibold h-9 border-gray-200 hover:border-[#ff6900] hover:text-[#ff6900]"
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            type="button"
+                            onClick={() => {
+                              setRoomSelectionModalOpen(true);
+                            }}
+                            className="flex-1 rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-semibold h-9 shadow-xs cursor-pointer"
+                          >
+                            Select Rooms
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+
         return (
           <section
             id="spacess"
@@ -1309,8 +1857,8 @@ export default function PropertyContentSections() {
 
         {/* View All Reviews Dialog */}
         <Dialog open={allReviewsOpen} onOpenChange={setAllReviewsOpen}>
-          <DialogContent className="max-w-2xl bg-white rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-2xl bg-white rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pr-8">
               <DialogTitle className="text-xl font-bold text-gray-900 flex items-center justify-between">
                 <span>All Reviews ({rawReviews.length})</span>
                 <span className="text-sm font-semibold text-[#ff6900] bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
@@ -1318,26 +1866,28 @@ export default function PropertyContentSections() {
                 </span>
               </DialogTitle>
             </DialogHeader>
-            <div className="space-y-4 mt-4">
-              {rawReviews.map((rev, idx) => (
-                <div
-                  key={rev._id || idx}
-                  className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-150 space-y-2"
-                >
-                  <div className="flex items-center justify-between">
-                    <h5 className="font-bold text-sm text-gray-900">
-                      {rev.name || rev?.userId?.fullName || "Guest"}
-                    </h5>
-                    <span className="text-xs text-amber-500 font-bold">
-                      ★ {rev.rating || 5} / 5
-                    </span>
+            <ScrollArea className="flex-1 min-h-0 pr-3 mt-4 max-h-[calc(85vh-120px)]">
+              <div className="space-y-4">
+                {rawReviews.map((rev, idx) => (
+                  <div
+                    key={rev._id || idx}
+                    className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-150 space-y-2"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-bold text-sm text-gray-900">
+                        {rev.name || rev?.userId?.fullName || "Guest"}
+                      </h5>
+                      <span className="text-xs text-amber-500 font-bold">
+                        ★ {rev.rating || 5} / 5
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-600 leading-relaxed">
+                      {rev.comment}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed">
-                    {rev.comment}
-                  </p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
 
@@ -1448,25 +1998,27 @@ export default function PropertyContentSections() {
 
         {/* All Amenities Dialog */}
         <Dialog open={allAmenitiesDialogOpen} onOpenChange={setAllAmenitiesDialogOpen}>
-          <DialogContent className="max-w-xl bg-white rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-xl bg-white rounded-3xl p-6 sm:p-8 max-h-[85vh] overflow-hidden flex flex-col">
+            <DialogHeader className="flex-shrink-0 pr-8">
               <DialogTitle className="text-xl font-bold text-gray-900">
                 All Property Amenities ({amenities.length})
               </DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-2 gap-3 mt-4">
-              {amenities.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center gap-2.5 p-3 rounded-xl bg-neutral-50 border border-neutral-150"
-                >
-                  <CustomAmenityIcon name={item} className="w-4 h-4 text-[#ff6900]" />
-                  <span className="text-xs font-semibold text-gray-800">
-                    {item}
-                  </span>
-                </div>
-              ))}
-            </div>
+            <ScrollArea className="flex-1 min-h-0 pr-3 mt-4 max-h-[calc(85vh-120px)]">
+              <div className="grid grid-cols-2 gap-3">
+                {amenities.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2.5 p-3 rounded-xl bg-neutral-50 border border-neutral-150"
+                  >
+                    <CustomAmenityIcon name={item} className="w-4 h-4 text-[#ff6900]" />
+                    <span className="text-xs font-semibold text-gray-800">
+                      {item}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
           </DialogContent>
         </Dialog>
       </section>
@@ -1908,13 +2460,26 @@ export default function PropertyContentSections() {
                 <div className="flex items-center mb-1">
                   <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-3" />
                   <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-                    Nearby Stays in {villa?.location?.name || villa?.address?.city || "Lonavala"}
+                    {isCamping
+                      ? "Nearby Campsites in "
+                      : isCottage
+                      ? "Nearby Cottages in "
+                      : isHotel
+                      ? "Nearby Hotels & Stays in "
+                      : "Nearby Stays in "}
+                    {villa?.location?.name || villa?.address?.city || "Destination"}
                   </h3>
                 </div>
                 <p className="text-xs sm:text-sm text-gray-500">
-                  Discover more handpicked luxury villas and retreats in and around{" "}
-                  {villa?.address?.area ? `${villa.address.area}, ` : ""}
-                  {villa?.location?.name || villa?.address?.city || "this destination"}.
+                  {isCamping
+                    ? "Discover more handpicked camping retreats and luxury glamping sites in and around this destination."
+                    : isCottage
+                    ? "Discover more serene cottage stays and rustic retreats in and around this destination."
+                    : isHotel
+                    ? "Discover more premier hotels, resorts, and vacation stays in and around this destination."
+                    : `Discover more handpicked luxury villas and retreats in and around ${
+                        villa?.address?.area ? `${villa.address.area}, ` : ""
+                      }${villa?.location?.name || villa?.address?.city || "this destination"}.`}
                 </p>
               </div>
             </div>
@@ -1932,6 +2497,81 @@ export default function PropertyContentSections() {
           </div>
         )}
       </section>
+
+      {/* Desktop Tent Details Modal */}
+      {isCamping && (
+        <TentDetailsModal
+          isOpen={tentDetailsModalOpen}
+          onClose={() => setTentDetailsModalOpen(false)}
+          tent={activeTentForModal}
+          onSelectTent={() => {
+            setTentDetailsModalOpen(false);
+            setTentSelectionModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Desktop Tent Selection Modal */}
+      {isCamping && (
+        <TentSelectionModal
+          isOpen={tentSelectionModalOpen}
+          onClose={() => setTentSelectionModalOpen(false)}
+          tents={villa?.tents || []}
+          totalGuests={selectedGuest?.totalGuests || 2}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
+
+      {/* Desktop Cottage Details Modal */}
+      {isCottage && (
+        <CottageDetailsModal
+          isOpen={cottageDetailsModalOpen}
+          onClose={() => setCottageDetailsModalOpen(false)}
+          cottage={activeCottageForModal}
+          onSelectCottage={() => {
+            setCottageDetailsModalOpen(false);
+            setCottageSelectionModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Desktop Cottage Selection Modal */}
+      {isCottage && (
+        <CottageSelectionModal
+          isOpen={cottageSelectionModalOpen}
+          onClose={() => setCottageSelectionModalOpen(false)}
+          cottages={villa?.cottages || []}
+          totalGuests={selectedGuest?.totalGuests || 2}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
+
+      {/* Desktop Hotel Room Details Modal */}
+      {isHotel && (
+        <RoomDetailsModal
+          isOpen={roomDetailsModalOpen}
+          onClose={() => setRoomDetailsModalOpen(false)}
+          room={activeRoomForModal}
+          onSelectRoom={() => {
+            setRoomDetailsModalOpen(false);
+            setRoomSelectionModalOpen(true);
+          }}
+        />
+      )}
+
+      {/* Desktop Hotel Room Selection Modal */}
+      {isHotel && (
+        <RoomSelectionModal
+          isOpen={roomSelectionModalOpen}
+          onClose={() => setRoomSelectionModalOpen(false)}
+          rooms={villa?.rooms || []}
+          totalGuests={selectedGuest?.totalGuests || 2}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
     </div>
   );
 }

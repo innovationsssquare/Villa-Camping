@@ -53,50 +53,58 @@ const FixedBookingBar = () => {
     return `₹${formatted}`;
   }
 
+  const [bookingTab, setBookingTab] = useState("dates");
+
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-gray-200 p-2 z-40">
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-sm text-price-original">Starts from -</span>
-              <span className="text-lg font-bold text-price-current">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-3.5 py-1.5 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between gap-2 max-w-md mx-auto">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[15px] font-bold text-gray-900 tracking-tight">
                 {formatRupee(basePrice)}
               </span>
+              <span className="text-[10px] text-gray-400 line-through font-normal">
+                {formatRupee(basePrice + 2500)}
+              </span>
             </div>
-            <div className="flex items-center space-x-1 text-xs text-villa-text-light">
-              <span>2 Guests</span>
-              <Button
-                onPress={() => {
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="font-medium text-gray-700">
+                {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
+              </span>
+              <button
+                type="button"
+                onClick={() => {
                   dispatch(setPropertyId(hotel?._id));
                   dispatch(setcategoryId(hotel?.category));
                   dispatch(setOwnerId(hotel?.owner));
-                  dispatch(setPropertyType("Hotels"));
+                  dispatch(setPropertyType("Hotel"));
+                  setBookingTab("guests");
                   setIsBookingOpen(true);
                 }}
-                isIconOnly
-                variant="light"
-                size=""
-                className=""
+                className="p-0.5 text-[#ff6900] hover:text-[#e05d00] transition-colors cursor-pointer inline-flex items-center"
+                aria-label="Edit guests"
               >
-                <SquarePen size={15} />
-              </Button>
+                <SquarePen className="w-2.5 h-2.5 text-[#ff6900]" />
+              </button>
+              <span className="text-gray-300">·</span>
+              <span className="text-gray-500 text-[9.5px]">night + taxes</span>
             </div>
-            <p className="text-xs text-villa-text-light">Per night + taxes</p>
           </div>
-          <Button
-            onPress={() => {
+          <button
+            type="button"
+            onClick={() => {
               dispatch(setPropertyId(hotel?._id));
               dispatch(setcategoryId(hotel?.category));
               dispatch(setOwnerId(hotel?.owner));
-              dispatch(setPropertyType("hotel"));
+              dispatch(setPropertyType("Hotel"));
+              setBookingTab("dates");
               setIsBookingOpen(true);
             }}
-            className="bg-black text-white px-4 py-1 rounded-full text-sm hover:bg-villa-text-dark/90"
-            size="lg"
+            className="bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] text-white px-3.5 py-1.5 rounded-lg font-semibold text-[11px] whitespace-nowrap shadow-xs shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center shrink-0 h-8"
           >
             Select Dates / Rooms
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -106,11 +114,13 @@ const FixedBookingBar = () => {
         onClose={() => setIsBookingOpen(false)}
         propertyName={hotel?.name}
         price={basePrice}
-        originalPrice={basePrice + 3000}
+        originalPrice={basePrice + 2500}
         propertyId={hotel?._id}
         ownerId={hotel?.owner}
         propertyType="Hotel"
+        pricing={hotel?.pricing}
         rooms={hotel?.rooms}
+        initialTab={bookingTab}
         // customerId:={}
       />
     </>

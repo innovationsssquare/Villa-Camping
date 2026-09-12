@@ -65,19 +65,19 @@ const FixedBookingBar = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-lg border-t border-gray-150 px-3.5 py-2 z-40 shadow-[0_-3px_12px_rgba(0,0,0,0.05)]">
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <div className="flex items-baseline space-x-1.5">
-              <span className="text-lg font-extrabold text-gray-900 tracking-tight">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-3.5 py-1.5 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
+        <div className="flex items-center justify-between gap-2 max-w-md mx-auto">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-[15px] font-bold text-gray-900 tracking-tight">
                 {formatRupee(basePrice)}
               </span>
-              <span className="text-[11px] text-gray-400 line-through font-normal">
+              <span className="text-[10px] text-gray-400 line-through font-normal">
                 {formatRupee(basePrice + 3000)}
               </span>
             </div>
-            <div className="flex items-center space-x-1 text-[10.5px] text-gray-500 mt-0.5">
-              <span className="font-semibold text-gray-700">
+            <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="font-medium text-gray-700">
                 {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
               </span>
               <button
@@ -95,8 +95,8 @@ const FixedBookingBar = () => {
               >
                 <SquarePen className="w-2.5 h-2.5 text-[#ff6900]" />
               </button>
-              <span className="text-gray-400">·</span>
-              <span className="text-gray-500 text-[10px]">Per night + taxes</span>
+              <span className="text-gray-300">·</span>
+              <span className="text-gray-500 text-[9.5px]">night + taxes</span>
             </div>
           </div>
           <button
@@ -109,7 +109,7 @@ const FixedBookingBar = () => {
               setBookingTab("dates");
               setIsBookingOpen(true);
             }}
-            className="bg-[#ff6900] hover:bg-[#e05d00] text-white px-4 py-2 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap shadow-xs shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center shrink-0"
+            className="bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] text-white px-3.5 py-1.5 rounded-lg font-semibold text-[11px] whitespace-nowrap shadow-xs shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center shrink-0 h-8"
           >
             Select Dates
           </button>

@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,15 +37,16 @@ const EditProfileDialog = ({ open, onOpenChange, onSave, initialData }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-full mx-auto border-none max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="w-full mx-auto border-none max-h-[90vh] overflow-hidden flex flex-col p-6">
+        <DialogHeader className="flex-shrink-0 pr-8">
           <DialogTitle className="flex items-center gap-2">
             <User className="w-5 h-5" />
             Edit Profile
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <ScrollArea className="flex-1 min-h-0 pr-2 max-h-[calc(90vh-120px)]">
+          <form onSubmit={handleSubmit} className="space-y-6 pt-2">
           {/* Profile Picture */}
           {/* <div className="flex flex-col items-center gap-4">
             <div className="relative">
@@ -138,6 +140,7 @@ const EditProfileDialog = ({ open, onOpenChange, onSave, initialData }) => {
             </Button>
           </div>
         </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useSelector } from "react-redux";
+import { buildPropertyViewUrl } from "@/lib/categoryUtils";
 
 export function Offbeatcard({ property }) {
   const [isLiked, setIsLiked] = useState(false);
@@ -24,6 +26,10 @@ export function Offbeatcard({ property }) {
   const [isMobile, setIsMobile] = useState(false);
   const [isAutoPlaying, setIsAutoPlaying] = useState(true);
   const router = useRouter();
+  const { selectedCategoryName, checkin, checkout } = useSelector(
+    (state) => state.booking || {}
+  );
+  const categories = useSelector((state) => state.category?.categories || []);
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -236,7 +242,17 @@ export function Offbeatcard({ property }) {
         </div>
 
         <Button
-          onPress={() => router.push(`/view-Villa/${property._id}`)}
+          onPress={() =>
+            router.push(
+              buildPropertyViewUrl(
+                property,
+                categories,
+                selectedCategoryName,
+                checkin,
+                checkout
+              )
+            )
+          }
           size="sm"
           radius="full"
           className="bg-transparent text-sm font-bold border border-white text-white hover:bg-white/90 transition-all duration-200 absolute md:right-6 md:bottom-6 right-3 bottom-3"

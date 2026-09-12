@@ -129,6 +129,12 @@ const Notifications = () => {
   const [notifications, setNotifications] = useState(initialNotifications);
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      navigate.replace("/");
+    }
+  }, [navigate]);
+
   const unreadCount = notifications.filter(
     (notification) => !notification.read
   ).length;

@@ -1,30 +1,19 @@
-"use client"
-import React, { useState, useCallback, useEffect } from "react";
-import { Heart, Camera, ChevronLeft, ChevronRight } from "lucide-react";
+"use client";
+import React, { useState, useEffect } from "react";
+import { Heart, Play, Star } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselNext,
-  CarouselPrevious,
-  CarouselApi,
 } from "@/components/ui/carousel";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import Image from "next/image";
-import { Button } from "@heroui/react";
 import { useHotel } from "@/lib/context/HotelContext";
 import { useRouter } from "next/navigation";
 import ImageGalleryDialog from "../Propertyviewcomponents/image-gallery-dialog";
 import VideoModal from "../Availableweekend/VideoModal";
 
-const  HotelHero = () => {
- const hotel = useHotel();
+const HotelHero = () => {
+  const hotel = useHotel();
   const router = useRouter();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [api, setApi] = useState();
@@ -46,84 +35,100 @@ const  HotelHero = () => {
     setIsGalleryOpen(true);
   };
 
+  const images =
+    hotel?.roomimages && hotel.roomimages.length > 0
+      ? hotel.roomimages
+      : hotel?.images && hotel.images.length > 0
+      ? hotel.images
+      : ["/placeholder.svg"];
+
   return (
-   <>
-         <div className="relative">
-           <div className="relative h-64 bg-gray-50 overflow-hidden rounded-none">
-             <Carousel setApi={setApi} className="w-full h-full">
-               <CarouselContent>
-                 {hotel?.images?.map((image, index) => (
-                     <CarouselItem key={index}>
-                       <Image
-                         src={image}
-                         height={80}
-                         unoptimized
-                         width={50}
-                         priority={index === 0}
-                         alt={`${hotel?.name} ${index + 1}`}
-                         className="w-full h-64 object-fill rounded-none"
-                       />
-                     </CarouselItem>
-                 ))}
-               </CarouselContent>
-             </Carousel>
-   
-             {/* Best Rated Badge */}
-             {hotel?.tags && (
-               <div className="absolute top-4 left-4 bg-background px-3 py-1 rounded-full flex items-center shadow-md z-10">
-                 {hotel?.tags?.map((tag, k) => (
-                   <span key={k} className="text-xs font-medium capitalize">
-                     ⭐ {tag}
-                   </span>
-                 ))}
-               </div>
-             )}
-   
-             {/* Heart Icon */}
-             <button className="absolute top-4 right-4 p-2 bg-background rounded-full shadow-md z-10">
-               <Heart className="w-5 h-5" />
-             </button>
-   
-             {/* View Photos Button */}
-   
-             <Button
-               onPress={() => openGallery(0)}
-               size="md"
-               className="absolute bottom-4 right-22 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10"
-             >
-               <span className="text-xs font-medium">View</span>
-               <span className="text-xs font-medium">Photos</span>
-             </Button>
-             <div className="absolute bottom-4 right-3 border bg-[#201e1e80]  border-gray-600   rounded-lg flex flex-col gap-0 justify-center items-center  text-white z-10">
-               <VideoModal
-                 thumbnailSrc={hotel?.images[0]}
-                 videoUrl={hotel?.reelVideo}
-               />
-             </div>
-   
-             {/* Carousel Dots */}
-             <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-2 z-10">
-               {hotel?.images.map((_, index) => (
-                 <button
-                   key={index}
-                   onClick={() => api?.scrollTo(index)}
-                   className={`w-2 h-2 rounded-full transition-colors ${
-                     index === currentSlide ? "bg-white" : "bg-white/50"
-                   }`}
-                 />
-               ))}
-             </div>
-           </div>
-         </div>
-   
-         <ImageGalleryDialog
-           isOpen={isGalleryOpen}
-           onClose={() => setIsGalleryOpen(false)}
-           images={hotel?.images}
-           initialIndex={galleryStartIndex}
-         />
-       </>
+    <>
+      <div className="relative">
+        <div className="relative h-64 bg-gray-50 overflow-hidden rounded-none">
+          <Carousel setApi={setApi} className="w-full h-full">
+            <CarouselContent>
+              {images.map((image, index) => (
+                <CarouselItem key={index}>
+                  <Image
+                    src={image}
+                    height={256}
+                    unoptimized
+                    width={400}
+                    priority={index === 0}
+                    alt={`${hotel?.name} ${index + 1}`}
+                    className="w-full h-64 object-cover"
+                  />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+          </Carousel>
+
+          {/* Top-Left Tag / Badge */}
+          {((Array.isArray(hotel?.tags) && hotel.tags.length > 0) ||
+            (typeof hotel?.tags === "string" && hotel.tags)) && (
+            <div className="absolute top-3 left-3 z-10">
+              <div className="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-xs border border-black/5 flex items-center gap-1.5">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
+                <span className="text-[11px] font-semibold text-neutral-900 tracking-tight capitalize">
+                  {Array.isArray(hotel.tags) ? hotel.tags[0] : hotel.tags}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Heart Icon */}
+          <button className="absolute top-3 right-3 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xs z-10 border border-black/5 text-gray-700 hover:text-[#ff6900] active:scale-90 transition-transform">
+            <Heart className="w-4 h-4" />
+          </button>
+
+          {/* View Photos & Video Buttons */}
+          <div className="absolute bottom-6 right-3 flex items-center space-x-2 z-10">
+            <button
+              type="button"
+              onClick={() => openGallery(0)}
+              className="bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/25 text-white font-semibold text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition-all cursor-pointer flex items-center justify-center"
+            >
+              View Photos
+            </button>
+            <VideoModal
+              thumbnailSrc={images[0]}
+              videoUrl={hotel?.reelVideo}
+              trigger={
+                <button
+                  type="button"
+                  className="bg-black/50 hover:bg-black/70 backdrop-blur-md border border-white/25 text-white font-semibold text-xs px-2.5 py-1.5 rounded-xl shadow-md flex items-center gap-1 justify-center active:scale-95 transition-all cursor-pointer"
+                >
+                  <Play className="w-3.5 h-3.5 fill-white text-white" />
+                  <span>Video</span>
+                </button>
+              }
+            />
+          </div>
+
+          {/* Slide Indicators */}
+          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex space-x-1.5 z-10">
+            {images.slice(0, 7).map((_, index) => (
+              <div
+                key={index}
+                className={`h-1 rounded-full transition-all duration-300 ${
+                  currentSlide === index ? "w-5 bg-white" : "w-1.5 bg-white/50"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <ImageGalleryDialog
+        isOpen={isGalleryOpen}
+        onClose={() => setIsGalleryOpen(false)}
+        images={images}
+        initialIndex={galleryStartIndex}
+        title={hotel?.name}
+      />
+    </>
   );
 };
 
-export default  HotelHero;
+export default HotelHero;

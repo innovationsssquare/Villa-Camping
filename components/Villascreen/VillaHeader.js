@@ -9,7 +9,7 @@ const VillaHeader = () => {
   const villa = useVilla();
   const router = useRouter();
   return (
-    <div className="flex items-center justify-between px-3 py-2 bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 w-full overflow-hidden">
+    <div className="flex items-center justify-between px-3 h-12 bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 w-full overflow-hidden">
       <div className="flex items-center w-2/3">
         <Button
           isIconOnly

@@ -47,7 +47,7 @@ export default function PropertyDetails() {
   }, [id]);
 
   if (loading) {
-    return <VillaScreenSkeleton />;
+    return <VillaScreenSkeleton view="desktop" />;
   }
 
   if (error) {

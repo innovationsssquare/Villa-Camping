@@ -112,10 +112,11 @@ export default function PremiumPropertyHero() {
   return (
     <div className="h-auto bg-gray-50">
       <div className="w-full mx-auto px-4 sm:px-2 lg:px-4 py-4">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 h-[70vh] overflow-hidden">
-          <div className="lg:col-span-3 relative rounded-2xl overflow-hidden group">
+        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 h-[60vh] sm:h-[65vh] lg:h-[70vh] min-h-[420px] max-h-[640px] overflow-hidden">
+          {/* Main Hero Image */}
+          <div className="md:col-span-3 lg:col-span-3 relative rounded-2xl overflow-hidden group h-full min-h-0 bg-neutral-900">
             <div
-              className={`w-full h-full transition-all duration-300 ${
+              className={`absolute inset-0 overflow-hidden transition-all duration-300 ${
                 isZoomed ? "cursor-grab" : "cursor-zoom-in"
               } ${isDragging ? "cursor-grabbing" : ""}`}
               onMouseDown={handleMouseDown}
@@ -124,14 +125,15 @@ export default function PremiumPropertyHero() {
               onMouseLeave={handleMouseUp}
               onDoubleClick={handleDoubleClick}
             >
-              <Image
-                width={300}
-                height={300}
+              <img
                 ref={imageRef}
-                src={hotel?.images[currentImageIndex] || "/placeholder.svg"}
-                alt={hotel?.name || "Hotel"}
+                src={hotel?.images?.[currentImageIndex] || "/placeholder.svg"}
+                alt={hotel?.name || "Hotel photo"}
                 className="w-full h-full object-cover transition-all duration-500 ease-out select-none"
                 style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
                   transform: `scale(${zoomLevel}) translate(${
                     zoomPosition.x / zoomLevel
                   }px, ${zoomPosition.y / zoomLevel}px)`,
@@ -143,20 +145,20 @@ export default function PremiumPropertyHero() {
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent pointer-events-none"></div>
 
-            <div className="absolute top-6 left-6 flex space-x-3">
-              <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full flex items-center space-x-2 shadow-lg">
-                <span className="text-yellow-500">⭐</span>
-                <span className="text-gray-800 font-semibold text-sm">Best Rated</span>
+            <div className="absolute top-6 left-6 flex space-x-2.5 z-10">
+              <div className="bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full flex items-center space-x-1.5 shadow-md border border-white/60">
+                <span className="text-amber-500 text-xs">★</span>
+                <span className="text-gray-900 font-bold text-xs">Best Rated</span>
               </div>
-              <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
-                <span className="text-gray-800 font-semibold text-sm">Luxury</span>
+              <div className="bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-full shadow-md border border-white/60">
+                <span className="text-gray-900 font-bold text-xs">Luxury Stay</span>
               </div>
             </div>
 
-            <div className="absolute top-6 right-6 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <div className="absolute top-6 right-6 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
               <Button
                 size="icon"
-                className="bg-white/90 hover:bg-white text-gray-700 rounded-full shadow-lg backdrop-blur-sm"
+                className="bg-white/90 hover:bg-white text-gray-700 hover:text-[#ff6900] rounded-full shadow-lg backdrop-blur-sm"
                 onClick={handleZoomIn}
                 disabled={zoomLevel >= 3}
               >
@@ -164,7 +166,7 @@ export default function PremiumPropertyHero() {
               </Button>
               <Button
                 size="icon"
-                className="bg-white/90 hover:bg-white text-gray-700 rounded-full shadow-lg backdrop-blur-sm"
+                className="bg-white/90 hover:bg-white text-gray-700 hover:text-[#ff6900] rounded-full shadow-lg backdrop-blur-sm"
                 onClick={handleZoomOut}
                 disabled={zoomLevel <= 1}
               >
@@ -172,7 +174,7 @@ export default function PremiumPropertyHero() {
               </Button>
               <Button
                 size="icon"
-                className="bg-white/90 hover:bg-white text-gray-700 rounded-full shadow-lg backdrop-blur-sm"
+                className="bg-white/90 hover:bg-white text-gray-700 hover:text-[#ff6900] rounded-full shadow-lg backdrop-blur-sm"
                 onClick={handleZoomReset}
                 disabled={zoomLevel === 1}
               >
@@ -181,7 +183,7 @@ export default function PremiumPropertyHero() {
             </div>
 
             {isZoomed && (
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm z-10">
                 {Math.round(zoomLevel * 100)}%
               </div>
             )}
@@ -190,83 +192,85 @@ export default function PremiumPropertyHero() {
               <>
                 <button
                   onClick={prevImage}
-                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                  className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 hover:text-[#ff6900]"
                 >
-                  <ChevronLeft className="w-5 h-5 text-gray-700" />
+                  <ChevronLeft className="w-5 h-5" />
                 </button>
                 <button
                   onClick={nextImage}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100"
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white rounded-full p-2 shadow-lg transition-all duration-200 opacity-0 group-hover:opacity-100 z-10 hover:text-[#ff6900]"
                 >
-                  <ChevronRight className="w-5 h-5 text-gray-700" />
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </>
             )}
 
             {!isZoomed && (
-              <div className="absolute bottom-20 right-6 bg-black/70 text-white px-3 py-2 rounded-lg text-xs backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+              <div className="absolute bottom-20 right-6 bg-black/70 text-white px-3 py-1.5 rounded-lg text-xs backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
                 Double-click to zoom
               </div>
             )}
 
-            <div className="absolute bottom-6 left-6 flex space-x-4">
+            <div className="absolute bottom-6 left-6 flex space-x-3 z-10">
               <Button
                 onClick={() => setIsVideoOpen(true)}
-                className="bg-black/70 hover:bg-black/80 text-white backdrop-blur-sm border-0 rounded-full px-6 py-3 font-medium"
+                className="bg-black/80 hover:bg-black text-white backdrop-blur-md border border-white/20 rounded-full px-5 py-2.5 font-semibold text-xs shadow-lg transition-transform active:scale-95"
               >
-                <Play className="w-4 h-4 mr-2" />
+                <Play className="w-3.5 h-3.5 mr-2 text-[#ff6900] fill-current" />
                 View Video
               </Button>
               <Button
                 variant="outline"
-                className="bg-white/90 hover:bg-white text-gray-800 backdrop-blur-sm border-white/50 rounded-full px-6 py-3 font-medium"
+                className="bg-white/95 hover:bg-white text-gray-900 backdrop-blur-md border-white/70 rounded-full px-5 py-2.5 font-semibold text-xs shadow-lg transition-transform active:scale-95 hover:text-[#ff6900]"
                 onClick={() => openGallery(0)}
               >
-                <ImageIcon className="w-4 h-4 mr-2" />
+                <ImageIcon className="w-3.5 h-3.5 mr-2 text-[#ff6900]" />
                 View Photos
               </Button>
             </div>
 
-            <div className="absolute bottom-6 right-6 bg-black/70 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
-              {currentImageIndex + 1} / {hotel?.images?.length}
+            <div className="absolute bottom-6 right-6 bg-black/70 text-white px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm z-10 border border-white/10">
+              {currentImageIndex + 1} / {hotel?.images?.length || 1}
             </div>
           </div>
 
-          <div className="lg:col-span-1 flex flex-col space-y-4">
+          <div className="md:col-span-1 lg:col-span-1 flex flex-col gap-4 h-full min-h-0">
             <div
-              className="relative flex-1 rounded-2xl overflow-hidden group cursor-pointer bg-black"
+              className="relative flex-1 min-h-0 rounded-2xl overflow-hidden group cursor-pointer bg-neutral-900"
               onClick={() => setIsVideoOpen(true)}
             >
               <img
-                src={hotel?.images[0] || "/placeholder.svg"}
+                src={hotel?.images?.[0] || "/placeholder.svg"}
                 alt="Property Video Tour"
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80"
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 opacity-80 select-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="bg-white/90 hover:bg-white rounded-full p-4 transition-all duration-200 group-hover:scale-110 shadow-lg">
-                  <Play className="w-8 h-8 text-gray-800 ml-1" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none"></div>
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="bg-white/95 hover:bg-white rounded-full p-4 transition-all duration-300 group-hover:scale-110 shadow-xl group-hover:shadow-orange-500/25 pointer-events-auto">
+                  <Play className="w-7 h-7 text-gray-900 group-hover:text-[#ff6900] ml-1 transition-colors fill-current" />
                 </div>
               </div>
-              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-sm backdrop-blur-sm">
+              <div className="absolute bottom-4 left-4 bg-black/70 text-white px-3 py-1 rounded-lg text-xs font-medium backdrop-blur-sm border border-white/10 pointer-events-none">
                 Video Tour
               </div>
             </div>
 
-            {hotel?.images.length > 1 && (
+            {(hotel?.images?.length || 0) > 1 && (
               <div
-                className="relative flex-1 rounded-2xl overflow-hidden group cursor-pointer"
-                onClick={() => openGallery(2)}
+                className="relative flex-1 min-h-0 rounded-2xl overflow-hidden group cursor-pointer bg-neutral-900"
+                onClick={() => openGallery(1)}
               >
                 <img
-                  src={hotel?.images[1] || "/placeholder.svg"}
-                  alt="Spa Pool Area"
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  src={hotel?.images?.[1] || hotel?.images?.[0] || "/placeholder.svg"}
+                  alt="Property photos"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 select-none"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none"></div>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <div className="text-center text-white">
-                    <div className="text-3xl font-bold mb-1">+{hotel?.images?.length}</div>
+                    <div className="text-3xl font-bold mb-1">
+                      +{(hotel?.images?.length || 0)}
+                    </div>
                     <div className="text-lg font-medium">More</div>
                   </div>
                 </div>

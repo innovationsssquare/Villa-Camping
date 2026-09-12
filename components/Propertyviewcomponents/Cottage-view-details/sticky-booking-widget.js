@@ -50,6 +50,9 @@ import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { useRouter } from "next/navigation";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import CottageSelectionDrawer from "@/components/Cottagescreen/cottage-selection-drawer";
+import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
+import { BaseUrl } from "@/lib/API/Baseurl";
+import { getDeviceId } from "@/lib/deviceId";
 
 export default function StickyBookingWidget() {
   const [stickyState, setStickyState] = useState("normal");
@@ -105,65 +108,95 @@ export default function StickyBookingWidget() {
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
 
-  const availableCoupons = [
-    {
-      code: "VILLACAMP10",
-      title: "Book your dreamy getaway",
-      description:
-        "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs. Use the code STAYVISTA at check-out.",
-      discount: 10,
-      type: "percentage",
-      maxDiscount: 10000,
-      validUntil: "31 December 2025",
-    },
-    {
-      code: "VILLACAMP102025",
-      title: "Instant Discount",
-      description:
-        "Get an instant 10% off, up to Rs. 4,000. This offer is applicable on bookings of 3 or more nights only.",
-      discount: 4000,
-      type: "fixed",
-      maxDiscount: 15000,
-      validUntil: "31 December 2025",
-    },
-    {
-      code: "VILLACAMPWEEKEND15",
-      title: "Weekend Special",
-      description: "15% off on weekend bookings",
-      discount: 15,
-      type: "percentage",
-      maxDiscount: 15000,
-      validUntil: "31 December 2025",
-    },
-  ];
+  const [availableCoupons, setAvailableCoupons] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function loadCoupons() {
+      try {
+        let res = null;
+        if (cottage?._id) {
+          res = await Getallcouponbypropertyid(cottage._id);
+        }
+        if (isMounted && res?.data?.coupons?.length) {
+          const formatted = res.data.coupons
+            .filter((c) => c.isActive !== false)
+            .map((c) => ({
+              code: c.code,
+              title: c.title || c.code,
+              description: c.description || "",
+              discount: c.discount?.amount ?? c.discountValue ?? c.discount,
+              type: c.discount?.type || c.discountType || "percentage",
+              maxDiscount: c.maxDiscount || Infinity,
+              validUntil: c.validTill
+                ? new Date(c.validTill).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })
+                : "Valid",
+              couponId: c._id,
+            }));
+          setAvailableCoupons(formatted);
+        } else if (isMounted) {
+          setAvailableCoupons([]);
+        }
+      } catch (err) {
+        console.warn("[cottage widget] Error loading backend coupons:", err);
+        if (isMounted) setAvailableCoupons([]);
+      }
+    }
+    loadCoupons();
+    return () => {
+      isMounted = false;
+    };
+  }, [cottage?._id]);
 
   const applyCoupon = async (code) => {
+    if (!code?.trim()) return;
     setIsApplyingCoupon(true);
     setCouponError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    try {
+      const deviceId = await getDeviceId();
+      const userId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("thevilla_user_id")
+          : null;
 
-    const coupon = availableCoupons.find(
-      (c) => c.code.toLowerCase() === code.toLowerCase()
-    );
+      const res = await Applycoupon({
+        couponCode: code.trim().toUpperCase(),
+        orderValue: displayTotal || 0,
+        userId,
+        deviceId,
+        propertyId: cottage?._id,
+        propertyType: "cottage",
+      });
 
-    if (!coupon) {
-      setCouponError("Invalid coupon code");
+      if (res?.status === "success" && res?.data?.coupon) {
+        const backendCoupon = res.data.coupon;
+        dispatch(
+          setAppliedCoupon({
+            ...backendCoupon,
+            code: backendCoupon.code,
+            discountAmount: res.data.discountAmount,
+            discountType: backendCoupon.discount?.type || "percentage",
+            discountValue: backendCoupon.discount?.amount || 0,
+            maxDiscount: backendCoupon.maxDiscount || Infinity,
+          })
+        );
+        setCouponCode("");
+        setIsApplyingCoupon(false);
+      } else {
+        setCouponError(res?.message || "Invalid coupon code");
+        setIsApplyingCoupon(false);
+        return;
+      }
+    } catch (err) {
+      setCouponError("Failed to apply coupon");
       setIsApplyingCoupon(false);
       return;
     }
-
-    if (coupon.minAmount && cottage?.basePricePerNight < coupon.minAmount) {
-      setCouponError(
-        `Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`
-      );
-      setIsApplyingCoupon(false);
-      return;
-    }
-
-    dispatch(setAppliedCoupon(coupon)); // 🔥 Redux
-    setCouponCode("");
-    setIsApplyingCoupon(false);
 
     const couponInputElement =
       document.querySelector("[data-coupon-input]") ||
@@ -530,7 +563,7 @@ export default function StickyBookingWidget() {
 
             {/* Coupon Code Section */}
             <div className="mb-4">
-              {!appliedCoupon && (
+              {!appliedCoupon && availableCoupons && availableCoupons.length > 0 && (
                 <div
                   className="mb-3 p-4 bg-gray-900 border border-gray-700 rounded-xl flex items-center justify-between"
                   data-main-coupon-input
@@ -541,17 +574,19 @@ export default function StickyBookingWidget() {
                     </div>
                     <div>
                       <div className="font-semibold text-sm text-white">
-                        VILLACAMP10
+                        {availableCoupons[0].code}
                       </div>
                       <div className="text-gray-300 text-sm">
-                        Apply to save upto ₹4,000
+                        {availableCoupons[0].type === "percentage"
+                          ? `Apply to save ${availableCoupons[0].discount}%${availableCoupons[0].maxDiscount && availableCoupons[0].maxDiscount < 100000 ? ` (up to ₹${availableCoupons[0].maxDiscount.toLocaleString("en-IN")})` : ""}`
+                          : `Apply to save ₹${availableCoupons[0].discount}`}
                       </div>
                     </div>
                   </div>
                   <Button
                     size="sm"
                     className="bg-white hover:bg-gray-100 text-gray-900 font-semibold px-4 py-2"
-                    onClick={() => applyCoupon("VILLACAMP10")}
+                    onClick={() => applyCoupon(availableCoupons[0].code)}
                   >
                     Apply
                   </Button>
@@ -634,72 +669,73 @@ export default function StickyBookingWidget() {
                             </div>
 
                             <div className="space-y-4 pb-6">
-                              {availableCoupons.map((coupon, index) => (
-                                <Card
-                                  key={coupon.code}
-                                  className="p-6 border border-white bg-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 "
-                                >
-                                  <div className="space-y-2">
-                                    <div className="flex items-start justify-between">
-                                      <div className="flex items-center space-x-2">
-                                        <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center flex-shrink-0">
-                                          <span className="text-white font-bold text-sm">
-                                            %
+                              {availableCoupons && availableCoupons.length > 0 ? (
+                                availableCoupons.map((coupon, index) => (
+                                  <Card
+                                    key={coupon.code}
+                                    className="p-6 border border-white bg-gray-200 rounded-xl hover:border-black hover:shadow-lg transition-all duration-200 "
+                                  >
+                                    <div className="space-y-2">
+                                      <div className="flex items-start justify-between">
+                                        <div className="flex items-center space-x-2">
+                                          <div className="w-10 h-10 bg-black rounded-full flex items-center justify-center flex-shrink-0">
+                                            <span className="text-white font-bold text-sm">
+                                              %
+                                            </span>
+                                          </div>
+                                          <div>
+                                            <h4 className="font-bold text-black text-sm">
+                                              {coupon.title}
+                                            </h4>
+                                            <p className="text-xs text-gray-600">
+                                              valid till: {coupon.validUntil}
+                                            </p>
+                                          </div>
+                                        </div>
+                                        <div className="text-right">
+                                          <div className="text-sm font-bold text-black">
+                                            {coupon.type === "percentage"
+                                              ? `${coupon.discount}% OFF`
+                                              : `₹${coupon.discount} OFF`}
+                                          </div>
+                                        </div>
+                                      </div>
+
+                                      <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        {coupon.description}
+                                      </p>
+
+                                      <div className="flex items-center justify-between">
+                                        <div className="bg-white border-2 border-dashed border-gray-400 px-4 py-2 rounded-lg">
+                                          <span className="font-mono text-sm font-bold text-black">
+                                            {coupon.code}
                                           </span>
                                         </div>
-                                        <div>
-                                          <h4 className="font-bold text-black text-sm">
-                                            {coupon.title}
-                                          </h4>
-                                          <p className="text-xs text-gray-600">
-                                            valid till: {coupon.validUntil}
-                                          </p>
-                                        </div>
-                                      </div>
-                                      <div className="text-right">
-                                        <div className="text-sm font-bold text-black">
-                                          {coupon.type === "percentage"
-                                            ? `${coupon.discount}% OFF`
-                                            : `₹${coupon.discount} OFF`}
-                                        </div>
-                                      </div>
-                                    </div>
-
-                                    <p className="text-xs text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg border border-gray-200">
-                                      {coupon.description}
-                                    </p>
-
-                                    <div className="flex items-center justify-between">
-                                      <div className="bg-white border-2 border-dashed border-gray-400 px-4 py-2 rounded-lg">
-                                        <span className="font-mono text-sm font-bold text-black">
-                                          {coupon.code}
-                                        </span>
-                                      </div>
-                                      <Button
-                                        className={`px-6 py-2 rounded-lg font-bold transition-all duration-200 ${
-                                          appliedCoupon?.code === coupon.code
-                                            ? "bg-gray-100 text-gray-500 border-2 border-gray-300"
-                                            : "bg-black hover:bg-gray-800 text-white shadow-md hover:shadow-lg transform hover:scale-105"
-                                        }`}
-                                        onClick={() =>
-                                          applyCouponFromSheet(coupon)
-                                        }
-                                        disabled={
-                                          appliedCoupon?.code === coupon.code
-                                        }
-                                      >
-                                        {appliedCoupon?.code === coupon.code ? (
-                                          <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
-                                              <span className="text-white text-xs">
-                                                ✓
-                                              </span>
+                                        <Button
+                                          className={`px-6 py-2 rounded-lg font-bold transition-all duration-200 ${
+                                            appliedCoupon?.code === coupon.code
+                                              ? "bg-gray-100 text-gray-500 border-2 border-gray-300"
+                                              : "bg-black hover:bg-gray-800 text-white shadow-md hover:shadow-lg transform hover:scale-105"
+                                          }`}
+                                          onClick={() =>
+                                            applyCouponFromSheet(coupon)
+                                          }
+                                          disabled={
+                                            appliedCoupon?.code === coupon.code
+                                          }
+                                        >
+                                          {appliedCoupon?.code === coupon.code ? (
+                                            <div className="flex items-center space-x-1">
+                                              <div className="w-4 h-4 bg-black rounded-full flex items-center justify-center">
+                                                <span className="text-white text-xs">
+                                                  ✓
+                                                </span>
+                                              </div>
+                                              <span>APPLIED</span>
                                             </div>
-                                            <span>APPLIED</span>
-                                          </div>
-                                        ) : (
-                                          "APPLY"
-                                        )}
+                                          ) : (
+                                            "APPLY"
+                                          )}
                                       </Button>
                                     </div>
                                   </div>

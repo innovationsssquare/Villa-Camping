@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-// Define protected routes
-const protectedRoutes = ["/booking", "/account", "/checkout"]
+// Define protected routes (account/support and account handle their own auth state)
+const protectedRoutes = ["/booking", "/checkout"]
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl

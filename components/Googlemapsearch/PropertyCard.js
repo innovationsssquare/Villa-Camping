@@ -16,6 +16,7 @@ import { getDisplayPrice } from "./getDisplayPrice";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
+import { buildPropertyViewUrl } from "@/lib/categoryUtils";
 
 export const PropertyCard = ({
   property,
@@ -28,6 +29,10 @@ export const PropertyCard = ({
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { selectedCategoryName, checkin, checkout } = useSelector(
+    (state) => state.booking || {}
+  );
+  const categories = useSelector((state) => state.category?.categories || []);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [localLiked, setLocalLiked] = useState(false);
@@ -102,16 +107,14 @@ export const PropertyCard = ({
     const targetId = property.id || property._id;
     if (!targetId) return;
 
-    const type = (property?.type || property?.category || "villa").toLowerCase();
-    if (type.includes("camp")) {
-      router.push(`/view-Camping/${targetId}`);
-    } else if (type.includes("cottage")) {
-      router.push(`/view-Cottage/${targetId}`);
-    } else if (type.includes("hotel")) {
-      router.push(`/view-Hotel/${targetId}`);
-    } else {
-      router.push(`/view-Villa/${targetId}`);
-    }
+    const url = buildPropertyViewUrl(
+      property,
+      categories,
+      selectedCategoryName,
+      checkin,
+      checkout
+    );
+    router.push(url);
   };
 
   function formatRupee(amount) {

@@ -7,22 +7,29 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@heroui/react";
-import { Card } from "@/components/ui/card";
-import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import { MinusIcon, PlaneIcon, PlusIcon, X } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Minus,
+  Plus,
+  Users,
+  Tent,
+  Sparkles,
+  Info,
+  CheckCircle2,
+  AlertCircle,
+  X,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCampingDayDetailsThunk } from "@/Redux/Slices/campingSlice";
 import { setSelectedTents } from "@/Redux/Slices/bookingSlice";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import Image from "next/image";
 
 export default function TentSelectionDrawer({
   isOpen,
   onClose,
   tents = [],
-  selectedTents = {},
-  onTentSelectionChange,
-  totalGuests = 0,
+  totalGuests = 1,
   dateStr,
   id,
 }) {
@@ -30,7 +37,6 @@ export default function TentSelectionDrawer({
   const { dayDetails, dayDetailsLoading } = useSelector(
     (state) => state.camping
   );
-
   const reduxSelectedTents = useSelector(
     (state) => state.booking.selectedTents
   );
@@ -38,27 +44,21 @@ export default function TentSelectionDrawer({
   const [tentError, setTentError] = useState("");
   const [localSelected, setLocalSelected] = useState({});
 
-  /* --------------------------------------------------
-   * 1️⃣ Stabilize date (PREVENTS useEffect LOOP)
-   * -------------------------------------------------- */
+  // 1. Stabilize date (YYYY-MM-DD for IST)
   const formattedDate = useMemo(() => {
     if (!dateStr) return null;
-
     const d = new Date(dateStr);
     return new Intl.DateTimeFormat("en-CA", {
       timeZone: "Asia/Kolkata",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-    }).format(d); // en-CA gives YYYY-MM-DD
+    }).format(d);
   }, [dateStr]);
 
-  /* --------------------------------------------------
-   * 2️⃣ Fetch day details ONCE per date
-   * -------------------------------------------------- */
+  // 2. Fetch day details when drawer opens
   useEffect(() => {
     if (!id || !formattedDate || !isOpen) return;
-
     dispatch(
       getCampingDayDetailsThunk({
         id,
@@ -67,39 +67,30 @@ export default function TentSelectionDrawer({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  /* --------------------------------------------------
-   * 3️⃣ Sync local state when drawer opens
-   * -------------------------------------------------- */
+  // 3. Sync Redux state to local on open
   useEffect(() => {
     if (!isOpen) return;
-
     const mapped = {};
-    Object.entries(reduxSelectedTents || {}).forEach(
-      ([tentType, t]) => (mapped[tentType] = t.quantity)
-    );
-
+    Object.entries(reduxSelectedTents || {}).forEach(([tentType, t]) => {
+      mapped[tentType] = t.quantity || 0;
+    });
     setLocalSelected(mapped);
     setTentError("");
   }, [isOpen, reduxSelectedTents]);
 
   const tentsForDay = useMemo(() => {
-    return dayDetails?.tents || [];
+    return dayDetails?.data?.tents || dayDetails?.tents || [];
   }, [dayDetails]);
 
   const getTentConfig = (tentType) =>
     tents.find((t) => t.tentType === tentType);
 
   const getTentCapacity = (tentType) =>
-    getTentConfig(tentType)?.maxCapacity || 0;
+    getTentConfig(tentType)?.maxCapacity || 2;
 
-  /* --------------------------------------------------
-   * 4️⃣ Availability from dayDetails (SOURCE OF TRUTH)
-   * -------------------------------------------------- */
+  // 4. Availability & Price lookup
   const getAvailabilityForTent = (tent) => {
-    const summary = dayDetails?.data?.tents?.find(
-      (t) => t.tentType === tent.tentType
-    );
-
+    const summary = tentsForDay.find((t) => t.tentType === tent.tentType);
     if (!summary) {
       return {
         total: tent.totaltents || 0,
@@ -110,88 +101,52 @@ export default function TentSelectionDrawer({
           tent.pricing?.weekendPrice || tent.pricing?.weekdayPrice || 0,
       };
     }
-
     return {
-      total: summary.total,
-      booked: summary.booked,
-      available: summary.available,
-      weekdayPrice: summary.price.weekday,
-      weekendPrice: summary.price.weekend,
+      total: summary.total ?? tent.totaltents ?? 0,
+      booked: summary.booked ?? 0,
+      available: summary.available ?? tent.totaltents ?? 0,
+      weekdayPrice: summary.price?.weekday ?? tent.pricing?.weekdayPrice ?? 0,
+      weekendPrice:
+        summary.price?.weekend ??
+        tent.pricing?.weekendPrice ??
+        summary.price?.weekday ??
+        0,
     };
   };
 
-  /* --------------------------------------------------
-   * 5️⃣ Quantity handler
-   * -------------------------------------------------- */
   const handleTentQtyChange = (tentType, qty, available) => {
     if (qty < 0 || qty > available) return;
-
     setLocalSelected((prev) => ({
       ...prev,
       [tentType]: qty,
     }));
-
     if (tentError) setTentError("");
   };
 
-  /* --------------------------------------------------
-   * 6️⃣ Validation + Apply
-   * -------------------------------------------------- */
-  const validateAndApply = () => {
-    const totalSelected = Object.values(localSelectedTents).reduce(
-      (s, q) => s + q,
-      0
-    );
+  const totalSelectedTents = Object.values(localSelected).reduce(
+    (s, q) => s + (q || 0),
+    0
+  );
 
-    if (totalSelected === 0) {
-      setTentError("Please select at least one tent");
-      return;
-    }
+  const totalCapacity = Object.entries(localSelected).reduce(
+    (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * (qty || 0),
+    0
+  );
 
-    const totalCapacity = Object.entries(localSelectedTents).reduce(
-      (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * qty,
-      0
-    );
-
-    if (totalGuests > totalCapacity) {
-      setTentError(
-        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
-      );
-      return;
-    }
-
-    onTentSelectionChange(localSelectedTents);
-    setTentError("");
-    onClose();
-  };
-
-  /* --------------------------------------------------
-   * 7️⃣ Helpers
-   * -------------------------------------------------- */
   const formatRupee = (amount) =>
     `₹${new Intl.NumberFormat("en-IN", {
       maximumFractionDigits: 0,
     }).format(amount || 0)}`;
 
   const applySelection = () => {
-    const totalSelected = Object.values(localSelected).reduce(
-      (s, q) => s + q,
-      0
-    );
-
-    if (totalSelected === 0) {
-      setTentError("Please select at least one tent");
+    if (totalSelectedTents === 0) {
+      setTentError("Please select at least one tent unit.");
       return;
     }
 
-    let totalCapacity = 0;
-    Object.entries(localSelected).forEach(([tentType, qty]) => {
-      totalCapacity += getTentCapacity(tentType) * qty;
-    });
-
-    if (totalGuests > totalCapacity) {
+    if (totalGuests > 0 && totalGuests > totalCapacity) {
       setTentError(
-        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
+        `Selected tents hold ${totalCapacity} guests, but you have ${totalGuests} guests.`
       );
       return;
     }
@@ -199,7 +154,6 @@ export default function TentSelectionDrawer({
     const payload = {};
     Object.entries(localSelected).forEach(([tentType, qty]) => {
       if (qty <= 0) return;
-
       const cfg = getTentConfig(tentType);
       const day = tentsForDay.find((t) => t.tentType === tentType);
 
@@ -208,172 +162,194 @@ export default function TentSelectionDrawer({
         unitId: cfg?._id,
         typeName: tentType,
         quantity: qty,
-        weekdayPrice: day?.price?.weekday || 0,
-        weekendPrice: day?.price?.weekend || 0,
-        maxCapacity: cfg?.maxCapacity || 0,
+        weekdayPrice: day?.price?.weekday || cfg?.pricing?.weekdayPrice || 0,
+        weekendPrice:
+          day?.price?.weekend ||
+          cfg?.pricing?.weekendPrice ||
+          cfg?.pricing?.weekdayPrice ||
+          0,
+        maxCapacity: cfg?.maxCapacity || 2,
       };
     });
 
     dispatch(setSelectedTents(payload));
+    setTentError("");
     onClose();
   };
 
-  const totalSelectedTents = Object.values(localSelected).reduce(
-    (s, q) => s + q,
-    0
-  );
-
-  const totalCapacity = Object.entries(localSelected).reduce(
-    (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * qty,
-    0
-  );
-
-  /* --------------------------------------------------
-   * 8️⃣ UI
-   * -------------------------------------------------- */
   return (
-    <Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
-      <DrawerContent className="max-h-[95vh] border-none">
-        <DrawerHeader className="p-0">
-          <div className="flex items-center justify-between px-4 py-3 border-b">
-            <DrawerTitle className="text-xl font-bold">
+    <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} shouldScaleBackground={false}>
+      <DrawerContent className="max-h-[92vh] p-0 rounded-t-3xl bg-white border-t border-gray-100 z-[160]">
+        {/* Handle */}
+        <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
+
+        {/* Header */}
+        <div className="px-5 pb-3 border-b border-gray-100 flex items-center justify-between">
+          <div>
+            <div className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#ff6900] uppercase tracking-wider">
+              <Tent className="w-3 h-3" />
+              <span>Choose Accommodation</span>
+            </div>
+            <DrawerTitle className="text-xl font-bold text-gray-900">
               Select Tents
             </DrawerTitle>
-            <Button isIconOnly variant="light" onPress={onClose}>
-              <X size={16} />
-            </Button>
+            <p className="text-xs text-gray-500">
+              Group size: {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
+            </p>
           </div>
-        </DrawerHeader>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
 
-        {dayDetailsLoading ? (
-          <div className="flex justify-center items-center h-[30vh] bg-white">
-            <div className="bg-black rounded-full flex justify-center items-center">
-              <ButtonLoader />
+        {/* Capacity Indicator */}
+        <div className="px-5 pt-3">
+          <div className="p-2.5 rounded-xl bg-orange-50/70 border border-orange-100 flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5 font-medium text-gray-700">
+              <Users className="w-3.5 h-3.5 text-[#ff6900]" />
+              <span>
+                Capacity: <strong>{totalCapacity}</strong> / {totalGuests} guests
+              </span>
+            </div>
+            <div>
+              {totalCapacity >= totalGuests && totalSelectedTents > 0 ? (
+                <span className="text-emerald-600 font-semibold flex items-center gap-1 text-[11px]">
+                  <CheckCircle2 className="w-3 h-3" /> Ready
+                </span>
+              ) : (
+                <span className="text-amber-600 font-medium text-[11px]">
+                  Need {Math.max(0, totalGuests - totalCapacity)} more
+                </span>
+              )}
             </div>
           </div>
-        ) : (
-          <>
-            <div className="p-4 space-y-4 overflow-y-auto flex-1">
-              {/* SUMMARY */}
-              <Card className="p-3 bg-blue-50 border-blue-200 shadow-none">
-                <div className="flex justify-between text-sm">
-                  <span>Total Guests</span>
-                  <span className="font-semibold">{totalGuests}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Selected Tents</span>
-                  <span className="font-semibold">{totalSelectedTents}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span>Total Capacity</span>
-                  <span
-                    className={`font-semibold ${
-                      totalCapacity >= totalGuests
-                        ? "text-green-600"
-                        : "text-red-600"
-                    }`}
-                  >
-                    {totalCapacity}
-                  </span>
-                </div>
-              </Card>
+        </div>
 
-              {tentError && (
-                <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {tentError}
-                </div>
-              )}
+        {/* Tent list */}
+        <div className="overflow-y-auto px-5 py-3 space-y-3 max-h-[calc(92vh-220px)]">
+          {tents.length === 0 ? (
+            <div className="text-center py-8 text-gray-500 text-xs">
+              No tents available for this campsite.
+            </div>
+          ) : (
+            tents.map((tent) => {
+              const availability = getAvailabilityForTent(tent);
+              const qty = localSelected[tent.tentType] || 0;
+              const isAvailable = availability.available > 0;
+              const tentImg =
+                (tent.tentimages && tent.tentimages[0]) ||
+                tent.images?.[0] ||
+                "/placeholder.svg";
 
-              {/* TENTS FROM BACKEND */}
-              {tentsForDay.map((tent) => {
-                const selectedQty = localSelected[tent.tentType] || 0;
-                const maxCapacity = getTentCapacity(tent.tentType);
+              return (
+                <div
+                  key={tent._id || tent.tentType}
+                  className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
+                    qty > 0
+                      ? "border-[#ff6900] bg-orange-50/20 shadow-2xs"
+                      : "border-gray-200 bg-white"
+                  }`}
+                >
+                  <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-100">
+                    <Image src={tentImg} alt="" fill className="object-cover" />
+                  </div>
 
-                return (
-                  <div
-                    key={tent.tentType}
-                    className={`p-2 border shadow-none rounded-2xl ${
-                      selectedQty > 0
-                        ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    <p className="font-semibold text-md">{tent.tentType}</p>
-
-                    <p className="text-sm text-gray-600">
-                      {formatRupee(tent.price.weekday)} / night (weekday)
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Weekend: {formatRupee(tent.price.weekend)}
-                    </p>
-
-                    <div className="flex gap-2 mt-2 text-xs">
-                      <span className="bg-red-100 px-2 py-1 rounded">
-                        Booked: {tent.booked}
-                      </span>
-                      <span className="bg-green-100 px-2 py-1 rounded">
-                        Available: {tent.available}
-                      </span>
-                      <span className="bg-gray-100 px-2 py-1 rounded">
-                        Total: {tent.total}
-                      </span>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-900 text-sm truncate">
+                      {tent.tentType}
+                    </h4>
+                    <div className="text-[11px] text-gray-500">
+                      Up to {tent.maxCapacity || 2} Guests
                     </div>
-
-                    <div className="flex items-center justify-between mt-4">
-                      <Button
-                        isIconOnly
-                        variant="bordered"
-                        size="sm"
-                        disabled={selectedQty <= 0}
-                        onPress={() =>
-                          handleTentQtyChange(
-                            tent.tentType,
-                            selectedQty - 1,
-                            tent.available
-                          )
-                        }
-                      >
-                        <MinusIcon size={12} />
-                      </Button>
-
-                      <div className="text-center">
-                        <span className="font-bold text-lg">{selectedQty}</span>
-                        <p className="text-xs text-gray-500">
-                          {selectedQty * maxCapacity} guests capacity
-                        </p>
-                      </div>
-
-                      <Button
-                        isIconOnly
-                        variant="bordered"
-                        size="sm"
-                        disabled={selectedQty >= tent.available}
-                        onPress={() =>
-                          handleTentQtyChange(
-                            tent.tentType,
-                            selectedQty + 1,
-                            tent.available
-                          )
-                        }
-                      >
-                        <PlusIcon size={12} />
-                      </Button>
+                    <div className="mt-0.5 flex items-baseline gap-1 text-xs">
+                      <span className="font-bold text-gray-900">
+                        {formatRupee(availability.weekdayPrice)}
+                      </span>
+                      <span className="text-[10px] text-gray-400">/ night</span>
+                    </div>
+                    <div className="text-[10px] mt-0.5">
+                      {dayDetailsLoading ? (
+                        <span className="text-gray-400">Checking...</span>
+                      ) : isAvailable ? (
+                        <span className="text-emerald-600 font-medium">
+                          {availability.available} left
+                        </span>
+                      ) : (
+                        <span className="text-red-500 font-medium">Sold Out</span>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
 
-            <div className="p-4 border-t">
-              <Button
-                className="w-full h-12 bg-black text-white"
-                onPress={applySelection}
-              >
-                Apply Selection ({totalSelectedTents})
-              </Button>
-            </div>
-          </>
+                  {/* Stepper */}
+                  <div className="flex items-center border border-gray-200 rounded-xl bg-white overflow-hidden shadow-2xs">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleTentQtyChange(
+                          tent.tentType,
+                          qty - 1,
+                          availability.available
+                        )
+                      }
+                      disabled={qty <= 0}
+                      className="w-8 h-8 flex items-center justify-center text-gray-600 active:bg-orange-100 disabled:opacity-25"
+                    >
+                      <Minus className="w-3 h-3" />
+                    </button>
+                    <span className="w-7 text-center font-bold text-xs text-gray-900">
+                      {qty}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleTentQtyChange(
+                          tent.tentType,
+                          qty + 1,
+                          availability.available
+                        )
+                      }
+                      disabled={!isAvailable || qty >= availability.available}
+                      className="w-8 h-8 flex items-center justify-center text-gray-600 active:bg-orange-100 disabled:opacity-25"
+                    >
+                      <Plus className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        {/* Error notification */}
+        {tentError && (
+          <div className="mx-5 mb-2 p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-600">
+            <AlertCircle className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />
+            <span>{tentError}</span>
+          </div>
         )}
+
+        {/* Fixed Footer */}
+        <div className="p-4 border-t border-gray-100 bg-white flex items-center justify-between gap-3">
+          <div>
+            <div className="text-xs font-bold text-gray-900">
+              {totalSelectedTents} {totalSelectedTents === 1 ? "Tent" : "Tents"}
+            </div>
+            <div className="text-[11px] text-gray-500">
+              Capacity: {totalCapacity} guests
+            </div>
+          </div>
+          <Button
+            type="button"
+            onClick={applySelection}
+            className="rounded-xl bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold px-6 h-11 shadow-md cursor-pointer"
+          >
+            Apply Tents
+          </Button>
+        </div>
       </DrawerContent>
     </Drawer>
   );

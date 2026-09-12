@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   Drawer,
   DrawerContent,
+  DrawerTitle,
 } from "@/components/ui/drawer";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
@@ -87,6 +88,7 @@ export default function BookingDialog({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
+  const [isTentSelectionOpen, setIsTentSelectionOpen] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [couponError, setCouponError] = useState("");
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
@@ -104,6 +106,15 @@ export default function BookingDialog({
   const reduxSelectedTents = useSelector((state) => state.booking.selectedTents);
   const reduxSelectedCottages = useSelector((state) => state.booking.selectedCottages);
   const reduxSelectedRooms = useSelector((state) => state.booking.selectedRooms);
+
+  const totalSelectedTentsCount = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t?.quantity || 0),
+    0
+  );
+  const totalSelectedTentCapacity = Object.values(reduxSelectedTents || {}).reduce(
+    (sum, t) => sum + (t?.maxCapacity || 2) * (t?.quantity || 0),
+    0
+  );
 
   const dayTents = useSelector((state) => state.camping?.dayDetails?.tents || []);
   const dayCottages = useSelector((state) => state.cottage?.dayDetails?.cottages || []);
@@ -232,10 +243,6 @@ export default function BookingDialog({
         if (propertyId) {
           res = await Getallcouponbypropertyid(propertyId);
         }
-        if (!res || !res.data?.coupons?.length) {
-          const allRes = await fetch(`${BaseUrl}/Coupon/GetAllCoupons`);
-          res = await allRes.json();
-        }
         if (isMounted && res?.data?.coupons?.length) {
           const formatted = res.data.coupons
             .filter((c) => c.isActive !== false)
@@ -255,12 +262,13 @@ export default function BookingDialog({
                 : "Valid",
               couponId: c._id,
             }));
-          if (formatted.length > 0) {
-            setCouponsList(formatted);
-          }
+          setCouponsList(formatted);
+        } else if (isMounted) {
+          setCouponsList([]);
         }
       } catch (err) {
         console.warn("[booking-dialog] Error loading coupons:", err);
+        if (isMounted) setCouponsList([]);
       }
     }
     loadCoupons();
@@ -444,6 +452,11 @@ export default function BookingDialog({
       return;
     }
 
+    if (propertyType === "Camping" && totalSelectedTentsCount === 0) {
+      setIsTentSelectionOpen(true);
+      return;
+    }
+
     if (propertyType === "Villa") {
       if (totalGuests > maxCap) {
         setTentError(`Selected guests (${totalGuests}) exceed maximum property capacity of ${maxCap}`);
@@ -495,6 +508,7 @@ export default function BookingDialog({
         shouldScaleBackground={false}
       >
         <DrawerContent className="max-h-[88vh] h-[88vh] border-none bg-white rounded-t-[28px] flex flex-col focus:outline-none overflow-hidden">
+          <DrawerTitle className="sr-only">Book Your Stay - {propertyName || "Property"}</DrawerTitle>
           {/* Top Grab Handle */}
           <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto my-2 shrink-0" />
 
@@ -941,6 +955,36 @@ export default function BookingDialog({
                 </div>
               )}
 
+              {/* If propertyType is Camping, show Tents Selection card */}
+              {propertyType === "Camping" && (
+                <div className="p-3 bg-white rounded-2xl border border-neutral-200/90 shadow-2xs space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="text-[10px] font-bold text-[#ff6900] uppercase tracking-wider block">
+                        Campsite Accommodation
+                      </span>
+                      <h4 className="text-xs font-bold text-neutral-900 mt-0.5">
+                        {totalSelectedTentsCount > 0
+                          ? `${totalSelectedTentsCount} ${totalSelectedTentsCount === 1 ? "Tent" : "Tents"} Selected`
+                          : "No Tents Selected"}
+                      </h4>
+                      <p className="text-[10.5px] text-neutral-500">
+                        {totalSelectedTentsCount > 0
+                          ? `Accommodates up to ${totalSelectedTentCapacity} guests`
+                          : "Select your tent type & units to proceed"}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsTentSelectionOpen(true)}
+                      className="px-3 py-1.5 bg-orange-50 hover:bg-orange-100 text-[#ff6900] border border-orange-200 font-bold text-xs rounded-xl transition-all active:scale-95 cursor-pointer"
+                    >
+                      {totalSelectedTentsCount > 0 ? "Change Tents" : "Select Tents"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* PRICING BREAKDOWN & DETAILS */}
               <div className="bg-neutral-50/90 rounded-2xl p-3 border border-neutral-200/90 space-y-2">
                 <div className="flex items-center justify-between">
@@ -1123,6 +1167,8 @@ export default function BookingDialog({
                 <ButtonLoader />
               ) : !areDatesSelected ? (
                 "Select Dates"
+              ) : propertyType === "Camping" && totalSelectedTentsCount === 0 ? (
+                "Select Tents"
               ) : isOverCapacity ? (
                 "Exceeds Capacity"
               ) : (
@@ -1132,6 +1178,20 @@ export default function BookingDialog({
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Tent Selection Drawer for Camping */}
+      {propertyType === "Camping" && (
+        <TentSelectionDrawer
+          isOpen={isTentSelectionOpen}
+          onClose={() => setIsTentSelectionOpen(false)}
+          tents={tents || []}
+          selectedTents={reduxSelectedTents}
+          onTentSelectionChange={() => {}}
+          totalGuests={totalGuests}
+          id={propertyId}
+          dateStr={checkinISO}
+        />
+      )}
 
       {/* Available Coupons Drawer */}
       <CouponsDrawer

@@ -1,20 +1,25 @@
 // redux/slices/couponsSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 // Thunks
 export const fetchCouponsByProperty = createAsyncThunk(
   "coupons/fetchByProperty",
   async (propertyId, { rejectWithValue }) => {
     try {
-      const res = await Getallcouponbypropertyid(propertyId);
-      // Expecting your API returns { status: "success", data: { coupons: [...] } } or similar
-      if (!res || res?.status === false) {
-        const message = res?.message || "Failed to fetch coupons";
-        return rejectWithValue(message);
+      let coupons = [];
+      if (propertyId) {
+        try {
+          const res = await Getallcouponbypropertyid(propertyId);
+          if (res?.data?.coupons && Array.isArray(res.data.coupons)) {
+            coupons = res.data.coupons;
+          }
+        } catch (e) {
+          coupons = [];
+        }
       }
-      // normalize: if API returns data.coupons or coupons directly
-      const coupons = res?.data?.coupons ?? res?.coupons ?? [];
+
       return coupons;
     } catch (err) {
       return rejectWithValue(err.message || "Network error");

@@ -110,9 +110,9 @@ export default function VillaDetailHeader() {
   ];
 
   return (
-    <header className="bg-white/95 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40 shadow-xs transition-all">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-18 gap-3">
+    <header className="bg-white/95 backdrop-blur-xl border-b border-gray-100 sticky top-0 z-40 shadow-xs transition-all h-16 md:h-[72px]">
+      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 h-full">
+        <div className="flex items-center justify-between h-full gap-3">
           
           {/* 1. Left: Brand Logo */}
           <div className="flex items-center space-x-6 shrink-0">

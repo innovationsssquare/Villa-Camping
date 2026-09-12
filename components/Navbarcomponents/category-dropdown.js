@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Search, Compass, Home, Tent, Trees, Hotel, Sparkles } from "lucide-react";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import { KNOWN_CATEGORY_IDS } from "@/lib/categoryUtils";
 import Image from "next/image";
 
 export function CategorySearch({ onCategorySelect, isMobile = false }) {
@@ -21,28 +22,28 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
       image: "/Productasset/Villaimg.png",
     },
     {
-      id: "villa",
+      id: KNOWN_CATEGORY_IDS.VILLA,
       name: "Villas",
       description: "Private pools & luxury estates",
       icon: Home,
       image: "/Productasset/Villaimg.png",
     },
     {
-      id: "camping",
+      id: KNOWN_CATEGORY_IDS.CAMPING,
       name: "Campings",
       description: "Lakeside tents & bonfire nights",
       icon: Tent,
       image: "/Productasset/Campimg.png",
     },
     {
-      id: "cottage",
+      id: KNOWN_CATEGORY_IDS.COTTAGE,
       name: "Cottages",
       description: "Cozy nature & hill retreats",
       icon: Trees,
       image: "/Productasset/Villaimg.png",
     },
     {
-      id: "hotel",
+      id: KNOWN_CATEGORY_IDS.HOTEL,
       name: "Hotels",
       description: "Resorts & boutique suites",
       icon: Hotel,
@@ -51,9 +52,16 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
   ];
 
   const handleSelect = (catId, catName) => {
-    dispatch(setSelectedCategory(catId === "all" ? null : catId));
+    let finalId = catId === "all" ? null : catId;
+    if (finalId) {
+      const upper = String(finalId).trim().toUpperCase();
+      if (KNOWN_CATEGORY_IDS[upper]) {
+        finalId = KNOWN_CATEGORY_IDS[upper];
+      }
+    }
+    dispatch(setSelectedCategory(finalId));
     dispatch(setSelectedCategoryname(catName));
-    if (onCategorySelect) onCategorySelect(catId, catName);
+    if (onCategorySelect) onCategorySelect(finalId, catName);
   };
 
   const filtered = (categories || []).filter((c) =>

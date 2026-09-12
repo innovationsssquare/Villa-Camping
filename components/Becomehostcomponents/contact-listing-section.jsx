@@ -14,7 +14,7 @@ export function ContactListingSection() {
     message: ''
   });
 
-  const handleChange = () => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -22,7 +22,7 @@ export function ContactListingSection() {
     }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
     setFormData({

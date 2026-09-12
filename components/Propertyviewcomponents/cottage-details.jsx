@@ -1,22 +1,20 @@
 "use client";
 
 import { useEffect } from "react";
-import { Users, XCircle } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import PremiumPropertyHero from "./Cottage-view-details/premium-property-hero";
-import PropertyHeaderSection from "./Cottage-view-details/property-header-section";
+import { XCircle } from "lucide-react";
+import PremiumPropertyHero from "./premium-property-hero";
+import PropertyHeaderSection from "./property-header-section";
 import StickyTabsNavigation from "./sticky-tabs-navigation";
-import PropertyContentSections from "./Cottage-view-details/property-content-sections";
-import StickyBookingWidget from "./Cottage-view-details/sticky-booking-widget";
-import Logo from "../../public/Productasset/Logo2.png";
-import Image from "next/image";
+import PropertyContentSections from "./property-content-sections";
+import StickyBookingWidget from "./sticky-booking-widget";
+import VillaDetailHeader from "./villa-detail-header";
 import { useParams } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import VillaScreenSkeleton from "./villa-screen-skeleton";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { fetchCottageById } from "@/Redux/Slices/cottageSlice";
 import { CottageProvider } from "@/lib/context/CottageContext";
+import { VillaProvider } from "@/lib/context/VillaContext";
 
 export default function CottageDetails() {
   const dispatch = useDispatch();
@@ -26,10 +24,10 @@ export default function CottageDetails() {
 
   useEffect(() => {
     dispatch(fetchCottageById(id));
-  }, [id]);
+  }, [id, dispatch]);
 
   if (loading) {
-    return <VillaScreenSkeleton />;
+    return <VillaScreenSkeleton view="desktop" />;
   }
 
   if (error) {
@@ -54,63 +52,39 @@ export default function CottageDetails() {
   }
 
   return (
-    <CottageProvider cottage={cottage}>
-      <div
-        className="min-h-screen bg-gray-50 hidden md:block"
-        style={{
-          fontFamily:
-            'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
-        }}
-      >
-        <header className="bg-white backdrop-blur-2xl border-b border-gray-200 sticky top-0 z-40 ">
-          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center space-x-8">
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center space-x-2">
-                    <Image
-                      src={Logo}
-                      alt="Thevillacamp"
-                      className="h-16 w-16 object-contain mt-2"
-                    />
-                  </div>
+    <VillaProvider villa={cottage}>
+      <CottageProvider cottage={cottage}>
+        <div
+          className="min-h-screen bg-gray-50 hidden md:block"
+          style={{
+            fontFamily:
+              'Airbnb Cereal VF, Circular, -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif',
+          }}
+        >
+          {/* Unified StayVista-style Property Header */}
+          <VillaDetailHeader />
+
+          <main className="w-full mx-auto">
+            <PremiumPropertyHero />
+            <StickyTabsNavigation />
+
+            <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Left Column: Overview Header + Content Sections */}
+                <div className="lg:col-span-2 space-y-8">
+                  <PropertyHeaderSection />
+                  <PropertyContentSections />
+                </div>
+
+                {/* Right Column: Sticky Booking Widget */}
+                <div className="lg:col-span-1 relative">
+                  <StickyBookingWidget />
                 </div>
               </div>
-              <div className="flex items-center space-x-4">
-                <Button variant="ghost" size="sm">
-                  Become a host
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Users className="w-5 h-5" />
-                </Button>
-              </div>
             </div>
-          </div>
-        </header>
-
-        <main className="w-full mx-auto">
-          <PremiumPropertyHero />
-          <StickyTabsNavigation />
-          <PropertyHeaderSection />
-
-          <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <PropertyContentSections />
-              </div>
-
-              <div className="lg:col-span-1 relative">
-                <StickyBookingWidget />
-              </div>
-            </div>
-          </div>
-
-          {/* Similar stays - Coming soon with backend data */}
-          {/* <div className="mt-12 border-t border-gray-200 py-8 w-11/12 mx-auto">
-            <h3 className="text-lg font-semibold text-gray-900 mb-6">Similar stays</h3>
-          </div> */}
-        </main>
-      </div>
-    </CottageProvider>
+          </main>
+        </div>
+      </CottageProvider>
+    </VillaProvider>
   );
 }

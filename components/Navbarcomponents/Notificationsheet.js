@@ -123,42 +123,59 @@ function getNotificationIcon(type) {
   }
 }
 
-export function NotificationSheet() {
-  const [notifications, setNotifications] = useState(initialNotifications)
-  const [open, setOpen] = useState(false)
+export function NotificationSheet({ trigger, open: controlledOpen, onOpenChange }) {
+  const [notifications, setNotifications] = useState(initialNotifications);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isControlled = controlledOpen !== undefined;
+  const open = isControlled ? controlledOpen : internalOpen;
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length
+  const handleOpenChange = (newOpen) => {
+    if (!isControlled) {
+      setInternalOpen(newOpen);
+    }
+    onOpenChange?.(newOpen);
+  };
+
+  const unreadCount = notifications.filter((notification) => !notification.read).length;
 
   const markAsRead = (id) => {
     setNotifications((prev) =>
       prev.map((notification) => (notification.id === id ? { ...notification, read: true } : notification)),
-    )
-  }
+    );
+  };
 
   const markAllAsRead = () => {
-    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })))
-  }
+    setNotifications((prev) => prev.map((notification) => ({ ...notification, read: true })));
+  };
 
   const removeNotification = (id) => {
-    setNotifications((prev) => prev.filter((notification) => notification.id !== id))
-  }
+    setNotifications((prev) => prev.filter((notification) => notification.id !== id));
+  };
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger asChild>
-        <Button variant="outline" size="icon" className="relative rounded-full border-gray-200 border bg-white/90 h-7 w-7 p-0 flex items-center justify-center shadow-2xs hover:bg-neutral-50 text-neutral-800">
-          <FaBell className="h-3 w-3" />
-          {unreadCount > 0 && (
-            <Badge
-              className="absolute -top-1 -right-1 px-1 py-0 bg-[#ff6900] text-white border-1 border-white min-w-[1rem] h-4 text-[9px] flex items-center justify-center"
-              variant="default"
-            >
-              {unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </SheetTrigger>
-      <SheetContent className="w-full sm:max-w-md p-0 overflow-hidden bg-white border-none">
+    <Sheet open={open} onOpenChange={handleOpenChange}>
+      {trigger !== undefined ? (
+        trigger && <SheetTrigger asChild>{trigger}</SheetTrigger>
+      ) : (
+        <SheetTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className="relative rounded-full border-gray-200 border bg-white/90 h-8 w-8 p-0 flex items-center justify-center shadow-2xs hover:bg-neutral-50 text-neutral-800 cursor-pointer"
+          >
+            <FaBell className="h-3.5 w-3.5 text-neutral-700" />
+            {unreadCount > 0 && (
+              <Badge
+                className="absolute -top-1 -right-1 px-1 py-0 bg-[#ff6900] text-white border-1 border-white min-w-[1rem] h-4 text-[9px] flex items-center justify-center"
+                variant="default"
+              >
+                {unreadCount}
+              </Badge>
+            )}
+          </Button>
+        </SheetTrigger>
+      )}
+      <SheetContent className="w-full sm:max-w-md p-0 overflow-hidden bg-white border-none z-50">
         <div className="flex flex-col h-full">
           <SheetHeader className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">

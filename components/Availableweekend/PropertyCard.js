@@ -72,6 +72,7 @@ import {
 } from "@/Redux/Slices/wishlistSlice";
 import VideoModal from "./VideoModal";
 import { addToast } from "@heroui/react";
+import { getCategoryRouteName, buildPropertyViewUrl } from "@/lib/categoryUtils";
 
 export default function PropertyCardnew({ property }) {
   const dispatch = useDispatch();
@@ -87,6 +88,7 @@ export default function PropertyCardnew({ property }) {
   const { selectedCategoryName, checkin, checkout } = useSelector(
     (state) => state.booking
   );
+  const categories = useSelector((state) => state.category?.categories || []);
 
   const checkInDate = useMemo(
     () => (checkin ? new Date(checkin) : new Date()),
@@ -181,22 +183,20 @@ export default function PropertyCardnew({ property }) {
 
   // Category routing helper
   const getCategoryName = () => {
-    const raw =
-      property?.category?.name ||
-      property?.category ||
-      selectedCategoryName ||
-      "Villa";
-    const str = String(raw).toLowerCase();
-    if (str.includes("camp")) return "Camping";
-    if (str.includes("cottage")) return "Cottage";
-    if (str.includes("hotel")) return "Hotel";
-    return "Villa";
+    return getCategoryRouteName(property, categories, selectedCategoryName);
   };
 
   const handleCardClick = () => {
     dispatch(removeCoupon());
     dispatch(clearSelectedTents());
-    router.push(`/view-${getCategoryName()}/${property?._id}`);
+    const url = buildPropertyViewUrl(
+      property,
+      categories,
+      selectedCategoryName,
+      checkin,
+      checkout
+    );
+    router.push(url);
   };
 
   // Format currency
@@ -480,12 +480,47 @@ export default function PropertyCardnew({ property }) {
                   <span>{property.baths} {property.baths === 1 ? "Bath" : "Baths"}</span>
                 </div>
               )}
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100/90 text-neutral-700 text-xs font-medium">
-                <Home className="w-3.5 h-3.5 text-[#ff6900]" />
-                <span>
-                  {property?.subtype || (property?.rooms ? `${property.rooms} Rooms` : "Entire Villa")}
-                </span>
-              </div>
+              {(() => {
+                const cat = getCategoryName();
+                if (cat === "Camping") {
+                  return (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100/90 text-neutral-700 text-xs font-medium">
+                      <Tent className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span>
+                        {property?.subtype || (property?.totaltents ? `${property.totaltents} Available Tents` : "Campsite Stay")}
+                      </span>
+                    </div>
+                  );
+                }
+                if (cat === "Cottage") {
+                  return (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100/90 text-neutral-700 text-xs font-medium">
+                      <Trees className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span>
+                        {property?.subtype || (property?.totalcottage ? `${property.totalcottage} Cottages` : "Cottage Stay")}
+                      </span>
+                    </div>
+                  );
+                }
+                if (cat === "Hotel") {
+                  return (
+                    <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100/90 text-neutral-700 text-xs font-medium">
+                      <Building2 className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span>
+                        {property?.subtype || (Array.isArray(property?.rooms) ? `${property.rooms.length} Room Types` : "Hotel Stay")}
+                      </span>
+                    </div>
+                  );
+                }
+                return (
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-neutral-100/90 text-neutral-700 text-xs font-medium">
+                    <Home className="w-3.5 h-3.5 text-[#ff6900]" />
+                    <span>
+                      {property?.bhkType || property?.subtype || (property?.rooms ? `${property.rooms} Rooms` : "Entire Villa")}
+                    </span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* "Great for" Tags */}

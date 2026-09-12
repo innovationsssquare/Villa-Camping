@@ -1,151 +1,147 @@
 "use client";
-import { cn } from "@/lib/utils";
-import { Tabs, Tab } from "@heroui/react";
+
 import { useEffect, useState } from "react";
-import { RiHome5Fill } from "react-icons/ri";
-import { useScrollDirection } from "@/hooks/use-scroll-direction";
-import { IoGrid } from "react-icons/io5";
-import { BsFillChatSquareHeartFill } from "react-icons/bs";
-import { FaPlay } from "react-icons/fa";
 import { usePathname, useRouter } from "next/navigation";
-import { DiBootstrap } from "react-icons/di";
-import { IoMdBookmarks } from "react-icons/io";
-import { House } from "lucide-react";
-import { IoHome } from "react-icons/io5";
-import { IoHomeOutline } from "react-icons/io5";
-import { IoGridOutline } from "react-icons/io5";
-import { BiSolidBookBookmark } from "react-icons/bi";
-import { BiBookBookmark } from "react-icons/bi";
-import { FaRegUser } from "react-icons/fa6";
-import { FaUser } from "react-icons/fa6";
-import { IoPerson } from "react-icons/io5";
-import { IoPersonOutline } from "react-icons/io5";
-import { IoTicket } from "react-icons/io5";
-import { IoTicketOutline } from "react-icons/io5";
-import { setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
 import { useSelector } from "react-redux";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import { useScrollDirection } from "@/hooks/use-scroll-direction";
+import {
+  Home,
+  Compass,
+  Play,
+  CalendarCheck,
+  User,
+} from "lucide-react";
 
 export function BottomNav() {
-  const [activeTab, setActiveTab] = useState("home");
-  const { isVisible } = useScrollDirection();
   const router = useRouter();
   const pathname = usePathname();
-  const [activeitem, setactiveitem] = useState();
-  const {
-    selectedCategoryName,
-  } = useSelector((state) => state.booking);
+  const { isVisible } = useScrollDirection();
+  const { selectedCategoryName } = useSelector((state) => state.booking || {});
+
+  // Determine active item from route
+  const getActiveTab = (path) => {
+    if (path === "/") return "home";
+    if (path.startsWith("/category") || path.startsWith("/products") || path === "/explore") return "stays";
+    if (path.startsWith("/shorts")) return "shorts";
+    if (path.startsWith("/booking")) return "bookings";
+    if (path.startsWith("/account")) return "profile";
+    return "home";
+  };
+
+  const [activeTab, setActiveTab] = useState(() => getActiveTab(pathname));
 
   useEffect(() => {
-    if (pathname === "/") {
-      setActiveTab("/");
-    } else if (pathname === "/account") {
-      setActiveTab("/account");
-    } else if (pathname === "/shorts") {
-      setActiveTab("/shorts");
-    } else if (pathname === "/booking") {
-      setActiveTab("/booking");
-    } else if (
-      pathname.startsWith("/category") ||
-      pathname.startsWith("/products")
-    ) {
-      setActiveTab(`/category/${selectedCategoryName}`);
-    } else {
-      setActiveTab("/");
-    }
+    setActiveTab(getActiveTab(pathname));
   }, [pathname]);
+
+  const targetCategoryPath = selectedCategoryName
+    ? `/category/${selectedCategoryName}`
+    : "/category/all";
 
   const navItems = [
     {
-      value: "/",
-      icon: <IoHome className="h-5 w-5" />,
-      outline: <IoHomeOutline className="h-5 w-5" />,
+      id: "home",
       label: "Home",
+      path: "/",
+      icon: Home,
     },
     {
-      value: `/category/${selectedCategoryName}`,
-      icon: <IoGrid className="h-5 w-5" />,
-      outline: <IoGridOutline className="h-5 w-5" />,
-      label: "category",
+      id: "stays",
+      label: "Stays",
+      path: targetCategoryPath,
+      icon: Compass,
     },
     {
-      value: "/shorts",
-      icon: <FaPlay size={24} className="h-5 w-5" />,
-      outline: <FaPlay size={24} className="h-5 w-5" />,
-      label: "Favorites",
+      id: "shorts",
+      label: "Shorts",
+      path: "/shorts",
+      icon: Play,
+      isSpecial: true,
     },
     {
-      value: "/booking",
-      icon: <IoTicket className="h-6 w-6" />,
-      outline: <IoTicketOutline className="h-6 w-6" />,
-      label: "Recycle",
+      id: "bookings",
+      label: "Bookings",
+      path: "/booking",
+      icon: CalendarCheck,
     },
     {
-      value: "/account",
-      icon: <IoPerson className="h-5 w-5" />,
-      outline: <IoPersonOutline className="h-5  w-5" />,
+      id: "profile",
       label: "Profile",
+      path: "/account",
+      icon: User,
     },
   ];
 
+  const handleItemClick = (item) => {
+    setActiveTab(item.id);
+    if (pathname !== item.path) {
+      router.push(item.path);
+    }
+  };
+
   return (
-    <Tabs
-      radius="full"
-      selectedKey={activeTab}
-      onSelectionChange={setActiveTab}
+    <div
       className={cn(
-        "fixed md:hidden bottom-0.5 left-0 right-0 mx-auto w-full overflow-hidden   px-4 z-50 transition-transform duration-300 ease-in-out",
-        isVisible ? "translate-y-0" : "translate-y-20"
+        "fixed md:hidden bottom-2 left-0 right-0 mx-auto w-[94%] max-w-md z-50 transition-all duration-300 ease-out",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"
       )}
-      classNames={{
-        tabList:
-          "h-14  z-20 w-full border border-gray-300 rounded-full   bg-white",
-        tab: "flex  w-full h-12 w-12 flex-1 flex-col items-center justify-center rounded-full data-[selected=true]:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0",
-        cursor: "rounded-full border-gray-200 border  ",
-        tabContent: "group-data-[selected=true]:text-black ",
-      }}
     >
-      {navItems.map((item) => (
-        <Tab
-          key={item.value}
-          onClick={() => {
-            setActiveTab(item.value);
-            if (pathname !== item.value) {
-              router.push(item.value);
-            }
-          }}
-          title={
-            <div
-              className="h-14 w-14  flex flex-col items-center justify-center"
-              onClick={() => {
-                setActiveTab(item.value);
-                if (pathname !== item.value) {
-                  router.push(item.value);
-                }
-              }}
+      <nav className="relative flex items-center justify-between px-2 py-1.5 rounded-full bg-white/95 backdrop-blur-xl border border-neutral-200/90 shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+        {navItems.map((item) => {
+          const isActive = activeTab === item.id;
+          const Icon = item.icon;
+
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => handleItemClick(item)}
+              className={cn(
+                "relative flex flex-col items-center justify-center flex-1 py-1.5 px-1 rounded-full text-xs transition-colors duration-200 cursor-pointer select-none",
+                isActive ? "text-[#ff6900] font-bold" : "text-neutral-500 hover:text-neutral-900"
+              )}
             >
+              {/* Active pill indicator background */}
+              {isActive && (
+                <motion.div
+                  layoutId="bottomNavActivePill"
+                  className="absolute inset-0 rounded-full bg-orange-50/90 border border-orange-200/60 -z-10"
+                  transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                />
+              )}
+
+              {/* Icon Container with custom styling for Shorts */}
               <div
                 className={cn(
-                  "flex h-12 w-12   items-center justify-center rounded-full transition-colors duration-400",
-
-                  item.value === "/shorts" && activeTab !== item.value
-                    ? " p-3 text-white bg-black "
-                    : ""
+                  "relative flex items-center justify-center w-7 h-7 rounded-full transition-transform duration-200",
+                  item.isSpecial && !isActive && "bg-neutral-900 text-white shadow-2xs",
+                  item.isSpecial && isActive && "bg-[#ff6900] text-white shadow-xs scale-105"
                 )}
               >
-                {activeTab === item.value ? (
-                  <span>{item.icon}</span>
-                ) : (
-                  <span>{item.outline}</span>
-                )}
+                <Icon
+                  className={cn(
+                    "w-4.5 h-4.5 transition-transform",
+                    isActive && !item.isSpecial && "scale-110 text-[#ff6900]",
+                    item.isSpecial && "w-3.5 h-3.5 fill-current ml-0.5"
+                  )}
+                />
               </div>
 
-              <span className="sr-only">{item.label}</span>
-            </div>
-          }
-        >
-          <span className="sr-only">{item.label}</span>
-        </Tab>
-      ))}
-    </Tabs>
+              {/* Label */}
+              <span
+                className={cn(
+                  "text-[10px] tracking-tight leading-tight mt-0.5 transition-colors font-medium",
+                  isActive ? "text-[#ff6900] font-bold" : "text-neutral-600"
+                )}
+              >
+                {item.label}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+    </div>
   );
 }

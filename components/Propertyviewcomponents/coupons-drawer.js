@@ -38,8 +38,15 @@ const CouponsDrawer = ({
   // NEW: separate loading states
   const [isApplyingManual, setIsApplyingManual] = useState(false);
   const [applyingCode, setApplyingCode] = useState(null); // string => coupon code being applied from cards
+  const [currentDeviceId, setCurrentDeviceId] = useState(null);
   const isSubtotalInvalid =
     !Number.isFinite(Number(subtotal)) || Number(subtotal) <= 0;
+
+  useEffect(() => {
+    getDeviceId().then((id) => {
+      if (id) setCurrentDeviceId(id);
+    });
+  }, []);
 
   // redux slice state
   const {
@@ -104,12 +111,17 @@ const CouponsDrawer = ({
       discountType:
         (c.discount && c.discount.type) || c.discountType || "percentage",
       maxDiscount: c.maxDiscount ?? c.maxDiscountAmount ?? 0,
+      isUsedOnThisDevice: Boolean(
+        currentDeviceId &&
+        Array.isArray(c.devicesUsed) &&
+        c.devicesUsed.includes(currentDeviceId)
+      ),
     };
   };
 
   const couponsToRender = useMemo(() => {
     return (list || []).map((c) => normalizeCouponForUI(c));
-  }, [list]);
+  }, [list, currentDeviceId]);
 
   const normalizeApplyResponse = (apiResponse) => {
     const payload = apiResponse?.data ?? apiResponse ?? {};
@@ -149,6 +161,26 @@ const CouponsDrawer = ({
 
       const deviceId = await getDeviceId();
       const userId = getUserId();
+
+      // Guard: Pre-check if coupon is already used on this device
+      const targetCoupon = (list || []).find(
+        (c) => c.code?.toUpperCase() === code.trim().toUpperCase()
+      );
+      if (
+        targetCoupon &&
+        deviceId &&
+        Array.isArray(targetCoupon.devicesUsed) &&
+        targetCoupon.devicesUsed.includes(deviceId)
+      ) {
+        addToast?.({
+          title: "Coupon Already Used",
+          description: "This coupon has already been used on this device.",
+          color: "danger",
+        });
+        if (source === "manual") setIsApplyingManual(false);
+        else setApplyingCode(null);
+        return;
+      }
 
       const payload = {
         couponCode: code,
@@ -354,14 +386,18 @@ const CouponsDrawer = ({
 
                       <button
                         onClick={() => handleCouponApply(coupon)}
-                        disabled={isThisApplying || isApplied}
+                        disabled={isThisApplying || isApplied || coupon.isUsedOnThisDevice}
                         className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                          isApplied
+                          coupon.isUsedOnThisDevice
+                            ? "bg-gray-100 text-gray-400 border border-gray-200 cursor-not-allowed"
+                            : isApplied
                             ? "bg-emerald-50 text-emerald-700 border border-emerald-300 cursor-not-allowed"
                             : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white shadow-xs"
                         }`}
                       >
-                        {isApplied
+                        {coupon.isUsedOnThisDevice
+                          ? "USED"
+                          : isApplied
                           ? "✓ APPLIED"
                           : isThisApplying
                           ? "Applying..."
@@ -373,8 +409,8 @@ const CouponsDrawer = ({
               })}
 
               {(couponsToRender || []).length === 0 &&
-                fetchStatus === "succeeded" && (
-                  <div className="text-sm text-gray-500">
+                fetchStatus !== "loading" && (
+                  <div className="text-sm text-gray-500 text-center py-6">
                     No coupons available for this property
                   </div>
                 )}

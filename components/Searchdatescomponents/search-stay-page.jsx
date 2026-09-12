@@ -177,7 +177,7 @@ export default function SearchStayPage() {
     dispatch(updateGuestCount({ type: "pets", value: 0 }));
   };
 
-  const handleSearch = async () => {
+  const handleSearch = () => {
     if (checkin && !checkout) {
       addToast({
         title: "Select check-out date",
@@ -191,9 +191,10 @@ export default function SearchStayPage() {
     setIsSearching(true);
 
     try {
-      const targetSlug = selectedCategoryName
-        ? selectedCategoryName.toLowerCase()
-        : "all";
+      const targetSlug =
+        selectedCategoryName && selectedCategoryName !== "All Stays"
+          ? selectedCategoryName.toLowerCase()
+          : "all";
 
       const params = new URLSearchParams();
       if (checkin) params.set("checkin", checkin);
@@ -202,23 +203,13 @@ export default function SearchStayPage() {
       if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
       const queryStr = params.toString();
 
-      await dispatch(
-        fetchAllProperties({
-          categoryId: selectedCategoryId,
-          checkIn: checkin,
-          checkOut: checkout,
-          subtype: "",
-          page: 1,
-          limit: 20,
-        })
-      ).unwrap();
-
       router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
     } catch (error) {
       console.error("Search error:", error);
-      const targetSlug = selectedCategoryName
-        ? selectedCategoryName.toLowerCase()
-        : "all";
+      const targetSlug =
+        selectedCategoryName && selectedCategoryName !== "All Stays"
+          ? selectedCategoryName.toLowerCase()
+          : "all";
       router.push(`/category/${targetSlug}`);
     } finally {
       setIsSearching(false);

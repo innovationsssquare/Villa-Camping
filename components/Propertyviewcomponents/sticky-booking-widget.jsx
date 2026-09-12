@@ -1,6 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import TentSelectionModal from "./tent-selection-modal";
+import CottageSelectionModal from "./cottage-selection-modal";
+import RoomSelectionModal from "./room-selection-modal";
+import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
+import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
 import {
   CalendarIcon,
   Users,
@@ -13,6 +18,9 @@ import {
   Receipt,
   Minus,
   Plus,
+  Tent,
+  Trees,
+  Bed,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -57,7 +65,8 @@ import {
   useHolidayDates,
   calculateNightBreakdown,
 } from "@/lib/pricingUtils";
-import { Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
+import { Getallcouponbypropertyid, Applycoupon } from "@/lib/API/Coupon/Coupon";
+import { getDeviceId } from "@/lib/deviceId";
 import { Checkvillaavailability } from "@/lib/API/category/Villa/Villa";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { AlertCircle } from "lucide-react";
@@ -73,8 +82,93 @@ export default function StickyBookingWidget() {
   const villa = useVilla();
   const router = useRouter();
   const dispatch = useDispatch();
-  const { checkin, checkout, selectedGuest, appliedCoupon } =
-    useSelector((state) => state.booking);
+  const {
+    checkin,
+    checkout,
+    selectedGuest,
+    appliedCoupon,
+    selectedTents: reduxSelectedTents,
+    selectedCottages: reduxSelectedCottages,
+    selectedRooms: reduxSelectedRooms,
+  } = useSelector((state) => state.booking);
+  const [tentModalOpen, setTentModalOpen] = useState(false);
+  const [cottageModalOpen, setCottageModalOpen] = useState(false);
+  const [roomModalOpen, setRoomModalOpen] = useState(false);
+
+  const isCamping = Boolean(villa?.tents && villa.tents.length > 0);
+  const isCottage = Boolean(villa?.cottages && villa.cottages.length > 0);
+  const isHotel = Boolean(villa?.rooms && villa.rooms.length > 0);
+
+  const dayCottages = useSelector(
+    (state) =>
+      state.cottage?.dayDetails?.data?.cottages ||
+      state.cottage?.dayDetails?.data?.tents ||
+      state.cottage?.dayDetails?.cottages ||
+      state.cottage?.dayDetails?.tents ||
+      []
+  );
+  const dayRooms = useSelector(
+    (state) =>
+      state.hotel?.dayDetails?.data?.rooms ||
+      state.hotel?.dayDetails?.data?.tents ||
+      state.hotel?.dayDetails?.rooms ||
+      state.hotel?.dayDetails?.tents ||
+      []
+  );
+
+  const totalSelectedTentsCount = Object.values(reduxSelectedTents || {}).reduce(
+    (s, t) => s + (t.quantity || 0),
+    0
+  );
+  const totalSelectedTentGuests = Object.values(reduxSelectedTents || {}).reduce(
+    (s, t) => s + (t.maxCapacity || 2) * (t.quantity || 0),
+    0
+  );
+
+  const totalSelectedCottagesCount = Object.values(reduxSelectedCottages || {}).reduce(
+    (s, c) => s + (c.quantity || 0),
+    0
+  );
+  const totalSelectedCottageGuests = Object.values(reduxSelectedCottages || {}).reduce(
+    (s, c) => s + (c.maxCapacity || 2) * (c.quantity || 0),
+    0
+  );
+
+  const totalSelectedRoomsCount = Object.values(reduxSelectedRooms || {}).reduce(
+    (s, r) => s + (r.quantity || 0),
+    0
+  );
+  const totalSelectedRoomGuests = Object.values(reduxSelectedRooms || {}).reduce(
+    (s, r) => s + (r.maxCapacity || 2) * (r.quantity || 0),
+    0
+  );
+
+  const lowestTentPrice = useMemo(() => {
+    if (!Array.isArray(villa?.tents) || villa.tents.length === 0) return 1200;
+    return Math.min(
+      ...villa.tents.map(
+        (t) => t.pricing?.weekdayPrice || t.pricing?.weekendPrice || 1200
+      )
+    );
+  }, [villa?.tents]);
+
+  const lowestCottagePrice = useMemo(() => {
+    if (!Array.isArray(villa?.cottages) || villa.cottages.length === 0) return 2000;
+    return Math.min(
+      ...villa.cottages.map(
+        (c) => c.pricing?.weekdayPrice || c.pricing?.weekendPrice || 2000
+      )
+    );
+  }, [villa?.cottages]);
+
+  const lowestRoomPrice = useMemo(() => {
+    if (!Array.isArray(villa?.rooms) || villa.rooms.length === 0) return 1500;
+    return Math.min(
+      ...villa.rooms.map(
+        (r) => r.pricing?.weekdayPrice || r.pricing?.weekendPrice || 1500
+      )
+    );
+  }, [villa?.rooms]);
 
   const [widgetFocusedSide, setWidgetFocusedSide] = useState(() => {
     return checkin && !checkout ? "checkout" : "checkin";
@@ -100,21 +194,69 @@ export default function StickyBookingWidget() {
     : 1;
 
   const villaPricing = villa?.pricing ?? {};
-  const basePricePerNight =
-    Number(villa?.basePricePerNight) ||
-    Number(villaPricing?.weekdayPrice) ||
-    Number(villaPricing?.weekendPrice) ||
-    0;
+  const basePricePerNight = isCamping
+    ? totalSelectedTentsCount > 0
+      ? Object.values(reduxSelectedTents).reduce(
+          (sum, t) => sum + (t.quantity || 0) * (t.weekdayPrice || lowestTentPrice),
+          0
+        )
+      : lowestTentPrice
+    : isCottage
+    ? totalSelectedCottagesCount > 0
+      ? Object.values(reduxSelectedCottages).reduce(
+          (sum, c) => sum + (c.quantity || 0) * (c.weekdayPrice || lowestCottagePrice),
+          0
+        )
+      : lowestCottagePrice
+    : isHotel
+    ? totalSelectedRoomsCount > 0
+      ? Object.values(reduxSelectedRooms).reduce(
+          (sum, r) => sum + (r.quantity || 0) * (r.weekdayPrice || lowestRoomPrice),
+          0
+        )
+      : lowestRoomPrice
+    : Number(villa?.basePricePerNight) ||
+      Number(villaPricing?.weekdayPrice) ||
+      Number(villaPricing?.weekendPrice) ||
+      0;
 
   // Compute the base amount using range pricing if dates selected, else 1-night base price
-  const baseAmount = areDatesSelected
-    ? calculateBasePriceForRange(
-        checkInDate?.toISOString(),
-        checkOutDate?.toISOString(),
-        villaPricing,
-        holidayDates
-      )
-    : basePricePerNight;
+  let baseAmount = 0;
+  if (isCamping) {
+    baseAmount = areDatesSelected && totalSelectedTentsCount > 0
+      ? Object.values(reduxSelectedTents).reduce(
+          (sum, t) => sum + (t.quantity || 0) * (t.weekdayPrice || lowestTentPrice) * nights,
+          0
+        )
+      : basePricePerNight * (areDatesSelected ? nights : 1);
+  } else if (isCottage) {
+    baseAmount = areDatesSelected && totalSelectedCottagesCount > 0
+      ? calculateCottageTotal(
+          reduxSelectedCottages,
+          dayCottages,
+          checkInDate?.toISOString(),
+          checkOutDate?.toISOString()
+        )
+      : basePricePerNight * (areDatesSelected ? nights : 1);
+  } else if (isHotel) {
+    baseAmount = areDatesSelected && totalSelectedRoomsCount > 0
+      ? calculateHotelTotal(
+          reduxSelectedRooms,
+          dayRooms,
+          checkInDate?.toISOString(),
+          checkOutDate?.toISOString()
+        )
+      : basePricePerNight * (areDatesSelected ? nights : 1);
+  } else {
+    baseAmount = areDatesSelected
+      ? calculateBasePriceForRange(
+          checkInDate?.toISOString(),
+          checkOutDate?.toISOString(),
+          villaPricing,
+          holidayDates
+        )
+      : basePricePerNight;
+  }
 
   const nightBreakdown = areDatesSelected
     ? calculateNightBreakdown(
@@ -125,7 +267,7 @@ export default function StickyBookingWidget() {
       )
     : [];
 
-  // Pass base=1 night multiplier since calculateBasePriceForRange already totals all nights
+  // Pass base=1 night multiplier since baseAmount already totals all nights
   const { discountAmount, finalTotal, taxAmount } = calculateBookingPrice(
     baseAmount,
     1,
@@ -133,8 +275,22 @@ export default function StickyBookingWidget() {
   );
 
   const totalGuests = (selectedGuest?.adults || 1) + (selectedGuest?.childrenn || 0);
-  const maxCapacity = Number(villa?.maxCapacity || 10);
-  const isOverCapacity = totalGuests > maxCapacity;
+  const maxCapacity = isCamping
+    ? totalSelectedTentsCount > 0
+      ? totalSelectedTentGuests
+      : Number(villa?.maxCapacity || 20)
+    : isCottage
+    ? totalSelectedCottagesCount > 0
+      ? totalSelectedCottageGuests
+      : Number(villa?.maxCapacity || 20)
+    : isHotel
+    ? totalSelectedRoomsCount > 0
+      ? totalSelectedRoomGuests
+      : Number(villa?.maxCapacity || 20)
+    : Number(villa?.maxCapacity || 10);
+
+  const isSubtypeProperty = isCamping || isCottage || isHotel;
+  const isOverCapacity = !isSubtypeProperty && totalGuests > maxCapacity;
 
   const widgetRef = useRef(null);
   const containerRef = useRef(null);
@@ -156,39 +312,7 @@ export default function StickyBookingWidget() {
     return () => window.removeEventListener("resize", checkScrollability);
   }, [areDatesSelected, appliedCoupon]);
 
-  const defaultAvailableCoupons = [
-    {
-      code: "VILLACAMP10",
-      title: "Book your dreamy getaway",
-      description:
-        "Book your dreamy getaway for a minimum of 2 nights and get 10% off upto 3000 Rs.",
-      discount: 10,
-      type: "percentage",
-      maxDiscount: 10000,
-      validUntil: "Valid",
-    },
-    {
-      code: "VILLACAMP102025",
-      title: "Instant Discount",
-      description:
-        "Get an instant discount of Rs. 4,000 on selected stays.",
-      discount: 4000,
-      type: "fixed",
-      maxDiscount: 15000,
-      validUntil: "Valid",
-    },
-    {
-      code: "VILLACAMPWEEKEND15",
-      title: "Weekend Special",
-      description: "15% off on weekend bookings",
-      discount: 15,
-      type: "percentage",
-      maxDiscount: 15000,
-      validUntil: "Valid",
-    },
-  ];
-
-  const [couponsList, setCouponsList] = useState(defaultAvailableCoupons);
+  const [couponsList, setCouponsList] = useState([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -197,10 +321,6 @@ export default function StickyBookingWidget() {
         let res = null;
         if (villa?._id) {
           res = await Getallcouponbypropertyid(villa._id);
-        }
-        if (!res || !res.data?.coupons?.length) {
-          const allRes = await fetch(`${BaseUrl}/Coupon/GetAllCoupons`);
-          res = await allRes.json();
         }
         if (isMounted && res?.data?.coupons?.length) {
           const formatted = res.data.coupons
@@ -221,12 +341,13 @@ export default function StickyBookingWidget() {
                 : "Valid",
               couponId: c._id,
             }));
-          if (formatted.length > 0) {
-            setCouponsList(formatted);
-          }
+          setCouponsList(formatted);
+        } else if (isMounted) {
+          setCouponsList([]);
         }
       } catch (err) {
         console.warn("[sticky-booking-widget] Error loading backend coupons:", err);
+        if (isMounted) setCouponsList([]);
       }
     }
     loadCoupons();
@@ -243,29 +364,46 @@ export default function StickyBookingWidget() {
     setIsApplyingCoupon(true);
     setCouponError("");
 
-    await new Promise((resolve) => setTimeout(resolve, 400));
+    try {
+      const deviceId = await getDeviceId();
+      const userId =
+        typeof window !== "undefined"
+          ? localStorage.getItem("thevilla_user_id")
+          : null;
 
-    const coupon = couponsList.find(
-      (c) => c.code.toLowerCase() === rawCode.toLowerCase()
-    );
+      const res = await Applycoupon({
+        couponCode: rawCode.trim().toUpperCase(),
+        orderValue: baseAmount,
+        userId,
+        deviceId,
+        propertyId: villa?._id,
+        propertyType: isCamping ? "camping" : isCottage ? "cottage" : isHotel ? "hotel" : "villa",
+      });
 
-    if (!coupon) {
-      setCouponError("Invalid coupon code");
+      if (res?.status === "success" && res?.data?.coupon) {
+        const backendCoupon = res.data.coupon;
+        dispatch(
+          setAppliedCoupon({
+            ...backendCoupon,
+            code: backendCoupon.code,
+            discountAmount: res.data.discountAmount,
+            discountType: backendCoupon.discount?.type || "percentage",
+            discountValue: backendCoupon.discount?.amount || 0,
+            maxDiscount: backendCoupon.maxDiscount || Infinity,
+          })
+        );
+        setCouponCode("");
+        setIsApplyingCoupon(false);
+      } else {
+        setCouponError(res?.message || "Invalid coupon code");
+        setIsApplyingCoupon(false);
+        return;
+      }
+    } catch (err) {
+      setCouponError("Failed to apply coupon");
       setIsApplyingCoupon(false);
       return;
     }
-
-    if (coupon.minAmount && baseAmount < coupon.minAmount) {
-      setCouponError(
-        `Minimum booking amount ₹${coupon.minAmount.toLocaleString()} required`
-      );
-      setIsApplyingCoupon(false);
-      return;
-    }
-
-    dispatch(setAppliedCoupon(coupon)); // 🔥 Redux
-    setCouponCode("");
-    setIsApplyingCoupon(false);
 
     const couponInputElement =
       document.querySelector("[data-coupon-input]") ||
@@ -356,8 +494,8 @@ export default function StickyBookingWidget() {
   };
 
   return (
-    <div id="booking-widget" className="lg:sticky lg:top-[120px] z-30 w-full transition-all duration-300">
-      <Card className="shadow-xl shadow-gray-200/50 border border-gray-150 bg-white/98 backdrop-blur-md rounded-2xl flex flex-col lg:max-h-[calc(100vh-8.5rem)] overflow-hidden">
+    <div id="booking-widget" className="lg:sticky lg:top-[148px] z-20 w-full transition-all duration-300 scroll-mt-[155px]">
+      <Card className="shadow-xl shadow-gray-200/50 border border-gray-150 bg-white/98 backdrop-blur-md rounded-2xl flex flex-col lg:max-h-[calc(100vh-10.5rem)] overflow-hidden">
         {/* Scrollable Upper Body with subtle custom scrollbar */}
         <div
           ref={scrollContainerRef}
@@ -381,17 +519,44 @@ export default function StickyBookingWidget() {
           <div>
             <div className="flex items-baseline space-x-2">
               <span className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                ₹{areDatesSelected ? finalTotal.toLocaleString("en-IN") : basePricePerNight.toLocaleString("en-IN")}
+                {isCamping && totalSelectedTentsCount === 0 && !areDatesSelected
+                  ? `Starts from ₹${lowestTentPrice.toLocaleString("en-IN")}`
+                  : isCottage && totalSelectedCottagesCount === 0 && !areDatesSelected
+                  ? `Starts from ₹${lowestCottagePrice.toLocaleString("en-IN")}`
+                  : isHotel && totalSelectedRoomsCount === 0 && !areDatesSelected
+                  ? `Starts from ₹${lowestRoomPrice.toLocaleString("en-IN")}`
+                  : `₹${(areDatesSelected ? finalTotal : basePricePerNight).toLocaleString("en-IN")}`}
               </span>
               <span className="text-gray-500 text-xs font-medium">
                 {areDatesSelected
                   ? nights === 1
                     ? "(1 night · Incl. taxes)"
                     : `(${nights} nights · Incl. taxes)`
+                  : isCamping
+                  ? "/ tent / night"
+                  : isCottage
+                  ? "/ cottage / night"
+                  : isHotel
+                  ? "/ room / night"
                   : "Per Night + Taxes"}
               </span>
             </div>
-            {!areDatesSelected && (
+            {isCamping && totalSelectedTentsCount === 0 && (
+              <p className="text-[11px] text-[#ff6900] font-medium mt-0.5">
+                Choose your tents & dates to calculate booking total
+              </p>
+            )}
+            {isCottage && totalSelectedCottagesCount === 0 && (
+              <p className="text-[11px] text-[#ff6900] font-medium mt-0.5">
+                Choose your cottages & dates to calculate booking total
+              </p>
+            )}
+            {isHotel && totalSelectedRoomsCount === 0 && (
+              <p className="text-[11px] text-[#ff6900] font-medium mt-0.5">
+                Choose your rooms & dates to calculate booking total
+              </p>
+            )}
+            {!isSubtypeProperty && !areDatesSelected && (
               <p className="text-[11px] text-amber-600 font-medium mt-0.5">
                 Select stay dates to calculate total stay price
               </p>
@@ -400,6 +565,93 @@ export default function StickyBookingWidget() {
 
           {/* Unified Compact Dates & Guests Selector (Airbnb Style) */}
           <div className="border border-gray-200 rounded-2xl overflow-hidden bg-white shadow-2xs divide-y divide-gray-150">
+            {/* If Camping, add Tent Accommodation Row */}
+            {isCamping && (
+              <div
+                onClick={() => setTentModalOpen(true)}
+                className={`p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-orange-50/50 ${
+                  totalSelectedTentsCount === 0 ? "bg-orange-50/20" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                      Tents Accommodation {totalSelectedTentsCount === 0 && <span className="text-red-500">*</span>}
+                    </span>
+                    <div className="flex items-center space-x-2 mt-0.5">
+                      <Tent className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {totalSelectedTentsCount > 0
+                          ? `${totalSelectedTentsCount} ${totalSelectedTentsCount === 1 ? "Tent" : "Tents"} (${totalSelectedTentGuests} Max Guests)`
+                          : "Choose Tents to Reserve"}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-[#ff6900] bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200/60">
+                    {totalSelectedTentsCount > 0 ? "Change" : "Select"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* If Cottage, add Cottage Accommodation Row */}
+            {isCottage && (
+              <div
+                onClick={() => setCottageModalOpen(true)}
+                className={`p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-orange-50/50 ${
+                  totalSelectedCottagesCount === 0 ? "bg-orange-50/20" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                      Cottage Accommodation {totalSelectedCottagesCount === 0 && <span className="text-red-500">*</span>}
+                    </span>
+                    <div className="flex items-center space-x-2 mt-0.5">
+                      <Trees className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {totalSelectedCottagesCount > 0
+                          ? `${totalSelectedCottagesCount} ${totalSelectedCottagesCount === 1 ? "Cottage" : "Cottages"} (${totalSelectedCottageGuests} Max Guests)`
+                          : "Choose Cottages to Reserve"}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-[#ff6900] bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200/60">
+                    {totalSelectedCottagesCount > 0 ? "Change" : "Select"}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* If Hotel, add Room Accommodation Row */}
+            {isHotel && (
+              <div
+                onClick={() => setRoomModalOpen(true)}
+                className={`p-2.5 sm:p-3 cursor-pointer transition-colors hover:bg-orange-50/50 ${
+                  totalSelectedRoomsCount === 0 ? "bg-orange-50/20" : "bg-white"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider block">
+                      Room Accommodation {totalSelectedRoomsCount === 0 && <span className="text-red-500">*</span>}
+                    </span>
+                    <div className="flex items-center space-x-2 mt-0.5">
+                      <Bed className="w-3.5 h-3.5 text-[#ff6900]" />
+                      <span className="text-xs sm:text-sm font-semibold text-gray-900">
+                        {totalSelectedRoomsCount > 0
+                          ? `${totalSelectedRoomsCount} ${totalSelectedRoomsCount === 1 ? "Room" : "Rooms"} (${totalSelectedRoomGuests} Max Guests)`
+                          : "Choose Rooms to Reserve"}
+                      </span>
+                    </div>
+                  </div>
+                  <span className="text-xs font-semibold text-[#ff6900] bg-orange-50 px-2 py-0.5 rounded-md border border-orange-200/60">
+                    {totalSelectedRoomsCount > 0 ? "Change" : "Select"}
+                  </span>
+                </div>
+              </div>
+            )}
+
             {/* Top Row: Dates */}
             <Popover open={datePopoverOpen} onOpenChange={setDatePopoverOpen}>
               <PopoverTrigger asChild>
@@ -531,9 +783,13 @@ export default function StickyBookingWidget() {
                 <div className="flex items-center space-x-2 min-w-0">
                   <Gift className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
                   <span className="text-xs font-semibold text-gray-800 truncate">Coupons & Offers</span>
-                  <span className="text-[10px] font-bold bg-[#ff6900]/10 text-[#ff6900] px-1.5 py-0.5 rounded-full">
-                    Up to 15% OFF
-                  </span>
+                  {couponsList && couponsList.length > 0 && (
+                    <span className="text-[10px] font-bold bg-[#ff6900]/10 text-[#ff6900] px-1.5 py-0.5 rounded-full">
+                      {couponsList[0].type === "percentage"
+                        ? `Up to ${couponsList[0].discount}% OFF`
+                        : `Flat ₹${couponsList[0].discount} OFF`}
+                    </span>
+                  )}
                 </div>
                 <Sheet>
                   <SheetTrigger asChild>
@@ -541,7 +797,7 @@ export default function StickyBookingWidget() {
                       type="button"
                       className="text-xs font-bold text-[#ff6900] hover:text-[#e05d00] flex items-center gap-0.5 cursor-pointer ml-2"
                     >
-                      <span>View (3)</span>
+                      <span>View ({couponsList?.length || 0})</span>
                       <ChevronRight className="w-3 h-3" />
                     </button>
                   </SheetTrigger>
@@ -581,45 +837,51 @@ export default function StickyBookingWidget() {
                         <div className="space-y-4">
                           <h4 className="font-bold text-sm text-gray-900">Coupons for you</h4>
                           <div className="space-y-3">
-                            {defaultAvailableCoupons.map((coupon) => (
-                              <Card
-                                key={coupon.code}
-                                className={`p-4 border transition-all duration-200 ${
-                                  appliedCoupon?.code === coupon.code
-                                    ? "border-emerald-300 bg-emerald-50/50 shadow-xs"
-                                    : "border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 shadow-xs"
-                                }`}
-                              >
-                                <div className="space-y-2">
-                                  <div className="flex items-center justify-between">
-                                    <h5 className="font-bold text-sm text-gray-900">{coupon.title}</h5>
-                                    <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
-                                      {coupon.type === "percentage"
-                                        ? `${coupon.discount}% OFF`
-                                        : `₹${coupon.discount} OFF`}
-                                    </span>
+                            {couponsList && couponsList.length > 0 ? (
+                              couponsList.map((coupon) => (
+                                <Card
+                                  key={coupon.code}
+                                  className={`p-4 border transition-all duration-200 ${
+                                    appliedCoupon?.code === coupon.code
+                                      ? "border-emerald-300 bg-emerald-50/50 shadow-xs"
+                                      : "border-gray-200 hover:border-orange-200 hover:bg-orange-50/20 shadow-xs"
+                                  }`}
+                                >
+                                  <div className="space-y-2">
+                                    <div className="flex items-center justify-between">
+                                      <h5 className="font-bold text-sm text-gray-900">{coupon.title}</h5>
+                                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                                        {coupon.type === "percentage"
+                                          ? `${coupon.discount}% OFF`
+                                          : `₹${coupon.discount} OFF`}
+                                      </span>
+                                    </div>
+                                    <p className="text-xs text-gray-600">{coupon.description}</p>
+                                    <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+                                      <span className="font-mono text-xs font-bold bg-neutral-100 text-neutral-800 px-2.5 py-1 rounded-md border border-neutral-200">
+                                        {coupon.code}
+                                      </span>
+                                      <Button
+                                        size="sm"
+                                        className={`px-5 py-2 rounded-xl font-bold text-xs transition-all duration-200 ${
+                                          appliedCoupon?.code === coupon.code
+                                            ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
+                                            : "bg-[#ff6900] hover:bg-[#e05d00] text-white shadow-xs hover:shadow-md"
+                                        }`}
+                                        onClick={() => applyCouponFromSheet(coupon)}
+                                        disabled={appliedCoupon?.code === coupon.code}
+                                      >
+                                        {appliedCoupon?.code === coupon.code ? "✓ APPLIED" : "APPLY"}
+                                      </Button>
+                                    </div>
                                   </div>
-                                  <p className="text-xs text-gray-600">{coupon.description}</p>
-                                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                    <span className="font-mono text-xs font-bold bg-neutral-100 text-neutral-800 px-2.5 py-1 rounded-md border border-neutral-200">
-                                      {coupon.code}
-                                    </span>
-                                    <Button
-                                      size="sm"
-                                      className={`px-5 py-2 rounded-xl font-bold text-xs transition-all duration-200 ${
-                                        appliedCoupon?.code === coupon.code
-                                          ? "bg-emerald-50 text-emerald-700 border border-emerald-300"
-                                          : "bg-[#ff6900] hover:bg-[#e05d00] text-white shadow-xs hover:shadow-md"
-                                      }`}
-                                      onClick={() => applyCouponFromSheet(coupon)}
-                                      disabled={appliedCoupon?.code === coupon.code}
-                                    >
-                                      {appliedCoupon?.code === coupon.code ? "✓ APPLIED" : "APPLY"}
-                                    </Button>
-                                  </div>
-                                </div>
-                              </Card>
-                            ))}
+                                </Card>
+                              ))
+                            ) : (
+                              <div className="text-center py-8 text-gray-400">
+                                <p className="text-sm font-medium">No coupons currently available</p>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </ScrollArea>
@@ -729,10 +991,31 @@ export default function StickyBookingWidget() {
             </div>
           )}
 
-          {/* Reserve / Proceed Button with strict Date Selection validation */}
+          {/* Reserve / Proceed Button with strict Date & Unit Selection validation */}
           <Button
             onClick={async () => {
               if (isOverCapacity) return;
+
+              // If camping and no tents selected yet, prompt tent selection modal
+              if (isCamping && totalSelectedTentsCount === 0) {
+                setTentModalOpen(true);
+                setAvailabilityError("Please select at least one tent unit to proceed.");
+                return;
+              }
+
+              // If cottage and no cottages selected yet, prompt cottage selection modal
+              if (isCottage && totalSelectedCottagesCount === 0) {
+                setCottageModalOpen(true);
+                setAvailabilityError("Please select at least one cottage unit to proceed.");
+                return;
+              }
+
+              // If hotel and no rooms selected yet, prompt room selection modal
+              if (isHotel && totalSelectedRoomsCount === 0) {
+                setRoomModalOpen(true);
+                setAvailabilityError("Please select at least one room unit to proceed.");
+                return;
+              }
 
               // Strictly enforce check-in and check-out selection
               if (!checkin || !checkout) {
@@ -748,31 +1031,46 @@ export default function StickyBookingWidget() {
 
               setAvailabilityError("");
               setAvailabilityChecking(true);
-              try {
-                const avail = await Checkvillaavailability({
-                  propertyId: villa?._id,
-                  checkIn: checkInDate.toISOString(),
-                  checkOut: checkOutDate.toISOString(),
-                });
-                if (avail && avail.available === false) {
-                  setAvailabilityError(avail.message || "This villa is not available for the selected dates.");
-                  setAvailabilityChecking(false);
-                  return;
+              if (!isSubtypeProperty) {
+                try {
+                  const avail = await Checkvillaavailability({
+                    propertyId: villa?._id,
+                    checkIn: checkInDate.toISOString(),
+                    checkOut: checkOutDate.toISOString(),
+                  });
+                  if (avail && avail.available === false) {
+                    setAvailabilityError(avail.message || "This villa is not available for the selected dates.");
+                    setAvailabilityChecking(false);
+                    return;
+                  }
+                } catch (e) {
+                  console.warn("Availability pre-check failed:", e);
                 }
-              } catch (e) {
-                console.warn("Availability pre-check failed:", e);
               }
               setAvailabilityChecking(false);
 
               dispatch(setPropertyId(villa?._id));
               dispatch(setcategoryId(villa?.category));
               dispatch(setOwnerId(villa?.owner));
-              dispatch(setPropertyType("Villa"));
+              dispatch(
+                setPropertyType(
+                  isCamping
+                    ? "Camping"
+                    : isCottage
+                    ? "Cottage"
+                    : isHotel
+                    ? "Hotel"
+                    : "Villa"
+                )
+              );
               router.push("/checkout");
             }}
             disabled={isOverCapacity || availabilityChecking}
             className={`w-full text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-              !areDatesSelected
+              !areDatesSelected ||
+              (isCamping && totalSelectedTentsCount === 0) ||
+              (isCottage && totalSelectedCottagesCount === 0) ||
+              (isHotel && totalSelectedRoomsCount === 0)
                 ? "bg-neutral-900 hover:bg-black shadow-neutral-800/20"
                 : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.99]"
             }`}
@@ -781,6 +1079,21 @@ export default function StickyBookingWidget() {
               "Checking Availability..."
             ) : isOverCapacity ? (
               `Max ${maxCapacity} Guests Allowed`
+            ) : isCamping && totalSelectedTentsCount === 0 ? (
+              <>
+                <Tent className="w-4 h-4" />
+                <span>Select Tents</span>
+              </>
+            ) : isCottage && totalSelectedCottagesCount === 0 ? (
+              <>
+                <Trees className="w-4 h-4" />
+                <span>Select Cottages</span>
+              </>
+            ) : isHotel && totalSelectedRoomsCount === 0 ? (
+              <>
+                <Bed className="w-4 h-4" />
+                <span>Select Rooms</span>
+              </>
             ) : !checkin ? (
               <>
                 <CalendarIcon className="w-4 h-4" />
@@ -791,6 +1104,12 @@ export default function StickyBookingWidget() {
                 <CalendarIcon className="w-4 h-4" />
                 <span>Select Check-out Date</span>
               </>
+            ) : isCamping ? (
+              "Reserve Campsite"
+            ) : isCottage ? (
+              "Reserve Cottage"
+            ) : isHotel ? (
+              "Reserve Hotel Stay"
             ) : (
               "Reserve Now"
             )}
@@ -803,6 +1122,42 @@ export default function StickyBookingWidget() {
           </p>
         </div>
       </Card>
+
+      {/* Desktop Tent Selection Modal */}
+      {isCamping && (
+        <TentSelectionModal
+          isOpen={tentModalOpen}
+          onClose={() => setTentModalOpen(false)}
+          tents={Array.isArray(villa?.tents) ? villa.tents : []}
+          totalGuests={totalGuests}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
+
+      {/* Desktop Cottage Selection Modal */}
+      {isCottage && (
+        <CottageSelectionModal
+          isOpen={cottageModalOpen}
+          onClose={() => setCottageModalOpen(false)}
+          cottages={Array.isArray(villa?.cottages) ? villa.cottages : []}
+          totalGuests={totalGuests}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
+
+      {/* Desktop Room Selection Modal */}
+      {isHotel && (
+        <RoomSelectionModal
+          isOpen={roomModalOpen}
+          onClose={() => setRoomModalOpen(false)}
+          rooms={Array.isArray(villa?.rooms) ? villa.rooms : []}
+          totalGuests={totalGuests}
+          dateStr={checkin || new Date().toISOString()}
+          id={villa?._id}
+        />
+      )}
     </div>
   );
 }

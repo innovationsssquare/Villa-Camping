@@ -75,6 +75,9 @@ const bookingSlice = createSlice({
     },
 
     setPropertyId: (state, action) => {
+      if (state.propertyId !== action.payload) {
+        state.appliedCoupon = null;
+      }
       state.propertyId = action.payload;
     },
     setcategoryId: (state, action) => {
