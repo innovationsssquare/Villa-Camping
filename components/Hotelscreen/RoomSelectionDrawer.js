@@ -84,11 +84,43 @@ export default function RoomSelectionDrawer({
   }, [isOpen, reduxSelectedRooms]);
 
   const roomsForDay = useMemo(() => {
-    return dayDetails?.rooms || [];
+    return dayDetails?.rooms || dayDetails?.data?.rooms || [];
   }, [dayDetails]);
 
+  const safeRooms = useMemo(() => {
+    if (!Array.isArray(rooms)) return [];
+    const map = new Map();
+
+    rooms.forEach((r, idx) => {
+      const rawType = r.roomType || r.name || `Room ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...r,
+          roomType: typeKey,
+          totalRooms: Number(r.totalRooms ?? r.totaltents ?? 1),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totalRooms = (Number(existing.totalRooms) || 0) + Number(r.totalRooms ?? r.totaltents ?? 1);
+        const hasImages = existing.images?.length || existing.roomimages?.length;
+        if (!hasImages && (r.images?.length || r.roomimages?.length)) {
+          existing.images = r.images || r.roomimages;
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [rooms]);
+
   const getTentConfig = (roomType) =>
-    rooms.find((t) => t.roomType === roomType);
+    safeRooms.find(
+      (t) =>
+        (t.roomType || t.name || "").trim().toLowerCase() ===
+        (roomType || "").trim().toLowerCase()
+    );
 
   const getTentCapacity = (roomType) =>
     getTentConfig(roomType)?.maxCapacity || 0;
@@ -97,15 +129,16 @@ export default function RoomSelectionDrawer({
    * 4️⃣ Availability from dayDetails (SOURCE OF TRUTH)
    * -------------------------------------------------- */
   const getAvailabilityForTent = (tent) => {
-    const summary = dayDetails?.data?.rooms?.find(
-      (t) => t.roomType === tent.roomType
+    const typeKey = (tent.roomType || "").trim().toLowerCase();
+    const summary = roomsForDay.find(
+      (t) => (t.roomType || "").trim().toLowerCase() === typeKey
     );
 
     if (!summary) {
       return {
-        total: tent.totaltents || 0,
+        total: tent.totalRooms || tent.totaltents || 1,
         booked: 0,
-        available: tent.totaltents || 0,
+        available: tent.totalRooms || tent.totaltents || 1,
         weekdayPrice: tent.pricing?.weekdayPrice || 0,
         weekendPrice:
           tent.pricing?.weekendPrice || tent.pricing?.weekdayPrice || 0,
@@ -113,13 +146,43 @@ export default function RoomSelectionDrawer({
     }
 
     return {
-      total: summary.total,
-      booked: summary.booked,
-      available: summary.available,
-      weekdayPrice: summary.price.weekday,
-      weekendPrice: summary.price.weekend,
+      total: summary.total ?? tent.totalRooms ?? 1,
+      booked: summary.booked ?? 0,
+      available: summary.available ?? tent.totalRooms ?? 1,
+      weekdayPrice: summary.price?.weekday ?? tent.pricing?.weekdayPrice ?? 0,
+      weekendPrice: summary.price?.weekend ?? tent.pricing?.weekendPrice ?? 0,
     };
   };
+
+  const displayRooms = useMemo(() => {
+    if (Array.isArray(roomsForDay) && roomsForDay.length > 0) {
+      const map = new Map();
+      roomsForDay.forEach((r) => {
+        const typeKey = (r.roomType || "Room").trim();
+        const lowerKey = typeKey.toLowerCase();
+        if (!map.has(lowerKey)) {
+          map.set(lowerKey, {
+            ...r,
+            roomType: typeKey,
+          });
+        }
+      });
+      return Array.from(map.values());
+    }
+    return safeRooms.map((r) => {
+      const avail = getAvailabilityForTent(r);
+      return {
+        roomType: r.roomType,
+        total: avail.total,
+        booked: avail.booked,
+        available: avail.available,
+        price: {
+          weekday: avail.weekdayPrice,
+          weekend: avail.weekendPrice,
+        },
+      };
+    });
+  }, [roomsForDay, safeRooms]);
 
   /* --------------------------------------------------
    * 5️⃣ Quantity handler
@@ -285,8 +348,8 @@ export default function RoomSelectionDrawer({
                 </div>
               )}
 
-              {/* TENTS FROM BACKEND */}
-              {roomsForDay.map((tent) => {
+              {/* ROOMS LIST */}
+              {displayRooms.map((tent) => {
                 const selectedQty = localSelected[tent.roomType] || 0;
                 const maxCapacity = getTentCapacity(tent.roomType);
 

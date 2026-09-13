@@ -17,12 +17,17 @@ import {
   FaTicketAlt,
   FaArrowRight,
   FaGift,
+  FaUtensils,
+  FaFire,
+  FaCoffee,
 } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import CouponsDrawer from "@/components/Propertyviewcomponents/coupons-drawer";
 import BookingDetailsDrawer from "@/components/Bookingcomponent/booking-details-drawer";
+import PropertyEventSection from "@/components/Bookingcomponent/PropertyEventSection";
+import EventDetailsModal from "@/components/Bookingcomponent/EventDetailsModal";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment-timezone";
 import { fetchproperty } from "@/Redux/Slices/propertiesSlice";
@@ -71,6 +76,13 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   const [open, setOpen] = useState(false);
   const [opensucessmodal, setOpensuccesmodal] = useState(false);
   const [loadingg, setloading] = useState(false);
+
+  // Property Events state
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [eventAttendees, setEventAttendees] = useState(1);
+  const [inspectingEvent, setInspectingEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+
   const [currentStep, setCurrentStep] = useState("overview");
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
@@ -135,6 +147,22 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
     1,
     appliedCoupon
   );
+
+  useEffect(() => {
+    if (totalGuests > 0) {
+      setEventAttendees(totalGuests);
+    }
+  }, [totalGuests]);
+
+  const activeEvents = (property?.events || []).filter(
+    (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+  );
+  const selectedEvent = activeEvents.find((e) => e._id === selectedEventId) || null;
+  const eventExtraCharge =
+    selectedEvent && !selectedEvent.isIncludedInStay
+      ? (Number(selectedEvent.pricePerPerson) || 0) * (Number(eventAttendees) || 1)
+      : 0;
+  const finalPayableTotal = (finalTotal || 0) + eventExtraCharge;
 
   function formatRupee(amount) {
     if (amount == null || Number.isNaN(Number(amount))) return "₹0";
@@ -254,16 +282,38 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
         infants: guestCounts.infants,
       },
       items,
-      paymentAmount: Number(finalTotal || 0),
+      paymentAmount: Number(finalPayableTotal || 0),
       couponCode: couponCode,
       paymentType: "full",
       partialPercentage: 30,
-      taxRate: 5,
+      taxRate: 18,
       deviceId,
       couponId,
-      paymentType: "full",
-      partialPercentage: 30,
-      taxRate: 18, // keep consistent with frontend calc (we used 18%)
+      hasEvent: !!selectedEvent,
+      eventDetails: selectedEvent
+        ? {
+            eventId: selectedEvent._id,
+            eventTitle: selectedEvent.title,
+            eventType: selectedEvent.eventType,
+            eventDate: selectedEvent.startDate,
+            attendees: eventAttendees,
+            pricePerPerson: Number(selectedEvent.pricePerPerson) || 0,
+            totalExtraCharge: eventExtraCharge,
+          }
+        : null,
+      hasMealPackage: false,
+      mealDetails: property?.meals
+        ? {
+            packageName: "Campfire Dining Experience (Included)",
+            includedMeals: [
+              property?.meals?.eveningSnacks ? "Evening Snacks" : null,
+              property?.meals?.bbq?.available ? "Live BBQ" : null,
+              property?.meals?.dinner ? "Dinner Buffet" : null,
+              property?.meals?.nextDayBreakfast ? "Breakfast" : null,
+            ].filter(Boolean),
+            isIncludedInStay: true,
+          }
+        : null,
     };
     setIsBookingDetailsOpen(false);
     try {
@@ -483,6 +533,86 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
           </div> */}
         </div>
       </div>
+
+      {/* Campfire Dining Experience (Included with Stay) */}
+      {property?.meals && (
+        <div className="border border-gray-200 rounded-lg p-4 bg-white mt-4 space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <FaUtensils className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">
+                  Campfire Dining Experience
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Local campsite dining included with stay
+                </p>
+              </div>
+            </div>
+            <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-semibold px-2 py-0.5 rounded-full">
+              Included Free
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            {property.meals.eveningSnacks && (
+              <div className="p-2 rounded-lg bg-gray-50 border border-gray-100">
+                <span className="text-[10px] font-bold text-gray-400 block uppercase">Evening Snacks</span>
+                <span className="text-gray-800 font-medium">{property.meals.eveningSnacks}</span>
+              </div>
+            )}
+            {property.meals.bbq?.available && (
+              <div className="p-2 rounded-lg bg-orange-50/70 border border-orange-100">
+                <span className="text-[10px] font-bold text-orange-600 block uppercase flex items-center gap-1">
+                  <FaFire className="w-2.5 h-2.5 text-orange-500" /> Live BBQ
+                </span>
+                <span className="text-gray-800 font-medium">
+                  {[property.meals.bbq.veg, property.meals.bbq.nonVeg].filter(Boolean).join(" & ") || "Veg & Non-Veg"}
+                </span>
+              </div>
+            )}
+            {property.meals.dinner && (
+              <div className="p-2 rounded-lg bg-gray-50 border border-gray-100">
+                <span className="text-[10px] font-bold text-gray-400 block uppercase">Dinner Buffet</span>
+                <span className="text-gray-800 font-medium">
+                  {[property.meals.dinner.veg, property.meals.dinner.nonVeg].filter(Boolean).join(" & ") || "Unlimited Dinner"}
+                </span>
+              </div>
+            )}
+            {property.meals.nextDayBreakfast && (
+              <div className="p-2 rounded-lg bg-amber-50/70 border border-amber-100">
+                <span className="text-[10px] font-bold text-amber-700 block uppercase flex items-center gap-1">
+                  <FaCoffee className="w-2.5 h-2.5 text-amber-500" /> Breakfast
+                </span>
+                <span className="text-gray-800 font-medium">{property.meals.nextDayBreakfast}</span>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Special Events & Experiences */}
+      {activeEvents.length > 0 && (
+        <div className="mt-4">
+          <PropertyEventSection
+            events={activeEvents}
+            selectedEventId={selectedEventId}
+            onToggleSelect={(id) =>
+              setSelectedEventId((prev) => (prev === id ? null : id))
+            }
+            onOpenDetails={(ev) => {
+              setInspectingEvent(ev);
+              setShowEventModal(true);
+            }}
+            attendees={eventAttendees}
+            setAttendees={setEventAttendees}
+            maxGuests={totalGuests}
+            formatRupee={formatRupee}
+          />
+        </div>
+      )}
     </div>
   );
 
@@ -525,6 +655,29 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
             </div>
           )}
 
+          {selectedEvent && (
+            <div className="flex justify-between items-center text-xs text-orange-800 bg-orange-50 p-2 rounded-lg border border-orange-200">
+              <span className="font-semibold flex items-center gap-1">
+                {selectedEvent.title} ({eventAttendees} {eventAttendees === 1 ? "guest" : "guests"})
+              </span>
+              <span className="font-bold">
+                {selectedEvent.isIncludedInStay || selectedEvent.pricePerPerson === 0
+                  ? "Free"
+                  : `+ ${formatRupee(eventExtraCharge)}`}
+              </span>
+            </div>
+          )}
+
+          {property?.meals && (
+            <div className="flex justify-between items-center text-xs text-emerald-700 bg-emerald-50/70 p-2 rounded-lg border border-emerald-200">
+              <span className="font-semibold flex items-center gap-1">
+                <FaUtensils className="w-3 h-3 text-emerald-600" />
+                Campfire Dining (Snacks, BBQ, Dinner, Breakfast)
+              </span>
+              <span className="font-bold">Included</span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center">
             <div>
               <span className="text-black">GST</span>
@@ -532,7 +685,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
                 (As per government guidelines)
               </span>
             </div>
-            <span className="font-medium text-black">{formatRupee(finalTotal)}</span>
+            <span className="font-medium text-black">{formatRupee(finalPayableTotal)}</span>
           </div>
         </div>
 
@@ -744,7 +897,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
             ) : (
               <>
                 <div>
-                  <p className="text-xl font-bold text-black">{formatRupee(finalTotal)}</p>
+                  <p className="text-xl font-bold text-black">{formatRupee(finalPayableTotal)}</p>
                   <p className="text-sm text-gray-600">
                     ( For {nights} nights, {totalGuests} guests )
                   </p>
@@ -801,6 +954,24 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
         isOpen={isBookingDetailsOpen}
         onClose={() => setIsBookingDetailsOpen(false)}
         onPayNow={handleProceedToPayment}
+      />
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        isOpen={showEventModal}
+        onClose={() => {
+          setShowEventModal(false);
+          setInspectingEvent(null);
+        }}
+        event={inspectingEvent}
+        isSelected={selectedEventId === inspectingEvent?._id}
+        onToggleSelect={(id) =>
+          setSelectedEventId((prev) => (prev === id ? null : id))
+        }
+        attendees={eventAttendees}
+        setAttendees={setEventAttendees}
+        maxGuests={totalGuests}
+        formatRupee={formatRupee}
       />
     </div>
   );

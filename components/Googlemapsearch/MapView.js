@@ -249,7 +249,7 @@ const MapView = ({
 
       {/* Redesigned Airbnb Map Popup Card (Dismisses on loading, location change, or filter change) */}
       {!loading && selectedProperty && (
-        <div className="absolute top-5 left-5 z-50 pointer-events-auto">
+        <div className="absolute top-[124px] left-3 sm:left-5 lg:top-5 lg:left-5 z-40 pointer-events-auto">
           <PropertyCard
             property={selectedProperty}
             onClose={() => handleSelectProperty(null)}

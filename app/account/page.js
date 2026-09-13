@@ -24,16 +24,16 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
-import ResponsiveAuthModal from "@/components/Logincomponents/responsive-auth-modal";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { useSelector, useDispatch } from "react-redux";
 import { clearMyBookings } from "@/Redux/Slices/myBookingSlice";
 
 export default function AccountPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Redux state for counts
   const wishlistIds = useSelector((state) => state?.wishlist?.ids || []);
@@ -149,8 +149,8 @@ export default function AccountPage() {
                 </p>
               </div>
               <Button
-                onClick={() => setShowAuthModal(true)}
-                className="bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs transition-all"
+                onClick={() => openAuthModal()}
+                className="bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-xs transition-all cursor-pointer"
               >
                 <LogIn className="w-4 h-4 mr-1.5" /> Sign In / Register
               </Button>
@@ -272,20 +272,12 @@ export default function AccountPage() {
           <Button
             variant="ghost"
             onClick={handleLogout}
-            className="w-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs font-semibold py-3 rounded-2xl flex items-center justify-center gap-2 border border-rose-100 transition-colors"
+            className="w-full text-rose-600 hover:text-rose-700 hover:bg-rose-50 text-xs font-semibold py-3 rounded-2xl flex items-center justify-center gap-2 border border-rose-100 transition-colors cursor-pointer"
           >
             <LogOut className="w-4 h-4" /> Log Out of Account
           </Button>
         )}
       </div>
-
-      {/* Auth Modal for Unauthenticated Users */}
-      {showAuthModal && (
-        <ResponsiveAuthModal
-          autoOpen={true}
-          onOpenChange={setShowAuthModal}
-        />
-      )}
     </main>
   );
 }

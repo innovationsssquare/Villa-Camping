@@ -5,7 +5,6 @@ import { ParallaxHero } from "@/components/Becomehostcomponents/parallax-hero";
 import { AvailableNowSection } from "@/components/Becomehostcomponents/available-now-section";
 import {
   Home,
-  ShieldCheck,
   TrendingUp,
   Camera,
   CalendarCheck,
@@ -18,8 +17,11 @@ import {
   Clock,
   ArrowRight,
   MessageSquare,
+  Loader2,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 function ModernHostListingSection() {
   const [formData, setFormData] = useState({
@@ -30,11 +32,41 @@ function ModernHostListingSection() {
     bedrooms: "3 BHK",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.fullName || !formData.phone) return;
-    setIsSubmitted(true);
+    if (!formData.fullName.trim() || !formData.phone.trim()) {
+      setError("Please provide your full name and phone number.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`${BaseUrl}/HostInquiry/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          fullName: formData.fullName.trim(),
+          phone: formData.phone.trim(),
+          propertyType: formData.propertyType,
+          location: formData.location,
+          bedrooms: formData.bedrooms,
+          source: "become_host_page",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to submit property inquiry.");
+      }
+      setIsSubmitted(true);
+    } catch (err) {
+      console.error("Host inquiry submission error:", err);
+      setError(err.message || "Could not submit inquiry. Please try again or call our helpline.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,18 +96,6 @@ function ModernHostListingSection() {
             </p>
 
             <div className="space-y-4 pt-2">
-              <div className="flex items-start gap-3.5">
-                <div className="w-9 h-9 rounded-xl bg-[#ff6900]/15 border border-[#ff6900]/30 flex items-center justify-center text-[#ff6900] shrink-0 mt-0.5">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">₹50 Lakh Damage Protection</h4>
-                  <p className="text-xs text-neutral-400 mt-0.5">
-                    Comprehensive cover against accidental damages, deep cleaning, and security deposit management.
-                  </p>
-                </div>
-              </div>
-
               <div className="flex items-start gap-3.5">
                 <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
                   <Users className="w-5 h-5" />
@@ -236,11 +256,29 @@ function ModernHostListingSection() {
                   </div>
                 </div>
 
+                {error && (
+                  <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-medium flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
                 <Button
                   type="submit"
-                  className="w-full h-11 bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-3 cursor-pointer"
+                  disabled={loading}
+                  className="w-full h-11 bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold rounded-xl shadow-md transition-all flex items-center justify-center gap-2 mt-3 cursor-pointer disabled:opacity-60"
                 >
-                  <Send className="w-3.5 h-3.5" /> Submit Property for Review
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Submitting details...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-3.5 h-3.5" />
+                      <span>Submit Property for Review</span>
+                    </>
+                  )}
                 </Button>
 
                 <p className="text-[10px] text-center text-neutral-400 pt-1">

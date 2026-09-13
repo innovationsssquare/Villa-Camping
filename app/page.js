@@ -7,6 +7,8 @@ import Hero from "@/components/Homecomponets/Hero";
 import PropertyReviews from "@/components/Homecomponets/property-reviews";
 
 import ShopbyCategory from "@/components/Homecomponets/ShopbyCategory";
+import OffersCarousel from "@/components/Homecomponets/offers-carousel";
+import AnnouncementModal from "@/components/Homecomponets/announcement-modal";
 import { SpecialOffers } from "@/components/Homecomponets/SpecialOffers";
 import {Testimonials} from "@/components/Homecomponets/Testimonials";
 import TrendingVideos from "@/components/Homecomponets/Trendingvideos";
@@ -17,8 +19,15 @@ import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 export default function Home() {
   return (
     <main className="overflow-hidden w-full">
+      {/* Active Promotional / Event Visitor Popup */}
+      <AnnouncementModal />
+
       <Hero />
       <ShopbyCategory />
+
+      {/* Dynamic Live Offers & Property Events Carousel */}
+      <OffersCarousel />
+
       <AvailableThisWeekend />
       <DestinationHighlights/>
       {/* <WeekendGetaway/> */}
@@ -27,7 +36,6 @@ export default function Home() {
       <PropertyReviews/>
       <WhyChooseUs/>
       {/* <Experiences/>
-      <SpecialOffers/>
       <Testimonials/> */}
 
     </main>

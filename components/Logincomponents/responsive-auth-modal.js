@@ -44,7 +44,7 @@ function AuthFormContent({
   return (
     <div className="w-full">
       {/* StayVista-Inspired Luxury Villa Pool Promo Banner */}
-      <div className="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm my-3 select-none bg-neutral-900">
+      <div className="relative w-full h-28 sm:h-32 rounded-2xl overflow-hidden shadow-sm my-2 select-none bg-neutral-900">
         <Image
           src="/Loginasset/villa_banner.jpg"
           alt="Enjoy A Villa Getaway"
@@ -53,24 +53,24 @@ function AuthFormContent({
           priority
         />
         {/* Dark contrast gradient overlay for typography */}
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/40 to-black/85 flex flex-col justify-between p-3.5 sm:p-4 text-right items-end">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/40 to-black/85 flex flex-col justify-between p-3 sm:p-3.5 text-right items-end">
           {/* Brand Tag Top Right */}
           <div className="flex items-center gap-1">
-            <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-white uppercase drop-shadow-md">
+            <span className="text-[9px] sm:text-[10px] font-black tracking-widest text-white uppercase drop-shadow-md">
               THEVILLA CAMP
             </span>
           </div>
 
           {/* Luxury Promotional Copy */}
-          <div className="space-y-1">
-            <h3 className="text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow-md">
+          <div className="space-y-0.5">
+            <h3 className="text-xs sm:text-sm font-extrabold text-white leading-tight drop-shadow-md">
               Book a Room.<br />Enjoy A Villa Getaway
             </h3>
-            <p className="text-[10px] sm:text-[11px] text-white/90 font-medium drop-shadow-sm">
+            <p className="text-[9px] sm:text-[10px] text-white/90 font-medium drop-shadow-sm">
               Enjoy the Luxuries &amp; Privacy of a villa with
             </p>
-            <div className="inline-block mt-0.5 px-2.5 py-0.5 rounded-md border border-dashed border-white/90 bg-white/15 backdrop-blur-xs">
-              <span className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
+            <div className="inline-block mt-0.5 px-2 py-0.5 rounded-md border border-dashed border-white/90 bg-white/15 backdrop-blur-xs">
+              <span className="text-[9px] sm:text-[10px] font-semibold text-white tracking-wide">
                 Rooms Starting at ₹4,999*
               </span>
             </div>
@@ -81,7 +81,7 @@ function AuthFormContent({
       {/* Form Area */}
       {!otpSent ? (
         /* Phone Number Entry Step */
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <h4 className="text-base font-bold text-neutral-900 tracking-tight">
             Login/Signup
           </h4>
@@ -107,7 +107,7 @@ function AuthFormContent({
                     handleSendOTP();
                   }
                 }}
-                className="w-full px-4 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-2xs"
+                className="w-full px-4 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 transition-all shadow-2xs"
                 autoFocus
               />
             </div>
@@ -118,7 +118,7 @@ function AuthFormContent({
             type="button"
             onClick={handleSendOTP}
             disabled={otpLoading || cleanPhoneNumber(phone).length !== 10}
-            className="w-full h-12 mt-2 bg-[#1b1c2b] hover:bg-[#11121d] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="w-full h-11 sm:h-12 mt-1.5 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
           >
             {otpLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white" />
@@ -129,7 +129,7 @@ function AuthFormContent({
         </div>
       ) : (
         /* WhatsApp OTP Verification Step */
-        <div className="space-y-3">
+        <div className="space-y-2.5">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-base font-bold text-neutral-900 tracking-tight">
@@ -170,7 +170,7 @@ function AuthFormContent({
                 handleVerifyOTP();
               }
             }}
-            className="w-full h-12 px-4 rounded-xl border-2 border-neutral-300 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 text-center tracking-[0.45em] text-neutral-900 bg-white text-xl font-bold font-mono outline-none shadow-2xs transition-all"
+            className="w-full h-12 px-4 rounded-xl border-2 border-neutral-300 focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 text-center tracking-[0.45em] text-neutral-900 bg-white text-xl font-bold font-mono outline-none shadow-2xs transition-all"
             maxLength={6}
             autoFocus
           />
@@ -180,7 +180,7 @@ function AuthFormContent({
             type="button"
             onClick={() => handleVerifyOTP()}
             disabled={otpLoading || otp.length < 6}
-            className="w-full h-12 mt-1 bg-[#1b1c2b] hover:bg-[#11121d] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+            className="w-full h-11 sm:h-12 mt-1 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
           >
             {otpLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white" />
@@ -190,7 +190,7 @@ function AuthFormContent({
           </button>
 
           {/* Resend WhatsApp OTP */}
-          <div className="text-center text-xs text-neutral-500 pt-1">
+          <div className="text-center text-xs text-neutral-500 pt-0.5">
             {countdown > 0 ? (
               <span>
                 Resend code via WhatsApp in{" "}
@@ -211,14 +211,13 @@ function AuthFormContent({
       )}
 
       {/* Footer Legal Terms Disclaimer */}
-      <p className="text-[11px] text-center text-neutral-500 mt-4 leading-relaxed select-none">
-        By signing up, you agree to<br />
-        our{" "}
+      <p className="text-[10.5px] text-center text-neutral-500 mt-2.5 leading-snug select-none">
+        By signing up, you agree to our{" "}
         <a
           href="/terms-of-service"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#2b5993] hover:underline font-medium"
+          className="text-[#ff6900] hover:underline font-medium"
         >
           Terms &amp; Conditions
         </a>{" "}
@@ -227,7 +226,7 @@ function AuthFormContent({
           href="/privacy-policy"
           target="_blank"
           rel="noopener noreferrer"
-          className="text-[#2b5993] hover:underline font-medium"
+          className="text-[#ff6900] hover:underline font-medium"
         >
           Privacy Policy
         </a>
@@ -410,23 +409,26 @@ const ResponsiveAuthModal = ({
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-        <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] px-5 pt-5 pb-8">
-          <div className="relative text-center pt-1 pb-1">
-            <DrawerTitle className="text-2xl sm:text-[26px] font-extrabold text-neutral-900 tracking-tight">
+        <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] px-5 pt-3 pb-4 h-fit max-h-[90vh] overflow-hidden">
+          {/* Dedicated Top-Right Close Button (Zero overlap with title or other elements) */}
+          <DrawerClose asChild>
+            <button
+              type="button"
+              className="absolute top-3.5 right-4 z-30 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 active:scale-90 text-neutral-700 flex items-center justify-center transition-all outline-none cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </DrawerClose>
+
+          {/* Title Header with lateral padding to prevent text collision with close button */}
+          <div className="relative text-center pt-0.5 pb-0.5 px-10">
+            <DrawerTitle className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight leading-snug">
               Welcome to ThevillaCamp
             </DrawerTitle>
             <DrawerDescription className="sr-only">
               Login or Signup with your mobile number via WhatsApp OTP
             </DrawerDescription>
-            <DrawerClose asChild>
-              <button
-                type="button"
-                className="absolute top-0 right-0 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-colors outline-none cursor-pointer"
-                aria-label="Close"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </DrawerClose>
           </div>
 
           <AuthFormContent
@@ -452,22 +454,24 @@ const ResponsiveAuthModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[430px] p-6 bg-white border border-neutral-100 rounded-3xl shadow-2xl overflow-hidden [&>button]:hidden">
-        <div className="relative text-center pt-1 pb-1">
-          <DialogTitle className="text-2xl font-extrabold text-neutral-900 tracking-tight">
+        {/* Dedicated Top-Right Close Button */}
+        <DialogClose asChild>
+          <button
+            type="button"
+            className="absolute top-4 right-4 z-30 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 active:scale-90 text-neutral-700 flex items-center justify-center transition-all outline-none cursor-pointer"
+            aria-label="Close"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </DialogClose>
+
+        <div className="relative text-center pt-1 pb-1 px-10">
+          <DialogTitle className="text-xl sm:text-2xl font-extrabold text-neutral-900 tracking-tight">
             Welcome to ThevillaCamp
           </DialogTitle>
           <DialogDescription className="sr-only">
             Login or Signup with your mobile number via WhatsApp OTP
           </DialogDescription>
-          <DialogClose asChild>
-            <button
-              type="button"
-              className="absolute top-0 right-0 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-colors outline-none cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </DialogClose>
         </div>
 
         <AuthFormContent

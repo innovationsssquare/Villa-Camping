@@ -13,18 +13,26 @@ export function proxy(request: NextRequest) {
   // Check for authentication token in cookies
   const token = request.cookies.get("token")
 
-  // If token exists and user is trying to access /Signin, redirect to home (/)
-  if (pathname === "/Signin" && token) {
+  // If user is trying to access /Signin, redirect to home (with in-place auth modal if unauthenticated)
+  if (pathname === "/Signin") {
     const url = request.nextUrl.clone()
-    url.pathname = "/" // Redirect to home
+    url.pathname = "/"
+    if (!token) {
+      url.searchParams.set("auth", "required")
+      const returnUrl = request.nextUrl.searchParams.get("returnUrl")
+      if (returnUrl) {
+        url.searchParams.set("returnUrl", returnUrl)
+      }
+    }
     return NextResponse.redirect(url)
   }
 
-  // If it's a protected route and no token exists, redirect to Signin
+  // If it's a protected route and no token exists, redirect to home with auth=required & returnUrl
   if (isProtectedRoute && !token) {
     const url = request.nextUrl.clone()
-    url.pathname = "/Signin"
-    url.searchParams.set("returnUrl", pathname) // Store the original path to redirect back after login
+    url.pathname = "/"
+    url.searchParams.set("auth", "required")
+    url.searchParams.set("returnUrl", pathname)
     return NextResponse.redirect(url)
   }
 

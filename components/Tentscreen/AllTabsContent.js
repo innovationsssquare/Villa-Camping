@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Accordion,
@@ -30,6 +30,7 @@ import { useCamping } from "@/lib/context/CampingContext";
 import { Card, CardContent } from "@/components/ui/card";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
   Trees,
   Tent,
@@ -179,6 +180,27 @@ const AllTabsContent = ({ refs = {} }) => {
     {}
   );
 
+  // Consolidate tents by unique tentType
+  const consolidatedTents = useMemo(() => {
+    if (!Array.isArray(camping?.tents)) return [];
+    const map = new Map();
+    camping.tents.forEach((t, idx) => {
+      const type = (t.tentType || t.name || `Tent ${idx + 1}`).trim();
+      const lower = type.toLowerCase();
+      if (!map.has(lower)) {
+        map.set(lower, {
+          ...t,
+          tentType: type,
+          totalUnits: Number(t.totaltents ?? t.totalUnits ?? 1),
+        });
+      } else {
+        const existing = map.get(lower);
+        existing.totalUnits += Number(t.totaltents ?? t.totalUnits ?? 1);
+      }
+    });
+    return Array.from(map.values());
+  }, [camping?.tents]);
+
   return (
     <div className="pb-24">
       {/* 1. HIGHLIGHTS SECTION */}
@@ -274,6 +296,9 @@ const AllTabsContent = ({ refs = {} }) => {
         </div>
       </section>
 
+      {/* EVENTS SECTION */}
+      <MobileEventsSection property={camping} propertyType="camping" />
+
       {/* 2. REFUND POLICY SECTION */}
       <section
         ref={refs?.refundRef}
@@ -354,10 +379,10 @@ const AllTabsContent = ({ refs = {} }) => {
             Choose from cozy couple tents, spacious family units, and glamping tents
           </p>
 
-          {Array.isArray(camping?.tents) && camping.tents.length > 0 ? (
+          {consolidatedTents.length > 0 ? (
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2.5">
-                {camping.tents.map((tent) => {
+                {consolidatedTents.map((tent) => {
                   const currentSelectedQty = reduxSelectedTents?.[tent.tentType]?.quantity || 0;
                   const tentPrice = Number(
                     tent.pricing?.weekdayPrice || tent.pricing?.weekendPrice || camping?.pricing?.weekdayPrice || 1200
@@ -862,7 +887,7 @@ const AllTabsContent = ({ refs = {} }) => {
       <TentSelectionDrawer
         isOpen={showTentSelectionDrawer}
         onClose={() => setShowTentSelectionDrawer(false)}
-        tents={camping?.tents || []}
+        tents={consolidatedTents}
         totalGuests={selectedGuest?.totalGuests || 2}
         dateStr={checkin || new Date().toISOString()}
         id={camping?._id}

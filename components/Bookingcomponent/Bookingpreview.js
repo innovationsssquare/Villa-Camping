@@ -47,10 +47,15 @@ import {
   CreditCard,
   ChevronRight,
   Info,
+  CookingPot,
+  Flame,
+  Coffee,
 } from "lucide-react";
 
 import VerifyDetailsDialog from "@/components/Bookingcomponent/VerifyDetailsDialog";
 import CouponsSheet from "@/components/Propertyviewcomponents/coupons-sheet";
+import PropertyEventSection from "@/components/Bookingcomponent/PropertyEventSection";
+import EventDetailsModal from "@/components/Bookingcomponent/EventDetailsModal";
 import Successmodal from "./Successmodal";
 import Overlay from "./Overlay";
 import Logo from "../../public/Productasset/mainlogo_clean.png";
@@ -115,6 +120,15 @@ const PropertyBooking = () => {
   const [loadingg, setloading] = useState(false);
   const [opensucessmodal, setOpensuccesmodal] = useState(false);
 
+  // Property Events state
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [eventAttendees, setEventAttendees] = useState(1);
+  const [inspectingEvent, setInspectingEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+
+  // Meal Package Selection state
+  const [isMealPackageSelected, setIsMealPackageSelected] = useState(false);
+
   // Auto-populate customer details from localStorage if not present
   useEffect(() => {
     try {
@@ -155,6 +169,10 @@ const PropertyBooking = () => {
   // Discard applied coupon if it belongs to a different property or was used on this device
   useEffect(() => {
     if (appliedCoupon) {
+      if (!appliedCoupon._id && !appliedCoupon.couponId && !appliedCoupon.id) {
+        dispatch(removeCoupon());
+        return;
+      }
       if (propertyId) {
         if (appliedCoupon.property && appliedCoupon.property.toString() !== propertyId.toString()) {
           dispatch(removeCoupon());
@@ -259,8 +277,47 @@ const PropertyBooking = () => {
   }
 
   // 2. Uniform nightsForCoupon = 1 because baseAmountForCoupon ALREADY computes the full stay
-  const { basePrice, discountAmount, taxAmount, finalTotal } =
+  const { basePrice, discountAmount } =
     calculateBookingPrice(baseAmountForCoupon, 1, appliedCoupon);
+
+  // Synchronize default event attendees with totalGuests
+  useEffect(() => {
+    if (totalGuests > 0) {
+      setEventAttendees(totalGuests);
+    }
+  }, [totalGuests]);
+
+  // Active property events & calculated extra charge
+  const activeEvents = (property?.events || []).filter(
+    (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+  );
+  const selectedEvent = activeEvents.find((e) => e._id === selectedEventId) || null;
+  const eventExtraCharge =
+    selectedEvent && !selectedEvent.isIncludedInStay
+      ? (Number(selectedEvent.pricePerPerson) || 0) * (Number(eventAttendees) || 1)
+      : 0;
+
+  // Meal Options & Calculated Charge from Schema
+  const foodOptions = property?.foodOptions;
+  const hasFoodOptions = Boolean(
+    foodOptions &&
+    (Number(foodOptions.adultPrice) > 0 || (Array.isArray(foodOptions.available) && foodOptions.available.length > 0))
+  );
+  const adultMealPrice = Number(foodOptions?.adultPrice || 0);
+  const childMealPrice = Number(foodOptions?.childPrice || 0);
+  const isPaidMealPackage = adultMealPrice > 0;
+  const isComplimentaryMeals = hasFoodOptions && !isPaidMealPackage;
+
+  const adultsCount = Number(guestCounts?.adults || 1);
+  const childrenCount = Number(guestCounts?.children || 0);
+  const mealNights = Math.max(1, Number(nights) || 1);
+  const totalMealCharge = ((adultMealPrice * adultsCount) + (childMealPrice * childrenCount)) * mealNights;
+  const mealExtraCharge = isMealPackageSelected && isPaidMealPackage ? totalMealCharge : 0;
+
+  // Total taxable base & 18% GST calculation (matching backend calculatePricing)
+  const taxableAmount = Math.max(0, (basePrice - discountAmount) + eventExtraCharge + mealExtraCharge);
+  const taxAmount = Math.round(taxableAmount * 0.18);
+  const finalPayableTotal = taxableAmount + taxAmount;
 
   const formatRupee = (num) => {
     return `₹${Math.round(Number(num) || 0).toLocaleString("en-IN")}`;
@@ -298,7 +355,7 @@ const PropertyBooking = () => {
   const handleProceedToPayment = async () => {
     setloading(true);
 
-    if (finalTotal === null || finalTotal === undefined || finalTotal <= 0) {
+    if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {
       addToast({
         title: "Invalid Amount",
         description: "Please check your stay dates and accommodation selection.",
@@ -522,7 +579,7 @@ const PropertyBooking = () => {
         infants: guestCounts.infants,
       },
       items,
-      paymentAmount: Number(finalTotal || 0),
+      paymentAmount: Number(finalPayableTotal || 0),
       couponCode: couponCode,
       paymentType: "full",
       partialPercentage: 30,
@@ -530,6 +587,44 @@ const PropertyBooking = () => {
       deviceId,
       couponId,
       specialRequests: specialRequests || "",
+      hasEvent: !!selectedEvent,
+      eventDetails: selectedEvent
+        ? {
+            eventId: selectedEvent._id,
+            eventTitle: selectedEvent.title,
+            eventType: selectedEvent.eventType,
+            eventDate: selectedEvent.startDate,
+            attendees: eventAttendees,
+            pricePerPerson: Number(selectedEvent.pricePerPerson) || 0,
+            totalExtraCharge: eventExtraCharge,
+          }
+        : null,
+      hasMealPackage: isMealPackageSelected && isPaidMealPackage,
+      mealDetails: isMealPackageSelected && isPaidMealPackage
+        ? {
+            packageName: "All-Day Gourmet Meal Package",
+            adultCount: adultsCount,
+            childCount: childrenCount,
+            adultPricePerDay: adultMealPrice,
+            childPricePerDay: childMealPrice,
+            numberOfDays: mealNights,
+            totalMealCharge: mealExtraCharge,
+            includedMeals: foodOptions?.available || [],
+            note: foodOptions?.note || "",
+          }
+        : isComplimentaryMeals
+        ? {
+            packageName: "Complimentary Meals Package",
+            adultCount: adultsCount,
+            childCount: childrenCount,
+            adultPricePerDay: 0,
+            childPricePerDay: 0,
+            numberOfDays: mealNights,
+            totalMealCharge: 0,
+            includedMeals: foodOptions?.available || [],
+            note: foodOptions?.note || "",
+          }
+        : null,
     };
 
     try {
@@ -892,6 +987,25 @@ const PropertyBooking = () => {
               </div>
             </Card>
 
+            {/* Card: Special Events & Experiences (If property offers events) */}
+            {activeEvents.length > 0 && (
+              <PropertyEventSection
+                events={activeEvents}
+                selectedEventId={selectedEventId}
+                onToggleSelect={(id) =>
+                  setSelectedEventId((prev) => (prev === id ? null : id))
+                }
+                onOpenDetails={(ev) => {
+                  setInspectingEvent(ev);
+                  setShowEventModal(true);
+                }}
+                attendees={eventAttendees}
+                setAttendees={setEventAttendees}
+                maxGuests={totalGuests}
+                formatRupee={formatRupee}
+              />
+            )}
+
             {/* Card 3: Primary Guest Information */}
             <Card className="p-6 bg-white border border-neutral-200/80 rounded-3xl shadow-xs">
               <div className="flex items-center justify-between border-b border-neutral-100 pb-4 mb-4">
@@ -959,45 +1073,197 @@ const PropertyBooking = () => {
               )}
             </Card>
 
-            {/* Card 4: Meals Inclusions */}
-            <Card className="p-6 bg-white border border-neutral-200/80 rounded-3xl shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                    <Utensils className="w-4 h-4" />
+            {/* Card 4: Meals & Dining Experience */}
+            {property?.meals ? (
+              /* Camping Meals (Included with campsite booking) */
+              <Card className="p-6 bg-white border border-neutral-200/80 rounded-3xl shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
+                      <CookingPot className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-neutral-900">Campfire Dining & Meals Package</h2>
+                      <p className="text-xs text-neutral-500">Delicious barbecue, campfire dinner, and morning breakfast</p>
+                    </div>
                   </div>
-                  <div>
-                    <h2 className="text-base font-bold text-neutral-900">Complimentary Meals Package</h2>
-                    <p className="text-xs text-neutral-500">Delicious home-style vegetarian & non-vegetarian culinary options</p>
-                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
+                    Included in Stay
+                  </span>
                 </div>
-                <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
-                  Included in Stay
-                </span>
-              </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs font-bold text-emerald-800">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Breakfast</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/70">
+                    <span className="font-bold text-neutral-900 block flex items-center gap-1.5 mb-1">
+                      <Coffee className="w-3.5 h-3.5 text-[#ff6900]" /> Evening Snacks & Tea
+                    </span>
+                    <p className="text-neutral-600">{property.meals.eveningSnacks || "Hot tea, coffee, and freshly made snacks"}</p>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/70">
+                    <span className="font-bold text-neutral-900 block flex items-center gap-1.5 mb-1">
+                      <Flame className="w-3.5 h-3.5 text-[#ff6900]" /> Live Campfire Barbecue
+                    </span>
+                    <p className="text-neutral-600">
+                      {property.meals.bbq?.veg && <span>Veg: {property.meals.bbq.veg} • </span>}
+                      {property.meals.bbq?.nonVeg && <span>Non-Veg: {property.meals.bbq.nonVeg}</span>}
+                      {!property.meals.bbq?.veg && !property.meals.bbq?.nonVeg && "Live barbecue skewers by the campfire"}
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/70">
+                    <span className="font-bold text-neutral-900 block flex items-center gap-1.5 mb-1">
+                      <Utensils className="w-3.5 h-3.5 text-[#ff6900]" /> Campfire Dinner Buffet
+                    </span>
+                    <p className="text-neutral-600">
+                      {property.meals.dinner?.veg && <span>Veg: {property.meals.dinner.veg} • </span>}
+                      {property.meals.dinner?.nonVeg && <span>Non-Veg: {property.meals.dinner.nonVeg}</span>}
+                      {!property.meals.dinner?.veg && !property.meals.dinner?.nonVeg && "Wholesome dinner spread"}
+                    </p>
+                  </div>
+
+                  <div className="p-3 rounded-2xl bg-neutral-50 border border-neutral-200/70">
+                    <span className="font-bold text-neutral-900 block flex items-center gap-1.5 mb-1">
+                      <Coffee className="w-3.5 h-3.5 text-[#ff6900]" /> Next Day Breakfast
+                    </span>
+                    <p className="text-neutral-600">{property.meals.nextDayBreakfast || "Hot morning breakfast, tea & coffee"}</p>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs font-bold text-emerald-800">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Lunch</span>
+              </Card>
+            ) : isPaidMealPackage ? (
+              /* Paid Meal Package with Interactive Selection Option */
+              <Card className={`p-6 rounded-3xl shadow-xs transition-all ${
+                isMealPackageSelected
+                  ? "bg-gradient-to-br from-white to-orange-50/30 border-2 border-[#ff6900]"
+                  : "bg-white border border-neutral-200/80 hover:border-neutral-300"
+              }`}>
+                <div className="flex items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${
+                      isMealPackageSelected
+                        ? "bg-[#ff6900] text-white shadow-md shadow-orange-500/20"
+                        : "bg-orange-50 text-[#ff6900]"
+                    }`}>
+                      <Utensils className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-base font-bold text-neutral-900">
+                          Gourmet Meal Package
+                        </h2>
+                        <Badge className="bg-orange-100 text-orange-800 border-none font-bold text-[10px] px-2 py-0.5 rounded-full">
+                          Optional Add-on
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-neutral-500 mt-0.5">
+                        Fresh home-cooked regional meals lovingly crafted by our in-house chef.
+                      </p>
+                    </div>
+                  </div>
+
+                  <Button
+                    type="button"
+                    onClick={() => setIsMealPackageSelected(!isMealPackageSelected)}
+                    className={`rounded-xl text-xs font-bold px-4 py-2 shrink-0 transition-all cursor-pointer ${
+                      isMealPackageSelected
+                        ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                        : "bg-neutral-900 hover:bg-black text-white"
+                    }`}
+                  >
+                    {isMealPackageSelected ? (
+                      <span className="flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5" /> Added to Stay
+                      </span>
+                    ) : (
+                      `+ Add (${formatRupee(totalMealCharge)})`
+                    )}
+                  </Button>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs font-bold text-emerald-800">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Evening Tea</span>
+
+                {/* Available Courses */}
+                {Array.isArray(foodOptions?.available) && foodOptions.available.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {foodOptions.available.map((course, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50/80 border border-orange-100 text-xs font-bold text-orange-900"
+                      >
+                        <CheckCircle className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                        <span>{course}</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Pricing Calculation Summary Box */}
+                <div className="p-3.5 rounded-2xl bg-neutral-50/80 border border-neutral-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-neutral-700">
+                      <span className="font-semibold">Adult Rate:</span>
+                      <span>{formatRupee(adultMealPrice)} / adult / day × {adultsCount} adults × {mealNights} {mealNights === 1 ? "day" : "days"}</span>
+                    </div>
+                    {childMealPrice > 0 && childrenCount > 0 ? (
+                      <div className="flex items-center gap-2 text-neutral-700">
+                        <span className="font-semibold">Child Rate:</span>
+                        <span>{formatRupee(childMealPrice)} / child / day × {childrenCount} kids × {mealNights} days</span>
+                      </div>
+                    ) : (
+                      <div className="text-[11px] text-emerald-600 font-semibold">
+                        ✓ Children under 5 complimentary
+                      </div>
+                    )}
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[11px] text-neutral-400 block uppercase font-bold">Total Meal Add-on</span>
+                    <span className="text-base font-black text-neutral-900">
+                      {formatRupee(totalMealCharge)}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs font-bold text-emerald-800">
-                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
-                  <span>Dinner</span>
+
+                {foodOptions?.note && (
+                  <p className="text-xs text-neutral-500 mt-3 italic leading-relaxed">
+                    ℹ {foodOptions.note}
+                  </p>
+                )}
+              </Card>
+            ) : isComplimentaryMeals ? (
+              /* Complimentary Meals Package */
+              <Card className="p-6 bg-white border border-neutral-200/80 rounded-3xl shadow-xs space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h2 className="text-base font-bold text-neutral-900">Complimentary Meals Package</h2>
+                      <p className="text-xs text-neutral-500">Delicious home-style vegetarian & non-vegetarian culinary options</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
+                    Included in Stay
+                  </span>
                 </div>
-              </div>
-              <p className="text-xs text-neutral-500 mt-3 leading-relaxed">
-                Enjoy authentic local flavours cooked fresh at the property. Special culinary and dietary preferences can be communicated directly with the villa caretaker upon arrival.
-              </p>
-            </Card>
+
+                {Array.isArray(foodOptions?.available) && foodOptions.available.length > 0 && (
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {foodOptions.available.map((course, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100 text-xs font-bold text-emerald-800"
+                      >
+                        <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0" />
+                        <span>{course}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-neutral-500 mt-2 leading-relaxed">
+                  {foodOptions?.note ||
+                    "Enjoy authentic local flavours cooked fresh at the property. Special culinary and dietary preferences can be communicated directly with the villa caretaker upon arrival."}
+                </p>
+              </Card>
+            ) : null}
 
             {/* Card 5: Special Requests */}
             <Card className="p-6 bg-white border border-neutral-200/80 rounded-3xl shadow-xs">
@@ -1074,6 +1340,34 @@ const PropertyBooking = () => {
                   </div>
                 )}
 
+                {selectedEvent && (
+                  <div className="flex justify-between items-center text-neutral-700 bg-orange-50/60 p-2.5 rounded-xl border border-orange-200/80">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800">
+                      <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+                      {selectedEvent.title} ({eventAttendees} {eventAttendees === 1 ? "guest" : "guests"})
+                    </span>
+                    <span className="font-bold text-xs text-neutral-900">
+                      {selectedEvent.isIncludedInStay || selectedEvent.pricePerPerson === 0 ? (
+                        <span className="text-emerald-600 font-bold">Included Free</span>
+                      ) : (
+                        `(+) ${formatRupee(eventExtraCharge)}`
+                      )}
+                    </span>
+                  </div>
+                )}
+
+                {isMealPackageSelected && mealExtraCharge > 0 && (
+                  <div className="flex justify-between items-center text-neutral-700 bg-amber-50/70 p-2.5 rounded-xl border border-amber-200/80">
+                    <span className="flex items-center gap-1.5 text-xs font-semibold text-neutral-800">
+                      <Utensils className="w-3.5 h-3.5 text-amber-600" />
+                      All-Day Meals ({mealNights} {mealNights === 1 ? "day" : "days"})
+                    </span>
+                    <span className="font-bold text-xs text-neutral-900">
+                      (+) {formatRupee(mealExtraCharge)}
+                    </span>
+                  </div>
+                )}
+
                 <div className="flex justify-between items-center text-neutral-700">
                   <span className="flex items-center gap-1 text-xs text-neutral-500">
                     GST & Hospitality Tax (18%)
@@ -1131,7 +1425,7 @@ const PropertyBooking = () => {
                 </div>
                 <div className="text-right">
                   <span className="text-2xl font-black text-[#ff6900] tracking-tight block">
-                    {formatRupee(finalTotal)}
+                    {formatRupee(finalPayableTotal)}
                   </span>
                 </div>
               </div>
@@ -1178,7 +1472,7 @@ const PropertyBooking = () => {
                 ) : (
                   <>
                     <Lock className="w-4 h-4" />
-                    <span>Proceed to Pay {formatRupee(finalTotal)}</span>
+                    <span>Proceed to Pay {formatRupee(finalPayableTotal)}</span>
                   </>
                 )}
               </Button>
@@ -1244,6 +1538,24 @@ const PropertyBooking = () => {
         checkIn={checkin}
         checkOut={checkout}
         nights={nights}
+      />
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        isOpen={showEventModal}
+        onClose={() => {
+          setShowEventModal(false);
+          setInspectingEvent(null);
+        }}
+        event={inspectingEvent}
+        isSelected={selectedEventId === inspectingEvent?._id}
+        onToggleSelect={(id) =>
+          setSelectedEventId((prev) => (prev === id ? null : id))
+        }
+        attendees={eventAttendees}
+        setAttendees={setEventAttendees}
+        maxGuests={totalGuests}
+        formatRupee={formatRupee}
       />
     </div>
   );

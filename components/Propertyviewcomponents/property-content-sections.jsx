@@ -68,6 +68,9 @@ import {
   Tent,
   Home,
   Hotel,
+  Ticket,
+  Tag,
+  Users,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 import TentSelectionModal from "./tent-selection-modal";
@@ -199,6 +202,75 @@ export default function PropertyContentSections() {
   const [roomSelectionModalOpen, setRoomSelectionModalOpen] = useState(false);
   const isHotel = Boolean(villa?.rooms && villa.rooms.length > 0);
 
+  const propertyTitle =
+    villa?.name ||
+    villa?.hotelName ||
+    villa?.cottageName ||
+    villa?.campingName ||
+    villa?.villaName ||
+    "Property";
+
+  const propertyConfig =
+    villa?.bhkType ||
+    (isHotel
+      ? "Luxury Hotel & Rooms"
+      : isCottage
+      ? "Boutique Cottage Stay"
+      : isCamping
+      ? "Nature Campsite Retreat"
+      : "Luxury Private Villa");
+
+  const totalRoomUnits = useMemo(() => {
+    if (Array.isArray(villa?.rooms) && villa.rooms.length > 0) {
+      return villa.rooms.reduce((acc, r) => acc + (Number(r?.totalRooms) || 1), 0);
+    }
+    if (typeof villa?.rooms === "number" || typeof villa?.rooms === "string") {
+      return villa.rooms;
+    }
+    if (Array.isArray(villa?.cottages) && villa.cottages.length > 0) {
+      return villa.cottages.reduce((acc, c) => acc + (Number(c?.totalCottages) || 1), 0);
+    }
+    if (Array.isArray(villa?.tents) && villa.tents.length > 0) {
+      return villa.tents.reduce((acc, t) => acc + (Number(t?.totaltents) || 1), 0);
+    }
+    return 4;
+  }, [villa]);
+
+  const totalGuestCapacity = useMemo(() => {
+    if (typeof villa?.maxCapacity === "number" || typeof villa?.maxCapacity === "string") {
+      return villa.maxCapacity;
+    }
+    if (Array.isArray(villa?.rooms) && villa.rooms.length > 0) {
+      return villa.rooms.reduce(
+        (acc, r) => acc + (Number(r?.maxCapacity) || 2) * (Number(r?.totalRooms) || 1),
+        0
+      );
+    }
+    if (Array.isArray(villa?.cottages) && villa.cottages.length > 0) {
+      return villa.cottages.reduce(
+        (acc, c) => acc + (Number(c?.maxCapacity) || 2) * (Number(c?.totalCottages) || 1),
+        0
+      );
+    }
+    if (Array.isArray(villa?.tents) && villa.tents.length > 0) {
+      return villa.tents.reduce(
+        (acc, t) => acc + (Number(t?.maxCapacity) || 2) * (Number(t?.totaltents) || 1),
+        0
+      );
+    }
+    return 10;
+  }, [villa]);
+
+  const totalBathCount = useMemo(() => {
+    if (typeof villa?.baths === "number" || typeof villa?.baths === "string") {
+      return villa.baths;
+    }
+    if (typeof villa?.bathrooms === "number" || typeof villa?.bathrooms === "string") {
+      return villa.bathrooms;
+    }
+    return totalRoomUnits || 4;
+  }, [villa, totalRoomUnits]);
+
   // State for Reviews (incorporating mobile ReviewsTab logic)
   const [activeReviewFilter, setActiveReviewFilter] = useState("All");
   const [activeReviewSort, setActiveReviewSort] = useState("Most Popular");
@@ -208,6 +280,35 @@ export default function PropertyContentSections() {
   // State for Amenities
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const [allAmenitiesDialogOpen, setAllAmenitiesDialogOpen] = useState(false);
+
+  // State for Property Events
+  const [propertyEvents, setPropertyEvents] = useState(villa?.events || []);
+  const [selectedEventForModal, setSelectedEventForModal] = useState(null);
+  const [copiedCouponCode, setCopiedCouponCode] = useState(null);
+
+  useEffect(() => {
+    if (villa?.events && Array.isArray(villa.events) && villa.events.length > 0) {
+      setPropertyEvents(villa.events);
+    }
+    const pId = villa?._id || villa?.id;
+    if (!pId) return;
+    const pType = isHotel ? "hotel" : isCottage ? "cottage" : isCamping ? "camping" : "villa";
+
+    fetch(`${BaseUrl}/PropertyEvent/property/${pType}/${pId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.success && Array.isArray(json?.events)) {
+          setPropertyEvents(json.events);
+        }
+      })
+      .catch(() => {});
+  }, [villa?._id, isHotel, isCottage, isCamping]);
+
+  const activePropertyEvents = useMemo(() => {
+    return (propertyEvents || []).filter(
+      (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+    );
+  }, [propertyEvents]);
 
   // State for Nearby Stays (in FAQ section)
   const [nearbyVillas, setNearbyVillas] = useState([]);
@@ -458,7 +559,7 @@ export default function PropertyContentSections() {
               </h2>
             </div>
             <p className="text-sm text-gray-500 max-w-xl">
-              Signature experiences and standout features that make your stay at {villa?.name || "this villa"} extraordinary.
+              Signature experiences and standout features that make your stay at {propertyTitle} extraordinary.
             </p>
           </div>
 
@@ -603,7 +704,7 @@ export default function PropertyContentSections() {
             <DialogHeader>
               <DialogTitle className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#ff6900]" />
-                {villa?.name} Brochure
+                {propertyTitle} Brochure
               </DialogTitle>
             </DialogHeader>
             <div className="space-y-4 text-sm text-gray-600 mt-2">
@@ -612,16 +713,18 @@ export default function PropertyContentSections() {
                   Quick Property Snapshot
                 </h4>
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-700">
-                  <div>• Configuration: {villa?.bhkType || "Luxury Villa"}</div>
-                  <div>• Max Guests: {villa?.maxCapacity || 10} Guests</div>
-                  <div>• Bedrooms: {villa?.rooms || 4} Rooms</div>
-                  <div>• Bathrooms: {villa?.baths || 4} Baths</div>
+                  <div>• Configuration: {propertyConfig}</div>
+                  <div>• Max Guests: {totalGuestCapacity} Guests</div>
+                  <div>
+                    • {isHotel ? "Rooms" : isCottage ? "Cottages" : isCamping ? "Tents" : "Bedrooms"}: {totalRoomUnits} {isHotel ? "Rooms" : isCottage ? "Units" : isCamping ? "Tents" : "Rooms"}
+                  </div>
+                  <div>• Bathrooms: {totalBathCount} Baths</div>
                 </div>
               </div>
               <p className="text-xs leading-relaxed text-gray-600">
-                {villa?.description}
+                {typeof villa?.description === "string" ? villa.description : ""}
               </p>
-              {villa?.brochure && (
+              {typeof villa?.brochure === "string" && villa.brochure && (
                 <div className="pt-2">
                   <a
                     href={villa.brochure}
@@ -639,7 +742,341 @@ export default function PropertyContentSections() {
         </Dialog>
       </section>
 
-      {/* 2. REFUND POLICY & RULES SECTION */}
+      {/* 2. PROPERTY EVENTS SECTION */}
+      <section
+        id="eventss"
+        className="scroll-mt-32 transition-all duration-500 ease-out"
+      >
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+          <div className="flex items-center">
+            <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] via-rose-500 to-amber-400 rounded-full mr-3" />
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+                  Property Events & Celebrations
+                </h2>
+                {activePropertyEvents.length > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full text-xs font-extrabold bg-gradient-to-r from-orange-500 to-rose-500 text-white shadow-xs animate-pulse">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                    </span>
+                    {activePropertyEvents.length} Active {activePropertyEvents.length > 1 ? "Events" : "Event"}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                    <Sparkles className="w-3 h-3 text-gray-400" />
+                    Seasonal Gatherings
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-gray-500 mt-0.5">
+                Curated poolside evenings, special festivities, musical sessions, and exclusive dining hosted at {propertyTitle}.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {activePropertyEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            {activePropertyEvents.map((event) => {
+              const isFree =
+                event.isIncludedInStay ||
+                !event.pricePerPerson ||
+                Number(event.pricePerPerson) === 0;
+
+              const formatEventDate = (d) => {
+                if (!d) return "";
+                return new Date(d).toLocaleDateString("en-IN", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                });
+              };
+
+              return (
+                <div
+                  key={event._id}
+                  className="group relative bg-white border border-neutral-200/90 rounded-3xl overflow-hidden shadow-xs hover:shadow-xl hover:border-orange-300 transition-all duration-300 flex flex-col justify-between"
+                >
+                  {/* Event Banner */}
+                  <div className="relative h-52 w-full overflow-hidden bg-neutral-100">
+                    <Image
+                      src={event.bannerImage || villa?.images?.[0] || "/placeholder.svg"}
+                      alt={event.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3 left-3 right-3 flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white/95 backdrop-blur-md text-neutral-900 shadow-sm">
+                        <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+                        {event.eventType ? event.eventType.toUpperCase() : "SPECIAL EVENT"}
+                      </span>
+                      <span
+                        className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-sm ${
+                          isFree
+                            ? "bg-emerald-500 text-white"
+                            : "bg-neutral-900/90 backdrop-blur-md text-white border border-white/20"
+                        }`}
+                      >
+                        {isFree
+                          ? "Included with Stay"
+                          : `₹${Number(event.pricePerPerson).toLocaleString("en-IN")}/person`}
+                      </span>
+                    </div>
+
+                    {/* Bottom Title on Image */}
+                    <div className="absolute bottom-3 left-4 right-4">
+                      <h3 className="text-white text-lg font-bold leading-snug drop-shadow-sm line-clamp-1 group-hover:text-orange-200 transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-orange-200 font-medium mt-1">
+                        <Calendar className="w-3.5 h-3.5 text-[#ff6900]" />
+                        <span>
+                          {formatEventDate(event.startDate)}
+                          {event.endDate && event.endDate !== event.startDate
+                            ? ` – ${formatEventDate(event.endDate)}`
+                            : ""}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Card Content */}
+                  <div className="p-5 space-y-3.5 flex-1 flex flex-col justify-between">
+                    <p className="text-xs sm:text-sm text-gray-600 line-clamp-2 leading-relaxed">
+                      {event.description ||
+                        "Exclusive property celebration with tailored experiences, special refreshments, and unforgettable moments."}
+                    </p>
+
+                    {/* Badges / Perks */}
+                    <div className="flex flex-wrap items-center gap-2 pt-1">
+                      {event.discountText && (
+                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200">
+                          <Tag className="w-3 h-3" />
+                          {event.discountText}
+                        </span>
+                      )}
+                      {event.maxAttendees && (
+                        <span className="inline-flex items-center gap-1 text-[11px] text-gray-500 bg-gray-100 px-2.5 py-1 rounded-lg">
+                          <Users className="w-3 h-3" />
+                          Up to {event.maxAttendees} Guests
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Action Bar */}
+                    <div className="pt-3 border-t border-neutral-100 flex items-center justify-between gap-3">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedEventForModal(event)}
+                        className="rounded-xl text-xs font-bold border-gray-200 hover:border-[#ff6900] hover:text-[#ff6900] hover:bg-orange-50 px-4 py-2 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Info className="w-3.5 h-3.5" />
+                        <span>View Details</span>
+                      </Button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const widget = document.getElementById("booking-widget") || document.querySelector(".sticky");
+                          if (widget) {
+                            widget.scrollIntoView({ behavior: "smooth" });
+                          }
+                        }}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-white bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c85200] px-4 py-2 rounded-xl shadow-xs transition-all cursor-pointer"
+                      >
+                        <span>Reserve with Stay</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          /* Empty state: Clean, inviting banner */
+          <div className="bg-gradient-to-br from-orange-50/50 via-white to-amber-50/40 rounded-3xl border border-orange-100 p-8 sm:p-10 text-center shadow-xs">
+            <div className="w-14 h-14 rounded-2xl bg-orange-100 text-[#ff6900] flex items-center justify-center mx-auto mb-4 shadow-2xs">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <h3 className="text-lg font-bold text-gray-900 mb-1.5">
+              No Scheduled Events Right Now
+            </h3>
+            <p className="text-xs sm:text-sm text-gray-500 max-w-md mx-auto mb-5 leading-relaxed">
+              This property regularly hosts sunset dinners, live barbecue sessions, and seasonal festivities. Custom private gatherings, poolside parties, and celebrations can also be organized upon request with the host.
+            </p>
+            <div className="flex flex-wrap items-center justify-center gap-2 text-xs">
+              <span className="px-3 py-1.5 rounded-full bg-white border border-neutral-200 text-neutral-700 font-medium">
+                ✦ Barbecue & Bonfire on Request
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-white border border-neutral-200 text-neutral-700 font-medium">
+                ✦ Private Poolside Dinners
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-white border border-neutral-200 text-neutral-700 font-medium">
+                ✦ Birthday & Family Gatherings
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Event Details Dialog Modal */}
+        <Dialog
+          open={Boolean(selectedEventForModal)}
+          onOpenChange={(open) => !open && setSelectedEventForModal(null)}
+        >
+          {selectedEventForModal && (
+            <DialogContent className="max-w-2xl lg:max-w-3xl w-[92vw] sm:w-[88vw] md:w-full max-h-[82vh] sm:max-h-[85vh] flex flex-col gap-0 p-0 overflow-hidden rounded-2xl sm:rounded-3xl bg-white border border-gray-100 shadow-2xl z-[150] my-auto">
+              {/* Header */}
+              <div className="p-4 sm:p-5 border-b border-gray-100 bg-gradient-to-r from-orange-50/50 via-white to-amber-50/40 flex items-start justify-between relative flex-shrink-0">
+                <div className="pr-8">
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-orange-100 text-[#ff6900] text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{selectedEventForModal.eventType || "Exclusive Event"}</span>
+                  </div>
+                  <DialogTitle className="text-lg sm:text-xl font-bold text-gray-900 tracking-tight">
+                    {selectedEventForModal.title}
+                  </DialogTitle>
+                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1.5 font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-[#ff6900]" />
+                    <span>
+                      {new Date(selectedEventForModal.startDate).toLocaleDateString("en-IN", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                      {selectedEventForModal.endDate && (
+                        <> – {new Date(selectedEventForModal.endDate).toLocaleDateString("en-IN", {
+                          weekday: "short",
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}</>
+                      )}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Scrollable Body */}
+              <ScrollArea className="flex-1 min-h-0">
+                <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+                  {/* Photo Showcase */}
+                  <div className="relative w-full h-44 sm:h-56 md:h-60 rounded-xl sm:rounded-2xl overflow-hidden bg-neutral-900 border border-gray-100 group flex-shrink-0">
+                    <Image
+                      src={selectedEventForModal.bannerImage || villa?.images?.[0] || "/placeholder.svg"}
+                      alt={selectedEventForModal.title}
+                      fill
+                      className="object-cover select-none"
+                      unoptimized
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    {selectedEventForModal.pricePerPerson !== undefined && (
+                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-extrabold bg-[#ff6900] text-white shadow-md">
+                        {selectedEventForModal.isIncludedInStay ||
+                        !selectedEventForModal.pricePerPerson ||
+                        Number(selectedEventForModal.pricePerPerson) === 0
+                          ? "Included with Stay"
+                          : `₹${Number(selectedEventForModal.pricePerPerson).toLocaleString("en-IN")}/person`}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* About This Event */}
+                  <div className="space-y-1.5">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                      About This Event
+                    </h4>
+                    <p className="text-xs sm:text-sm text-gray-700 leading-relaxed">
+                      {selectedEventForModal.description ||
+                        "An exclusive event hosted at the property for residing guests. Enjoy curated entertainment, refreshments, and vibrant hospitality."}
+                    </p>
+                  </div>
+
+                  {/* Quick Specs Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 bg-neutral-50 p-4 rounded-2xl border border-neutral-200/70 text-xs">
+                    <div>
+                      <span className="text-gray-400 block text-[11px]">Pricing</span>
+                      <span className="font-bold text-gray-900 text-sm">
+                        {selectedEventForModal.isIncludedInStay ||
+                        !selectedEventForModal.pricePerPerson ||
+                        Number(selectedEventForModal.pricePerPerson) === 0
+                          ? "Free (With Stay)"
+                          : `₹${Number(selectedEventForModal.pricePerPerson).toLocaleString("en-IN")}/person`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block text-[11px]">Max Capacity</span>
+                      <span className="font-bold text-gray-900 text-sm">
+                        {selectedEventForModal.maxAttendees || 50} Attendees
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-gray-400 block text-[11px]">Special Offer</span>
+                      <span className="font-bold text-emerald-700 text-sm">
+                        {selectedEventForModal.discountText || "Exclusive Access"}
+                      </span>
+                    </div>
+                  </div>
+
+
+
+                  {/* Included Perks */}
+                  {Array.isArray(selectedEventForModal.perks) && selectedEventForModal.perks.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Included Highlights
+                      </h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {selectedEventForModal.perks.map((perk, i) => (
+                          <div
+                            key={i}
+                            className="flex items-center gap-2 p-2.5 rounded-xl bg-orange-50/40 border border-orange-100/70 text-xs text-gray-800"
+                          >
+                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                            <span>{perk}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </ScrollArea>
+
+              {/* Fixed Footer */}
+              <div className="p-3 sm:p-4 border-t border-gray-100 bg-gray-50/80 flex flex-col-reverse sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  onClick={() => setSelectedEventForModal(null)}
+                  className="rounded-xl border-gray-200 text-xs sm:text-sm h-9 sm:h-10 w-full sm:w-auto cursor-pointer"
+                >
+                  Close
+                </Button>
+                <Button
+                  onClick={() => {
+                    setSelectedEventForModal(null);
+                    const widget = document.getElementById("booking-widget") || document.querySelector(".sticky");
+                    if (widget) {
+                      widget.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                  className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs sm:text-sm font-bold px-6 shadow-md shadow-orange-500/20 h-9 sm:h-10 w-full sm:w-auto cursor-pointer"
+                >
+                  Book Stay & Event
+                </Button>
+              </div>
+            </DialogContent>
+          )}
+        </Dialog>
+      </section>
+
+      {/* 3. REFUND POLICY & RULES SECTION */}
       <section
         id="refund-policyy"
         className="scroll-mt-32 transition-all duration-500 ease-out"
@@ -856,7 +1293,23 @@ export default function PropertyContentSections() {
         };
 
         if (isCamping && Array.isArray(villa?.tents) && villa.tents.length > 0) {
-          const tents = villa.tents;
+          // Consolidate tents by unique tentType
+          const consolidatedTentsMap = new Map();
+          villa.tents.forEach((t, idx) => {
+            const type = (t.tentType || t.name || `Tent ${idx + 1}`).trim();
+            const lower = type.toLowerCase();
+            if (!consolidatedTentsMap.has(lower)) {
+              consolidatedTentsMap.set(lower, {
+                ...t,
+                tentType: type,
+                totalUnits: Number(t.totaltents ?? t.totalUnits ?? 1),
+              });
+            } else {
+              const existing = consolidatedTentsMap.get(lower);
+              existing.totalUnits += Number(t.totaltents ?? t.totalUnits ?? 1);
+            }
+          });
+          const tents = Array.from(consolidatedTentsMap.values());
           return (
             <section
               id="spacess"
@@ -945,7 +1398,7 @@ export default function PropertyContentSections() {
                             Up to {tent.maxCapacity || 2} Guests
                           </span>
                           <span className="font-semibold bg-[#ff6900]/90 backdrop-blur-md px-2.5 py-1 rounded-full text-white">
-                            {tent.totaltents || 1} Units Available
+                            {tent.totalUnits || tent.totaltents || 1} Units Available
                           </span>
                         </div>
                       </div>
@@ -1025,7 +1478,23 @@ export default function PropertyContentSections() {
         }
 
         if (isCottage && Array.isArray(villa?.cottages) && villa.cottages.length > 0) {
-          const cottages = villa.cottages;
+          // Consolidate cottages by unique cottageType
+          const consolidatedCottagesMap = new Map();
+          villa.cottages.forEach((c, idx) => {
+            const type = (c.cottageType || c.name || `Cottage ${idx + 1}`).trim();
+            const lower = type.toLowerCase();
+            if (!consolidatedCottagesMap.has(lower)) {
+              consolidatedCottagesMap.set(lower, {
+                ...c,
+                cottageType: type,
+                totalUnits: Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1),
+              });
+            } else {
+              const existing = consolidatedCottagesMap.get(lower);
+              existing.totalUnits += Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1);
+            }
+          });
+          const cottages = Array.from(consolidatedCottagesMap.values());
           return (
             <section
               id="spacess"
@@ -1069,7 +1538,7 @@ export default function PropertyContentSections() {
                     "/placeholder.svg";
                   const weekdayPrice = cottage.pricing?.weekdayPrice || 2500;
                   const weekendPrice = cottage.pricing?.weekendPrice || weekdayPrice;
-                  const totalUnits = cottage.totaltents || cottage.totalCottages || 1;
+                  const totalUnits = cottage.totalUnits || cottage.totalcottage || cottage.totaltents || cottage.totalCottages || 1;
 
                   return (
                     <div
@@ -1196,7 +1665,23 @@ export default function PropertyContentSections() {
         }
 
         if (isHotel && Array.isArray(villa?.rooms) && villa.rooms.length > 0) {
-          const rooms = villa.rooms;
+          // Consolidate rooms by unique roomType
+          const consolidatedRoomsMap = new Map();
+          villa.rooms.forEach((r, idx) => {
+            const type = (r.roomType || r.name || `Room ${idx + 1}`).trim();
+            const lower = type.toLowerCase();
+            if (!consolidatedRoomsMap.has(lower)) {
+              consolidatedRoomsMap.set(lower, {
+                ...r,
+                roomType: type,
+                totalUnits: Number(r.totalRooms ?? r.totaltents ?? 1),
+              });
+            } else {
+              const existing = consolidatedRoomsMap.get(lower);
+              existing.totalUnits += Number(r.totalRooms ?? r.totaltents ?? 1);
+            }
+          });
+          const rooms = Array.from(consolidatedRoomsMap.values());
           return (
             <section
               id="spacess"
@@ -2023,7 +2508,7 @@ export default function PropertyContentSections() {
         </Dialog>
       </section>
 
-      {/* 6. MEALS & DINING EXPERIENCE SECTION (From Schema: foodOptions) */}
+      {/* 6. MEALS & DINING EXPERIENCE SECTION */}
       <section
         id="mealss"
         className="scroll-mt-32 transition-all duration-500 ease-out"
@@ -2032,163 +2517,292 @@ export default function PropertyContentSections() {
           <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-3" />
           <div>
             <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
-              Meals & Dining Experience
+              {villa?.meals ? "Meals & Campfire Dining" : "Meals & Dining Experience"}
             </h2>
             <p className="text-sm text-gray-500 mt-0.5">
-              Freshly prepared home-cooked regional meals lovingly crafted by our in-house chef.
+              {villa?.meals
+                ? "Freshly prepared barbecue, campfire dinner, and morning breakfast amidst nature."
+                : "Freshly prepared home-cooked regional meals lovingly crafted by our in-house chef."}
             </p>
           </div>
         </div>
 
-        {/* Meal Package Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-          {/* Adult Meal Plan */}
-          <div className="relative rounded-3xl p-6 bg-gradient-to-br from-white to-orange-50/30 border border-orange-200/80 shadow-xs space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#ff6900]">
-                  Gourmet All-Day Dining
-                </span>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Adult Meal Package
-                </h3>
+        {/* CAMPING MEALS EXPERIENCE */}
+        {villa?.meals ? (
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* Evening Snacks */}
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-2xs flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <Coffee className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-gray-900">Evening Snacks & Tea</h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                      5:00 PM – 6:30 PM
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {villa?.meals?.eveningSnacks || "Hot tea, coffee, and freshly made snacks"}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-extrabold text-gray-900">
-                  ₹{(villa?.foodOptions?.adultPrice || 1200).toLocaleString("en-IN")}
-                </span>
-                <span className="text-xs text-gray-500 block">
-                  / adult / day + taxes
-                </span>
+
+              {/* Live Campfire BBQ */}
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-2xs flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <Flame className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-gray-900">Live Campfire Barbecue</h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                      7:30 PM – 9:00 PM
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                    {villa?.meals?.bbq?.veg && (
+                      <p><span className="font-semibold text-gray-900">Veg:</span> {villa.meals.bbq.veg}</p>
+                    )}
+                    {villa?.meals?.bbq?.nonVeg && (
+                      <p><span className="font-semibold text-gray-900">Non-Veg:</span> {villa.meals.bbq.nonVeg}</p>
+                    )}
+                    {!villa?.meals?.bbq?.veg && !villa?.meals?.bbq?.nonVeg && (
+                      <p>Sizzling skewers prepared live around the campfire</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Campfire Dinner */}
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-2xs flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <Utensils className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-gray-900">Unlimited Dinner Buffet</h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                      9:00 PM – 10:30 PM
+                    </span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1 space-y-0.5">
+                    {villa?.meals?.dinner?.veg && (
+                      <p><span className="font-semibold text-gray-900">Veg:</span> {villa.meals.dinner.veg}</p>
+                    )}
+                    {villa?.meals?.dinner?.nonVeg && (
+                      <p><span className="font-semibold text-gray-900">Non-Veg:</span> {villa.meals.dinner.nonVeg}</p>
+                    )}
+                    {!villa?.meals?.dinner?.veg && !villa?.meals?.dinner?.nonVeg && (
+                      <p>Wholesome regional curries, rotis, rice, and dessert</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Breakfast */}
+              <div className="bg-white rounded-2xl p-5 border border-neutral-200/80 shadow-2xs flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <CookingPot className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-sm font-bold text-gray-900">Next Day Breakfast</h4>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-800">
+                      8:30 AM – 10:00 AM
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    {villa?.meals?.nextDayBreakfast || "Fresh morning breakfast, tea & brewed coffee"}
+                  </p>
+                </div>
               </div>
             </div>
 
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Includes full course breakfast, lunch, evening high-tea with snacks, and elaborate dinner. Fresh seasonal produce customized to your palate.
-            </p>
-
-            <div className="pt-2 border-t border-orange-100 flex flex-wrap gap-2 text-xs font-semibold text-gray-700">
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Veg & Non-Veg
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Jain on Request
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Unlimited Servings
-              </span>
-            </div>
-          </div>
-
-          {/* Child Meal Plan */}
-          <div className="relative rounded-3xl p-6 bg-white border border-neutral-200/80 shadow-xs space-y-4">
-            <div className="flex items-start justify-between">
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                  For Little Ones (5 - 10 Yrs)
-                </span>
-                <h3 className="text-lg font-bold text-gray-900">
-                  Child Meal Package
-                </h3>
+            <div className="bg-emerald-50/70 border border-emerald-200/80 rounded-2xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs font-bold text-emerald-900">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span>All Meals & Campfire Barbecue Included With Your Stay</span>
               </div>
-              <div className="text-right">
-                <span className="text-2xl font-extrabold text-gray-900">
-                  ₹{(villa?.foodOptions?.childPrice || 800).toLocaleString("en-IN")}
-                </span>
-                <span className="text-xs text-gray-500 block">
-                  / child / day + taxes
-                </span>
+              <span className="text-xs font-bold text-emerald-700 bg-emerald-100/80 px-2.5 py-0.5 rounded-full">
+                Zero Extra Charges
+              </span>
+            </div>
+          </div>
+        ) : (
+          /* VILLA / HOTEL / COTTAGE FOOD OPTIONS */
+          <div className="space-y-6">
+            {/* When Meals are Paid */}
+            {(villa?.foodOptions?.adultPrice > 0 || villa?.foodOptions?.childPrice > 0) ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                {/* Adult Meal Plan */}
+                <div className="relative rounded-3xl p-6 bg-gradient-to-br from-white to-orange-50/30 border border-orange-200/80 shadow-xs space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[#ff6900]">
+                        Gourmet All-Day Dining
+                      </span>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Adult Meal Package
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-2xl font-extrabold text-gray-900">
+                        ₹{Number(villa.foodOptions.adultPrice || 0).toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-xs text-gray-500 block">
+                        / adult / day + taxes
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Includes full course breakfast, lunch, evening high-tea with snacks, and elaborate dinner. Fresh seasonal produce customized to your palate.
+                  </p>
+
+                  <div className="pt-2 border-t border-orange-100 flex flex-wrap gap-2 text-xs font-semibold text-gray-700">
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Veg & Non-Veg
+                    </span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Jain on Request
+                    </span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Unlimited Servings
+                    </span>
+                  </div>
+                </div>
+
+                {/* Child Meal Plan */}
+                <div className="relative rounded-3xl p-6 bg-white border border-neutral-200/80 shadow-xs space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                        For Little Ones (5 - 10 Yrs)
+                      </span>
+                      <h3 className="text-lg font-bold text-gray-900">
+                        Child Meal Package
+                      </h3>
+                    </div>
+                    <div className="text-right">
+                      {Number(villa?.foodOptions?.childPrice || 0) > 0 ? (
+                        <>
+                          <span className="text-2xl font-extrabold text-gray-900">
+                            ₹{Number(villa.foodOptions.childPrice).toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-xs text-gray-500 block">
+                            / child / day + taxes
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 block">
+                          Free for Kids Under 5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Tailored kid-friendly preparations with mild spices, freshly made rotis, comfort meals, warm milk, and snacks throughout the stay.
+                  </p>
+
+                  <div className="pt-2 border-t border-neutral-150 flex flex-wrap gap-2 text-xs font-semibold text-gray-700">
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Mild Spice Options
+                    </span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Kid Favourites
+                    </span>
+                    <span>•</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-600">
+                      <Check className="w-3.5 h-3.5" /> Under 5 Free
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ) : (
+              /* When Meals are Complimentary */
+              <div className="p-6 bg-gradient-to-r from-emerald-50/80 to-teal-50/50 border border-emerald-200/80 rounded-3xl shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-gray-900">Complimentary Meals Package</h3>
+                      <p className="text-xs text-gray-500">Wholesome home-style culinary options provided with your booking</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300/80">
+                    Included in Stay
+                  </span>
+                </div>
+              </div>
+            )}
 
-            <p className="text-xs text-gray-600 leading-relaxed">
-              Tailored kid-friendly preparations with mild spices, freshly made rotis, comfort meals, warm milk, and snacks throughout the stay.
-            </p>
+            {/* Dynamic Available Meal Courses */}
+            {Array.isArray(villa?.foodOptions?.available) && villa.foodOptions.available.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {villa.foodOptions.available.includes("Breakfast") && (
+                  <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
+                      <Coffee className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-900">Breakfast</h4>
+                    <span className="text-[11px] text-gray-500 block">8:30 AM – 10:30 AM</span>
+                    <p className="text-[11px] text-gray-400">Hot breakfast, eggs, fruits, tea & coffee</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("Lunch") && (
+                  <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
+                      <Utensils className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-900">Lunch</h4>
+                    <span className="text-[11px] text-gray-500 block">1:00 PM – 3:00 PM</span>
+                    <p className="text-[11px] text-gray-400">Traditional regional curries, rotis, rice & salad</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("High Tea") && (
+                  <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
+                      <Soup className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-900">High Tea</h4>
+                    <span className="text-[11px] text-gray-500 block">5:00 PM – 6:30 PM</span>
+                    <p className="text-[11px] text-gray-400">Fresh chai, filter coffee & hot savoury pakoras</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("Dinner") && (
+                  <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
+                    <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
+                      <Sparkles className="w-4 h-4" />
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-900">Dinner</h4>
+                    <span className="text-[11px] text-gray-500 block">8:30 PM – 10:30 PM</span>
+                    <p className="text-[11px] text-gray-400">Elaborate gourmet spread and dessert</p>
+                  </div>
+                )}
+              </div>
+            )}
 
-            <div className="pt-2 border-t border-neutral-150 flex flex-wrap gap-2 text-xs font-semibold text-gray-700">
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Mild Spice Options
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Kid Favourites
-              </span>
-              <span>•</span>
-              <span className="inline-flex items-center gap-1 text-emerald-600">
-                <Check className="w-3.5 h-3.5" /> Under 5 Free
-              </span>
+            {/* Chef Policy & Special Note */}
+            <div className="bg-neutral-50/70 border border-neutral-200/80 rounded-2xl p-5 space-y-2">
+              <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
+                <Info className="w-4 h-4 text-[#ff6900]" />
+                <span>Important Dining Notes & Kitchen Guidelines</span>
+              </div>
+              <p className="text-xs text-gray-600 leading-relaxed">
+                {villa?.foodOptions?.note ||
+                  "All meals are prepared fresh on-site using local farm produce. Barbecue nights and celebration cakes can be arranged with prior notice. Outside food ordering is subject to local availability."}
+              </p>
             </div>
           </div>
-        </div>
-
-        {/* 4-Course Meal Timings Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
-              <Coffee className="w-4 h-4" />
-            </div>
-            <h4 className="font-bold text-sm text-gray-900">Breakfast</h4>
-            <span className="text-[11px] text-gray-500 block">
-              8:30 AM – 10:30 AM
-            </span>
-            <p className="text-[11px] text-gray-400">
-              Hot breakfast, eggs, fruits, tea & coffee
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
-              <Utensils className="w-4 h-4" />
-            </div>
-            <h4 className="font-bold text-sm text-gray-900">Lunch</h4>
-            <span className="text-[11px] text-gray-500 block">
-              1:00 PM – 3:00 PM
-            </span>
-            <p className="text-[11px] text-gray-400">
-              Traditional regional curries, rotis, rice & salad
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
-              <Soup className="w-4 h-4" />
-            </div>
-            <h4 className="font-bold text-sm text-gray-900">High Tea</h4>
-            <span className="text-[11px] text-gray-500 block">
-              5:00 PM – 6:30 PM
-            </span>
-            <p className="text-[11px] text-gray-400">
-              Fresh chai, filter coffee & hot savoury pakoras
-            </p>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-1.5">
-            <div className="w-8 h-8 rounded-xl bg-orange-50 text-[#ff6900] flex items-center justify-center">
-              <Sparkles className="w-4 h-4" />
-            </div>
-            <h4 className="font-bold text-sm text-gray-900">Dinner</h4>
-            <span className="text-[11px] text-gray-500 block">
-              8:30 PM – 10:30 PM
-            </span>
-            <p className="text-[11px] text-gray-400">
-              Elaborate gourmet spread and dessert
-            </p>
-          </div>
-        </div>
-
-        {/* Chef Policy & Special Note */}
-        <div className="bg-neutral-50/70 border border-neutral-200/80 rounded-2xl p-5 space-y-2">
-          <div className="flex items-center gap-2 text-gray-900 font-bold text-sm">
-            <Info className="w-4 h-4 text-[#ff6900]" />
-            <span>Important Dining Notes & Kitchen Guidelines</span>
-          </div>
-          <p className="text-xs text-gray-600 leading-relaxed">
-            {villa?.foodOptions?.note ||
-              "All meals are prepared fresh on-site using local farm produce. Barbecue nights and celebration cakes can be arranged with prior notice. Outside food ordering is subject to local availability."}
-          </p>
-        </div>
+        )}
       </section>
 
       {/* 7. LOCATION SECTION */}

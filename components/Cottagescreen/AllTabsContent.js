@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Accordion,
@@ -27,6 +27,7 @@ import ExperiencesTab from "./ExperiencesTab";
 import { useCottage } from "@/lib/context/CottageContext";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
   Trees,
   Home,
@@ -41,6 +42,7 @@ import {
   Users,
   Search,
   Flame,
+  Soup,
 } from "lucide-react";
 import { Button } from "@heroui/react";
 import { useSelector, useDispatch } from "react-redux";
@@ -151,6 +153,27 @@ const AllTabsContent = ({ refs = {} }) => {
     {}
   );
 
+  // Consolidate cottages by unique cottageType
+  const consolidatedCottages = useMemo(() => {
+    if (!Array.isArray(cottage?.cottages)) return [];
+    const map = new Map();
+    cottage.cottages.forEach((c, idx) => {
+      const type = (c.cottageType || c.tentType || c.name || `Cottage ${idx + 1}`).trim();
+      const lower = type.toLowerCase();
+      if (!map.has(lower)) {
+        map.set(lower, {
+          ...c,
+          cottageType: type,
+          unitCount: Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1),
+        });
+      } else {
+        const existing = map.get(lower);
+        existing.unitCount += Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1);
+      }
+    });
+    return Array.from(map.values());
+  }, [cottage?.cottages]);
+
   return (
     <div className="pb-24">
       {/* 1. HIGHLIGHTS SECTION */}
@@ -249,6 +272,9 @@ const AllTabsContent = ({ refs = {} }) => {
         </div>
       </section>
 
+      {/* EVENTS SECTION */}
+      <MobileEventsSection property={cottage} propertyType="cottage" />
+
       {/* 2. REFUND POLICY SECTION */}
       <section
         ref={refs?.refundRef}
@@ -329,10 +355,10 @@ const AllTabsContent = ({ refs = {} }) => {
             Select your preferred cottage type and units
           </p>
 
-          {Array.isArray(cottage?.cottages) && cottage.cottages.length > 0 ? (
+          {consolidatedCottages.length > 0 ? (
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2.5">
-                {cottage.cottages.map((cotItem, idx) => {
+                {consolidatedCottages.map((cotItem, idx) => {
                   const cKey = cotItem.cottageType || cotItem.tentType || cotItem._id || `cottage-${idx}`;
                   const currentSelectedQty = reduxSelectedCottages?.[cKey]?.quantity || 0;
                   const cotPrice = Number(
@@ -342,6 +368,7 @@ const AllTabsContent = ({ refs = {} }) => {
                     2500
                   );
                   const unitCount =
+                    cotItem.unitCount ||
                     cotItem.totalcottage ||
                     cotItem.totaltents ||
                     cotItem.totalCottages ||
@@ -492,57 +519,129 @@ const AllTabsContent = ({ refs = {} }) => {
             Authentic home-cooked meals prepared with local ingredients
           </p>
 
-          <div className="space-y-2.5">
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Coffee className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">Morning Breakfast</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    8:30 AM – 10:30 AM
-                  </span>
+          <div className="space-y-3">
+            {/* When Meals are Paid */}
+            {(Number(cottage?.foodOptions?.adultPrice || 0) > 0 || Number(cottage?.foodOptions?.childPrice || 0) > 0) ? (
+              <>
+                {/* Adult Meal Plan */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-orange-50/40 border border-orange-200 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6900]">
+                        Gourmet Dining
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Adult Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-extrabold text-[#ff6900] text-base">
+                        ₹{Number(cottage.foodOptions.adultPrice || 0).toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-[10px] text-gray-400 block">/adult/day</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Freshly cooked home-style meals with seasonal vegetables, rotis, and curries tailored to your taste.
+                  </p>
+                  <div className="pt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-600">
+                    <span>✓ Veg & Non-Veg</span>
+                    <span>•</span>
+                    <span>✓ Freshly Cooked</span>
+                    <span>•</span>
+                    <span>✓ Unlimited</span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  Fresh breakfast options, hot tea & brewed coffee
-                </p>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Flame className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
+                {/* Child Meal Plan */}
+                <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        5 - 10 Years
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Child Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      {Number(cottage?.foodOptions?.childPrice || 0) > 0 ? (
+                        <>
+                          <span className="font-extrabold text-gray-900 text-base">
+                            ₹{Number(cottage.foodOptions.childPrice).toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-[10px] text-gray-400 block">/child/day</span>
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Free for Kids Under 5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Mild, wholesome preparations for little ones with warm milk and freshly made snacks.
+                  </p>
+                </div>
+              </>
+            ) : (
+              /* Complimentary Meals */
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">Evening Bonfire & Tea</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    6:00 PM – 7:30 PM
+                  <h4 className="text-xs font-bold text-gray-900">Complimentary Meals Package</h4>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    Included in Stay
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  Evening tea, warm cookies, and cozy outdoor campfire sit-out
+                <p className="text-[11px] text-gray-600">
+                  Wholesome home-style vegetarian & non-vegetarian culinary options prepared fresh on-site.
                 </p>
               </div>
-            </div>
+            )}
 
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Utensils className="w-4 h-4" />
+            {/* Dynamic Available Course Schedule in Grid */}
+            {Array.isArray(cottage?.foodOptions?.available) && cottage.foodOptions.available.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {cottage.foodOptions.available.includes("Breakfast") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Coffee className="w-3 h-3" /> Breakfast
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">8:30 AM – 10:30 AM</p>
+                  </div>
+                )}
+                {cottage.foodOptions.available.includes("Lunch") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Utensils className="w-3 h-3" /> Lunch
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">1:00 PM – 3:00 PM</p>
+                  </div>
+                )}
+                {cottage.foodOptions.available.includes("High Tea") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Soup className="w-3 h-3" /> High Tea
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">5:00 PM – 6:30 PM</p>
+                  </div>
+                )}
+                {cottage.foodOptions.available.includes("Dinner") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Flame className="w-3 h-3" /> Dinner
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">8:30 PM – 10:30 PM</p>
+                  </div>
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">Dinner Service</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    8:30 PM – 10:30 PM
-                  </span>
-                </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  Wholesome Indian cuisine cooked fresh to order
-                </p>
-              </div>
-            </div>
+            )}
+
+            {cottage?.foodOptions?.note && (
+              <p className="text-[11px] text-gray-500 bg-neutral-50 p-3 rounded-xl border border-neutral-200/70 leading-relaxed">
+                ℹ {cottage.foodOptions.note}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -783,7 +882,7 @@ const AllTabsContent = ({ refs = {} }) => {
       <CottageSelectionDrawer
         isOpen={showCottageSelectionDrawer}
         onClose={() => setShowCottageSelectionDrawer(false)}
-        cottages={cottage?.cottages || []}
+        cottages={consolidatedCottages}
         totalGuests={selectedGuest?.totalGuests || 2}
         dateStr={checkin || new Date().toISOString()}
         id={cottage?._id}

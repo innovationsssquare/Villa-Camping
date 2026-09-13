@@ -13,9 +13,11 @@ import { fetchHotelById } from "@/Redux/Slices/hotelSlice";
 import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
 import { XCircle } from "lucide-react";
 import ButtonLoader from "../Loadercomponents/button-loader";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
+  { id: "events", label: "Events" },
   { id: "refund-policy", label: "Refund Policy" },
   { id: "spaces", label: "Rooms" },
   { id: "reviews", label: "Reviews" },
@@ -28,6 +30,7 @@ const tabs = [
 
 const Viewhotel = () => {
   const [activeTab, setActiveTab] = useState("highlights");
+  const [events, setEvents] = useState([]);
   const isManualScrollingRef = useRef(false);
   const manualTimerRef = useRef(null);
 
@@ -40,6 +43,25 @@ const Viewhotel = () => {
   useEffect(() => {
     dispatch(fetchHotelById(id));
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (id) {
+      fetch(`${BaseUrl}/PropertyEvent/property/hotel/${id}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json?.success && Array.isArray(json?.events)) {
+            setEvents(json.events);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [id]);
+
+  const hasEvents =
+    (hotel?.events && hotel.events.length > 0) ||
+    events.some(
+      (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+    );
 
   // Sequential Scroll-Spy logic
   useEffect(() => {
@@ -155,6 +177,7 @@ const Viewhotel = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
             isSticky={true}
+            hasEvents={hasEvents}
           />
         </div>
 

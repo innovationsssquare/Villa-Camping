@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import Listprop from "@/public/Homeasset/Listprop.jpg";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 import {
   Home,
@@ -45,6 +46,7 @@ import { TiThMenu } from "react-icons/ti";
 export function UserSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { openAuthModal } = useAuthModal();
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -168,7 +170,10 @@ export function UserSidebar() {
                 Welcome to luxury stays
               </h3>
               <Button
-                onClick={() => handleNavigate("/account")}
+                onClick={() => {
+                  setOpen(false);
+                  openAuthModal();
+                }}
                 className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold rounded-xl py-2 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation"
               >
                 <LogIn className="w-3.5 h-3.5" /> Sign In / Register
@@ -449,7 +454,10 @@ export function UserSidebar() {
             </Button>
           ) : (
             <Button
-              onClick={() => handleNavigate("/account")}
+              onClick={() => {
+                setOpen(false);
+                openAuthModal();
+              }}
               className="w-full justify-center text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl h-10 transition-all cursor-pointer touch-manipulation"
             >
               <User className="h-4 w-4 mr-1.5" />

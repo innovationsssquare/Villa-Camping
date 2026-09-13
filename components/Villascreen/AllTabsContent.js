@@ -33,6 +33,7 @@ import { useVilla } from "@/lib/context/VillaContext";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
   Trees,
   Bed,
@@ -454,10 +455,10 @@ const AllTabsContent = ({ refs }) => {
                       • <strong>Capacity:</strong> Up to {villa?.maxCapacity || 10} Guests
                     </div>
                     <div>
-                      • <strong>Bedrooms:</strong> {villa?.rooms || 4} Rooms
+                      • <strong>Bedrooms:</strong> {Array.isArray(villa?.rooms) ? villa.rooms.length : (typeof villa?.rooms === "number" || typeof villa?.rooms === "string" ? villa.rooms : 4)} Rooms
                     </div>
                     <div>
-                      • <strong>Bathrooms:</strong> {villa?.baths || 4} Baths
+                      • <strong>Bathrooms:</strong> {typeof villa?.baths === "number" || typeof villa?.baths === "string" ? villa.baths : 4} Baths
                     </div>
                   </div>
                 </div>
@@ -496,6 +497,9 @@ const AllTabsContent = ({ refs }) => {
           </a>
         </div>
       </section>
+
+      {/* EVENTS SECTION */}
+      <MobileEventsSection property={villa} propertyType="villa" />
 
       {/* 2. RULES & REFUND POLICY SECTION */}
       <section
@@ -890,89 +894,122 @@ const AllTabsContent = ({ refs }) => {
           </h3>
 
           <div className="space-y-3">
-            {/* Adult Meal Plan */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-orange-50/40 border border-orange-200 shadow-2xs space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6900]">
-                    Gourmet Spread
-                  </span>
-                  <h4 className="font-bold text-sm text-gray-900">
-                    Adult Meal Package
-                  </h4>
+            {/* When Meals are Paid */}
+            {(Number(villa?.foodOptions?.adultPrice || 0) > 0 || Number(villa?.foodOptions?.childPrice || 0) > 0) ? (
+              <>
+                {/* Adult Meal Plan */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-orange-50/40 border border-orange-200 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6900]">
+                        Gourmet Spread
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Adult Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-extrabold text-[#ff6900] text-base">
+                        ₹{Number(villa.foodOptions.adultPrice || 0).toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-[10px] text-gray-400 block">/adult/day</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Includes full course breakfast, regional lunch, evening high-tea & snacks, and gourmet dinner prepared by our chef.
+                  </p>
+                  <div className="pt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-600">
+                    <span>✓ Veg & Non-Veg</span>
+                    <span>•</span>
+                    <span>✓ Jain Available</span>
+                    <span>•</span>
+                    <span>✓ Unlimited</span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span className="font-extrabold text-[#ff6900] text-base">
-                    ₹{(villa?.foodOptions?.adultPrice || 1200).toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-[10px] text-gray-400 block">/adult/day</span>
+
+                {/* Child Meal Plan */}
+                <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        5 - 10 Years
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Child Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      {Number(villa?.foodOptions?.childPrice || 0) > 0 ? (
+                        <>
+                          <span className="font-extrabold text-gray-900 text-base">
+                            ₹{Number(villa.foodOptions.childPrice).toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-[10px] text-gray-400 block">/child/day</span>
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Free for Kids Under 5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Mild, kid-friendly comfort preparations, fresh rotis, warm milk, and snacks.
+                  </p>
                 </div>
-              </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Includes full course breakfast, regional lunch, evening high-tea & snacks, and gourmet dinner prepared by our chef.
-              </p>
-              <div className="pt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-600">
-                <span>✓ Veg & Non-Veg</span>
-                <span>•</span>
-                <span>✓ Jain Available</span>
-                <span>•</span>
-                <span>✓ Unlimited</span>
-              </div>
-            </div>
-
-            {/* Child Meal Plan */}
-            <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
-                    5 - 10 Years
+              </>
+            ) : (
+              /* Complimentary Meals */
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-xs font-bold text-gray-900">Complimentary Meals Package</h4>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    Included in Stay
                   </span>
-                  <h4 className="font-bold text-sm text-gray-900">
-                    Child Meal Package
-                  </h4>
                 </div>
-                <div className="text-right">
-                  <span className="font-extrabold text-gray-900 text-base">
-                    ₹{(villa?.foodOptions?.childPrice || 800).toLocaleString("en-IN")}
-                  </span>
-                  <span className="text-[10px] text-gray-400 block">/child/day</span>
-                </div>
+                <p className="text-[11px] text-gray-600">
+                  Delicious home-style vegetarian & non-vegetarian culinary options prepared fresh on-site.
+                </p>
               </div>
-              <p className="text-xs text-gray-600 leading-relaxed">
-                Mild, kid-friendly comfort preparations, fresh rotis, warm milk, and snacks.
-              </p>
-            </div>
+            )}
 
-            {/* 4-Course Meal Schedule in 2x2 Grid */}
-            <div className="grid grid-cols-2 gap-2 pt-1">
-              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
-                <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
-                  <Coffee className="w-3 h-3" /> Breakfast
-                </span>
-                <p className="text-xs font-bold text-gray-800">8:30 AM – 10:30 AM</p>
+            {/* Dynamic Available Course Schedule in Grid */}
+            {Array.isArray(villa?.foodOptions?.available) && villa.foodOptions.available.length > 0 && (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {villa.foodOptions.available.includes("Breakfast") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Coffee className="w-3 h-3" /> Breakfast
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">8:30 AM – 10:30 AM</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("Lunch") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Utensils className="w-3 h-3" /> Lunch
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">1:00 PM – 3:00 PM</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("High Tea") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Soup className="w-3 h-3" /> High Tea
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">5:00 PM – 6:30 PM</p>
+                  </div>
+                )}
+                {villa.foodOptions.available.includes("Dinner") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Sparkles className="w-3 h-3" /> Dinner
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">8:30 PM – 10:30 PM</p>
+                  </div>
+                )}
               </div>
-
-              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
-                <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
-                  <Utensils className="w-3 h-3" /> Lunch
-                </span>
-                <p className="text-xs font-bold text-gray-800">1:00 PM – 3:00 PM</p>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
-                <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
-                  <Soup className="w-3 h-3" /> High Tea
-                </span>
-                <p className="text-xs font-bold text-gray-800">5:00 PM – 6:30 PM</p>
-              </div>
-
-              <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
-                <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
-                  <Sparkles className="w-3 h-3" /> Dinner
-                </span>
-                <p className="text-xs font-bold text-gray-800">8:30 PM – 10:30 PM</p>
-              </div>
-            </div>
+            )}
 
             {villa?.foodOptions?.note && (
               <p className="text-[11px] text-gray-500 bg-neutral-50 p-3 rounded-xl border border-neutral-200/70 leading-relaxed">

@@ -79,9 +79,16 @@ const Mappropertyview = () => {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
-  // Fetch locations initially
+  // Fetch locations & map properties initially
   useEffect(() => {
     dispatch(fetchPropertylocation());
+    // Immediately fetch map properties on mount (backend returns all destinations if no locationId)
+    dispatch(
+      fetchPropertiesBymap({
+        locationId: selectedLocationId || "",
+        categoryId: selectedCategoryId,
+      })
+    );
   }, [dispatch]);
 
   // Set default location if none selected
@@ -92,15 +99,17 @@ const Mappropertyview = () => {
     const defaultLocation =
       locationData.find((loc) => loc.isPopular) || locationData[0];
 
-    const locationId = defaultLocation._id;
-    dispatch(setselectedLocationId(locationId));
+    if (defaultLocation?._id) {
+      const locationId = defaultLocation._id;
+      dispatch(setselectedLocationId(locationId));
 
-    dispatch(
-      fetchPropertiesBymap({
-        locationId: locationId,
-        categoryId: selectedCategoryId,
-      })
-    );
+      dispatch(
+        fetchPropertiesBymap({
+          locationId: locationId,
+          categoryId: selectedCategoryId,
+        })
+      );
+    }
   }, [locationData, selectedLocationId, selectedCategoryId, dispatch]);
 
   // Dismiss any open popup card / active card whenever location, filters, or loading changes
@@ -122,14 +131,12 @@ const Mappropertyview = () => {
   const handleCategorySelect = (categoryId) => {
     setActivePropertyId(null);
     dispatch(setSelectedCategory(categoryId));
-    if (selectedLocationId) {
-      dispatch(
-        fetchPropertiesBymap({
-          locationId: selectedLocationId,
-          categoryId: categoryId,
-        })
-      );
-    }
+    dispatch(
+      fetchPropertiesBymap({
+        locationId: selectedLocationId || "",
+        categoryId: categoryId,
+      })
+    );
   };
 
   const handleApplyDrawerFilters = (filters) => {
@@ -147,14 +154,12 @@ const Mappropertyview = () => {
     setTempPriceRange([1000, 50000]);
     setSortBy("price-low");
     dispatch(setSelectedCategory(null));
-    if (selectedLocationId) {
-      dispatch(
-        fetchPropertiesBymap({
-          locationId: selectedLocationId,
-          categoryId: null,
-        })
-      );
-    }
+    dispatch(
+      fetchPropertiesBymap({
+        locationId: selectedLocationId || "",
+        categoryId: null,
+      })
+    );
   };
 
   // Pricing helper

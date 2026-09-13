@@ -23,12 +23,18 @@ import {
   Hotel,
   Clock,
   Info,
+  Utensils,
+  CookingPot,
+  Flame,
+  Coffee,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import CouponsDrawer from "@/components/Propertyviewcomponents/coupons-drawer";
 import BookingDetailsDrawer from "@/components/Bookingcomponent/booking-details-drawer";
+import PropertyEventSection from "@/components/Bookingcomponent/PropertyEventSection";
+import EventDetailsModal from "@/components/Bookingcomponent/EventDetailsModal";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchproperty } from "@/Redux/Slices/propertiesSlice";
 import Image from "next/image";
@@ -94,6 +100,12 @@ export default function BookingPreviewScreen() {
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
   const [showSpecialRequests, setShowSpecialRequests] = useState(false);
 
+  // Property Events state
+  const [selectedEventId, setSelectedEventId] = useState(null);
+  const [eventAttendees, setEventAttendees] = useState(1);
+  const [inspectingEvent, setInspectingEvent] = useState(null);
+  const [showEventModal, setShowEventModal] = useState(false);
+
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
 
   const reduxSelectedTents = useSelector(
@@ -157,6 +169,10 @@ export default function BookingPreviewScreen() {
   // Discard applied coupon if it belongs to a different property or was used on this device
   useEffect(() => {
     if (appliedCoupon) {
+      if (!appliedCoupon._id && !appliedCoupon.couponId && !appliedCoupon.id) {
+        dispatch(removeCoupon());
+        return;
+      }
       if (propertyId) {
         if (appliedCoupon.property && appliedCoupon.property.toString() !== propertyId.toString()) {
           dispatch(removeCoupon());
@@ -276,6 +292,41 @@ export default function BookingPreviewScreen() {
   const { basePrice, discountAmount, taxAmount, finalTotal } =
     calculateBookingPrice(baseAmountForCoupon, 1, appliedCoupon);
 
+  // Synchronize default event attendees with totalGuests
+  useEffect(() => {
+    if (totalGuests > 0) {
+      setEventAttendees(totalGuests);
+    }
+  }, [totalGuests]);
+
+  // Active property events & calculated extra charge
+  const activeEvents = (property?.events || []).filter(
+    (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+  );
+  const selectedEvent = activeEvents.find((e) => e._id === selectedEventId) || null;
+  const eventExtraCharge =
+    selectedEvent && !selectedEvent.isIncludedInStay
+      ? (Number(selectedEvent.pricePerPerson) || 0) * (Number(eventAttendees) || 1)
+      : 0;
+
+  // Meal selection & dynamic charges
+  const [isMealPackageSelected, setIsMealPackageSelected] = useState(false);
+  const adultMealPrice = Number(property?.foodOptions?.adultPrice) || 0;
+  const childMealPrice = Number(property?.foodOptions?.childPrice) || 0;
+  const adultsCount = Number(guestCounts?.adults) || 1;
+  const childrenCount = Number(guestCounts?.children) || 0;
+  const mealNights = nights || 1;
+  const totalMealCharge =
+    isMealPackageSelected && (adultMealPrice > 0 || childMealPrice > 0)
+      ? ((adultMealPrice * adultsCount) + (childMealPrice * childrenCount)) * mealNights
+      : 0;
+
+  // Dynamic tax & payable total including event & meal charges
+  const baseAmountWithDiscount = Math.max(0, (basePrice || 0) - (discountAmount || 0));
+  const taxableAmount = baseAmountWithDiscount + eventExtraCharge + totalMealCharge;
+  const dynamicTaxAmount = Math.round(taxableAmount * 0.18);
+  const finalPayableTotal = taxableAmount + dynamicTaxAmount;
+
   // Count weekday vs weekend vs holiday nights for the villa price breakdown label
   const villaNightBreakdown =
     normalizedType === "villa"
@@ -345,7 +396,7 @@ export default function BookingPreviewScreen() {
   const handleProceedToPayment = async () => {
     setloading(true);
 
-    if (finalTotal === null || finalTotal === undefined || finalTotal <= 0) {
+    if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {
       addToast({
         title: "Invalid Amount",
         description: "Please check your stay dates and accommodation selection.",
@@ -580,7 +631,7 @@ export default function BookingPreviewScreen() {
         infants: guestCounts.infants,
       },
       items,
-      paymentAmount: Number(finalTotal || 0),
+      paymentAmount: Number(finalPayableTotal || 0),
       couponCode: couponCode,
       paymentType: "full",
       partialPercentage: 30,
@@ -588,6 +639,32 @@ export default function BookingPreviewScreen() {
       deviceId,
       couponId,
       specialRequests: specialRequests || "",
+      hasEvent: !!selectedEvent,
+      eventDetails: selectedEvent
+        ? {
+            eventId: selectedEvent._id,
+            eventTitle: selectedEvent.title,
+            eventType: selectedEvent.eventType,
+            eventDate: selectedEvent.startDate,
+            attendees: eventAttendees,
+            pricePerPerson: Number(selectedEvent.pricePerPerson) || 0,
+            totalExtraCharge: eventExtraCharge,
+          }
+        : null,
+      hasMealPackage: isMealPackageSelected,
+      mealDetails: isMealPackageSelected
+        ? {
+            packageName: "All-Day Meal Package",
+            adultCount: adultsCount,
+            childCount: childrenCount,
+            adultPricePerDay: adultMealPrice,
+            childPricePerDay: childMealPrice,
+            numberOfDays: mealNights,
+            totalMealCharge: totalMealCharge,
+            includedMeals: property?.foodOptions?.available || [],
+            note: property?.foodOptions?.note || "",
+          }
+        : null,
     };
 
     try {
@@ -888,6 +965,188 @@ export default function BookingPreviewScreen() {
           )}
         </div>
 
+        {/* Special Events & Experiences (Mobile) */}
+        {activeEvents.length > 0 && (
+          <PropertyEventSection
+            events={activeEvents}
+            selectedEventId={selectedEventId}
+            onToggleSelect={(id) =>
+              setSelectedEventId((prev) => (prev === id ? null : id))
+            }
+            onOpenDetails={(ev) => {
+              setInspectingEvent(ev);
+              setShowEventModal(true);
+            }}
+            attendees={eventAttendees}
+            setAttendees={setEventAttendees}
+            maxGuests={totalGuests}
+            formatRupee={formatRupee}
+          />
+        )}
+
+        {/* Meal Options Card (Mobile) */}
+        {normalizedType === "camping" && property?.meals && (
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                  <Utensils className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                    Campfire Dining Experience
+                  </h3>
+                  <p className="text-[11px] text-gray-500">
+                    Freshly prepared local camp meals
+                  </p>
+                </div>
+              </div>
+              <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase">
+                Included Free
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              {property.meals.eveningSnacks && (
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Evening Snacks</span>
+                  <span className="text-gray-800 font-medium text-[11px]">{property.meals.eveningSnacks}</span>
+                </div>
+              )}
+              {property.meals.bbq?.available && (
+                <div className="p-2.5 rounded-xl bg-orange-50/60 border border-orange-100">
+                  <span className="text-[10px] font-bold text-orange-600 block uppercase flex items-center gap-1">
+                    <Flame className="w-3 h-3 text-orange-500" /> Live BBQ
+                  </span>
+                  <span className="text-gray-800 font-medium text-[11px]">
+                    {[property.meals.bbq.veg, property.meals.bbq.nonVeg].filter(Boolean).join(" & ") || "Veg & Non-Veg BBQ"}
+                  </span>
+                </div>
+              )}
+              {property.meals.dinner && (
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-100">
+                  <span className="text-[10px] font-bold text-gray-400 block uppercase">Buffet Dinner</span>
+                  <span className="text-gray-800 font-medium text-[11px]">
+                    {[property.meals.dinner.veg, property.meals.dinner.nonVeg].filter(Boolean).join(" & ") || "Unlimited Dinner"}
+                  </span>
+                </div>
+              )}
+              {property.meals.nextDayBreakfast && (
+                <div className="p-2.5 rounded-xl bg-amber-50/60 border border-amber-100">
+                  <span className="text-[10px] font-bold text-amber-700 block uppercase flex items-center gap-1">
+                    <Coffee className="w-3 h-3 text-amber-500" /> Breakfast
+                  </span>
+                  <span className="text-gray-800 font-medium text-[11px]">{property.meals.nextDayBreakfast}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Villa / Cottage / Hotel Meal Options (Mobile) */}
+        {normalizedType !== "camping" && property?.foodOptions && (
+          <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-100">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                  <Utensils className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-xs font-bold text-gray-900 uppercase tracking-wider">
+                    {adultMealPrice > 0 ? "All-Day Meal Package" : "Complimentary Meals"}
+                  </h3>
+                  <p className="text-[11px] text-gray-500">
+                    Freshly cooked home-style dining
+                  </p>
+                </div>
+              </div>
+              {adultMealPrice > 0 ? (
+                <span className="px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-[11px] font-bold">
+                  ₹{adultMealPrice}/adult/day
+                </span>
+              ) : (
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-[10px] font-bold uppercase">
+                  Included Free
+                </span>
+              )}
+            </div>
+
+            {/* Courses / Available Meals */}
+            {Array.isArray(property.foodOptions.available) && property.foodOptions.available.length > 0 && (
+              <div className="flex flex-wrap gap-1.5">
+                {property.foodOptions.available.map((course, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50/70 border border-amber-200/60 text-amber-900 text-[11px] font-medium"
+                  >
+                    <Check className="w-3 h-3 text-amber-600" />
+                    {course}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Paid package breakdown & toggle */}
+            {adultMealPrice > 0 && (
+              <div className="pt-2 border-t border-gray-100 space-y-2">
+                <div className="bg-gray-50/80 p-2.5 rounded-xl border border-gray-100 text-[11px] text-gray-600 space-y-1">
+                  <div className="flex justify-between">
+                    <span>
+                      Adults ({adultsCount} × {formatRupee(adultMealPrice)} × {mealNights}d):
+                    </span>
+                    <span className="font-semibold text-gray-900">
+                      {formatRupee(adultMealPrice * adultsCount * mealNights)}
+                    </span>
+                  </div>
+                  {childrenCount > 0 && (
+                    <div className="flex justify-between">
+                      <span>
+                        Children ({childrenCount} × {childMealPrice > 0 ? `${formatRupee(childMealPrice)}` : "Free"} × {mealNights}d):
+                      </span>
+                      <span className="font-semibold text-gray-900">
+                        {childMealPrice > 0 ? formatRupee(childMealPrice * childrenCount * mealNights) : "₹0"}
+                      </span>
+                    </div>
+                  )}
+                  {childMealPrice === 0 && (
+                    <p className="text-[10px] text-emerald-600 font-medium">
+                      Kids under 5 eat free with adults!
+                    </p>
+                  )}
+                </div>
+
+                <Button
+                  type="button"
+                  variant={isMealPackageSelected ? "default" : "outline"}
+                  onClick={() => setIsMealPackageSelected(!isMealPackageSelected)}
+                  className={`w-full h-9 rounded-xl text-xs font-semibold transition-all ${
+                    isMealPackageSelected
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                      : "border-amber-300 text-amber-900 bg-amber-50/60 hover:bg-amber-100"
+                  }`}
+                >
+                  {isMealPackageSelected ? (
+                    <span className="flex items-center justify-center gap-1.5">
+                      <Check className="w-3.5 h-3.5" />
+                      Meal Package Added ({formatRupee(totalMealCharge)})
+                    </span>
+                  ) : (
+                    <span>
+                      + Add Meal Package (+{formatRupee(((adultMealPrice * adultsCount) + (childMealPrice * childrenCount)) * mealNights)})
+                    </span>
+                  )}
+                </Button>
+              </div>
+            )}
+
+            {property.foodOptions.note && (
+              <p className="text-[10px] text-gray-400 italic pt-1">
+                Note: {property.foodOptions.note}
+              </p>
+            )}
+          </div>
+        )}
+
         {/* 4. Primary Guest Contact Card */}
         <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-gray-100">
@@ -1047,6 +1306,36 @@ export default function BookingPreviewScreen() {
               </div>
             )}
 
+            {/* Event extra charge row if selected */}
+            {selectedEvent && (
+              <div className="flex justify-between items-center text-xs text-orange-800 bg-orange-50/80 p-2 rounded-xl border border-orange-200">
+                <span className="font-semibold flex items-center gap-1 truncate max-w-[200px]">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                  {selectedEvent.title} ({eventAttendees} {eventAttendees === 1 ? "guest" : "guests"})
+                </span>
+                <span className="font-bold shrink-0">
+                  {selectedEvent.isIncludedInStay || selectedEvent.pricePerPerson === 0 ? (
+                    <span className="text-emerald-700">Free</span>
+                  ) : (
+                    `+ ${formatRupee(eventExtraCharge)}`
+                  )}
+                </span>
+              </div>
+            )}
+
+            {/* Meal package extra charge row if selected */}
+            {isMealPackageSelected && totalMealCharge > 0 && (
+              <div className="flex justify-between items-center text-xs text-amber-800 bg-amber-50/80 p-2 rounded-xl border border-amber-200">
+                <span className="font-semibold flex items-center gap-1 truncate max-w-[200px]">
+                  <Utensils className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                  All-Day Meals ({mealNights} {mealNights === 1 ? "day" : "days"})
+                </span>
+                <span className="font-bold shrink-0">
+                  + {formatRupee(totalMealCharge)}
+                </span>
+              </div>
+            )}
+
             {/* GST */}
             <div className="flex justify-between items-center">
               <div>
@@ -1054,7 +1343,7 @@ export default function BookingPreviewScreen() {
                 <p className="text-[10px] text-gray-400">Government taxes</p>
               </div>
               <span className="font-semibold text-gray-900">
-                {formatRupee(taxAmount)}
+                {formatRupee(dynamicTaxAmount)}
               </span>
             </div>
 
@@ -1063,7 +1352,7 @@ export default function BookingPreviewScreen() {
               <span className="text-sm font-bold text-gray-900">Total Payable</span>
               <div className="text-right">
                 <span className="text-lg font-extrabold text-[#ff6900]">
-                  {formatRupee(finalTotal)}
+                  {formatRupee(finalPayableTotal)}
                 </span>
                 <p className="text-[10px] text-gray-400">Inclusive of all taxes</p>
               </div>
@@ -1168,7 +1457,7 @@ export default function BookingPreviewScreen() {
             </span>
             <div className="flex items-baseline gap-1">
               <span className="text-base font-bold text-gray-900 leading-tight">
-                {formatRupee(finalTotal)}
+                {formatRupee(finalPayableTotal)}
               </span>
             </div>
             <span className="text-[10px] text-gray-500 block leading-tight mt-0.5">
@@ -1238,6 +1527,24 @@ export default function BookingPreviewScreen() {
         isOpen={isBookingDetailsOpen}
         onClose={() => setIsBookingDetailsOpen(false)}
         onPayNow={handleProceedToPayment}
+      />
+
+      {/* Event Details Modal */}
+      <EventDetailsModal
+        isOpen={showEventModal}
+        onClose={() => {
+          setShowEventModal(false);
+          setInspectingEvent(null);
+        }}
+        event={inspectingEvent}
+        isSelected={selectedEventId === inspectingEvent?._id}
+        onToggleSelect={(id) =>
+          setSelectedEventId((prev) => (prev === id ? null : id))
+        }
+        attendees={eventAttendees}
+        setAttendees={setEventAttendees}
+        maxGuests={totalGuests}
+        formatRupee={formatRupee}
       />
     </div>
   );

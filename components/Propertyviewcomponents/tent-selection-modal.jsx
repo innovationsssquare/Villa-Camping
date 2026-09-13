@@ -82,31 +82,70 @@ export default function TentSelectionModal({
     return dayDetails?.data?.tents || dayDetails?.tents || [];
   }, [dayDetails]);
 
-  const safeTents = useMemo(() => (Array.isArray(tents) ? tents : []), [tents]);
+  const safeTents = useMemo(() => {
+    if (!Array.isArray(tents)) return [];
+    const map = new Map();
+
+    tents.forEach((t, idx) => {
+      const rawType = t.tentType || t.name || `Tent ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...t,
+          tentType: typeKey,
+          totaltents: Number(t.totaltents ?? t.totalUnits ?? 1),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totaltents = (Number(existing.totaltents) || 0) + Number(t.totaltents ?? t.totalUnits ?? 1);
+        const hasImages = existing.tentimages?.length || existing.images?.length;
+        if (!hasImages && (t.tentimages?.length || t.images?.length)) {
+          existing.tentimages = t.tentimages || t.images;
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [tents]);
 
   const getTentConfig = (tentType) =>
-    safeTents.find((t) => t.tentType === tentType);
+    safeTents.find(
+      (t) =>
+        (t.tentType || t.name || "").trim().toLowerCase() ===
+        (tentType || "").trim().toLowerCase()
+    );
 
   const getTentCapacity = (tentType) =>
     getTentConfig(tentType)?.maxCapacity || 2;
 
   // 4. Availability & Price lookup
   const getAvailabilityForTent = (tent) => {
-    const summary = tentsForDay.find((t) => t.tentType === tent.tentType);
+    const typeKey = (tent.tentType || tent.name || "").trim();
+    const summary = tentsForDay.find(
+      (t) =>
+        (t.tentType || t.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
+    );
+    const configuredTotal = tent.totaltents || 0;
     if (!summary) {
       return {
-        total: tent.totaltents || 0,
+        total: configuredTotal,
         booked: 0,
-        available: tent.totaltents || 0,
+        available: configuredTotal,
         weekdayPrice: tent.pricing?.weekdayPrice || 0,
         weekendPrice:
           tent.pricing?.weekendPrice || tent.pricing?.weekdayPrice || 0,
       };
     }
+    const availableCount =
+      summary.available ??
+      Math.max(0, (summary.total ?? configuredTotal) - (summary.booked ?? 0));
     return {
-      total: summary.total ?? tent.totaltents ?? 0,
+      total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
-      available: summary.available ?? tent.totaltents ?? 0,
+      available: availableCount,
       weekdayPrice: summary.price?.weekday ?? tent.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
@@ -157,7 +196,11 @@ export default function TentSelectionModal({
     Object.entries(localSelected).forEach(([tentType, qty]) => {
       if (qty <= 0) return;
       const cfg = getTentConfig(tentType);
-      const day = tentsForDay.find((t) => t.tentType === tentType);
+      const day = tentsForDay.find(
+        (t) =>
+          (t.tentType || t.name || "").trim().toLowerCase() ===
+          tentType.trim().toLowerCase()
+      );
 
       payload[tentType] = {
         unitType: "Tent",

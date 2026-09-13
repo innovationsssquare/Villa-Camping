@@ -35,12 +35,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { clearMyBookings } from "@/Redux/Slices/myBookingSlice";
-import ResponsiveAuthModal from "@/components/Logincomponents/responsive-auth-modal";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { NotificationSheet } from "./Notificationsheet";
 
 export function ProfileSheet() {
   const [open, setOpen] = useState(false);
-  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const { openAuthModal } = useAuthModal();
   const [notificationSheetOpen, setNotificationSheetOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -404,7 +404,7 @@ export function ProfileSheet() {
             <Button
               onClick={() => {
                 setOpen(false);
-                setAuthModalOpen(true);
+                openAuthModal();
               }}
               className="w-full justify-center text-sm font-semibold bg-[#ff6900] hover:bg-[#e05d00] text-white rounded-xl transition-all gap-2 shadow-xs cursor-pointer"
             >
@@ -414,10 +414,6 @@ export function ProfileSheet() {
           )}
         </div>
       </SheetContent>
-      <ResponsiveAuthModal
-        open={authModalOpen}
-        onOpenChange={setAuthModalOpen}
-      />
       <NotificationSheet
         open={notificationSheetOpen}
         onOpenChange={setNotificationSheetOpen}

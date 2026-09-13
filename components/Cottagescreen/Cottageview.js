@@ -13,10 +13,11 @@ import { fetchCottageById } from "@/Redux/Slices/cottageSlice";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { XCircle } from "lucide-react";
 import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
-
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
+  { id: "events", label: "Events" },
   { id: "refund-policy", label: "Refund Policy" },
   { id: "spaces", label: "Spaces" },
   { id: "reviews", label: "Reviews" },
@@ -29,6 +30,7 @@ const tabs = [
 
 const Cottageview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
+  const [events, setEvents] = useState([]);
   const isManualScrollingRef = useRef(false);
   const manualTimerRef = useRef(null);
 
@@ -41,6 +43,25 @@ const Cottageview = () => {
   useEffect(() => {
     dispatch(fetchCottageById(id));
   }, [id, dispatch]);
+
+  useEffect(() => {
+    if (id) {
+      fetch(`${BaseUrl}/PropertyEvent/property/cottage/${id}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json?.success && Array.isArray(json?.events)) {
+            setEvents(json.events);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [id]);
+
+  const hasEvents =
+    (cottage?.events && cottage.events.length > 0) ||
+    events.some(
+      (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+    );
 
   // Sequential Scroll-Spy logic
   useEffect(() => {
@@ -156,6 +177,7 @@ const Cottageview = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
             isSticky={true}
+            hasEvents={hasEvents}
           />
         </div>
 

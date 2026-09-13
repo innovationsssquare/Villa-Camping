@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import {
   Accordion,
@@ -27,6 +27,7 @@ import ExperiencesTab from "./ExperiencesTab";
 import { useHotel } from "@/lib/context/HotelContext";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
   Hotel,
   Bed,
@@ -40,6 +41,7 @@ import {
   Users,
   Search,
   Wine,
+  Soup,
 } from "lucide-react";
 import { Button } from "@heroui/react";
 import { useSelector, useDispatch } from "react-redux";
@@ -86,6 +88,27 @@ const AllTabsContent = ({ refs = {} }) => {
   const reduxSelectedRooms = useSelector((state) => state.booking.selectedRooms);
 
   const amenities = hotel?.amenities || [];
+
+  // Consolidate rooms by unique roomType
+  const consolidatedRooms = useMemo(() => {
+    if (!Array.isArray(hotel?.rooms)) return [];
+    const map = new Map();
+    hotel.rooms.forEach((r, idx) => {
+      const type = (r.roomType || r.name || `Room ${idx + 1}`).trim();
+      const lower = type.toLowerCase();
+      if (!map.has(lower)) {
+        map.set(lower, {
+          ...r,
+          roomType: type,
+          totalRooms: Number(r.totalRooms ?? r.totaltents ?? 1),
+        });
+      } else {
+        const existing = map.get(lower);
+        existing.totalRooms = (Number(existing.totalRooms) || 0) + Number(r.totalRooms ?? r.totaltents ?? 1);
+      }
+    });
+    return Array.from(map.values());
+  }, [hotel?.rooms]);
 
   // Fetch nearby hotels
   useEffect(() => {
@@ -248,6 +271,9 @@ const AllTabsContent = ({ refs = {} }) => {
         </div>
       </section>
 
+      {/* EVENTS SECTION */}
+      <MobileEventsSection property={hotel} propertyType="hotel" />
+
       {/* 2. REFUND POLICY SECTION */}
       <section
         ref={refs?.refundRef}
@@ -328,10 +354,10 @@ const AllTabsContent = ({ refs = {} }) => {
             Select your room category and quantity
           </p>
 
-          {Array.isArray(hotel?.rooms) && hotel.rooms.length > 0 ? (
+          {consolidatedRooms.length > 0 ? (
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2.5">
-                {hotel.rooms.map((roomItem, idx) => {
+                {consolidatedRooms.map((roomItem, idx) => {
                   const rKey = roomItem.roomType || roomItem._id || `room-${idx}`;
                   const currentSelectedQty = reduxSelectedRooms?.[rKey]?.quantity || 0;
                   const roomPrice = Number(
@@ -490,57 +516,141 @@ const AllTabsContent = ({ refs = {} }) => {
             Culinary excellence with multi-cuisine dining options
           </p>
 
-          <div className="space-y-2.5">
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Coffee className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">Buffet Breakfast</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    7:00 AM – 10:30 AM
-                  </span>
+          <div className="space-y-3">
+            {/* When Meals are Paid */}
+            {(Number(hotel?.foodOptions?.adultPrice || 0) > 0 || Number(hotel?.foodOptions?.childPrice || 0) > 0) ? (
+              <>
+                {/* Adult Meal Plan */}
+                <div className="p-4 rounded-2xl bg-gradient-to-br from-white to-orange-50/40 border border-orange-200 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6900]">
+                        Gourmet Dining
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Adult Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-extrabold text-[#ff6900] text-base">
+                        ₹{Number(hotel.foodOptions.adultPrice || 0).toLocaleString("en-IN")}
+                      </span>
+                      <span className="text-[10px] text-gray-400 block">/adult/day</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Includes multi-cuisine dining prepared by our hotel chefs with veg & non-veg culinary specialties.
+                  </p>
+                  <div className="pt-1 flex flex-wrap gap-2 text-[11px] font-semibold text-emerald-600">
+                    <span>✓ Buffet Spread</span>
+                    <span>•</span>
+                    <span>✓ Multi-Cuisine</span>
+                    <span>•</span>
+                    <span>✓ Unlimited</span>
+                  </div>
                 </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  Continental & Indian morning breakfast spread
-                </p>
-              </div>
-            </div>
 
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Utensils className="w-4 h-4" />
-              </div>
-              <div className="flex-1 min-w-0">
+                {/* Child Meal Plan */}
+                <div className="p-4 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs space-y-2">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400">
+                        5 - 10 Years
+                      </span>
+                      <h4 className="font-bold text-sm text-gray-900">
+                        Child Meal Package
+                      </h4>
+                    </div>
+                    <div className="text-right">
+                      {Number(hotel?.foodOptions?.childPrice || 0) > 0 ? (
+                        <>
+                          <span className="font-extrabold text-gray-900 text-base">
+                            ₹{Number(hotel.foodOptions.childPrice).toLocaleString("en-IN")}
+                          </span>
+                          <span className="text-[10px] text-gray-400 block">/child/day</span>
+                        </>
+                      ) : (
+                        <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                          Free for Kids Under 5
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-relaxed">
+                    Tailored kid-friendly preparations with mild spices and freshly made comfort meals.
+                  </p>
+                </div>
+              </>
+            ) : (
+              /* Complimentary Meals */
+              <div className="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">All-Day Dining Restaurant</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    12:00 PM – 11:00 PM
+                  <h4 className="text-xs font-bold text-gray-900">Complimentary Meals Package</h4>
+                  <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                    Included in Stay
                   </span>
                 </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  A-la-carte multi-cuisine lunch and dinner menu
+                <p className="text-[11px] text-gray-600">
+                  Wholesome culinary options and morning breakfast provided with your reservation.
                 </p>
               </div>
-            </div>
+            )}
 
-            <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
-                <Wine className="w-4 h-4" />
+            {/* Dynamic Available Course Schedule in Grid */}
+            {Array.isArray(hotel?.foodOptions?.available) && hotel.foodOptions.available.length > 0 ? (
+              <div className="grid grid-cols-2 gap-2 pt-1">
+                {hotel.foodOptions.available.includes("Breakfast") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Coffee className="w-3 h-3" /> Buffet Breakfast
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">7:00 AM – 10:30 AM</p>
+                  </div>
+                )}
+                {hotel.foodOptions.available.includes("Lunch") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Utensils className="w-3 h-3" /> Lunch Buffet
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">12:30 PM – 3:30 PM</p>
+                  </div>
+                )}
+                {hotel.foodOptions.available.includes("High Tea") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Soup className="w-3 h-3" /> Evening Tea & Bites
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">5:00 PM – 6:30 PM</p>
+                  </div>
+                )}
+                {hotel.foodOptions.available.includes("Dinner") && (
+                  <div className="p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/70 space-y-0.5">
+                    <span className="text-[10px] font-bold text-[#ff6900] flex items-center gap-1">
+                      <Wine className="w-3 h-3" /> Dinner Buffet
+                    </span>
+                    <p className="text-xs font-bold text-gray-800">7:30 PM – 10:30 PM</p>
+                  </div>
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-xs font-bold text-gray-900">24/7 In-Room Dining</h4>
-                  <span className="text-[9.5px] font-bold text-orange-800 bg-orange-100 px-1.5 py-0.5 rounded-full">
-                    24 Hours
-                  </span>
+            ) : (
+              <div className="bg-white rounded-xl p-3 border border-neutral-200/80 flex items-start gap-3">
+                <div className="w-8 h-8 rounded-lg bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0">
+                  <Wine className="w-4 h-4" />
                 </div>
-                <p className="text-[11px] text-gray-600 mt-0.5">
-                  Hot meals and beverages delivered directly to your room
-                </p>
+                <div className="flex-1 min-w-0">
+                  <h4 className="text-xs font-bold text-gray-900">In-Room & Restaurant Dining</h4>
+                  <p className="text-[11px] text-gray-600 mt-0.5">
+                    Multi-cuisine fresh meals and room service available throughout the day.
+                  </p>
+                </div>
               </div>
-            </div>
+            )}
+
+            {hotel?.foodOptions?.note && (
+              <p className="text-[11px] text-gray-500 bg-neutral-50 p-3 rounded-xl border border-neutral-200/70 leading-relaxed">
+                ℹ {hotel.foodOptions.note}
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -781,7 +891,7 @@ const AllTabsContent = ({ refs = {} }) => {
       <RoomSelectionDrawer
         isOpen={showRoomSelectionDrawer}
         onClose={() => setShowRoomSelectionDrawer(false)}
-        rooms={hotel?.rooms || []}
+        rooms={consolidatedRooms}
         totalGuests={selectedGuest?.totalGuests || 2}
         dateStr={checkin || new Date().toISOString()}
         id={hotel?._id}

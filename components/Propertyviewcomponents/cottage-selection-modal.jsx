@@ -82,37 +82,87 @@ export default function CottageSelectionModal({
     return dayDetails?.data?.tents || dayDetails?.data?.cottages || dayDetails?.cottages || [];
   }, [dayDetails]);
 
-  const safeCottages = useMemo(() => (Array.isArray(cottages) ? cottages : []), [cottages]);
+  const safeCottages = useMemo(() => {
+    if (!Array.isArray(cottages)) return [];
+    const map = new Map();
+
+    cottages.forEach((c, idx) => {
+      const rawType = c.cottageType || c.name || `Cottage ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...c,
+          cottageType: typeKey,
+          totalcottage: Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1),
+          totalCottages: Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1),
+          totaltents: Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1),
+        });
+      } else {
+        // Merge duplicate cottage types
+        const existing = map.get(lowerKey);
+        const addCount = Number(c.totalcottage ?? c.totaltents ?? c.totalCottages ?? 1);
+        existing.totalcottage = (Number(existing.totalcottage) || 0) + addCount;
+        existing.totalCottages = existing.totalcottage;
+        existing.totaltents = existing.totalcottage;
+
+        const hasImages =
+          existing.cottageimages?.length ||
+          existing.images?.length ||
+          existing.tentimages?.length;
+        if (!hasImages && (c.cottageimages?.length || c.images?.length || c.tentimages?.length)) {
+          existing.cottageimages = c.cottageimages || c.images || c.tentimages;
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [cottages]);
 
   const getCottageConfig = (cottageType) =>
-    safeCottages.find((c) => (c.cottageType || c.name) === cottageType);
+    safeCottages.find(
+      (c) =>
+        (c.cottageType || c.name || "").trim().toLowerCase() ===
+        (cottageType || "").trim().toLowerCase()
+    );
 
   const getCottageCapacity = (cottageType) =>
     getCottageConfig(cottageType)?.maxCapacity || 2;
 
   // 4. Availability & Price lookup
   const getAvailabilityForCottage = (cottage) => {
-    const typeKey = cottage.cottageType || cottage.name;
+    const typeKey = (cottage.cottageType || cottage.name || "").trim();
     const summary = cottagesForDay.find(
-      (c) => (c.cottageType || c.name) === typeKey
+      (c) =>
+        (c.cottageType || c.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
     );
+    const configuredTotal =
+      cottage.totalcottage ?? cottage.totaltents ?? cottage.totalCottages ?? 1;
+
     if (!summary) {
-      const defaultTotal = cottage.totalcottage ?? cottage.totaltents ?? cottage.totalCottages ?? 1;
       return {
-        total: defaultTotal,
+        total: configuredTotal,
         booked: 0,
-        available: defaultTotal,
+        available: configuredTotal,
         weekdayPrice: cottage.pricing?.weekdayPrice || 0,
         weekendPrice:
           cottage.pricing?.weekendPrice || cottage.pricing?.weekdayPrice || 0,
       };
     }
-    const fallbackTotal = cottage.totalcottage ?? cottage.totaltents ?? cottage.totalCottages ?? 1;
+    const availableCount =
+      summary.available ??
+      Math.max(
+        0,
+        (summary.total ?? configuredTotal) - (summary.booked ?? 0)
+      );
     return {
-      total: summary.total ?? fallbackTotal,
+      total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
-      available: summary.available ?? fallbackTotal,
-      weekdayPrice: summary.price?.weekday ?? cottage.pricing?.weekdayPrice ?? 0,
+      available: availableCount,
+      weekdayPrice:
+        summary.price?.weekday ?? cottage.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
         cottage.pricing?.weekendPrice ??
@@ -162,11 +212,17 @@ export default function CottageSelectionModal({
     Object.entries(localSelected).forEach(([cottageType, qty]) => {
       if (qty <= 0) return;
       const cfg = getCottageConfig(cottageType);
-      const day = cottagesForDay.find((c) => (c.cottageType || c.name) === cottageType);
+      const day = cottagesForDay.find(
+        (c) =>
+          (c.cottageType || c.name || "").trim().toLowerCase() ===
+          cottageType.toLowerCase()
+      );
+      const avail = getAvailabilityForCottage(cfg || { cottageType });
 
       payload[cottageType] = {
         quantity: qty,
         cottageType,
+        unitId: cfg?._id,
         maxCapacity: cfg?.maxCapacity || 2,
         weekdayPrice: day?.price?.weekday ?? cfg?.pricing?.weekdayPrice ?? 0,
         weekendPrice:
@@ -174,9 +230,9 @@ export default function CottageSelectionModal({
           cfg?.pricing?.weekendPrice ??
           day?.price?.weekday ??
           0,
-        available: day?.available ?? cfg?.totaltents ?? cfg?.totalCottages ?? 1,
-        totalCottages: cfg?.totaltents ?? cfg?.totalCottages ?? 1,
-        images: cfg?.tentimages || cfg?.images || [],
+        available: avail.available,
+        totalCottages: avail.total,
+        images: cfg?.cottageimages || cfg?.images || cfg?.tentimages || [],
         amenities: cfg?.amenities || [],
       };
     });

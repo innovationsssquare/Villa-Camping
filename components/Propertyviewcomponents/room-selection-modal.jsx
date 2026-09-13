@@ -82,34 +82,74 @@ export default function RoomSelectionModal({
     return dayDetails?.data?.tents || dayDetails?.data?.rooms || dayDetails?.rooms || [];
   }, [dayDetails]);
 
-  const safeRooms = useMemo(() => (Array.isArray(rooms) ? rooms : []), [rooms]);
+  const safeRooms = useMemo(() => {
+    if (!Array.isArray(rooms)) return [];
+    const map = new Map();
+
+    rooms.forEach((r, idx) => {
+      const rawType = r.roomType || r.name || `Room ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...r,
+          roomType: typeKey,
+          totalRooms: Number(r.totalRooms ?? r.totaltents ?? 1),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totalRooms = (Number(existing.totalRooms) || 0) + Number(r.totalRooms ?? r.totaltents ?? 1);
+        const hasImages = existing.images?.length || existing.roomimages?.length;
+        if (!hasImages && (r.images?.length || r.roomimages?.length)) {
+          existing.images = r.images || r.roomimages;
+        }
+      }
+    });
+
+    return Array.from(map.values());
+  }, [rooms]);
 
   const getRoomConfig = (roomType) =>
-    safeRooms.find((r) => (r.roomType || r.name) === roomType);
+    safeRooms.find(
+      (r) =>
+        (r.roomType || r.name || "").trim().toLowerCase() ===
+        (roomType || "").trim().toLowerCase()
+    );
 
   const getRoomCapacity = (roomType) =>
     getRoomConfig(roomType)?.maxCapacity || 2;
 
   // 4. Availability & Price lookup
   const getAvailabilityForRoom = (room) => {
-    const typeKey = room.roomType || room.name;
+    const typeKey = (room.roomType || room.name || "").trim();
     const summary = roomsForDay.find(
-      (r) => (r.roomType || r.name) === typeKey
+      (r) =>
+        (r.roomType || r.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
     );
+    const configuredTotal = room.totalRooms ?? room.totaltents ?? 1;
+
     if (!summary) {
       return {
-        total: room.totaltents || room.totalRooms || 1,
+        total: configuredTotal,
         booked: 0,
-        available: room.totaltents || room.totalRooms || 1,
+        available: configuredTotal,
         weekdayPrice: room.pricing?.weekdayPrice || 0,
         weekendPrice:
           room.pricing?.weekendPrice || room.pricing?.weekdayPrice || 0,
       };
     }
+    const availableCount =
+      summary.available ??
+      Math.max(
+        0,
+        (summary.total ?? configuredTotal) - (summary.booked ?? 0)
+      );
     return {
-      total: summary.total ?? room.totaltents ?? room.totalRooms ?? 1,
+      total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
-      available: summary.available ?? room.totaltents ?? room.totalRooms ?? 1,
+      available: availableCount,
       weekdayPrice: summary.price?.weekday ?? room.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
@@ -160,11 +200,17 @@ export default function RoomSelectionModal({
     Object.entries(localSelected).forEach(([roomType, qty]) => {
       if (qty <= 0) return;
       const cfg = getRoomConfig(roomType);
-      const day = roomsForDay.find((r) => (r.roomType || r.name) === roomType);
+      const day = roomsForDay.find(
+        (r) =>
+          (r.roomType || r.name || "").trim().toLowerCase() ===
+          roomType.trim().toLowerCase()
+      );
+      const avail = getAvailabilityForRoom(cfg || { roomType });
 
       payload[roomType] = {
         quantity: qty,
         roomType,
+        unitId: cfg?._id,
         maxCapacity: cfg?.maxCapacity || 2,
         weekdayPrice: day?.price?.weekday ?? cfg?.pricing?.weekdayPrice ?? 0,
         weekendPrice:
@@ -172,8 +218,8 @@ export default function RoomSelectionModal({
           cfg?.pricing?.weekendPrice ??
           day?.price?.weekday ??
           0,
-        available: day?.available ?? cfg?.totaltents ?? cfg?.totalRooms ?? 1,
-        totalRooms: cfg?.totaltents ?? cfg?.totalRooms ?? 1,
+        available: avail.available,
+        totalRooms: avail.total,
         images: cfg?.roomimages || cfg?.images || [],
         amenities: cfg?.amenities || [],
       };

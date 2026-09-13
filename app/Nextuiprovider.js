@@ -10,6 +10,7 @@ import { useEffect, useState, Suspense } from "react";
 import { ToastProvider } from "@heroui/toast";
 import { SocketProvider } from "@/lib/context/SocketProvider";
 import BookingParamsSync from "@/components/Bookingcomponent/BookingParamsSync";
+import { AuthModalProvider } from "@/context/AuthModalContext";
 
 const hideChrome = (pathname) => {
   const p = pathname?.toLowerCase() || "";
@@ -66,19 +67,21 @@ export function NextuiProviderWrapper({ children }) {
   return (
     <SocketProvider>
       <HeroUIProvider>
-        <Suspense fallback={null}>
-          <BookingParamsSync />
-        </Suspense>
-        {hideChrome(pathname) ? null : <Navbar />}
-        {hideMobileHeader(pathname) ? null : <AppHeader />}
-        <div className="z-[400]">
-          <ToastProvider placement={"top-center"} />
-        </div>
-        {children}
-        {hideChrome(pathname) ? null : <BottomNav />}
-        {hideChrome(pathname) || pathname === "/category/all" ? null : (
-          <Footer />
-        )}
+        <AuthModalProvider>
+          <Suspense fallback={null}>
+            <BookingParamsSync />
+          </Suspense>
+          {hideChrome(pathname) ? null : <Navbar />}
+          {hideMobileHeader(pathname) ? null : <AppHeader />}
+          <div className="z-[400]">
+            <ToastProvider placement={"top-center"} />
+          </div>
+          {children}
+          {hideChrome(pathname) ? null : <BottomNav />}
+          {hideChrome(pathname) || pathname === "/category/all" ? null : (
+            <Footer />
+          )}
+        </AuthModalProvider>
       </HeroUIProvider>
     </SocketProvider>
   );

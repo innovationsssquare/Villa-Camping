@@ -83,14 +83,23 @@ export default function CottageSelectionDrawer({
   }, [isOpen, reduxSelectedCottages]);
 
   const cottagesForDay = useMemo(() => {
-    return dayDetails?.cottages || [];
+    return (
+      dayDetails?.data?.cottages ||
+      dayDetails?.data?.tents ||
+      dayDetails?.cottages ||
+      []
+    );
   }, [dayDetails]);
 
   const getTentConfig = (cottageType) =>
-    cottages.find((t) => t.cottageType === cottageType);
+    cottages.find(
+      (t) =>
+        (t.cottageType || t.name || "").trim().toLowerCase() ===
+        (cottageType || "").trim().toLowerCase()
+    );
 
   const getTentCapacity = (cottageType) =>
-    getTentConfig(cottageType)?.maxCapacity || 0;
+    getTentConfig(cottageType)?.maxCapacity || 2;
 
   /* --------------------------------------------------
    * 4️⃣ Availability from dayDetails (SOURCE OF TRUTH)

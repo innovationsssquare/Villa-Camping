@@ -14,9 +14,11 @@ import { XCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchVillaById } from "@/Redux/Slices/villaSlice";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
 const tabs = [
   { id: "highlights", label: "Highlights" },
+  { id: "events", label: "Events" },
   { id: "refund-policy", label: "Refund Policy" },
   { id: "spaces", label: "Spaces" },
   { id: "reviews", label: "Reviews" },
@@ -29,6 +31,7 @@ const tabs = [
 
 const Villaview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
+  const [events, setEvents] = useState([]);
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -38,6 +41,25 @@ const Villaview = () => {
   useEffect(() => {
     dispatch(fetchVillaById(id));
   }, [id]);
+
+  useEffect(() => {
+    if (id) {
+      fetch(`${BaseUrl}/PropertyEvent/property/villa/${id}`)
+        .then((res) => res.json())
+        .then((json) => {
+          if (json?.success && Array.isArray(json?.events)) {
+            setEvents(json.events);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [id]);
+
+  const hasEvents =
+    (villa?.events && villa.events.length > 0) ||
+    events.some(
+      (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+    );
 
   // Intersection Observer for each section
   const { ref: highlightsRef, inView: highlightsInView } = useInView({
@@ -145,6 +167,7 @@ const Villaview = () => {
             activeTab={activeTab}
             onTabChange={handleTabChange}
             isSticky={true}
+            hasEvents={hasEvents}
           />
         </div>
 

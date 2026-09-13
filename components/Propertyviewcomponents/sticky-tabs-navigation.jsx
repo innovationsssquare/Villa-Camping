@@ -1,12 +1,52 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useContext, useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Sparkles } from "lucide-react";
+import { VillaContext } from "@/lib/context/VillaContext";
+import { BaseUrl } from "@/lib/API/Baseurl";
 
-export default function StickyTabsNavigation({ onTabChange }) {
+export default function StickyTabsNavigation({ onTabChange, hasEvents: hasEventsProp, events: eventsProp }) {
   const [activeTab, setActiveTab] = useState("overview");
   const [isSticky, setIsSticky] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+
+  const villa = useContext(VillaContext);
+  const [events, setEvents] = useState(eventsProp || villa?.events || []);
+
+  const isHotel = Boolean(villa?.rooms && villa.rooms.length > 0);
+  const isCottage = Boolean(villa?.cottages && villa.cottages.length > 0);
+  const isCamping = Boolean(villa?.tents && villa.tents.length > 0);
+
+  useEffect(() => {
+    if (eventsProp && Array.isArray(eventsProp)) {
+      setEvents(eventsProp);
+      return;
+    }
+    if (villa?.events && Array.isArray(villa.events) && villa.events.length > 0) {
+      setEvents(villa.events);
+    }
+    const pId = villa?._id || villa?.id;
+    if (!pId) return;
+    const pType = isHotel ? "hotel" : isCottage ? "cottage" : isCamping ? "camping" : "villa";
+
+    fetch(`${BaseUrl}/PropertyEvent/property/${pType}/${pId}`)
+      .then((res) => res.json())
+      .then((json) => {
+        if (json?.success && Array.isArray(json?.events)) {
+          setEvents(json.events);
+        }
+      })
+      .catch(() => {});
+  }, [villa?._id, isHotel, isCottage, isCamping, eventsProp]);
+
+  const activeEvents = useMemo(() => {
+    return (events || []).filter(
+      (e) => e.isActive !== false && (!e.endDate || new Date(e.endDate) >= new Date())
+    );
+  }, [events]);
+
+  const hasEvents = hasEventsProp !== undefined ? Boolean(hasEventsProp) : activeEvents.length > 0;
 
   const tabsRef = useRef(null);
   const tabsContainerRef = useRef(null);
@@ -17,6 +57,7 @@ export default function StickyTabsNavigation({ onTabChange }) {
   const tabs = [
     { id: "overview", label: "Overview" },
     { id: "highlightss", label: "Highlights" },
+    { id: "eventss", label: "Events", isEvent: true },
     { id: "refund-policyy", label: "Refund Policy" },
     { id: "spacess", label: "Spaces" },
     { id: "reviewss", label: "Reviews" },
@@ -177,6 +218,45 @@ export default function StickyTabsNavigation({ onTabChange }) {
           >
             {tabs.map((tab) => {
               const isActive = activeTab === tab.id;
+
+              if (tab.isEvent && hasEvents) {
+                return (
+                  <div
+                    key={tab.id}
+                    className="relative inline-flex p-[1.5px] rounded-full bg-gradient-to-r from-[#ff6900] via-rose-500 to-amber-400 shadow-sm animate-pulse hover:animate-none transition-all"
+                  >
+                    <button
+                      ref={(el) => {
+                        if (el) tabRefs.current[tab.id] = el;
+                      }}
+                      type="button"
+                      onClick={() => scrollToSection(tab.id)}
+                      className={`relative px-3 sm:px-3.5 py-1.5 text-xs sm:text-sm font-bold whitespace-nowrap rounded-full cursor-pointer flex items-center gap-1.5 transition-all ${
+                        isActive
+                          ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs"
+                          : "bg-white text-neutral-900 hover:text-[#ff6900]"
+                      }`}
+                    >
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-[#ff6900]"></span>
+                      </span>
+                      <Sparkles className={`w-3.5 h-3.5 ${isActive ? "text-amber-200" : "text-[#ff6900]"}`} />
+                      <span>{tab.label}</span>
+                      <span
+                        className={`text-[9px] uppercase tracking-wider font-extrabold px-1.5 py-0.5 rounded-full ${
+                          isActive
+                            ? "bg-white/25 text-white"
+                            : "bg-gradient-to-r from-orange-500 to-rose-500 text-white"
+                        }`}
+                      >
+                        {activeEvents.length > 1 ? `${activeEvents.length} Live` : "Live"}
+                      </span>
+                    </button>
+                  </div>
+                );
+              }
+
               return (
                 <button
                   key={tab.id}
@@ -185,13 +265,16 @@ export default function StickyTabsNavigation({ onTabChange }) {
                   }}
                   type="button"
                   onClick={() => scrollToSection(tab.id)}
-                  className={`relative px-3.5 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors rounded-full cursor-pointer ${
+                  className={`relative px-3.5 py-2 text-xs sm:text-sm font-semibold whitespace-nowrap transition-colors rounded-full cursor-pointer flex items-center gap-1.5 ${
                     isActive
                       ? "text-[#ff6900] bg-orange-50/60 font-bold"
                       : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                   }`}
                 >
-                  {tab.label}
+                  {tab.isEvent && (
+                    <Sparkles className="w-3.5 h-3.5 text-gray-400" />
+                  )}
+                  <span>{tab.label}</span>
                 </button>
               );
             })}
