@@ -36,7 +36,7 @@ export function Experiences() {
     <section id="experiences" className="py-20 bg-stone-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
             Curated Experiences
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -68,7 +68,7 @@ export function Experiences() {
                       <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mr-4">
                         <IconComponent className="w-6 h-6 text-emerald-600" />
                       </div>
-                      <h3 className="text-2xl font-serif text-gray-900">
+                      <h3 className="text-2xl font-bold text-gray-900">
                         {experience.title}
                       </h3>
                     </div>

@@ -107,6 +107,55 @@ export default function RootLayout({ children }) {
             content={process.env.BING_SITE_VERIFICATION}
           />
         ) : null}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@graph": [
+                {
+                  "@type": "Organization",
+                  "@id": "https://thevillacamp.com/#organization",
+                  "name": "ThevillaCamp",
+                  "url": "https://thevillacamp.com",
+                  "logo": "https://thevillacamp.com/og-default.jpg",
+                  "contactPoint": {
+                    "@type": "ContactPoint",
+                    "telephone": "+91-8669186483",
+                    "contactType": "customer service",
+                    "areaServed": "IN",
+                    "availableLanguage": ["English", "Hindi", "Marathi"],
+                  },
+                  "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "Apti, Pavananagar, Mawal",
+                    "addressLocality": "Lonavala",
+                    "addressRegion": "Maharashtra",
+                    "postalCode": "410401",
+                    "addressCountry": "IN",
+                  },
+                },
+                {
+                  "@type": "WebSite",
+                  "@id": "https://thevillacamp.com/#website",
+                  "url": "https://thevillacamp.com",
+                  "name": "ThevillaCamp",
+                  "description":
+                    "Maharashtra's premier luxury villa and campsite booking platform",
+                  "publisher": {
+                    "@id": "https://thevillacamp.com/#organization",
+                  },
+                  "potentialAction": {
+                    "@type": "SearchAction",
+                    "target":
+                      "https://thevillacamp.com/category/all?search={search_term_string}",
+                    "query-input": "required name=search_term_string",
+                  },
+                },
+              ],
+            }),
+          }}
+        />
       </head>
       <Script
         src="https://checkout.razorpay.com/v1/checkout.js"

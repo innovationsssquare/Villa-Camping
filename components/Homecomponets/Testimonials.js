@@ -84,7 +84,7 @@ export function Testimonials() {
     <section className="py-20 bg-gradient-to-b hidden md:block from-emerald-50 to-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
             Guest Stories
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -113,7 +113,7 @@ export function Testimonials() {
               </div>
 
               {/* Testimonial text */}
-              <blockquote className="text-xl md:text-2xl text-gray-700 text-center leading-relaxed mb-8 font-serif">
+              <blockquote className="text-xl md:text-2xl text-gray-700 text-center leading-relaxed mb-8 italic">
                 {testimonialss[currentIndex].text}
               </blockquote>
 

@@ -95,7 +95,7 @@ export function SpecialOffers() {
     <section id="offers" className="py-20 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-serif text-gray-900 mb-4">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4 tracking-tight">
             Special Offers & Packages
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -130,7 +130,7 @@ export function SpecialOffers() {
 
                     {/* Content */}
                     <div className="p-6">
-                      <h3 className="text-xl font-serif text-gray-900 mb-2">
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
                         {offer.title}
                       </h3>
                       <p className="text-gray-600 mb-4 leading-relaxed">
@@ -206,7 +206,7 @@ export function SpecialOffers() {
 
         {/* CTA Section */}
         <div className="mt-16 text-center bg-gradient-to-r from-emerald-700 to-emerald-800 rounded-3xl p-8 md:p-12">
-          <h3 className="text-2xl md:text-3xl font-serif text-white mb-4">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-white mb-4 tracking-tight">
             Ready to Save on Your Next Getaway?
           </h3>
           <p className="text-emerald-100 mb-6 max-w-2xl mx-auto">

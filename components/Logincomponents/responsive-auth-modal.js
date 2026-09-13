@@ -1,27 +1,240 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { OAuthProvider, signInWithPopup } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/components/ui/dialog";
 import {
   Drawer,
   DrawerContent,
   DrawerDescription,
-  DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
+  DrawerClose,
 } from "@/components/ui/drawer";
-import { LogIn, Loader2, MessageSquare, ShieldCheck, ArrowRight, X } from "lucide-react";
+import { Loader2, ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
-import Logoicon from "@/public/Productasset/Logoicon.png";
 import Image from "next/image";
-import { addToast, Button } from "@heroui/react";
+import { addToast } from "@heroui/react";
 import { getDeviceId } from "@/lib/deviceId";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { getAuthCookieOptions } from "@/lib/authCookies";
+
+// Standalone AuthFormContent to ensure input focus is never lost on re-renders
+function AuthFormContent({
+  phone,
+  setPhone,
+  otp,
+  setOtp,
+  otpSent,
+  setOtpSent,
+  otpLoading,
+  countdown,
+  handleSendOTP,
+  handleVerifyOTP,
+  cleanPhoneNumber,
+}) {
+  return (
+    <div className="w-full">
+      {/* StayVista-Inspired Luxury Villa Pool Promo Banner */}
+      <div className="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm my-3 select-none bg-neutral-900">
+        <Image
+          src="/Loginasset/villa_banner.jpg"
+          alt="Enjoy A Villa Getaway"
+          fill
+          className="object-cover"
+          priority
+        />
+        {/* Dark contrast gradient overlay for typography */}
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-black/40 to-black/85 flex flex-col justify-between p-3.5 sm:p-4 text-right items-end">
+          {/* Brand Tag Top Right */}
+          <div className="flex items-center gap-1">
+            <span className="text-[10px] sm:text-[11px] font-black tracking-widest text-white uppercase drop-shadow-md">
+              THEVILLA CAMP
+            </span>
+          </div>
+
+          {/* Luxury Promotional Copy */}
+          <div className="space-y-1">
+            <h3 className="text-sm sm:text-base font-extrabold text-white leading-tight drop-shadow-md">
+              Book a Room.<br />Enjoy A Villa Getaway
+            </h3>
+            <p className="text-[10px] sm:text-[11px] text-white/90 font-medium drop-shadow-sm">
+              Enjoy the Luxuries &amp; Privacy of a villa with
+            </p>
+            <div className="inline-block mt-0.5 px-2.5 py-0.5 rounded-md border border-dashed border-white/90 bg-white/15 backdrop-blur-xs">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-white tracking-wide">
+                Rooms Starting at ₹4,999*
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Form Area */}
+      {!otpSent ? (
+        /* Phone Number Entry Step */
+        <div className="space-y-3">
+          <h4 className="text-base font-bold text-neutral-900 tracking-tight">
+            Login/Signup
+          </h4>
+
+          <div className="flex items-center gap-2.5">
+            {/* Country Code Selector Box */}
+            <div className="flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-semibold text-neutral-800 shrink-0 select-none shadow-2xs">
+              <span>+91</span>
+              <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
+            </div>
+
+            {/* Phone Number Input Field */}
+            <div className="flex-1 relative">
+              <input
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                placeholder="Phone number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && cleanPhoneNumber(phone).length === 10 && !otpLoading) {
+                    handleSendOTP();
+                  }
+                }}
+                className="w-full px-4 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 transition-all shadow-2xs"
+                autoFocus
+              />
+            </div>
+          </div>
+
+          {/* Continue CTA */}
+          <button
+            type="button"
+            onClick={handleSendOTP}
+            disabled={otpLoading || cleanPhoneNumber(phone).length !== 10}
+            className="w-full h-12 mt-2 bg-[#1b1c2b] hover:bg-[#11121d] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+          >
+            {otpLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
+            ) : (
+              "Continue"
+            )}
+          </button>
+        </div>
+      ) : (
+        /* WhatsApp OTP Verification Step */
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-base font-bold text-neutral-900 tracking-tight">
+                Verify WhatsApp Code
+              </h4>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Sent to <strong className="text-neutral-900">+91 {cleanPhoneNumber(phone)}</strong>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setOtpSent(false);
+                setOtp("");
+              }}
+              className="text-xs font-semibold text-[#ff6900] hover:underline px-2.5 py-1 rounded-md hover:bg-orange-50 transition-colors cursor-pointer"
+            >
+              Change
+            </button>
+          </div>
+
+          {/* Monospace 6-Digit OTP Box */}
+          <input
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            placeholder="• • • • • •"
+            value={otp}
+            onChange={(e) => {
+              const val = e.target.value.replace(/\D/g, "").slice(0, 6);
+              setOtp(val);
+              if (val.length === 6) {
+                handleVerifyOTP(val);
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && otp.length === 6 && !otpLoading) {
+                handleVerifyOTP();
+              }
+            }}
+            className="w-full h-12 px-4 rounded-xl border-2 border-neutral-300 focus:border-neutral-900 focus:ring-1 focus:ring-neutral-900 text-center tracking-[0.45em] text-neutral-900 bg-white text-xl font-bold font-mono outline-none shadow-2xs transition-all"
+            maxLength={6}
+            autoFocus
+          />
+
+          {/* Verify & Continue CTA */}
+          <button
+            type="button"
+            onClick={() => handleVerifyOTP()}
+            disabled={otpLoading || otp.length < 6}
+            className="w-full h-12 mt-1 bg-[#1b1c2b] hover:bg-[#11121d] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed shadow-xs cursor-pointer"
+          >
+            {otpLoading ? (
+              <Loader2 className="h-4 w-4 animate-spin text-white" />
+            ) : (
+              "Verify & Continue"
+            )}
+          </button>
+
+          {/* Resend WhatsApp OTP */}
+          <div className="text-center text-xs text-neutral-500 pt-1">
+            {countdown > 0 ? (
+              <span>
+                Resend code via WhatsApp in{" "}
+                <strong className="text-neutral-800 font-semibold">{countdown}s</strong>
+              </span>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSendOTP}
+                disabled={otpLoading}
+                className="text-[#ff6900] hover:underline font-semibold cursor-pointer"
+              >
+                Resend WhatsApp Code
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Footer Legal Terms Disclaimer */}
+      <p className="text-[11px] text-center text-neutral-500 mt-4 leading-relaxed select-none">
+        By signing up, you agree to<br />
+        our{" "}
+        <a
+          href="/terms-of-service"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#2b5993] hover:underline font-medium"
+        >
+          Terms &amp; Conditions
+        </a>{" "}
+        and{" "}
+        <a
+          href="/privacy-policy"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-[#2b5993] hover:underline font-medium"
+        >
+          Privacy Policy
+        </a>
+      </p>
+    </div>
+  );
+}
 
 const ResponsiveAuthModal = ({
   autoOpen = false,
@@ -30,16 +243,16 @@ const ResponsiveAuthModal = ({
   returnUrl,
   trigger,
 }) => {
-  const [appleLoading, setAppleLoading] = useState(false);
-  const [truecallerLoading, setTruecallerLoading] = useState(false);
   const [internalOpen, setInternalOpen] = useState(autoOpen);
   const isControlled = controlledOpen !== undefined;
   const open = isControlled ? controlledOpen : internalOpen;
+
   const [phone, setPhone] = useState("");
   const [otp, setOtp] = useState("");
   const [otpSent, setOtpSent] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
   const [countdown, setCountdown] = useState(0);
+
   const router = useRouter();
   const isMobile = useIsMobile();
 
@@ -61,6 +274,11 @@ const ResponsiveAuthModal = ({
     if (!isControlled) {
       setInternalOpen(newOpen);
     }
+    if (!newOpen) {
+      // Reset OTP state on modal close
+      setOtpSent(false);
+      setOtp("");
+    }
     onOpenChange?.(newOpen);
   };
 
@@ -70,196 +288,6 @@ const ResponsiveAuthModal = ({
       clean = clean.slice(2);
     }
     return clean;
-  };
-
-  const handleAppleLogin = async () => {
-    setAppleLoading(true);
-    try {
-      const provider = new OAuthProvider("apple.com");
-      const result = await signInWithPopup(auth, provider);
-      const credential = OAuthProvider.credentialFromResult(result);
-      const idToken = credential?.idToken;
-      if (!idToken) throw new Error("Apple ID Token is missing");
-
-      // 1. Authenticate with Express backend
-      const res = await fetch(`${BaseUrl}/auth/apple`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          identityToken: idToken,
-          role: "user",
-        }),
-      });
-      if (!res.ok) throw new Error("Backend authentication failed");
-      const backendData = await res.json();
-
-      // 2. Establish local Next.js session
-      const localRes = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: backendData.token, user: backendData.user }),
-      });
-      if (!localRes.ok) throw new Error("Local session creation failed");
-      const data = await localRes.json();
-
-      if (data.user?._id) {
-        localStorage.setItem("thevilla_user_id", data.user._id);
-      }
-      if (data.user) {
-        localStorage.setItem("thevilla_user", JSON.stringify(data.user));
-      }
-      Cookies.set("token", data.token, getAuthCookieOptions());
-      setOpen(false);
-      addToast({
-        title: "Welcome!",
-        description: "Logged in successfully with Apple",
-        color: "success",
-      });
-      setTimeout(() => {
-        onOpenChange?.(false);
-        if (returnUrl) {
-          window.location.href = returnUrl;
-        } else {
-          window.location.reload();
-        }
-      }, 100);
-    } catch (err) {
-      addToast({
-        title: "Apple Login Failed",
-        description: "Apple sign in failed. Please try again or use WhatsApp OTP.",
-        color: "danger",
-      });
-      console.error("Apple login failed:", err);
-    } finally {
-      setAppleLoading(false);
-    }
-  };
-
-  const handleTruecallerLogin = async () => {
-    setTruecallerLoading(true);
-    try {
-      const deviceId = getDeviceId();
-      const requestId =
-        Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-
-      const checkProfile = async () => {
-        try {
-          const res = await fetch(
-            `${BaseUrl}/auth/truecaller/check?requestId=${requestId}`
-          );
-          if (res.ok) {
-            const data = await res.json();
-            if (data.status === "completed" && data.token) {
-              const localRes = await fetch("/api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token: data.token, user: data.user }),
-              });
-              if (!localRes.ok) throw new Error("Local session creation failed");
-              const localData = await localRes.json();
-
-              if (localData.user?._id) {
-                localStorage.setItem("thevilla_user_id", localData.user._id);
-              }
-              if (localData.user) {
-                localStorage.setItem("thevilla_user", JSON.stringify(localData.user));
-              }
-              Cookies.set("token", localData.token, getAuthCookieOptions());
-              setOpen(false);
-              addToast({
-                title: "Welcome back!",
-                description: "Logged in successfully with Truecaller",
-                color: "success",
-              });
-              setTimeout(() => {
-                onOpenChange?.(false);
-                if (returnUrl) {
-                  window.location.href = returnUrl;
-                } else {
-                  window.location.reload();
-                }
-              }, 100);
-              return true;
-            }
-          }
-        } catch {
-          // ignore polling check errors
-        }
-        return false;
-      };
-
-      if (
-        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-          navigator.userAgent
-        )
-      ) {
-        window.location.href = `truecallersdk://truesdk/web_verify?type=btmsheet&requestNonce=${requestId}&partnerKey=YOUR_PARTNER_KEY`;
-
-        let attempts = 0;
-        const interval = setInterval(async () => {
-          attempts++;
-          const success = await checkProfile();
-          if (success || attempts > 20) {
-            clearInterval(interval);
-            setTruecallerLoading(false);
-          }
-        }, 2000);
-      } else {
-        const dummyNumber = "919999999999";
-        const res = await fetch(`${BaseUrl}/auth/truecaller/verify`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phoneNumber: dummyNumber,
-            name: "Truecaller User",
-            deviceId,
-            role: "user",
-          }),
-        });
-
-        if (!res.ok) throw new Error("Verification failed");
-        const backendData = await res.json();
-
-        const localRes = await fetch("/api/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: backendData.token, user: backendData.user }),
-        });
-        if (!localRes.ok) throw new Error("Local session creation failed");
-        const data = await localRes.json();
-
-        if (data.user?._id) {
-          localStorage.setItem("thevilla_user_id", data.user._id);
-        }
-        if (data.user) {
-          localStorage.setItem("thevilla_user", JSON.stringify(data.user));
-        }
-        Cookies.set("token", data.token, getAuthCookieOptions());
-        setOpen(false);
-        addToast({
-          title: "Welcome!",
-          description: "Logged in successfully via Truecaller",
-          color: "success",
-        });
-        setTimeout(() => {
-          onOpenChange?.(false);
-          if (returnUrl) {
-            window.location.href = returnUrl;
-          } else {
-            window.location.reload();
-          }
-        }, 100);
-      }
-    } catch (err) {
-      console.error(err);
-      addToast({
-        title: "Login Error",
-        description: "Could not complete Truecaller login.",
-        color: "danger",
-      });
-    } finally {
-      setTruecallerLoading(false);
-    }
   };
 
   const handleSendOTP = async () => {
@@ -287,8 +315,8 @@ const ResponsiveAuthModal = ({
       setOtpSent(true);
       setCountdown(60);
       addToast({
-        title: "OTP Sent!",
-        description: `Code sent to WhatsApp on +91 ${rawNumber}`,
+        title: "WhatsApp OTP Sent!",
+        description: `Verification code sent to WhatsApp on +91 ${rawNumber}`,
         color: "success",
       });
     } catch (err) {
@@ -302,8 +330,9 @@ const ResponsiveAuthModal = ({
     }
   };
 
-  const handleVerifyOTP = async () => {
-    if (otp.length < 6) {
+  const handleVerifyOTP = async (customCode = null) => {
+    const codeToVerify = customCode || otp;
+    if (!codeToVerify || codeToVerify.length < 6) {
       addToast({
         title: "Invalid OTP",
         description: "Please enter the complete 6-digit verification code.",
@@ -322,7 +351,7 @@ const ResponsiveAuthModal = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phoneNumber: rawNumber,
-          code: otp,
+          code: codeToVerify,
           deviceId,
           role: "user",
         }),
@@ -346,7 +375,12 @@ const ResponsiveAuthModal = ({
         localStorage.setItem("thevilla_user", JSON.stringify(data.user));
       }
       Cookies.set("token", data.token, getAuthCookieOptions());
-      setOpen(false);
+
+      if (!isControlled) {
+        setInternalOpen(false);
+      }
+      onOpenChange?.(false);
+
       addToast({
         title: "Welcome!",
         description: "Logged in successfully",
@@ -354,13 +388,12 @@ const ResponsiveAuthModal = ({
       });
 
       setTimeout(() => {
-        onOpenChange?.(false);
         if (returnUrl) {
           window.location.href = returnUrl;
         } else {
           window.location.reload();
         }
-      }, 100);
+      }, 150);
     } catch (err) {
       addToast({
         title: "Verification Failed",
@@ -372,205 +405,84 @@ const ResponsiveAuthModal = ({
     }
   };
 
-  // The login form (right column or mobile drawer content)
-  const FormContent = () => (
-    <div className="space-y-4">
-      <div>
-        <div className="flex items-center gap-2 mb-1">
-          <Image src={Logoicon} alt="ThevillaCamp" className="h-6 w-auto" />
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#ff6900]">
-            ThevillaCamp
-          </span>
-        </div>
-        <p className="text-xs text-neutral-500 font-medium">Login / Signup</p>
-        <h3 className="text-xl sm:text-2xl font-extrabold text-neutral-900 mt-0.5">
-          Welcome to ThevillaCamp
-        </h3>
-      </div>
-
-      {/* WhatsApp OTP Phone Flow */}
-      <div className="space-y-3 pt-1">
-        {!otpSent ? (
-          <div className="space-y-3">
-            <div className="flex rounded-xl border border-neutral-300 focus-within:border-neutral-900 focus-within:ring-1 focus-within:ring-neutral-900 overflow-hidden transition-all bg-white shadow-2xs">
-              <div className="px-3 py-2.5 bg-neutral-50 border-r border-neutral-200 flex items-center gap-1 text-xs font-bold text-neutral-700">
-                <span>🇮🇳 +91</span>
-              </div>
-              <input
-                type="tel"
-                placeholder="Phone number"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
-                className="flex-1 px-3 py-2.5 text-sm outline-none text-neutral-900 placeholder:text-neutral-400 font-medium bg-transparent"
-              />
-            </div>
-
-            <Button
-              onPress={handleSendOTP}
-              disabled={otpLoading || cleanPhoneNumber(phone).length !== 10}
-              className="w-full h-11 bg-[#131927] hover:bg-[#1f293d] text-white font-bold text-sm rounded-xl transition-all shadow-xs disabled:opacity-50"
-            >
-              {otpLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Continue"}
-            </Button>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between text-xs text-neutral-600 px-1">
-              <span>Code sent to <strong className="text-neutral-900">+91 {cleanPhoneNumber(phone)}</strong></span>
-              <button
-                onClick={() => {
-                  setOtpSent(false);
-                  setOtp("");
-                }}
-                className="text-[#ff6900] hover:underline font-semibold"
-              >
-                Change
-              </button>
-            </div>
-            <input
-              type="text"
-              placeholder="• • • • • •"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              className="w-full h-11 px-3 rounded-xl border-2 border-orange-300 focus:outline-none focus:ring-2 focus:ring-[#ff6900] text-center tracking-[0.4em] text-neutral-900 bg-white text-lg font-bold shadow-2xs"
-              maxLength={6}
-              autoFocus
-            />
-            <Button
-              onPress={handleVerifyOTP}
-              disabled={otpLoading || otp.length < 6}
-              className="w-full h-11 bg-[#ff6900] hover:bg-[#e05d00] text-white font-bold text-sm rounded-xl transition-all shadow-xs disabled:opacity-50"
-            >
-              {otpLoading ? <Loader2 className="h-4 w-4 animate-spin mx-auto" /> : "Verify & Continue"}
-            </Button>
-            <div className="text-center text-xs text-neutral-500">
-              {countdown > 0 ? (
-                <span>Resend in <strong className="text-neutral-800">{countdown}s</strong></span>
-              ) : (
-                <button
-                  onClick={handleSendOTP}
-                  disabled={otpLoading}
-                  className="text-[#ff6900] hover:underline font-semibold"
-                >
-                  Resend WhatsApp Code
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Divider */}
-      <div className="relative py-1">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-neutral-200" />
-        </div>
-        <div className="relative flex justify-center text-[10px] uppercase">
-          <span className="bg-white px-2 text-neutral-400 font-semibold tracking-wider">
-            Or continue with
-          </span>
-        </div>
-      </div>
-
-      {/* Secondary Quick Logins */}
-      <div className="grid grid-cols-2 gap-2">
-        <Button
-          onPress={handleTruecallerLogin}
-          disabled={truecallerLoading || appleLoading || otpLoading}
-          className="h-10 bg-[#0087FF] hover:bg-[#0070d6] text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-2xs"
-        >
-          {truecallerLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ShieldCheck className="w-4 h-4" />}
-          <span>Truecaller</span>
-        </Button>
-
-        <Button
-          onPress={handleAppleLogin}
-          disabled={truecallerLoading || appleLoading || otpLoading}
-          className="h-10 bg-neutral-950 hover:bg-neutral-800 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-2xs"
-        >
-          {appleLoading ? (
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-          ) : (
-            <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-            </svg>
-          )}
-          <span>Apple ID</span>
-        </Button>
-      </div>
-
-      {/* Footer Disclaimer */}
-      <p className="text-[10px] text-center text-neutral-400 leading-tight pt-1">
-        By signing up, you agree to our{" "}
-        <a href="/terms-of-service" className="underline text-neutral-600 hover:text-neutral-900 font-medium">
-          Terms & Conditions
-        </a>{" "}
-        and{" "}
-        <a href="/privacy-policy" className="underline text-neutral-600 hover:text-neutral-900 font-medium">
-          Privacy Policy
-        </a>
-      </p>
-    </div>
-  );
-
+  // Mobile Bottom-Sheet Drawer (matching StayVista reference design)
   if (isMobile) {
     return (
       <Drawer open={open} onOpenChange={handleOpenChange}>
         {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-        <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-3xl p-6">
-          <DrawerHeader className="sr-only">
-            <DrawerTitle>Login to ThevillaCamp</DrawerTitle>
-            <DrawerDescription>Enter your mobile number to sign in</DrawerDescription>
-          </DrawerHeader>
-          <FormContent />
+        <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] px-5 pt-5 pb-8">
+          <div className="relative text-center pt-1 pb-1">
+            <DrawerTitle className="text-2xl sm:text-[26px] font-extrabold text-neutral-900 tracking-tight">
+              Welcome to ThevillaCamp
+            </DrawerTitle>
+            <DrawerDescription className="sr-only">
+              Login or Signup with your mobile number via WhatsApp OTP
+            </DrawerDescription>
+            <DrawerClose asChild>
+              <button
+                type="button"
+                className="absolute top-0 right-0 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-colors outline-none cursor-pointer"
+                aria-label="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </DrawerClose>
+          </div>
+
+          <AuthFormContent
+            phone={phone}
+            setPhone={setPhone}
+            otp={otp}
+            setOtp={setOtp}
+            otpSent={otpSent}
+            setOtpSent={setOtpSent}
+            otpLoading={otpLoading}
+            countdown={countdown}
+            handleSendOTP={handleSendOTP}
+            handleVerifyOTP={handleVerifyOTP}
+            cleanPhoneNumber={cleanPhoneNumber}
+          />
         </DrawerContent>
       </Drawer>
     );
   }
 
+  // Desktop Centered Dialog (consistent StayVista luxury card aesthetic)
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
-      <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-white border-none rounded-3xl shadow-2xl">
-        <div className="flex w-full min-h-[440px]">
-          {/* Left Column: StayVista-Inspired Luxury Villa Visual */}
-          <div className="hidden md:flex flex-col justify-between w-1/2 relative p-8 bg-neutral-950 overflow-hidden text-white">
-            <div className="absolute inset-0 -z-10">
-              <img
-                src="https://images.unsplash.com/photo-1540541338287-41700207dee6?w=800&auto=format&fit=crop&q=80"
-                alt="Luxury Villa Getaway"
-                className="w-full h-full object-cover opacity-60"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/60" />
-            </div>
-
-            {/* Top Logo */}
-            <div>
-              <span className="text-xl font-extrabold tracking-tight text-white flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#ff6900]" />
-                ThevillaCamp
-              </span>
-            </div>
-
-            {/* Bottom Copy */}
-            <div className="space-y-3">
-              <h2 className="text-2xl lg:text-3xl font-extrabold leading-tight drop-shadow-sm">
-                Book a Stay.<br />Enjoy A Villa Getaway
-              </h2>
-              <p className="text-xs text-neutral-200 leading-relaxed max-w-xs">
-                Enjoy the Luxuries & Privacy of private pools, manicured lawns & personalized concierge service.
-              </p>
-              <div className="inline-block px-3 py-1 rounded-full border border-dashed border-white/60 text-[11px] font-bold tracking-wide backdrop-blur-xs bg-white/10 text-orange-200">
-                Stays Starting at ₹4,999*
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Clean Login & Signup Form */}
-          <div className="w-full md:w-1/2 p-6 sm:p-8 flex flex-col justify-center bg-white">
-            <FormContent />
-          </div>
+      <DialogContent className="sm:max-w-[430px] p-6 bg-white border border-neutral-100 rounded-3xl shadow-2xl overflow-hidden [&>button]:hidden">
+        <div className="relative text-center pt-1 pb-1">
+          <DialogTitle className="text-2xl font-extrabold text-neutral-900 tracking-tight">
+            Welcome to ThevillaCamp
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            Login or Signup with your mobile number via WhatsApp OTP
+          </DialogDescription>
+          <DialogClose asChild>
+            <button
+              type="button"
+              className="absolute top-0 right-0 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 flex items-center justify-center transition-colors outline-none cursor-pointer"
+              aria-label="Close"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </DialogClose>
         </div>
+
+        <AuthFormContent
+          phone={phone}
+          setPhone={setPhone}
+          otp={otp}
+          setOtp={setOtp}
+          otpSent={otpSent}
+          setOtpSent={setOtpSent}
+          otpLoading={otpLoading}
+          countdown={countdown}
+          handleSendOTP={handleSendOTP}
+          handleVerifyOTP={handleVerifyOTP}
+          cleanPhoneNumber={cleanPhoneNumber}
+        />
       </DialogContent>
     </Dialog>
   );
