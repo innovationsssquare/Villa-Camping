@@ -123,94 +123,94 @@ export function UserSidebar() {
 
       <SheetContent
         side="left"
-        className="w-[60vw] sm:w-[60vw] max-w-[270px] min-w-[230px] p-0 bg-white border-r border-neutral-200 flex flex-col h-full z-50"
+        className="w-[75vw] max-w-[75vw] sm:w-[350px] sm:max-w-sm p-0 bg-white border-r border-neutral-200 flex flex-col h-full z-50"
       >
         <SheetHeader className="sr-only">
           <SheetTitle>Navigation Menu</SheetTitle>
           <SheetDescription>Explore ThevillaCamp stays and options</SheetDescription>
         </SheetHeader>
 
-        {/* User Card Header - Compact for 60% width */}
-        <div className="p-3.5 pt-8 bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-100">
+        {/* User Card Header - 75% width on mobile */}
+        <div className="p-4 pt-8 bg-gradient-to-b from-neutral-50 to-white border-b border-neutral-100">
           {isLoggedIn ? (
-            <div className="flex items-center gap-2.5">
-              <Avatar className="h-10 w-10 ring-2 ring-[#ff6900]/20 shadow-xs shrink-0">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-11 w-11 ring-2 ring-[#ff6900]/20 shadow-xs shrink-0">
                 {currentUser?.profilePic ? (
                   <AvatarImage src={currentUser.profilePic} alt={currentUser?.fullName} />
                 ) : null}
-                <AvatarFallback className="bg-gradient-to-br from-[#ff6900] to-[#e05d00] text-xs font-bold text-white">
+                <AvatarFallback className="bg-gradient-to-br from-[#ff6900] to-[#e05d00] text-sm font-bold text-white">
                   {getUserInitials(currentUser?.fullName)}
                 </AvatarFallback>
               </Avatar>
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1">
-                  <h3 className="text-xs font-bold text-neutral-900 truncate">
+                <div className="flex items-center gap-1.5">
+                  <h3 className="text-sm font-bold text-neutral-900 truncate">
                     {currentUser?.fullName || "Member"}
                   </h3>
-                  <span className="inline-flex items-center px-1 py-0.2 text-[8px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                  <span className="inline-flex items-center px-1.5 py-0.5 text-[9px] font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
                     Verified
                   </span>
                 </div>
-                <p className="text-[10px] text-neutral-500 truncate">
+                <p className="text-xs text-neutral-500 truncate">
                   {currentUser?.email || currentUser?.mobile || "Active Account"}
                 </p>
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2.5">
               <div className="flex items-center gap-1.5">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#ff6900] animate-pulse" />
-                <span className="text-[9px] font-bold tracking-wider uppercase text-[#ff6900]">
+                <div className="w-2 h-2 rounded-full bg-[#ff6900] animate-pulse" />
+                <span className="text-[10px] font-bold tracking-wider uppercase text-[#ff6900]">
                   ThevillaCamp
                 </span>
               </div>
-              <h3 className="text-xs font-bold text-neutral-900 leading-snug">
+              <h3 className="text-sm font-bold text-neutral-900 leading-snug">
                 Welcome to luxury stays
               </h3>
               <Button
                 onClick={() => handleNavigate("/account")}
-                className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-[10px] font-semibold rounded-lg py-1.5 shadow-xs transition-all flex items-center justify-center gap-1"
+                className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold rounded-xl py-2 shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer touch-manipulation"
               >
-                <LogIn className="w-3 h-3" /> Sign In / Register
+                <LogIn className="w-3.5 h-3.5" /> Sign In / Register
               </Button>
             </div>
           )}
         </div>
 
-        {/* Scrollable Navigation Body with shadcn ScrollArea (No native scrollbar!) */}
-        <ScrollArea className="flex-1 px-3 py-3">
+        {/* Scrollable Navigation Body with shadcn ScrollArea */}
+        <ScrollArea className="flex-1 px-3.5 py-3.5">
           <div className="space-y-4">
             {/* Quick Access Row */}
-            <div className="grid grid-cols-3 gap-1.5 bg-neutral-50 p-1.5 rounded-xl border border-neutral-100">
+            <div className="grid grid-cols-3 gap-2 bg-neutral-50 p-2 rounded-xl border border-neutral-100">
               <button
                 onClick={() => handleNavigate("/account")}
                 className={cn(
-                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer touch-manipulation",
                   isActive("/account") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
                 )}
               >
-                <User className="h-3.5 w-3.5 mb-0.5" />
-                <span className="text-[9px]">Account</span>
+                <User className="h-4 w-4 mb-1" />
+                <span className="text-[10px] font-medium">Account</span>
               </button>
               <button
                 onClick={() => handleNavigate("/account/support")}
                 className={cn(
-                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer touch-manipulation",
                   isActive("/account/support") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
                 )}
               >
-                <MessageCircle className="h-3.5 w-3.5 mb-0.5" />
-                <span className="text-[9px]">Support</span>
+                <MessageCircle className="h-4 w-4 mb-1" />
+                <span className="text-[10px] font-medium">Support</span>
               </button>
               <button
                 onClick={() => handleNavigate("/notifications")}
                 className={cn(
-                  "flex flex-col items-center justify-center py-1.5 px-1 rounded-lg transition-all",
+                  "flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all cursor-pointer touch-manipulation",
                   isActive("/notifications") ? "bg-white text-[#ff6900] shadow-xs font-bold" : "text-neutral-600 hover:bg-white/60"
                 )}
               >
-                <Bell className="h-3.5 w-3.5 mb-0.5" />
-                <span className="text-[9px]">Alerts</span>
+                <Bell className="h-4 w-4 mb-1" />
+                <span className="text-[10px] font-medium">Alerts</span>
               </button>
             </div>
 
@@ -437,22 +437,22 @@ export function UserSidebar() {
         </ScrollArea>
 
         {/* Drawer Bottom Action */}
-        <div className="p-3 border-t border-neutral-100 bg-neutral-50/80 mt-auto">
+        <div className="p-3.5 border-t border-neutral-100 bg-neutral-50/80 mt-auto">
           {isLoggedIn ? (
             <Button
               variant="ghost"
               onClick={handleLogout}
-              className="w-full justify-center text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg py-1.5 gap-1.5 transition-all"
+              className="w-full justify-center text-xs font-semibold text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl h-10 gap-1.5 transition-all cursor-pointer touch-manipulation"
             >
-              <LogOut className="h-3.5 w-3.5" />
+              <LogOut className="h-4 w-4" />
               Log Out
             </Button>
           ) : (
             <Button
               onClick={() => handleNavigate("/account")}
-              className="w-full justify-center text-[11px] font-semibold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg py-1.5 transition-all"
+              className="w-full justify-center text-xs font-semibold bg-neutral-900 hover:bg-neutral-800 text-white rounded-xl h-10 transition-all cursor-pointer touch-manipulation"
             >
-              <User className="h-3.5 w-3.5 mr-1" />
+              <User className="h-4 w-4 mr-1.5" />
               Sign In
             </Button>
           )}

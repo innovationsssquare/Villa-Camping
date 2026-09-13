@@ -379,17 +379,17 @@ function MobilePropertySkeleton() {
         </div>
       </div>
 
-      {/* 4. Mobile Compact Sticky Bottom Pricing Bar (Matching our updated compact bar) */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-3.5 py-1.5 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between gap-2 max-w-md mx-auto">
-          <div className="min-w-0 flex-1 space-y-1">
-            <div className="flex items-baseline gap-1.5">
-              <Skeleton className="h-4 w-20 rounded-md" />
-              <Skeleton className="h-3 w-12 rounded" />
+      {/* 4. Mobile Sticky Bottom Pricing Bar Skeleton */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200/90 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
+          <div className="min-w-0 flex-1 space-y-1.5">
+            <div className="flex items-baseline gap-2">
+              <Skeleton className="h-6 w-24 rounded-md" />
+              <Skeleton className="h-4 w-14 rounded" />
             </div>
-            <Skeleton className="h-3 w-28 rounded" />
+            <Skeleton className="h-4 w-32 rounded" />
           </div>
-          <Skeleton className="h-8 w-36 rounded-lg bg-gradient-to-r from-orange-400 to-[#e05d00] opacity-80" />
+          <Skeleton className="h-11 sm:h-12 w-36 rounded-xl bg-gradient-to-r from-orange-400 to-[#e05d00] opacity-80" />
         </div>
       </div>
     </div>

@@ -126,7 +126,7 @@ export default function TrendingVideos() {
   };
 
   return (
-    <section className="w-full py-6 sm:py-10 md:py-14 bg-white">
+    <section className="w-full py-2 sm:py-10 md:py-4 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header - Centered with App-style Typography */}
         <div className="relative text-center max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-2">

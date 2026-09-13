@@ -29,8 +29,6 @@ const tabs = [
 
 const Villaview = () => {
   const [activeTab, setActiveTab] = useState("highlights");
-  const [showStickyTabs, setShowStickyTabs] = useState(false);
-  const tabsRef = useRef(null);
 
   const dispatch = useDispatch();
   const params = useParams();
@@ -91,23 +89,11 @@ const Villaview = () => {
     faqsInView,
   ]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      if (tabsRef.current) {
-        const rect = tabsRef.current.getBoundingClientRect();
-        setShowStickyTabs(rect.top <= 48);
-      }
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     const element = document.getElementById(tabId);
     if (element) {
-      const offset = 95; // Account for sticky header (48px) + tabs (44px)
+      const offset = 96; // Account for sticky header (48px) + tabs (48px)
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - offset;
 
@@ -145,30 +131,22 @@ const Villaview = () => {
 
   return (
     <VillaProvider villa={villa}>
-      <div className="min-h-screen bg-background relative md:hidden overflow-hidden">
+      <div className="min-h-screen bg-background relative md:hidden">
+        {/* Sticky Header at top-0 */}
         <VillaHeader />
+
         <VillaHero />
         <VillaDetails />
 
-        <div ref={tabsRef}>
+        {/* Sticky Tabs Bar - Sticks directly below the 48px header at top-12 (48px) */}
+        <div className="sticky top-12 z-40 bg-white border-b border-gray-200 shadow-xs">
           <StickyTabs
             tabs={tabs}
             activeTab={activeTab}
             onTabChange={handleTabChange}
-            isSticky={false}
+            isSticky={true}
           />
         </div>
-
-        {showStickyTabs && (
-          <div className="fixed top-12 left-0 right-0 z-30 bg-background/95 backdrop-blur-md border-b border-gray-200 shadow-sm">
-            <StickyTabs
-              tabs={tabs}
-              activeTab={activeTab}
-              onTabChange={handleTabChange}
-              isSticky={true}
-            />
-          </div>
-        )}
 
         <div>
           <AllTabsContent

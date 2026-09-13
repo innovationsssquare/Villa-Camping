@@ -57,19 +57,19 @@ const FixedBookingBar = () => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/80 px-3.5 py-1.5 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.06)]">
-        <div className="flex items-center justify-between gap-2 max-w-md mx-auto">
+      <div className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200/90 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+        <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
           <div className="min-w-0 flex-1">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-[15px] font-bold text-gray-900 tracking-tight">
+              <span className="text-xl sm:text-2xl font-extrabold text-gray-950 tracking-tight">
                 {formatRupee(basePrice)}
               </span>
-              <span className="text-[10px] text-gray-400 line-through font-normal">
+              <span className="text-xs sm:text-sm text-gray-400 line-through font-normal ml-0.5">
                 {formatRupee(basePrice + 2500)}
               </span>
             </div>
-            <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
-              <span className="font-medium text-gray-700">
+            <div className="flex items-center gap-1.5 text-xs text-gray-600 mt-1 whitespace-nowrap overflow-hidden text-ellipsis">
+              <span className="font-semibold text-gray-800">
                 {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
               </span>
               <button
@@ -82,13 +82,13 @@ const FixedBookingBar = () => {
                   setBookingTab("guests");
                   setIsBookingOpen(true);
                 }}
-                className="p-0.5 text-[#ff6900] hover:text-[#e05d00] transition-colors cursor-pointer inline-flex items-center"
+                className="p-1 -my-1 text-[#ff6900] hover:text-[#e05d00] active:scale-90 transition-transform cursor-pointer inline-flex items-center touch-manipulation"
                 aria-label="Edit guests"
               >
-                <SquarePen className="w-2.5 h-2.5 text-[#ff6900]" />
+                <SquarePen className="w-3.5 h-3.5 text-[#ff6900]" />
               </button>
-              <span className="text-gray-300">·</span>
-              <span className="text-gray-500 text-[9.5px]">night + taxes</span>
+              <span className="text-gray-300 font-bold">·</span>
+              <span className="text-gray-500 text-xs">night + taxes</span>
             </div>
           </div>
           <button
@@ -101,7 +101,7 @@ const FixedBookingBar = () => {
               setBookingTab("dates");
               setIsBookingOpen(true);
             }}
-            className="bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] text-white px-3.5 py-1.5 rounded-lg font-semibold text-[11px] whitespace-nowrap shadow-xs shadow-orange-500/20 active:scale-95 transition-all cursor-pointer inline-flex items-center justify-center shrink-0 h-8"
+            className="bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] text-white px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm whitespace-nowrap shadow-md shadow-orange-500/25 active:scale-[0.97] transition-transform duration-100 cursor-pointer inline-flex items-center justify-center shrink-0 h-11 sm:h-12 touch-manipulation select-none"
           >
             Select Dates / Rooms
           </button>

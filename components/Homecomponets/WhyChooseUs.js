@@ -110,7 +110,7 @@ export function WhyChooseUs() {
     features.find((f) => f.id === activeId) || features[0];
 
   return (
-    <section className="relative w-full py-8 sm:py-12 md:py-16 bg-white overflow-hidden">
+    <section className="relative w-full py-2 sm:py-12 md:py-4 bg-white overflow-hidden">
       {/* Background Subtle Ambient Glow */}
       <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] sm:w-[750px] h-[350px] bg-gradient-to-tr from-orange-400/10 via-amber-300/15 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 

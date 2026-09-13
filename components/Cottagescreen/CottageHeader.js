@@ -10,8 +10,8 @@ const CottageHeader = () => {
   const router = useRouter();
 
   return (
-    <div className="flex items-center justify-between px-3 h-12 bg-white/95 backdrop-blur-md border-b border-gray-100 sticky top-0 z-40 w-full overflow-hidden">
-      <div className="flex items-center w-2/3">
+    <header className="flex items-center justify-between px-3 h-12 bg-white border-b border-gray-100 sticky top-0 z-50 w-full shadow-2xs">
+      <div className="flex items-center w-2/3 overflow-hidden">
         <Button
           isIconOnly
           variant="light"
@@ -56,7 +56,7 @@ const CottageHeader = () => {
           </div>
         </Button>
       </div>
-    </div>
+    </header>
   );
 };
 

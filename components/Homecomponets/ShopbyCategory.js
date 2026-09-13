@@ -124,9 +124,9 @@ const ShopbyCategory = () => {
   const scrollNext = () => carouselApi?.scrollNext();
 
   return (
-    <section className="w-full relative -mt-3 sm:-mt-4 md:-mt-5 z-20 rounded-t-[1.75rem] sm:rounded-t-[2.5rem] md:rounded-t-[3.5rem] bg-white py-5 sm:py-8 md:py-12 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
+    <section className="w-full relative -mt-5 sm:-mt-4 md:-mt-9 z-20 rounded-t-[1.75rem] sm:rounded-t-[2.5rem] md:rounded-t-[1.5rem] bg-white py-5 sm:py-8 md:py-12 overflow-hidden shadow-[0_-10px_40px_rgba(0,0,0,0.06)]">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        
+
         {/* Section Header - Centered with Mobile-App Sized Typography */}
         <div className="relative text-center max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-2">
           {/* Eyebrow Badge */}
@@ -190,18 +190,17 @@ const ShopbyCategory = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-2.5 sm:-ml-4">
-              
+
               {/* 1. "All Stays" Primary Card with Real Image */}
               <CarouselItem className="pl-2.5 sm:pl-4 basis-[45%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5">
                 <motion.div
                   whileHover={{ y: -3 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => handleSelectCategory("all-stays", "All Stays")}
-                  className={`group relative flex flex-col rounded-xl sm:rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer h-full ${
-                    isSelected("All Stays")
-                      ? "border-[#ff6900] shadow-[0_6px_20px_rgba(255,105,0,0.18)] ring-2 ring-[#ff6900]/30"
-                      : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
-                  }`}
+                  className={`group relative flex flex-col rounded-xl sm:rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer h-full ${isSelected("All Stays")
+                    ? "border-[#ff6900] shadow-[0_6px_20px_rgba(255,105,0,0.18)] ring-2 ring-[#ff6900]/30"
+                    : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
+                    }`}
                 >
                   {/* Real Image Container - Compact Height */}
                   <div className="relative h-28 sm:h-36 md:h-44 lg:h-48 w-full overflow-hidden">
@@ -212,7 +211,7 @@ const ShopbyCategory = () => {
                       sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 20vw"
                       className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                     />
-                    
+
                     {/* Dark Gradient Overlay */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 
@@ -263,11 +262,10 @@ const ShopbyCategory = () => {
                       onClick={() =>
                         handleSelectCategory(category._id, category.name)
                       }
-                      className={`group relative flex flex-col rounded-xl sm:rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer h-full ${
-                        selected
-                          ? "border-[#ff6900] shadow-[0_6px_20px_rgba(255,105,0,0.18)] ring-2 ring-[#ff6900]/30"
-                          : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
-                      }`}
+                      className={`group relative flex flex-col rounded-xl sm:rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer h-full ${selected
+                        ? "border-[#ff6900] shadow-[0_6px_20px_rgba(255,105,0,0.18)] ring-2 ring-[#ff6900]/30"
+                        : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
+                        }`}
                     >
                       {/* Real Image Container - Compact Height */}
                       <div className="relative h-28 sm:h-36 md:h-44 lg:h-48 w-full overflow-hidden">
@@ -278,7 +276,7 @@ const ShopbyCategory = () => {
                           sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 20vw"
                           className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
                         />
-                        
+
                         {/* Dark Gradient Overlay */}
                         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
 

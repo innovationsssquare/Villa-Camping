@@ -28,16 +28,16 @@ export function AppHeader() {
         "fixed top-0 left-0 right-0 w-full rounded-b-xl px-3 pt-1 pb-1.5 z-50 transition-transform duration-300 ease-in-out md:hidden shadow-xs",
         isVisible
           ? "translate-y-0 bg-white/95 backdrop-blur-md"
-          : "-translate-y-12 bg-white"
+          : "-translate-y-8 bg-white"
       )}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <UserSidebar />
           {pathname === "/" ||
-          pathname === "/explore" ||
-          pathname.startsWith("/products/") ||
-          pathname.startsWith("/category/") ? (
+            pathname === "/explore" ||
+            pathname.startsWith("/products/") ||
+            pathname.startsWith("/category/") ? (
             <div className="flex items-center gap-1 text-[10px]">
               <span className="uppercase font-bold text-neutral-400">Location:</span>
               <UserLocationDisplay />

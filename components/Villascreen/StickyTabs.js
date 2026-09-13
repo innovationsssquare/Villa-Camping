@@ -31,21 +31,21 @@ const StickyTabs = ({ tabs, activeTab, onTabChange, isSticky }) => {
     <div
       ref={scrollRef}
       className={cn(
-        "bg-background border-b border-gray-200 overflow-x-auto scrollbar-hide",
-        isSticky && "shadow-sm"
+        "bg-white border-b border-gray-200 overflow-x-auto scrollbar-none",
+        isSticky && "shadow-xs"
       )}
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
-      <div className="flex space-x-0 min-w-max px-4">
+      <div className="flex space-x-0 min-w-max px-3">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             ref={tab.id === activeTab ? activeTabRef : null}
             onClick={() => onTabChange(tab.id)}
             className={cn(
-              "px-3.5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors",
+              "px-3.5 py-2.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer",
               activeTab === tab.id
-                ? "text-[#ff6900] border-b-2 border-[#ff6900]"
+                ? "text-[#ff6900] border-[#ff6900]"
                 : "text-gray-500 border-transparent hover:text-gray-900"
             )}
           >

@@ -33,7 +33,7 @@ export function BookingSearchBox() {
   return (
     <div
       onClick={() => router.push("/search-stay")}
-      className="w-full bg-white rounded-full border border-neutral-200/90 shadow-2xs hover:shadow-sm transition-all duration-200 cursor-pointer px-2.5 py-1 h-9 flex items-center justify-between"
+      className="w-full bg-white rounded-full border border-neutral-200/90 shadow-2xs hover:shadow-sm transition-all duration-200 cursor-pointer px-2.5 py-1 h-10 flex items-center justify-between"
     >
       <div className="flex items-center gap-2 min-w-0">
         <div className="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center text-neutral-800 shrink-0">
