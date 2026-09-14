@@ -16,6 +16,7 @@ import {
   fetchWishlistIds,
 } from "@/Redux/Slices/wishlistSlice";
 import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { saveRecentlyVisited } from "@/lib/recentlyVisited";
 
 export function PropertyCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -106,6 +107,7 @@ export function PropertyCard({ property }) {
   };
 
   const handleCardClick = () => {
+    saveRecentlyVisited(property, selectedCategoryName);
     const url = buildPropertyViewUrl(
       property,
       categories,

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import Banner1 from "@/public/Aboutusasset/Villabanner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import { addToast } from "@heroui/react";
 
 const HERO_SLIDES = [
   {
@@ -70,6 +71,9 @@ export default function Hero() {
   const router = useRouter();
   const dispatch = useDispatch();
   const { categories } = useSelector((state) => state.category);
+  const { checkin, checkout, selectedGuest, isGuestSelected } = useSelector(
+    (state) => state.booking
+  );
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [videoLoaded, setVideoLoaded] = useState(false);
@@ -87,14 +91,37 @@ export default function Hero() {
   const handleExplore = (slug = "all") => {
     if (slug !== "all" && categories && categories.length > 0) {
       const match = categories.find(
-        (c) => c.categoryname?.toLowerCase() === slug.toLowerCase()
+        (c) =>
+          c.slug?.toLowerCase() === slug.toLowerCase() ||
+          c.categoryname?.toLowerCase() === slug.toLowerCase() ||
+          c.name?.toLowerCase() === slug.toLowerCase()
       );
       if (match) {
         dispatch(setSelectedCategory(match._id));
-        dispatch(setSelectedCategoryname(match.categoryname));
+        dispatch(setSelectedCategoryname(match.categoryname || match.name));
       }
     }
-    router.push(`/category/${slug.toLowerCase()}`);
+
+    if (!checkin || !checkout || !isGuestSelected) {
+      addToast({
+        title: "Select stay dates & guests",
+        description: "Please select your check-in, check-out dates and guests before exploring stays.",
+        color: "warning",
+      });
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+      return;
+    }
+
+    const params = new URLSearchParams();
+    if (checkin) params.set("checkin", checkin);
+    if (checkout) params.set("checkout", checkout);
+    if (selectedGuest?.adults) params.set("adults", selectedGuest.adults.toString());
+    if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
+    const queryStr = params.toString();
+
+    router.push(`/category/${slug.toLowerCase()}${queryStr ? `?${queryStr}` : ""}`);
   };
 
   return (

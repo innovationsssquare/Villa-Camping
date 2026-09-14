@@ -91,11 +91,14 @@ export function GuestSelector({
       </div>
 
       {onClose && (
-        <div className="pt-3 mt-2 border-t border-neutral-150 flex justify-end">
+        <div className="pt-3 mt-2 border-t border-neutral-150 flex items-center justify-between">
+          <span className="text-[11px] text-neutral-400">Customized for your stay</span>
           <button
             type="button"
-            onClick={onClose}
-            className="bg-black hover:bg-neutral-800 text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer transition-all shadow-xs"
+            onClick={() => {
+              if (onClose) onClose();
+            }}
+            className="bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer transition-all shadow-xs"
           >
             Done
           </button>

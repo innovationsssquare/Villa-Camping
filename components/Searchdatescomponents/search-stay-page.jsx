@@ -20,6 +20,7 @@ import {
   setCheckin,
   setCheckout,
   updateGuestCount,
+  setIsGuestSelected,
 } from "@/Redux/Slices/bookingSlice";
 import moment from "moment-timezone";
 import { fetchAllProperties } from "@/Redux/Slices/propertiesSlice";
@@ -41,6 +42,7 @@ export default function SearchStayPage() {
     checkin,
     checkout,
     selectedGuest,
+    isGuestSelected,
     selectedCategoryImage,
   } = useSelector((state) => state.booking);
 
@@ -63,6 +65,7 @@ export default function SearchStayPage() {
 
   // Guest summary calculation
   const guestSummary = useMemo(() => {
+    if (!isGuestSelected) return "Add guests";
     const totalGuests = (selectedGuest.adults || 1) + (selectedGuest.childrenn || 0);
     const parts = [`${totalGuests} Guest${totalGuests > 1 ? "s" : ""}`];
 
@@ -78,7 +81,7 @@ export default function SearchStayPage() {
     }
 
     return parts.join(", ");
-  }, [selectedGuest]);
+  }, [selectedGuest, isGuestSelected]);
 
   // Nights count
   const nights = useMemo(() => {
@@ -175,16 +178,37 @@ export default function SearchStayPage() {
     dispatch(updateGuestCount({ type: "childrenn", value: 0 }));
     dispatch(updateGuestCount({ type: "infants", value: 0 }));
     dispatch(updateGuestCount({ type: "pets", value: 0 }));
+    dispatch(setIsGuestSelected(false));
   };
 
   const handleSearch = () => {
-    if (checkin && !checkout) {
+    if (!checkin) {
+      addToast({
+        title: "Select check-in date",
+        description: "Please choose your arrival date before searching stays",
+        color: "warning",
+      });
+      router.push("/date-selection");
+      return;
+    }
+
+    if (!checkout) {
       addToast({
         title: "Select check-out date",
         description: "Please choose your departure date to complete search dates",
         color: "warning",
       });
       router.push("/date-selection");
+      return;
+    }
+
+    if (!isGuestSelected) {
+      addToast({
+        title: "Select guests",
+        description: "Please specify number of guests for your stay",
+        color: "warning",
+      });
+      setIsGuestDrawerOpen(true);
       return;
     }
 

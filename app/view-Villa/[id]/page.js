@@ -2,6 +2,7 @@ import PropertyDetails from "@/components/Propertyviewcomponents/property-detail
 import Villascreen from "@/components/Propertyviewcomponents/Villascreen";
 import Villaview from "@/components/Villascreen/Villaview";
 import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import TrackPropertyVisit from "@/components/Propertyviewcomponents/TrackPropertyVisit";
 import { BaseUrl } from "@/lib/API/Baseurl";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
@@ -51,6 +52,7 @@ export default async function Home({ params }) {
     <div className="min-h-screen">
       {/* Structured data for SEO */}
       {villa ? <JsonLd villa={villa} /> : null}
+      {villa ? <TrackPropertyVisit property={villa} category="Villa" /> : null}
       <Villaview />
       <PropertyDetails />
     </div>

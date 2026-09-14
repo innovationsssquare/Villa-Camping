@@ -22,6 +22,7 @@ import {
   setSelectedCategory,
   setSelectedCategoryname,
 } from "@/Redux/Slices/bookingSlice";
+import { addToast } from "@heroui/react";
 
 // Real High-Definition Category Photography
 import VillaBanner from "@/public/Aboutusasset/Villabanner.jpg";
@@ -77,7 +78,7 @@ const ShopbyCategory = () => {
   const [carouselApi, setCarouselApi] = useState(null);
 
   const { categories, loading } = useSelector((state) => state.category);
-  const { selectedCategoryId, selectedCategoryName } = useSelector(
+  const { selectedCategoryId, selectedCategoryName, checkin, checkout, selectedGuest, isGuestSelected } = useSelector(
     (state) => state.booking
   );
 
@@ -86,15 +87,30 @@ const ShopbyCategory = () => {
   }, [dispatch]);
 
   const handleSelectCategory = (id, name) => {
-    if (name === "All Stays" || id === "all-stays") {
-      dispatch(setSelectedCategory(null));
-      dispatch(setSelectedCategoryname("All Stays"));
-      router.push("/category/all");
+    dispatch(setSelectedCategory(id === "all-stays" ? null : id));
+    dispatch(setSelectedCategoryname(name));
+
+    if (!checkin || !checkout || !isGuestSelected) {
+      addToast({
+        title: "Select stay dates & guests",
+        description: `Please select your check-in, check-out dates and guests to view available ${name} stays.`,
+        color: "warning",
+      });
+      if (typeof window !== "undefined") {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
       return;
     }
-    dispatch(setSelectedCategory(id));
-    dispatch(setSelectedCategoryname(name));
-    router.push(`/category/${name.toLowerCase()}`);
+
+    const params = new URLSearchParams();
+    if (checkin) params.set("checkin", checkin);
+    if (checkout) params.set("checkout", checkout);
+    if (selectedGuest?.adults) params.set("adults", selectedGuest.adults.toString());
+    if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
+    const queryStr = params.toString();
+
+    const targetSlug = name === "All Stays" || id === "all-stays" ? "all" : name.toLowerCase();
+    router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
   };
 
   const getMeta = (name = "") => {

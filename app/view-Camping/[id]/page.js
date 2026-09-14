@@ -1,6 +1,7 @@
 import CampingDetails from "@/components/Propertyviewcomponents/camping-details";
 import Tentview from "@/components/Tentscreen/Tentview";
 import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import TrackPropertyVisit from "@/components/Propertyviewcomponents/TrackPropertyVisit";
 import { BaseUrl } from "@/lib/API/Baseurl";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
@@ -49,6 +50,7 @@ export default async function Home({ params }) {
   return (
     <div className="min-h-screen">
       {camping ? <JsonLd villa={camping} /> : null}
+      {camping ? <TrackPropertyVisit property={camping} category="Camping" /> : null}
       <Tentview />
       <CampingDetails />
     </div>

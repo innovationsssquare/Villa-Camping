@@ -7,7 +7,7 @@ import Hero from "@/components/Homecomponets/Hero";
 import PropertyReviews from "@/components/Homecomponets/property-reviews";
 
 import ShopbyCategory from "@/components/Homecomponets/ShopbyCategory";
-import OffersCarousel from "@/components/Homecomponets/offers-carousel";
+import RecentlyVisited from "@/components/Homecomponets/RecentlyVisited";
 import AnnouncementModal from "@/components/Homecomponets/announcement-modal";
 import { SpecialOffers } from "@/components/Homecomponets/SpecialOffers";
 import {Testimonials} from "@/components/Homecomponets/Testimonials";
@@ -25,9 +25,6 @@ export default function Home() {
       <Hero />
       <ShopbyCategory />
 
-      {/* Dynamic Live Offers & Property Events Carousel */}
-      <OffersCarousel />
-
       <AvailableThisWeekend />
       <DestinationHighlights/>
       {/* <WeekendGetaway/> */}
@@ -38,6 +35,8 @@ export default function Home() {
       {/* <Experiences/>
       <Testimonials/> */}
 
+      {/* Recently Visited Properties (Browsing History with Property Type Tabs) */}
+      <RecentlyVisited />
     </main>
   );
 }

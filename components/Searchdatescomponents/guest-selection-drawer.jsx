@@ -13,7 +13,7 @@ import {
 import { X, Users } from "lucide-react";
 import { CounterButton } from "./counter-button";
 import { useSelector, useDispatch } from "react-redux";
-import { updateGuestCount } from "@/Redux/Slices/bookingSlice";
+import { updateGuestCount, setIsGuestSelected } from "@/Redux/Slices/bookingSlice";
 
 export function GuestSelectionDrawer({ isOpen, onClose }) {
   const dispatch = useDispatch();
@@ -21,6 +21,11 @@ export function GuestSelectionDrawer({ isOpen, onClose }) {
 
   const handleUpdate = (type, value) => {
     dispatch(updateGuestCount({ type, value }));
+  };
+
+  const handleConfirm = () => {
+    dispatch(setIsGuestSelected(true));
+    if (onClose) onClose();
   };
 
   const totalGuests = (selectedGuest.adults || 1) + (selectedGuest.childrenn || 0);
@@ -150,7 +155,7 @@ export function GuestSelectionDrawer({ isOpen, onClose }) {
         {/* Footer with Done Button */}
         <DrawerFooter className="px-5 py-3 border-t border-neutral-150 bg-white">
           <Button
-            onClick={onClose}
+            onClick={handleConfirm}
             className="w-full py-3 h-12 text-sm font-bold bg-[#ff6900] hover:bg-[#e05d00] text-white rounded-xl shadow-md transition-all active:scale-[0.99] cursor-pointer"
           >
             Confirm Guests ({totalGuests})

@@ -19,6 +19,7 @@ const initialState = {
     infants: 0,
     pets: 0,
   },
+  isGuestSelected: false,
   propertyId: null,
   ownerId: null,
   propertyType: "",
@@ -69,9 +70,14 @@ const bookingSlice = createSlice({
     },
     setSelectedGuest: (state, action) => {
       state.selectedGuest = { ...state.selectedGuest, ...action.payload };
+      state.isGuestSelected = true;
     },
     updateGuestCount: (state, action) => {
       state.selectedGuest[action.payload.type] = action.payload.value;
+      state.isGuestSelected = true;
+    },
+    setIsGuestSelected: (state, action) => {
+      state.isGuestSelected = !!action.payload;
     },
 
     setPropertyId: (state, action) => {
@@ -180,6 +186,7 @@ export const {
   setCheckout,
   setSelectedGuest,
   updateGuestCount,
+  setIsGuestSelected,
   resetBooking,
   hydrateBooking,
   setSelectedCategoryname,

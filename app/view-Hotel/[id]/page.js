@@ -1,6 +1,7 @@
 import Viewhotel from "@/components/Hotelscreen/Viewhotel";
 import HotelDetails from "@/components/Propertyviewcomponents/hotel-details";
 import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import TrackPropertyVisit from "@/components/Propertyviewcomponents/TrackPropertyVisit";
 import { BaseUrl } from "@/lib/API/Baseurl";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
@@ -49,6 +50,7 @@ export default async function Home({ params }) {
   return (
     <div className="min-h-screen">
       {hotel ? <JsonLd villa={hotel} /> : null}
+      {hotel ? <TrackPropertyVisit property={hotel} category="Hotel" /> : null}
       <Viewhotel />
       <HotelDetails />
     </div>

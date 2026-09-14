@@ -28,6 +28,7 @@ import {
   setCheckin,
   setCheckout,
   updateGuestCount,
+  setIsGuestSelected,
   setSelectedCategoryname,
 } from "@/Redux/Slices/bookingSlice";
 import Logo from "../../public/Productasset/mainlogo_clean.png";
@@ -62,6 +63,7 @@ export default function AirbnbNavbar() {
     checkin,
     checkout,
     selectedGuest,
+    isGuestSelected,
     selectedCategoryName,
   } = useSelector((state) => state.booking);
 
@@ -243,7 +245,18 @@ export default function AirbnbNavbar() {
   }, [activeDropdown, checkin, checkout]);
 
   const handleSearch = async () => {
-    if (checkin && !checkout) {
+    if (!checkin) {
+      addToast({
+        title: "Select check-in date",
+        description: "Please choose your arrival date before searching stays",
+        color: "warning",
+      });
+      setActiveDropdown("checkin");
+      setFocusedSide("checkin");
+      return;
+    }
+
+    if (!checkout) {
       addToast({
         title: "Select check-out date",
         description: "Please choose a check-out date to complete your search dates",
@@ -251,6 +264,16 @@ export default function AirbnbNavbar() {
       });
       setActiveDropdown("checkout");
       setFocusedSide("checkout");
+      return;
+    }
+
+    if (!isGuestSelected) {
+      addToast({
+        title: "Select guests",
+        description: "Please specify number of guests for your stay",
+        color: "warning",
+      });
+      setActiveDropdown("guests");
       return;
     }
 
@@ -352,7 +375,7 @@ export default function AirbnbNavbar() {
                   <div className="flex items-center gap-1.5 text-xs font-medium text-neutral-500 pl-3 pr-2">
                     <Users className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
                     <span>
-                      {selectedGuest?.adults > 1 || selectedGuest?.childrenn > 0
+                      {isGuestSelected
                         ? getTotalGuests()
                         : "Add guests"}
                     </span>
@@ -640,7 +663,7 @@ export default function AirbnbNavbar() {
                           <span>Who</span>
                         </div>
                         <div className="text-xs font-medium text-neutral-500 truncate mt-0.5">
-                          {selectedGuest?.adults > 1 || selectedGuest?.childrenn > 0
+                          {isGuestSelected
                             ? getTotalGuests()
                             : "Add guests"}
                         </div>
@@ -724,7 +747,10 @@ export default function AirbnbNavbar() {
                           infants={selectedGuest?.infants || 0}
                           pets={selectedGuest?.pets || 0}
                           onGuestChange={handleGuestChange}
-                          onClose={() => setActiveDropdown(null)}
+                          onClose={() => {
+                            dispatch(setIsGuestSelected(true));
+                            setActiveDropdown(null);
+                          }}
                           isMobile={isMobile}
                         />
                       </div>
