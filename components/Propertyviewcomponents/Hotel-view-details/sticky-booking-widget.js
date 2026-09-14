@@ -49,6 +49,8 @@
   import { useHotel } from "@/lib/context/HotelContext";
   import { calculateBookingPrice } from "@/lib/bookingUtils";
   import { useRouter } from "next/navigation";
+  import Cookies from "js-cookie";
+  import { useAuthModal } from "@/context/AuthModalContext";
   import { calculateHotelTotal } from "@/lib/calculateHotelBasePrice";
   import RoomSelectionDrawer from "@/components/Hotelscreen/RoomSelectionDrawer";
   import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
@@ -66,6 +68,7 @@
     const hotel = useHotel();
     const router = useRouter();
     const dispatch = useDispatch();
+    const { openAuthModal } = useAuthModal();
     const { checkin, checkout, selectedGuest, selectedSubtype, appliedCoupon } =
       useSelector((state) => state.booking);
 
@@ -825,6 +828,13 @@
                   dispatch(setcategoryId(hotel?.category));
                   dispatch(setOwnerId(hotel?.owner));
                   dispatch(setPropertyType("Hotel"));
+
+                  const token = Cookies.get("token");
+                  if (!token) {
+                    openAuthModal({ returnUrl: "/checkout" });
+                    return;
+                  }
+
                   router.push("/checkout");
                 }}
                 disabled={totalSelectedRooms === 0}

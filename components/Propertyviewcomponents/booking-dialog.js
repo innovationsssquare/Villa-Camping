@@ -31,6 +31,8 @@ import confetti from "canvas-confetti";
 import { useRouter } from "next/navigation";
 import ButtonLoader from "../Loadercomponents/button-loader";
 import { useDispatch, useSelector } from "react-redux";
+import Cookies from "js-cookie";
+import { useAuthModal } from "@/context/AuthModalContext";
 import {
   setCheckin,
   setCheckout,
@@ -40,6 +42,9 @@ import {
   clearSelectedTents,
   clearSelectedCottages,
   clearSelectedRooms,
+  setPropertyId,
+  setOwnerId,
+  setPropertyType,
 } from "@/Redux/Slices/bookingSlice";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import {
@@ -80,6 +85,7 @@ export default function BookingDialog({
 }) {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const holidayDates = useHolidayDates();
 
   const [activeTab, setActiveTab] = useState(initialTab || "dates"); // "dates" | "guests"
@@ -482,6 +488,18 @@ export default function BookingDialog({
     }
 
     setIsLoading(false);
+
+    if (propertyId) dispatch(setPropertyId(propertyId));
+    if (ownerId) dispatch(setOwnerId(ownerId));
+    if (propertyType) dispatch(setPropertyType(propertyType));
+
+    const token = Cookies.get("token");
+    if (!token) {
+      onClose?.();
+      openAuthModal({ returnUrl: "/checkout" });
+      return;
+    }
+
     onClose?.();
     router.push("/checkout");
   };

@@ -27,8 +27,26 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  // If it's a protected route and no token exists, redirect to home with auth=required & returnUrl
+  // If it's a protected route and no token exists, redirect to referer if available, or home with auth=required & returnUrl
   if (isProtectedRoute && !token) {
+    const referer = request.headers.get("referer")
+    if (referer) {
+      try {
+        const refererUrl = new URL(referer)
+        // If referer is from the same origin and not another protected route
+        if (
+          refererUrl.origin === request.nextUrl.origin &&
+          !protectedRoutes.some((route) => refererUrl.pathname.startsWith(route))
+        ) {
+          refererUrl.searchParams.set("auth", "required")
+          refererUrl.searchParams.set("returnUrl", pathname)
+          return NextResponse.redirect(refererUrl)
+        }
+      } catch {
+        // ignore url parsing error
+      }
+    }
+
     const url = request.nextUrl.clone()
     url.pathname = "/"
     url.searchParams.set("auth", "required")

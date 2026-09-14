@@ -11,18 +11,16 @@ import {
   DialogDescription,
   DialogClose,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerTitle,
-  DrawerTrigger,
-  DrawerClose,
-} from "@/components/ui/drawer";
 import { Loader2, ChevronDown, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import Image from "next/image";
-import { addToast } from "@heroui/react";
+import {
+  addToast,
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerBody,
+} from "@heroui/react";
 import { getDeviceId } from "@/lib/deviceId";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { getAuthCookieOptions } from "@/lib/authCookies";
@@ -388,9 +386,9 @@ const ResponsiveAuthModal = ({
 
       setTimeout(() => {
         if (returnUrl) {
-          window.location.href = returnUrl;
+          router.push(returnUrl);
         } else {
-          window.location.reload();
+          router.refresh();
         }
       }, 150);
     } catch (err) {
@@ -404,48 +402,73 @@ const ResponsiveAuthModal = ({
     }
   };
 
-  // Mobile Bottom-Sheet Drawer (matching StayVista reference design)
+  // Mobile Bottom-Sheet Drawer using HeroUI Drawer
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange}>
-        {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
-        <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] px-5 pt-3 pb-4 h-fit max-h-[90vh] overflow-hidden">
-          {/* Dedicated Top-Right Close Button (Zero overlap with title or other elements) */}
-          <DrawerClose asChild>
-            <button
-              type="button"
-              className="absolute top-3.5 right-4 z-30 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 active:scale-90 text-neutral-700 flex items-center justify-center transition-all outline-none cursor-pointer"
-              aria-label="Close"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </DrawerClose>
+      <>
+        {trigger && React.isValidElement(trigger)
+          ? React.cloneElement(trigger, {
+              onClick: (e) => {
+                trigger.props?.onClick?.(e);
+                handleOpenChange(true);
+              },
+            })
+          : trigger}
+        <Drawer
+          isOpen={open}
+          onOpenChange={handleOpenChange}
+          placement="bottom"
+          backdrop="opaque"
+          hideCloseButton
+          classNames={{
+            base: "max-w-md mx-auto bg-white rounded-t-[28px] p-0 m-0 border-none shadow-2xl overflow-hidden",
+            backdrop: "bg-black/60 backdrop-blur-xs z-50",
+            wrapper: "z-50",
+          }}
+        >
+          <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] overflow-hidden p-0">
+            {() => (
+              <>
+                {/* Pull handle indicator */}
+                <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mt-3 mb-1 shrink-0" />
 
-          {/* Title Header with lateral padding to prevent text collision with close button */}
-          <div className="relative text-center pt-0.5 pb-0.5 px-10">
-            <DrawerTitle className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight leading-snug">
-              Welcome to ThevillaCamp
-            </DrawerTitle>
-            <DrawerDescription className="sr-only">
-              Login or Signup with your mobile number via WhatsApp OTP
-            </DrawerDescription>
-          </div>
+                {/* Dedicated Top-Right Close Button */}
+                <button
+                  type="button"
+                  onClick={() => handleOpenChange(false)}
+                  className="absolute top-3.5 right-4 z-30 w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 active:scale-90 text-neutral-700 flex items-center justify-center transition-all outline-none cursor-pointer"
+                  aria-label="Close"
+                >
+                  <X className="w-4 h-4" />
+                </button>
 
-          <AuthFormContent
-            phone={phone}
-            setPhone={setPhone}
-            otp={otp}
-            setOtp={setOtp}
-            otpSent={otpSent}
-            setOtpSent={setOtpSent}
-            otpLoading={otpLoading}
-            countdown={countdown}
-            handleSendOTP={handleSendOTP}
-            handleVerifyOTP={handleVerifyOTP}
-            cleanPhoneNumber={cleanPhoneNumber}
-          />
-        </DrawerContent>
-      </Drawer>
+                {/* Title Header with lateral padding to prevent text collision with close button */}
+                <DrawerHeader className="relative flex flex-col items-center justify-center text-center pt-0.5 pb-0.5 px-10">
+                  <h3 className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight leading-snug">
+                    Welcome to ThevillaCamp
+                  </h3>
+                </DrawerHeader>
+
+                <DrawerBody className="px-5 pt-1 pb-5 max-h-[85vh] overflow-y-auto no-scrollbar">
+                  <AuthFormContent
+                    phone={phone}
+                    setPhone={setPhone}
+                    otp={otp}
+                    setOtp={setOtp}
+                    otpSent={otpSent}
+                    setOtpSent={setOtpSent}
+                    otpLoading={otpLoading}
+                    countdown={countdown}
+                    handleSendOTP={handleSendOTP}
+                    handleVerifyOTP={handleVerifyOTP}
+                    cleanPhoneNumber={cleanPhoneNumber}
+                  />
+                </DrawerBody>
+              </>
+            )}
+          </DrawerContent>
+        </Drawer>
+      </>
     );
   }
 

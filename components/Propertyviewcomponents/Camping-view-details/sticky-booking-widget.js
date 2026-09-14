@@ -51,6 +51,8 @@ import { Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
 import TentSelectionDrawer from "@/components/Tentscreen/tent-selection-drawer";
 import CouponsDrawer from "../coupons-drawer";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 export default function StickyBookingWidget() {
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
@@ -65,6 +67,7 @@ export default function StickyBookingWidget() {
   const camping = useCamping();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
 
   const { checkin, checkout, selectedGuest, appliedCoupon, selectedTents } =
     useSelector((state) => state.booking);
@@ -207,6 +210,13 @@ export default function StickyBookingWidget() {
     dispatch(setcategoryId(camping?.category));
     dispatch(setOwnerId(camping?.owner));
     dispatch(setPropertyType("Camping"));
+
+    const token = Cookies.get("token");
+    if (!token) {
+      openAuthModal({ returnUrl: "/checkout" });
+      return;
+    }
+
     router.push("/checkout");
   };
 

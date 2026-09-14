@@ -58,6 +58,8 @@ import {
   setOwnerId,
   setPropertyType,
 } from "@/Redux/Slices/bookingSlice";
+import Cookies from "js-cookie";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { useVilla } from "@/lib/context/VillaContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import {
@@ -82,6 +84,7 @@ export default function StickyBookingWidget() {
   const villa = useVilla();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const {
     checkin,
     checkout,
@@ -1063,6 +1066,13 @@ export default function StickyBookingWidget() {
                     : "Villa"
                 )
               );
+
+              const token = Cookies.get("token");
+              if (!token) {
+                openAuthModal({ returnUrl: "/checkout" });
+                return;
+              }
+
               router.push("/checkout");
             }}
             disabled={isOverCapacity || availabilityChecking}

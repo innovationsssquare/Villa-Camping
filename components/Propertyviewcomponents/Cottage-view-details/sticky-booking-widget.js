@@ -48,6 +48,8 @@ import {
 import { useCottage } from "@/lib/context/CottageContext";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { useRouter } from "next/navigation";
+import Cookies from "js-cookie";
+import { useAuthModal } from "@/context/AuthModalContext";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import CottageSelectionDrawer from "@/components/Cottagescreen/cottage-selection-drawer";
 import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
@@ -65,6 +67,7 @@ export default function StickyBookingWidget() {
   const cottage = useCottage();
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const { checkin, checkout, selectedGuest, selectedSubtype, appliedCoupon } =
     useSelector((state) => state.booking);
 
@@ -736,11 +739,18 @@ export default function StickyBookingWidget() {
                                           ) : (
                                             "APPLY"
                                           )}
-                                      </Button>
+                                        </Button>
+                                      </div>
                                     </div>
-                                  </div>
-                                </Card>
-                              ))}
+                                  </Card>
+                                ))
+                              ) : (
+                                <div className="text-center py-6 text-gray-500">
+                                  <p className="text-sm font-medium">
+                                    No coupons currently available
+                                  </p>
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -819,6 +829,13 @@ export default function StickyBookingWidget() {
                 dispatch(setcategoryId(cottage?.category));
                 dispatch(setOwnerId(cottage?.owner));
                 dispatch(setPropertyType("Cottage"));
+
+                const token = Cookies.get("token");
+                if (!token) {
+                  openAuthModal({ returnUrl: "/checkout" });
+                  return;
+                }
+
                 router.push("/checkout");
               }}
               disabled={totalSelectedCottages === 0}
