@@ -691,12 +691,19 @@ const PropertyBooking = () => {
           modal: {
             ondismiss: function () {
               addToast({
-                title: "Payment Cancelled",
-                description: "You cancelled the payment transaction.",
-                variant: "destructive",
-                duration: 2000,
+                title: "Reservation Saved in My Bookings",
+                description: "Your booking is held for 20 minutes. You can complete payment anytime from My Bookings or via the payment link sent to your WhatsApp.",
+                variant: "warning",
+                duration: 5000,
               });
               setloading(false);
+              if (Bookingid) {
+                const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8086";
+                fetch(`${apiBase}/api/v1/Booking/abandoned/${Bookingid}`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                }).catch((err) => console.warn("Abandoned alert trigger error:", err));
+              }
             },
           },
         };
