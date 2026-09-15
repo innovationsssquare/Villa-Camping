@@ -11,6 +11,7 @@ import {
   Smartphone,
   CreditCard,
   ChevronRight,
+  Settings,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -104,13 +105,16 @@ const Settings = () => {
       <div className="w-full px-3 mx-auto bg-background min-h-screen">
         <section
           className={cn(
-            " w-full sticky top-0  bg-white   px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
+            "w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-50 border-b border-neutral-150 transition-transform duration-300 ease-in-out md:hidden shadow-2xs"
           )}
         >
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <UserSidebar/>
-              Settings
+            <div className="flex items-center gap-2.5">
+              <UserSidebar />
+              <div className="flex items-center gap-1.5">
+                <Settings className="w-4 h-4 text-[#ff6900]" />
+                <span className="text-sm font-bold text-neutral-900">Settings</span>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">

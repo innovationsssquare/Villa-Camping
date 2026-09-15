@@ -35,7 +35,8 @@ const hideMobileHeader = (pathname) =>
   pathname === "/wishlist" ||
   pathname === "/account/settings" ||
   pathname === "/notifications" ||
-  pathname === "/booking";
+  pathname === "/booking" ||
+  pathname?.startsWith("/account/");
 
 export function NextuiProviderWrapper({ children }) {
   const pathname = usePathname();

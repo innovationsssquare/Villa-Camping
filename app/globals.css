@@ -291,37 +291,42 @@ div.spinner div.bar12 {
 }
 
 .circle {
-  width: 15px;
-  height: 15px;
-  background-color: #8BC6EC;
-  background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+  width: 14px;
+  height: 14px;
+  background-color: #ff6900;
+  background-image: linear-gradient(135deg, #ff7a1a 0%, #ff5500 100%);
   border-radius: 50%;
   margin-right: 0.5rem;
   animation: pulse 1.2s ease-in-out infinite;
+  box-shadow: 0 0 10px rgba(255, 105, 0, 0.45);
 }
 
 .circle:nth-child(2) {
   animation-delay: 0.2s;
-  background-color: #4158D0;
-  background-image: linear-gradient(43deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+  background-color: #ff7a1a;
+  background-image: linear-gradient(135deg, #ff8c33 0%, #ff6900 100%);
+  box-shadow: 0 0 10px rgba(255, 122, 26, 0.45);
 }
 
 .circle:nth-child(3) {
   animation-delay: 0.4s;
-  background-color: #0093E9;
-  background-image: linear-gradient(160deg, #0093E9 0%, #80D0C7 100%);
+  background-color: #ff8c33;
+  background-image: linear-gradient(135deg, #ffa34d 0%, #ff7a1a 100%);
+  box-shadow: 0 0 10px rgba(255, 140, 51, 0.45);
 }
 
 .circle:nth-child(4) {
   animation-delay: 0.6s;
-  background-color: #8EC5FC;
-  background-image: linear-gradient(62deg, #8EC5FC 0%, #E0C3FC 100%);
+  background-color: #ffa34d;
+  background-image: linear-gradient(135deg, #ffb866 0%, #ff8c33 100%);
+  box-shadow: 0 0 10px rgba(255, 163, 77, 0.45);
 }
 
 .circle:nth-child(5) {
   animation-delay: 0.8s;
-  background-color: #00DBDE;
-  background-image: linear-gradient(90deg, #00DBDE 0%, #FC00FF 100%);
+  background-color: #ff5500;
+  background-image: linear-gradient(135deg, #ff5500 0%, #e05d00 100%);
+  box-shadow: 0 0 10px rgba(255, 85, 0, 0.45);
 }
 
 @keyframes pulse {
@@ -429,6 +434,12 @@ div.spinner div.bar12 {
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+/* Ensure Razorpay modal iframe is always above all drawers/modals and receives full touch/pointer events */
+.razorpay-container {
+  z-index: 2147483647 !important;
+  pointer-events: auto !important;
 }
 
 

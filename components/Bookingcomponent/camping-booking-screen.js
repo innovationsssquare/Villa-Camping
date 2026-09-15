@@ -215,6 +215,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   };
 
   const handleProceedToPayment = async () => {
+    setIsBookingDetailsOpen(false);
     setloading(true);
 
     if (finalTotal === null || finalTotal === undefined) {

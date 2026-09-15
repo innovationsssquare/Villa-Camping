@@ -72,7 +72,11 @@ export function ReviewDrawer({ isOpen, onClose, booking }) {
     const files = Array.from(e.target.files);
 
     if (files.length + images.length > 5) {
-      alert("You can only upload up to 5 images.");
+      addToast({
+        title: "Upload Limit",
+        description: "You can only upload up to 5 images.",
+        color: "warning",
+      });
       return;
     }
 

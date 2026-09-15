@@ -296,8 +296,14 @@ const Mappropertyview = () => {
           />
         </div>
 
-        {/* Mobile Bottom Peek Bar */}
-        <div className="fixed bottom-0 left-0 right-0 z-20">
+        {/* Mobile Bottom Peek Bar (Smoothly hides when a property card is selected on the map) */}
+        <div
+          className={`fixed bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
+            activePropertyId
+              ? "translate-y-full opacity-0 pointer-events-none"
+              : "translate-y-0 opacity-100"
+          }`}
+        >
           <PropertyCountHeader
             count={filteredAndSortedProperties.length || 0}
             location={currentLocationName}

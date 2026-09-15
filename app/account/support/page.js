@@ -16,6 +16,7 @@ import {
   FileText,
   RotateCcw,
   Sparkles,
+  LifeBuoy,
 } from "lucide-react";
 import {
   Accordion,
@@ -61,17 +62,20 @@ export default function SupportPage() {
   );
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-24 pt-20 md:pt-28">
+    <main className="min-h-screen bg-neutral-50 pb-24 pt-0 md:pt-28">
       {/* Mobile Top Header */}
-      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-40 border-b border-neutral-150 md:hidden flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-40 border-b border-neutral-150 md:hidden flex items-center justify-between shadow-2xs">
+        <div className="flex items-center gap-2.5">
           <UserSidebar />
-          <span className="text-sm font-bold text-neutral-900">Help & Support</span>
+          <div className="flex items-center gap-1.5">
+            <LifeBuoy className="w-4 h-4 text-[#ff6900]" />
+            <span className="text-sm font-bold text-neutral-900">Help & Support</span>
+          </div>
         </div>
         <NotificationSheet />
       </section>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-7 space-y-8">
         {/* Support Header Card */}
         <section className="bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-900 text-white rounded-3xl p-6 sm:p-10 shadow-lg relative overflow-hidden border border-neutral-800">
           <div className="absolute top-0 right-1/4 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
@@ -106,7 +110,7 @@ export default function SupportPage() {
         {/* 3 Direct Support Channels */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <a
-            href="https://wa.me/919876543210?text=Hi%20ThevillaCamp%20Support%2C%20I%20need%20assistance%20with%20my%20stay"
+            href="https://wa.me/918669186483?text=Hi%20ThevillaCamp%20Support%2C%20I%20need%20assistance%20with%20my%20stay"
             target="_blank"
             rel="noreferrer"
             className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-emerald-300 transition-all flex flex-col justify-between group cursor-pointer"
@@ -126,7 +130,7 @@ export default function SupportPage() {
           </a>
 
           <a
-            href="tel:+919876543210"
+            href="tel:+918669186483"
             className="p-5 rounded-2xl bg-white border border-neutral-200/90 shadow-2xs hover:shadow-md hover:border-orange-300 transition-all flex flex-col justify-between group cursor-pointer"
           >
             <div>

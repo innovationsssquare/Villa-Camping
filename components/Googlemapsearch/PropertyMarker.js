@@ -6,6 +6,7 @@ export const PropertyMarker = ({
   isDeal,
   has3DTour,
   onClick,
+  onMouseEnter,
   image,
 }) => {
   function formatRupee(amount) {
@@ -24,7 +25,11 @@ export const PropertyMarker = ({
   };
 
   return (
-    <div className="relative group/marker" onClick={onClick}>
+    <div
+      className="relative group/marker"
+      onClick={onClick}
+      onMouseEnter={onMouseEnter}
+    >
       <div className="relative flex flex-col items-center">
         {/* Main price marker pill */}
         <div

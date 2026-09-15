@@ -354,7 +354,7 @@ export default function CampingDetailHeader() {
                   </div>
 
                   <a
-                    href="tel:+919876543210"
+                    href="tel:+918669186483"
                     className="flex items-center gap-3 p-2.5 rounded-xl border border-neutral-150 hover:border-[#ff6900] hover:bg-orange-50/40 transition-all group"
                   >
                     <div className="w-8 h-8 rounded-full bg-orange-50 text-[#ff6900] flex items-center justify-center shrink-0 group-hover:bg-[#ff6900] group-hover:text-white transition-colors">
@@ -365,13 +365,13 @@ export default function CampingDetailHeader() {
                         Call Concierge
                       </div>
                       <div className="text-[11px] text-neutral-500 font-medium">
-                        +91 98765 43210
+                        +91 8669186483
                       </div>
                     </div>
                   </a>
 
                   <a
-                    href="https://wa.me/919876543210?text=Hi%2C%20I%20am%20interested%20in%20booking%20this%20camping"
+                    href="https://wa.me/918669186483?text=Hi%2C%20I%20am%20interested%20in%20booking%20this%20camping"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-3 p-2.5 rounded-xl border border-neutral-150 hover:border-green-500 hover:bg-green-50/40 transition-all group"

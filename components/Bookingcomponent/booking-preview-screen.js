@@ -394,6 +394,7 @@ export default function BookingPreviewScreen() {
   };
 
   const handleProceedToPayment = async () => {
+    setIsBookingDetailsOpen(false);
     setloading(true);
 
     if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {

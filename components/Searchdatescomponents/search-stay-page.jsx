@@ -403,7 +403,7 @@ export default function SearchStayPage() {
           Finding your ideal vacation spot should be easy, we're here to help!
         </p>
         <a
-          href="tel:+919876543210"
+          href="tel:+918669186483"
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 text-[#ff6900] hover:bg-orange-100 font-bold text-xs border border-orange-200/80 transition-colors shadow-2xs"
         >
           <Phone className="h-3.5 w-3.5" />

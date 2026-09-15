@@ -236,7 +236,7 @@ const Page = () => {
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-gray-700">Phone Number (Optional)</label>
                   <Input
-                    placeholder="+91 98765 43210"
+                    placeholder="+91 8669186483"
                     value={formData.phone}
                     onChange={(e) => handleChange("phone", e.target.value)}
                     className="h-11 rounded-xl bg-gray-50 border-gray-200 text-xs"

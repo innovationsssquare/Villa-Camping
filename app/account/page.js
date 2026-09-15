@@ -89,12 +89,15 @@ export default function AccountPage() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-50 pb-24 pt-2 md:pt-24">
+    <main className="min-h-screen bg-neutral-50 pb-24 pt-0 md:pt-24">
       {/* Mobile Header Bar */}
-      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-40 border-b border-neutral-150 md:hidden flex items-center justify-between">
-        <div className="flex items-center gap-2">
+      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-40 border-b border-neutral-150 md:hidden flex items-center justify-between shadow-2xs">
+        <div className="flex items-center gap-2.5">
           <UserSidebar />
-          <span className="text-sm font-bold text-neutral-900">My Account</span>
+          <div className="flex items-center gap-1.5">
+            <User className="w-4 h-4 text-[#ff6900]" />
+            <span className="text-sm font-bold text-neutral-900">My Account</span>
+          </div>
         </div>
         <NotificationSheet />
       </section>

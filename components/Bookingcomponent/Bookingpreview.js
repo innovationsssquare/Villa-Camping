@@ -353,6 +353,7 @@ const PropertyBooking = () => {
   };
 
   const handleProceedToPayment = async () => {
+    setShowVerifyDialog(false);
     setloading(true);
 
     if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {
@@ -862,7 +863,7 @@ const PropertyBooking = () => {
               </div>
               <div>
                 <span className="text-neutral-400 block text-[10px] uppercase font-bold tracking-wider">Assistance</span>
-                <span className="font-bold text-neutral-800">+91 91120 91114</span>
+                <span className="font-bold text-neutral-800">+91 8669186483</span>
               </div>
             </div>
           </div>

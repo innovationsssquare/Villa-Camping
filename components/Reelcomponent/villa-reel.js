@@ -21,6 +21,7 @@ import {
   Check,
   Compass,
   Flame,
+  RefreshCcw,
 } from "lucide-react";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 
@@ -44,19 +45,50 @@ export default function VillaReel({ villas = [] }) {
   const containerRef = useRef(null);
   const videoRefs = useRef([]);
   const isScrolling = useRef(false);
-  const startY = useRef(0);
-  const currentY = useRef(0);
   const lastTapRef = useRef(0);
 
-  const currentVilla = villas[currentIndex] || null;
+  const currentVilla = currentIndex < villas.length ? villas[currentIndex] : null;
+  const isAtEndSlide = currentIndex >= villas.length;
 
-  // Format video timestamp mm:ss
-  const formatTime = (secs) => {
-    if (!secs || isNaN(secs)) return "0:00";
-    const m = Math.floor(secs / 60);
-    const s = Math.floor(secs % 60);
-    return `${m}:${s < 10 ? "0" : ""}${s}`;
+  // Unconditionally stop & silence all video elements
+  const stopAllVideos = useCallback(() => {
+    videoRefs.current.forEach((video) => {
+      if (video) {
+        try {
+          video.pause();
+          video.muted = true;
+        } catch (e) {}
+      }
+    });
+    setIsPlaying(false);
+  }, []);
+
+  // Safe navigation back to previous route or Home
+  const handleBack = useCallback(() => {
+    stopAllVideos();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }, [router, stopAllVideos]);
+
+  // Route map for property types
+  const getPropertyRoute = (type) => {
+    const t = (type || "villa").toLowerCase();
+    if (t.includes("camp")) return "Camping";
+    if (t.includes("cottage")) return "Cottage";
+    if (t.includes("hotel")) return "Hotel";
+    return "Villa";
   };
+
+  const navigateToProperty = useCallback(() => {
+    if (!currentVilla) return;
+    stopAllVideos();
+    const id = currentVilla.id || currentVilla._id;
+    const routeType = getPropertyRoute(currentVilla.propertyType);
+    router.push(`/view-${routeType}/${id}`);
+  }, [currentVilla, router, stopAllVideos]);
 
   // Check if current villa is liked
   const isCurrentLiked = useMemo(() => {
@@ -107,25 +139,9 @@ export default function VillaReel({ villas = [] }) {
     return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num)}`;
   };
 
-  // Route map
-  const getPropertyRoute = (type) => {
-    const t = (type || "villa").toLowerCase();
-    if (t.includes("camp")) return "Camping";
-    if (t.includes("cottage")) return "Cottage";
-    if (t.includes("hotel")) return "Hotel";
-    return "Villa";
-  };
-
-  const navigateToProperty = () => {
-    if (!currentVilla) return;
-    const id = currentVilla.id || currentVilla._id;
-    const routeType = getPropertyRoute(currentVilla.propertyType);
-    router.push(`/view-${routeType}/${id}`);
-  };
-
-  // Navigation handlers
+  // Slide navigation handlers (can advance up to villas.length for the End Slide)
   const goToNext = useCallback(() => {
-    if (currentIndex < villas.length - 1) {
+    if (currentIndex < villas.length) {
       setCurrentIndex((prev) => prev + 1);
       setIsPlaying(true);
       setProgress(0);
@@ -142,8 +158,69 @@ export default function VillaReel({ villas = [] }) {
     }
   }, [currentIndex]);
 
-  // Video playback management across indexes - Always unmuted by default
+  // 1. Critical unmount cleanup: stop, mute, remove src and unload all videos to guarantee no background audio
   useEffect(() => {
+    return () => {
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          try {
+            video.pause();
+            video.muted = true;
+            video.removeAttribute("src");
+            video.load();
+          } catch (e) {}
+        }
+      });
+      videoRefs.current = [];
+    };
+  }, []);
+
+  // 2. Browser tab switch, backgrounding, or back/forward popstate cleanup
+  useEffect(() => {
+    const handlePause = () => {
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          try {
+            video.pause();
+          } catch (e) {}
+        }
+      });
+      setIsPlaying(false);
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        handlePause();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePause);
+    window.addEventListener("beforeunload", handlePause);
+    window.addEventListener("popstate", handlePause);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePause);
+      window.removeEventListener("beforeunload", handlePause);
+      window.removeEventListener("popstate", handlePause);
+    };
+  }, []);
+
+  // 3. Video playback management across indexes
+  useEffect(() => {
+    if (currentIndex >= villas.length) {
+      // Reached the End of Reels screen: ensure all videos are halted
+      videoRefs.current.forEach((video) => {
+        if (video) {
+          try {
+            video.pause();
+          } catch (e) {}
+        }
+      });
+      return;
+    }
+
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       if (index === currentIndex) {
@@ -152,12 +229,11 @@ export default function VillaReel({ villas = [] }) {
           const playPromise = video.play();
           if (playPromise !== undefined) {
             playPromise.catch(() => {
-              // If browser strictly requires user gesture before playing audio,
-              // start video rolling without setting isMuted state to true
+              // If autoplay policy requires a user gesture, mute first then resume
               video.muted = true;
               video.play().catch(() => {});
 
-              // On the very first user interaction anywhere on the screen, immediately restore full sound
+              // On the very first user interaction anywhere, restore sound
               const unmuteOnUserGesture = () => {
                 if (video && !isMuted) {
                   video.muted = false;
@@ -182,7 +258,16 @@ export default function VillaReel({ villas = [] }) {
         video.currentTime = 0;
       }
     });
-  }, [currentIndex, isPlaying, isMuted]);
+
+    return () => {
+      const activeVideo = videoRefs.current[currentIndex];
+      if (activeVideo) {
+        try {
+          activeVideo.pause();
+        } catch (e) {}
+      }
+    };
+  }, [currentIndex, isPlaying, isMuted, villas.length]);
 
   // Time update progress tracker
   const handleTimeUpdate = (e) => {
@@ -203,7 +288,6 @@ export default function VillaReel({ villas = [] }) {
   const handleVideoDoubleTap = (e) => {
     const now = Date.now();
     if (now - lastTapRef.current < 300) {
-      // Double tap detected
       setShowHeartBurst(true);
       if (!isCurrentLiked) {
         handleToggleWishlist(e);
@@ -250,7 +334,7 @@ export default function VillaReel({ villas = [] }) {
         setCopiedToast(true);
         setTimeout(() => setCopiedToast(false), 2200);
       } catch {
-        // clipboard error
+        // Clipboard error
       }
     }
   };
@@ -258,7 +342,6 @@ export default function VillaReel({ villas = [] }) {
   // Keyboard Shortcuts (ArrowDown, ArrowUp, Space, M)
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Avoid stealing typing focus if inside an input
       if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
 
       if (e.key === "ArrowDown" || e.key === "j" || e.key === "PageDown") {
@@ -280,7 +363,7 @@ export default function VillaReel({ villas = [] }) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [goToNext, goToPrev]);
 
-  // Lock html and body overscroll behavior while on shorts page to block browser pull-to-refresh
+  // Lock overscroll behavior to prevent native browser pull-to-refresh
   useEffect(() => {
     const origBodyOverscroll = document.body.style.overscrollBehaviorY;
     const origHtmlOverscroll = document.documentElement.style.overscrollBehaviorY;
@@ -293,7 +376,7 @@ export default function VillaReel({ villas = [] }) {
     };
   }, []);
 
-  // Desktop Wheel listener with throttling
+  // Desktop Wheel listener with smooth slide throttling
   useEffect(() => {
     const handleWheel = (e) => {
       if (isScrolling.current) return;
@@ -307,7 +390,7 @@ export default function VillaReel({ villas = [] }) {
       }
       setTimeout(() => {
         isScrolling.current = false;
-      }, 500);
+      }, 450);
     };
 
     const container = containerRef.current;
@@ -317,7 +400,7 @@ export default function VillaReel({ villas = [] }) {
     }
   }, [goToNext, goToPrev]);
 
-  // Touch gestures with passive: false to cancel native pull-to-refresh
+  // Touch gestures with cancelable check to prevent native pull-to-refresh
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -336,21 +419,24 @@ export default function VillaReel({ villas = [] }) {
       if (e.touches && e.touches[0]) {
         touchEndY = e.touches[0].clientY;
       }
-      // Critical: stop mobile Chrome from triggering pull-to-refresh when dragging down to see previous reel
       if (e.cancelable) {
         e.preventDefault();
       }
     };
 
     const onTouchEnd = () => {
+      if (isScrolling.current) return;
       const deltaY = touchStartY - touchEndY;
-      // 35px threshold for light, smooth reel switching
       if (Math.abs(deltaY) > 35) {
+        isScrolling.current = true;
         if (deltaY > 0) {
           goToNext();
         } else {
           goToPrev();
         }
+        setTimeout(() => {
+          isScrolling.current = false;
+        }, 450);
       }
     };
 
@@ -371,20 +457,22 @@ export default function VillaReel({ villas = [] }) {
       className="fixed inset-0 w-full h-[100dvh] bg-black overflow-hidden select-none z-50 flex flex-col justify-center items-center font-sans overscroll-none touch-none"
     >
       {/* 1. Ambient Blurred Backdrop (Desktop Dynamic Lighting) */}
-      {currentVilla?.thumbnail && (
+      {currentVilla?.thumbnail ? (
         <div
           className="hidden md:block absolute inset-0 bg-cover bg-center blur-3xl opacity-25 scale-125 transition-all duration-700 pointer-events-none"
           style={{ backgroundImage: `url(${currentVilla.thumbnail})` }}
         />
+      ) : (
+        <div className="hidden md:block absolute inset-0 bg-gradient-to-b from-neutral-950 via-neutral-900 to-black pointer-events-none" />
       )}
       <div className="hidden md:block absolute inset-0 bg-black/60 pointer-events-none" />
 
       {/* 2. Top Header Navigation Bar */}
       <header className="absolute top-0 left-0 right-0 z-40 px-4 sm:px-8 py-3.5 flex items-center justify-between pointer-events-auto">
-        {/* Left: Back to Home */}
+        {/* Left: Back to Previous / Home */}
         <button
           type="button"
-          onClick={() => router.back()}
+          onClick={handleBack}
           className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-md text-white border border-white/15 transition-all cursor-pointer group"
           aria-label="Back"
         >
@@ -428,18 +516,23 @@ export default function VillaReel({ villas = [] }) {
       <div className="relative w-full h-full md:h-[calc(100vh-60px)] md:max-h-[840px] md:w-auto flex items-center justify-center">
         {/* Main 9:16 Video Player Card */}
         <div className="relative w-full h-full md:w-[410px] lg:w-[430px] md:aspect-[9/16] md:rounded-3xl overflow-hidden bg-neutral-950 shadow-2xl border-0 md:border md:border-white/15">
-          {/* Active Reel Videos Stack */}
+          {/* Active Reel Videos Stack with Smooth Vertical Slide Up/Down Effect */}
           {villas.map((villa, index) => {
-            const isActive = index === currentIndex;
-            // Only mount current, previous, and next for lightweight memory
-            if (Math.abs(index - currentIndex) > 1) return null;
+            const offset = index - currentIndex;
+            // Mount adjacent items so transitions animate smoothly
+            if (Math.abs(offset) > 1) return null;
+
+            const isActive = offset === 0;
 
             return (
               <div
                 key={villa.id || villa._id}
-                className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${
-                  isActive ? "opacity-100 z-10" : "opacity-0 pointer-events-none z-0"
+                className={`absolute inset-0 w-full h-full transition-transform duration-500 ease-out will-change-transform ${
+                  isActive ? "z-10" : "z-0 pointer-events-none"
                 }`}
+                style={{
+                  transform: `translateY(${offset * 100}%)`,
+                }}
               >
                 <video
                   ref={(el) => (videoRefs.current[index] = el)}
@@ -461,6 +554,92 @@ export default function VillaReel({ villas = [] }) {
             );
           })}
 
+          {/* End of Reels Screen (Smoothly slides in after the last reel) */}
+          {(() => {
+            const endOffset = villas.length - currentIndex;
+            if (Math.abs(endOffset) > 1) return null;
+            const isEndActive = endOffset === 0;
+
+            return (
+              <div
+                className={`absolute inset-0 w-full h-full transition-transform duration-500 ease-out will-change-transform flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-neutral-900/98 via-black to-neutral-950 ${
+                  isEndActive ? "z-20 pointer-events-auto" : "z-0 pointer-events-none"
+                }`}
+                style={{
+                  transform: `translateY(${endOffset * 100}%)`,
+                }}
+              >
+                {/* Ambient glow decoration */}
+                <div className="absolute w-60 h-60 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
+
+                <div className="relative z-10 flex flex-col items-center max-w-xs">
+                  {/* Glowing icon badge */}
+                  <div className="relative mb-5">
+                    <div className="w-20 h-20 rounded-3xl bg-neutral-900/90 border border-white/15 backdrop-blur-xl flex items-center justify-center shadow-2xl">
+                      <Sparkles className="w-9 h-9 text-[#ff6900] animate-pulse" />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center shadow-md">
+                      <Check className="w-4 h-4 text-white stroke-[3]" />
+                    </div>
+                  </div>
+
+                  <span className="text-[11px] font-extrabold tracking-widest text-[#ff6900] uppercase mb-1.5">
+                    You're All Caught Up
+                  </span>
+
+                  <h3 className="text-2xl font-black text-white mb-2.5 tracking-tight">
+                    No More Reels
+                  </h3>
+
+                  <p className="text-xs text-neutral-300/80 leading-relaxed mb-6 font-normal">
+                    You've explored all the latest villa shorts! More exclusive stays are being curated daily.
+                  </p>
+
+                  <div className="flex flex-col w-full gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCurrentIndex(0);
+                        setIsPlaying(true);
+                      }}
+                      className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-bold shadow-lg shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <RefreshCcw className="w-4 h-4" />
+                      <span>Watch Again From Start</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="w-full py-3 px-5 rounded-2xl bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs font-bold backdrop-blur-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Explore All Stays</span>
+                    </button>
+                  </div>
+
+                  {/* Revisit hint */}
+                  <button
+                    type="button"
+                    onClick={goToPrev}
+                    className="mt-6 inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/50 hover:text-white/80 transition-colors cursor-pointer"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5 animate-bounce" />
+                    <span>Swipe down to revisit reels</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
+
+          {/* Last reel hint indicator */}
+          {currentIndex === villas.length - 1 && (
+            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[11px] font-medium text-white/85 shadow-lg pointer-events-none flex items-center gap-1.5 animate-in fade-in duration-300">
+              <Sparkles className="w-3 h-3 text-[#ff6900]" />
+              <span>Last reel · Swipe up to finish</span>
+            </div>
+          )}
+
           {/* Center Heart Burst Animation on Double Tap */}
           {showHeartBurst && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-30 animate-in zoom-in-50 fade-in duration-300">
@@ -471,7 +650,7 @@ export default function VillaReel({ villas = [] }) {
           )}
 
           {/* Paused Controls Overlay: Mute/Unmute Button Directly Above Play/Pause Button */}
-          {!isPlaying && (
+          {currentVilla && !isPlaying && (
             <div
               onClick={handleVideoClick}
               className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all cursor-pointer pointer-events-auto"
@@ -530,7 +709,7 @@ export default function VillaReel({ villas = [] }) {
 
           {/* 4. Bottom Video Info & Booking CTA */}
           {currentVilla && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-5 pb-[max(3.8rem,calc(env(safe-area-inset-bottom)+3.2rem))] flex flex-col gap-2.5 pointer-events-none">
+            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-5 pb-[max(3rem,calc(env(safe-area-inset-bottom)+2.5rem))] flex flex-col gap-2 pointer-events-none">
               {/* Location Tag & Rating */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/10">
@@ -580,86 +759,82 @@ export default function VillaReel({ villas = [] }) {
             </div>
           )}
 
-          {/* 5. Real-Time Timing & Progress Scrubber - Pinned Safely Above Mobile Navigation Bar */}
-          <div className="absolute bottom-[max(0.65rem,calc(env(safe-area-inset-bottom)+0.35rem))] left-0 right-0 z-30 px-3 sm:px-4 flex flex-col gap-1 pointer-events-auto">
-            <div className="flex items-center justify-between text-[11px] font-bold text-white/95 drop-shadow-sm select-none px-0.5">
-              <span className="bg-black/60 backdrop-blur-md px-2.5 py-0.5 rounded-md border border-white/10 font-mono tracking-tight text-[11px] sm:text-xs text-white">
-                {formatTime(currentTime)} / {formatTime(duration)}
-              </span>
-              <span className="text-[10px] text-white/80 font-bold bg-black/40 backdrop-blur-md px-2 py-0.5 rounded-md border border-white/10">
-                {currentIndex + 1} / {villas.length}
-              </span>
-            </div>
-
-            {/* Interactive Scrubber Bar */}
-            <div
-              onClick={handleProgressClick}
-              className="group relative h-2.5 sm:h-2 w-full bg-white/25 hover:h-3 rounded-full cursor-pointer transition-all backdrop-blur-xs flex items-center touch-manipulation"
-            >
+          {/* 5. Minimal Sleek Scrubber Bar (No Timing or Reel Count Text) */}
+          {currentVilla && (
+            <div className="absolute bottom-[max(0.65rem,calc(env(safe-area-inset-bottom)+0.35rem))] left-0 right-0 z-30 px-3 sm:px-4 pointer-events-auto">
               <div
-                className="h-full bg-gradient-to-r from-[#ff6900] via-orange-400 to-amber-300 rounded-full relative transition-all duration-100"
-                style={{ width: `${progress}%` }}
+                onClick={handleProgressClick}
+                className="group relative h-1.5 sm:h-1 hover:h-2 w-full bg-white/20 rounded-full cursor-pointer transition-all backdrop-blur-xs flex items-center touch-manipulation"
               >
-                <div className="absolute right-0 top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-md border border-[#ff6900] scale-90 sm:scale-0 group-hover:scale-100 transition-transform" />
+                <div
+                  className="h-full bg-gradient-to-r from-[#ff6900] via-orange-400 to-amber-300 rounded-full relative transition-all duration-100"
+                  style={{ width: `${progress}%` }}
+                >
+                  <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white shadow-md border border-[#ff6900] scale-0 group-hover:scale-100 transition-transform" />
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* 6. Side Action Rail (Desktop & Mobile Unified Strip) */}
         <div className="absolute right-3 bottom-[max(8rem,calc(env(safe-area-inset-bottom)+7.5rem))] md:static md:right-auto md:bottom-auto md:ml-4 flex flex-col items-center gap-3 z-30 pointer-events-auto">
-          {/* Wishlist Heart Button */}
-          <div className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={handleToggleWishlist}
-              className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90 ${
-                isCurrentLiked
-                  ? "bg-[#ff6900] text-white"
-                  : "bg-black/60 hover:bg-black/80 text-white border border-white/20 hover:border-white/40"
-              }`}
-              aria-label="Wishlist"
-            >
-              <Heart
-                className={`w-5 h-5 transition-transform ${
-                  isCurrentLiked ? "fill-white scale-110" : "text-white"
-                }`}
-              />
-            </button>
-            <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
-              {isCurrentLiked ? "Saved" : "Save"}
-            </span>
-          </div>
+          {currentVilla && (
+            <>
+              {/* Wishlist Heart Button */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleToggleWishlist}
+                  className={`w-11 h-11 sm:w-12 sm:h-12 rounded-full backdrop-blur-md flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90 ${
+                    isCurrentLiked
+                      ? "bg-[#ff6900] text-white"
+                      : "bg-black/60 hover:bg-black/80 text-white border border-white/20 hover:border-white/40"
+                  }`}
+                  aria-label="Wishlist"
+                >
+                  <Heart
+                    className={`w-5 h-5 transition-transform ${
+                      isCurrentLiked ? "fill-white scale-110" : "text-white"
+                    }`}
+                  />
+                </button>
+                <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
+                  {isCurrentLiked ? "Saved" : "Save"}
+                </span>
+              </div>
 
-          {/* Share Button */}
-          <div className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={handleShare}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90"
-              aria-label="Share"
-            >
-              <Share2 className="w-5 h-5" />
-            </button>
-            <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
-              Share
-            </span>
-          </div>
+              {/* Share Button */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={handleShare}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90"
+                  aria-label="Share"
+                >
+                  <Share2 className="w-5 h-5" />
+                </button>
+                <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
+                  Share
+                </span>
+              </div>
 
-          {/* Quick Property Route Button */}
-          <div className="flex flex-col items-center gap-1">
-            <button
-              type="button"
-              onClick={navigateToProperty}
-              className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90"
-              aria-label="Details"
-            >
-              <Compass className="w-5 h-5 text-[#ff6900]" />
-            </button>
-            <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
-              Stay
-            </span>
-          </div>
+              {/* Quick Property Route Button */}
+              <div className="flex flex-col items-center gap-1">
+                <button
+                  type="button"
+                  onClick={navigateToProperty}
+                  className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-black/60 hover:bg-black/80 backdrop-blur-md text-white border border-white/20 hover:border-white/40 flex items-center justify-center transition-all duration-200 cursor-pointer shadow-lg active:scale-90"
+                  aria-label="Details"
+                >
+                  <Compass className="w-5 h-5 text-[#ff6900]" />
+                </button>
+                <span className="text-[10px] sm:text-xs font-bold text-white drop-shadow-xs">
+                  Stay
+                </span>
+              </div>
+            </>
+          )}
 
           {/* Desktop Only: Previous Reel (↑) */}
           <div className="hidden md:flex flex-col items-center mt-2">
@@ -679,7 +854,7 @@ export default function VillaReel({ villas = [] }) {
             <button
               type="button"
               onClick={goToNext}
-              disabled={currentIndex === villas.length - 1}
+              disabled={currentIndex >= villas.length}
               className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white border border-white/15 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
               aria-label="Next Reel"
             >

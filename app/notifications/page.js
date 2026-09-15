@@ -1,20 +1,33 @@
 "use client";
-import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
+
+import React, { useState, useEffect } from "react";
 import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
-import { useToast } from "@/components/ui/toast-provider";
+import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
+import { useNotifications } from "@/hooks/useNotifications";
 import { cn } from "@/lib/utils";
 import { Button } from "@heroui/react";
-import { Bell, Check, ChevronRight, X } from "lucide-react";
+import {
+  Bell,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  Clock,
+  XCircle,
+  AlertCircle,
+  Sparkles,
+  ArrowLeft,
+  Trash2,
+  CalendarCheck,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import Link from "next/link";
 
-// Sample notification data
-const initialNotifications = [
- 
-];
+// Helper function to format timestamp
+function formatTimestamp(dateInput) {
+  if (!dateInput) return "just now";
+  const date = new Date(dateInput);
+  if (isNaN(date.getTime())) return "recently";
 
-// Helper function to format the timestamp
-function formatTimestamp(date) {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffSecs = Math.floor(diffMs / 1000);
@@ -25,258 +38,266 @@ function formatTimestamp(date) {
   if (diffSecs < 60) {
     return "just now";
   } else if (diffMins < 60) {
-    return `${diffMins} ${diffMins === 1 ? "minute" : "minutes"} ago`;
+    return `${diffMins}m ago`;
   } else if (diffHours < 24) {
-    return `${diffHours} ${diffHours === 1 ? "hour" : "hours"} ago`;
+    return `${diffHours}h ago`;
   } else if (diffDays < 7) {
-    return `${diffDays} ${diffDays === 1 ? "day" : "days"} ago`;
+    return `${diffDays}d ago`;
   } else {
-    return date.toLocaleDateString();
+    return date.toLocaleDateString("en-IN", {
+      month: "short",
+      day: "numeric",
+    });
   }
 }
 
-// Get the appropriate icon for the notification type
-function getNotificationIcon(type) {
+// Get the appropriate icon and accent color for the notification type
+function getNotificationBadge(type) {
   switch (type) {
-    case "order":
-      return (
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-blue-600"
-          >
-            <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-            <line x1="3" y1="6" x2="21" y2="6" />
-            <path d="M16 10a4 4 0 0 1-8 0" />
-          </svg>
-        </div>
-      );
-    case "payment":
-      return (
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-green-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-green-600"
-          >
-            <rect x="2" y="5" width="20" height="14" rx="2" />
-            <line x1="2" y1="10" x2="22" y2="10" />
-          </svg>
-        </div>
-      );
-    case "account":
-      return (
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-red-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-red-600"
-          >
-            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          </svg>
-        </div>
-      );
-    case "system":
-      return (
-        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-purple-100">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-purple-600"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <line x1="12" y1="16" x2="12" y2="12" />
-            <line x1="12" y1="8" x2="12.01" y2="8" />
-          </svg>
-        </div>
-      );
+    case "booking_confirmed":
+    case "payment_successful":
+      return {
+        icon: <CheckCircle2 className="w-5 h-5 text-emerald-600" />,
+        bg: "bg-emerald-50 border-emerald-200",
+        label: "Confirmed",
+      };
+    case "booking_created":
+    case "payment_pending":
+      return {
+        icon: <CalendarCheck className="w-5 h-5 text-blue-600" />,
+        bg: "bg-blue-50 border-blue-200",
+        label: "Booking",
+      };
+    case "booking_reminder":
+      return {
+        icon: <Clock className="w-5 h-5 text-[#ff6900]" />,
+        bg: "bg-orange-50 border-orange-200",
+        label: "Reminder",
+      };
+    case "payment_failed":
+      return {
+        icon: <AlertCircle className="w-5 h-5 text-amber-600" />,
+        bg: "bg-amber-50 border-amber-200",
+        label: "Payment",
+      };
+    case "booking_cancelled":
+      return {
+        icon: <XCircle className="w-5 h-5 text-rose-600" />,
+        bg: "bg-rose-50 border-rose-200",
+        label: "Cancelled",
+      };
+    case "announcement":
+    default:
+      return {
+        icon: <Sparkles className="w-5 h-5 text-purple-600" />,
+        bg: "bg-purple-50 border-purple-200",
+        label: "Update",
+      };
   }
 }
 
-const Notifications = () => {
-  const navigate = useRouter();
-  const { addToast } = useToast();
-
-  const [notifications, setNotifications] = useState(initialNotifications);
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.innerWidth >= 768) {
-      navigate.replace("/");
-    }
-  }, [navigate]);
-
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read
-  ).length;
-
-  const markAsRead = (id) => {
-    setNotifications((prev) =>
-      prev.map((notification) =>
-        notification.id === id ? { ...notification, read: true } : notification
-      )
-    );
-  };
-
-  const markAllAsRead = () => {
-    setNotifications((prev) =>
-      prev.map((notification) => ({ ...notification, read: true }))
-    );
-  };
-
-  const removeNotification = (id) => {
-    setNotifications((prev) =>
-      prev.filter((notification) => notification.id !== id)
-    );
-  };
-
-  const handleBackClick = () => {
-    navigate.push("/");
-  };
-
-  const handleMarkRead = (id) => {
-    addToast({
-      title: "Marked as read",
-      description: "Notification has been marked as read",
-    });
-  };
-
-  const handleDeleteNotification = (id) => {
-    addToast({
-      title: "Notification deleted",
-      description: "Notification has been removed",
-    });
-  };
+const NotificationsPage = () => {
+  const router = useRouter();
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    removeNotification,
+  } = useNotifications();
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="w-full  mx-auto bg-background min-h-screen">
-        <section
-          className={cn(
-            " w-full sticky top-0  bg-white   px-4 py-3 z-50 transition-transform duration-300 ease-in-out md:hidden "
-          )}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <UserSidebar />
-              Notifications
+    <div className="min-h-screen bg-neutral-50 flex flex-col font-sans">
+      {/* Mobile Top Header */}
+      <section className="w-full sticky top-0 bg-white/95 backdrop-blur-md px-4 py-3 z-50 border-b border-neutral-150 md:hidden shadow-2xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <UserSidebar />
+            <div className="flex items-center gap-1.5">
+              <Bell className="w-4 h-4 text-[#ff6900]" />
+              <span className="text-sm font-bold text-neutral-900">Notifications</span>
+              {unreadCount > 0 && (
+                <span className="px-1.5 py-0.2 bg-[#ff6900] text-white text-[10px] font-bold rounded-full">
+                  {unreadCount}
+                </span>
+              )}
             </div>
           </div>
-        </section>
+          <div className="flex items-center gap-2">
+            {unreadCount > 0 && (
+              <button
+                type="button"
+                onClick={markAllAsRead}
+                className="text-xs font-semibold text-[#ff6900] hover:text-[#e05d00] transition-colors"
+              >
+                Mark all read
+              </button>
+            )}
+            <NotificationSheet />
+          </div>
+        </div>
+      </section>
 
-        <div className="flex-1 overflow-auto">
-          {notifications.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full p-6 text-center">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
-                <Bell className="h-8 w-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium mb-1">No notifications</h3>
-              <p className="text-gray-500">{`You're all caught up!`}</p>
+      {/* Main Content Area */}
+      <main className="flex-1 w-full max-w-3xl mx-auto px-4 py-6 sm:py-10">
+        {/* Desktop Header */}
+        <div className="hidden md:flex items-center justify-between mb-6 pb-4 border-b border-neutral-200">
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="w-9 h-9 rounded-full bg-white border border-neutral-200 flex items-center justify-center hover:bg-neutral-100 transition-colors shadow-2xs"
+            >
+              <ArrowLeft className="w-4 h-4 text-neutral-700" />
+            </button>
+            <div>
+              <h1 className="text-2xl font-black text-neutral-900 flex items-center gap-2">
+                Notifications
+                {unreadCount > 0 && (
+                  <span className="px-2 py-0.5 bg-[#ff6900] text-white text-xs font-bold rounded-full">
+                    {unreadCount} new
+                  </span>
+                )}
+              </h1>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Stay updated with your bookings, payments, and property announcements.
+              </p>
             </div>
-          ) : (
-            <ul className="divide-y divide-gray-200">
-              {notifications.map((notification) => (
-                <li
-                  key={notification.id}
+          </div>
+
+          {unreadCount > 0 && (
+            <Button
+              variant="flat"
+              size="sm"
+              onPress={markAllAsRead}
+              className="text-xs font-bold text-[#ff6900] bg-orange-50 hover:bg-orange-100 rounded-xl"
+            >
+              <Check className="w-3.5 h-3.5 mr-1" />
+              Mark all as read
+            </Button>
+          )}
+        </div>
+
+        {/* Notifications List */}
+        {loading ? (
+          <div className="space-y-3 py-6">
+            {[1, 2, 3].map((n) => (
+              <div
+                key={n}
+                className="h-20 bg-white rounded-2xl border border-neutral-200/80 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : notifications.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-neutral-200/90 p-8 sm:p-12 text-center shadow-xs flex flex-col items-center justify-center my-8">
+            <div className="w-16 h-16 rounded-full bg-orange-50 text-[#ff6900] flex items-center justify-center mb-4 shadow-xs">
+              <Bell className="w-8 h-8" />
+            </div>
+            <h3 className="text-lg font-black text-neutral-900 mb-1">
+              No notifications yet
+            </h3>
+            <p className="text-xs sm:text-sm text-neutral-500 max-w-sm mb-6 leading-relaxed">
+              When you reserve a villa, complete a payment, or receive updates about your trip, you’ll see them right here.
+            </p>
+            <Link
+              href="/booking"
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white text-xs font-bold shadow-md shadow-orange-500/20 active:scale-95 transition-all"
+            >
+              View My Bookings
+            </Link>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            {notifications.map((notification) => {
+              const badge = getNotificationBadge(notification.type);
+              const isUnread = !notification.isRead && notification.status !== "read";
+
+              return (
+                <div
+                  key={notification._id || notification.id}
+                  onClick={() => markAsRead(notification._id || notification.id)}
                   className={cn(
-                    "p-4 transition-colors hover:bg-gray-50",
-                    !notification.read && "bg-gray-50"
+                    "group relative p-3.5 sm:p-4 rounded-2xl border transition-all duration-200 cursor-pointer bg-white flex items-start gap-3.5 shadow-2xs hover:shadow-xs",
+                    isUnread
+                      ? "border-orange-200 bg-orange-50/20"
+                      : "border-neutral-200/80 hover:border-neutral-300"
                   )}
                 >
-                  <div className="flex items-start gap-3">
-                    {getNotificationIcon(notification.type)}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <h4
-                          className={cn(
-                            "text-sm font-medium",
-                            !notification.read && "font-semibold"
-                          )}
-                        >
-                          {notification.title}
-                        </h4>
-                        <span className="text-xs text-gray-500 whitespace-nowrap">
-                          {formatTimestamp(notification.timestamp)}
-                        </span>
-                      </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {notification.message}
-                      </p>
-                      <div className="flex items-center justify-between mt-2">
-                        <Button
-                          variant="light"
-                          size="sm"
-                          className="text-xs text-[#106C83] hover:text-teal-700 hover:bg-teal-50 px-2 h-7"
-                          onPress={() => {
-                            // In a real app, this would navigate to the relevant page
-                            markAsRead(notification.id);
-                          }}
-                        >
-                          View Details
-                          <ChevronRight className="ml-1 h-3 w-3" />
-                        </Button>
-                        <div className="flex items-center gap-1">
-                          {!notification.read && (
-                            <Button
-                              variant="light"
-                              size="icon"
-                              className="h-7 w-7 text-gray-400 hover:text-[#106C83]"
-                              onPress={() => markAsRead(notification.id)}
-                            >
-                              <Check className="h-4 w-4" />
-                              <span className="sr-only">Mark as read</span>
-                            </Button>
-                          )}
-                          <Button
-                            variant="light"
-                            size="icon"
-                            className="h-7 w-7 text-gray-400 hover:text-red-600"
-                            onPress={() => removeNotification(notification.id)}
+                  {/* Icon */}
+                  <div
+                    className={cn(
+                      "w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 border",
+                      badge.bg
+                    )}
+                  >
+                    {badge.icon}
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4
+                        className={cn(
+                          "text-sm text-neutral-900 truncate leading-snug",
+                          isUnread ? "font-black" : "font-bold"
+                        )}
+                      >
+                        {notification.title}
+                      </h4>
+                      <span className="text-[11px] text-neutral-400 shrink-0 whitespace-nowrap">
+                        {formatTimestamp(notification.createdAt || notification.timestamp)}
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-neutral-600 mt-1 leading-relaxed line-clamp-2">
+                      {notification.message}
+                    </p>
+
+                    <div className="flex items-center justify-between mt-2 pt-1 border-t border-neutral-100">
+                      <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">
+                        {badge.label}
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {notification.bookingId && (
+                          <Link
+                            href="/booking"
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-[11px] font-bold text-[#ff6900] hover:text-[#e05d00] flex items-center gap-0.5"
                           >
-                            <X className="h-4 w-4" />
-                            <span className="sr-only">Remove</span>
-                          </Button>
-                        </div>
+                            <span>View Booking</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </Link>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            removeNotification(notification._id || notification.id);
+                          }}
+                          className="w-6 h-6 rounded-md hover:bg-neutral-100 text-neutral-400 hover:text-neutral-700 flex items-center justify-center transition-colors"
+                          aria-label="Delete notification"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
                     </div>
                   </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      </div>
+
+                  {/* Unread Orange Dot */}
+                  {isUnread && (
+                    <div className="absolute top-3.5 right-3.5 w-2 h-2 rounded-full bg-[#ff6900]" />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </main>
     </div>
   );
 };
 
-export default Notifications;
+export default NotificationsPage;

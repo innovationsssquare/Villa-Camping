@@ -76,6 +76,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
 
   const handlePayNow = () => {
     if (isFormValid()) {
+      if (onClose) onClose();
       onPayNow(customerDetails);
     }
   };

@@ -89,7 +89,11 @@ export function DisputeDrawer({ isOpen, onClose, booking, onSuccess }) {
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
     if (files.length + images.length > 4) {
-      alert("You can upload up to 4 photos as evidence.");
+      addToast({
+        title: "Upload Limit",
+        description: "You can upload up to 4 photos as evidence.",
+        color: "warning",
+      });
       return;
     }
 

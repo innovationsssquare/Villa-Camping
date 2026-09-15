@@ -138,11 +138,10 @@ export const PropertyCard = ({
     return (
       <div
         onClick={navigateToProperty}
-        className={`group relative bg-white rounded-2xl border transition-all duration-200 p-2.5 flex gap-3 cursor-pointer ${
-          isActive
-            ? "border-2 border-[#ff6900] shadow-md"
-            : "border-neutral-200/90 hover:border-black/20 shadow-xs"
-        }`}
+        className={`group relative bg-white rounded-2xl border transition-all duration-200 p-2.5 flex gap-3 cursor-pointer ${isActive
+          ? "border-2 border-[#ff6900] shadow-md"
+          : "border-neutral-200/90 hover:border-black/20 shadow-xs"
+          }`}
       >
         <div className="relative w-28 h-28 shrink-0 rounded-xl overflow-hidden bg-neutral-100">
           <img
@@ -197,61 +196,42 @@ export const PropertyCard = ({
   }
 
   /* ========================================================================= */
-  /* 2. MARKER POPUP PREVIEW CARD (Small & Compact for Map Overview)           */
+  /* 2. MARKER POPUP PREVIEW CARD (Airbnb Horizontal Floating Bottom Card)     */
   /* ========================================================================= */
   if (onClose) {
     return (
       <div
         onClick={navigateToProperty}
-        className="relative w-[230px] sm:w-[245px] bg-white rounded-2xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in zoom-in-95 duration-200 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-shadow"
+        className="group/popup relative w-full sm:w-[380px] md:w-[410px] h-[126px] sm:h-[132px] bg-white rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in slide-in-from-bottom-3 duration-250 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all flex flex-row items-stretch"
       >
-        {/* Top Image (Compact h-32) */}
-        <div className="relative h-32 w-full overflow-hidden bg-neutral-100">
+        {/* Left Side: Square Thumbnail with Close X at Top-Left */}
+        <div className="relative w-[126px] sm:w-[132px] h-full shrink-0 bg-neutral-100 overflow-hidden">
           <img
             src={images[currentImageIndex] || "/placeholder.svg"}
             alt={property.title || "Stay"}
-            className="w-full h-full object-cover transition-transform duration-300 ease-out"
+            className="w-full h-full object-cover transition-transform duration-300 ease-out group-hover/popup:scale-105"
           />
 
-          {/* Top-Right Circular Action Buttons (Heart + Close X) */}
-          <div className="absolute top-2 right-2 z-20 flex items-center gap-1.5">
-            {/* Wishlist Heart */}
-            <button
-              type="button"
-              onClick={handleWishlist}
-              className="w-6 h-6 rounded-full bg-white/95 backdrop-blur-md shadow-xs flex items-center justify-center hover:scale-110 active:scale-90 transition-transform cursor-pointer border border-black/5"
-              aria-label="Wishlist"
-            >
-              <Heart
-                className={`w-3.5 h-3.5 transition-colors ${
-                  isLiked
-                    ? "fill-[#ff6900] text-[#ff6900]"
-                    : "text-neutral-700 stroke-[2]"
-                }`}
-              />
-            </button>
+          {/* Top-Left Circular Close X Button (Exact Airbnb Placement) */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-2 left-2 z-20 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white/95 text-neutral-800 shadow-md flex items-center justify-center hover:scale-110 active:scale-90 transition-transform cursor-pointer border border-black/5"
+            aria-label="Close"
+          >
+            <X className="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
 
-            {/* Close Button X */}
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="w-6 h-6 rounded-full bg-white/95 backdrop-blur-md shadow-xs flex items-center justify-center hover:scale-110 active:scale-90 transition-transform cursor-pointer border border-black/5 text-neutral-800"
-              aria-label="Close"
-            >
-              <X className="w-3.5 h-3.5 stroke-[2.5]" />
-            </button>
-          </div>
-
-          {/* Left/Right Carousel Controls */}
+          {/* Carousel Left/Right Buttons if multiple images */}
           {images.length > 1 && (
             <>
               <button
                 type="button"
                 onClick={prevImage}
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 w-5 h-5 rounded-full bg-white/90 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center cursor-pointer"
+                className="absolute left-1.5 bottom-2 z-10 w-5 h-5 rounded-full bg-white/90 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center cursor-pointer opacity-0 group-hover/popup:opacity-100 transition-opacity"
                 aria-label="Previous image"
               >
                 <ChevronLeft className="w-3 h-3" />
@@ -259,64 +239,74 @@ export const PropertyCard = ({
               <button
                 type="button"
                 onClick={nextImage}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 z-10 w-5 h-5 rounded-full bg-white/90 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center cursor-pointer"
+                className="absolute right-1.5 bottom-2 z-10 w-5 h-5 rounded-full bg-white/90 hover:bg-white text-neutral-800 shadow-sm flex items-center justify-center cursor-pointer opacity-0 group-hover/popup:opacity-100 transition-opacity"
                 aria-label="Next image"
               >
                 <ChevronRight className="w-3 h-3" />
               </button>
-
-              {/* Dots Indicator */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1 bg-black/30 backdrop-blur-xs px-2 py-0.5 rounded-full">
-                {images.slice(0, 5).map((_, idx) => (
-                  <span
-                    key={idx}
-                    className={`rounded-full transition-all ${
-                      idx === currentImageIndex
-                        ? "w-1.5 h-1.5 bg-white scale-125"
-                        : "w-1 h-1 bg-white/60"
-                    }`}
-                  />
-                ))}
-              </div>
             </>
           )}
         </div>
 
-        {/* Text Details (Compact) */}
-        <div className="p-2.5 flex flex-col">
-          {/* Line 1: Type in Location + Star Rating */}
-          <div className="flex items-baseline justify-between gap-1 mb-0.5">
-            <span className="font-bold text-neutral-900 text-xs truncate">
-              {propertyTypeName} in {property.location || "Maharashtra"}
-            </span>
-            <div className="flex items-center gap-0.5 shrink-0 text-neutral-900 font-bold text-[11px]">
+        {/* Right Side: Property Details */}
+        <div className="flex-1 p-2.5 sm:p-3 flex flex-col justify-between min-w-0 h-full">
+          <div>
+            {/* Row 1: Type in Location + Wishlist Heart */}
+            <div className="flex items-center justify-between gap-1.5">
+              <span className="font-bold text-neutral-900 text-xs sm:text-[13px] truncate leading-tight">
+                {propertyTypeName} in {property.location || "Maharashtra"}
+              </span>
+
+              {/* Wishlist Heart Button */}
+              <button
+                type="button"
+                onClick={handleWishlist}
+                className="w-6 h-6 -mr-1 -mt-0.5 rounded-full flex items-center justify-center hover:bg-neutral-100 active:scale-90 transition-transform cursor-pointer shrink-0"
+                aria-label="Wishlist"
+              >
+                <Heart
+                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
+                    isLiked
+                      ? "fill-[#ff6900] text-[#ff6900]"
+                      : "text-neutral-700 stroke-[2]"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {/* Row 2: Title / Subtitle */}
+            <p className="text-neutral-500 text-[11px] sm:text-xs truncate mt-0.5">
+              {property.title}
+            </p>
+
+            {/* Row 3: Dates */}
+            <p className="text-neutral-600 text-[10.5px] sm:text-[11px] font-medium mt-0.5">
+              {checkin && checkout
+                ? `${new Date(checkin).toLocaleDateString("en-US", { month: "short", day: "numeric" })}–${new Date(checkout).toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+                : "16–18 Oct"}
+            </p>
+          </div>
+
+          <div>
+            {/* Row 4: Star Rating */}
+            <div className="flex items-center gap-1 text-[11px] font-bold text-neutral-900 mb-0.5">
               <Star className="w-3 h-3 fill-black text-black" />
               <span>
                 {property.rating?.average
-                  ? `${property.rating.average} (${property.rating.count || 6})`
-                  : "5.0 (6)"}
+                  ? `${property.rating.average} (${property.rating.count || 12})`
+                  : "New"}
               </span>
             </div>
-          </div>
 
-          {/* Line 2: Property title / Tagline */}
-          <p className="text-neutral-500 text-[11px] truncate mb-0.5">
-            {property.title}
-          </p>
-
-          {/* Line 3: Dates */}
-          <p className="text-neutral-600 text-[10px] font-medium mb-1">
-            6–8 Nov
-          </p>
-
-          {/* Line 4: Price */}
-          <div className="flex items-baseline gap-1 pt-1 border-t border-neutral-100">
-            <span className="font-extrabold text-neutral-900 text-xs">
-              {formatRupee(twoNightsPrice || basePrice)}
-            </span>
-            <span className="text-neutral-600 text-[10px] font-normal">
-              for 2 nights
-            </span>
+            {/* Row 5: Price */}
+            <div className="flex items-baseline gap-1">
+              <span className="font-extrabold text-neutral-900 text-xs sm:text-sm">
+                {formatRupee(twoNightsPrice || basePrice)}
+              </span>
+              <span className="text-neutral-500 text-[10px] font-normal">
+                for 2 nights
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -330,11 +320,10 @@ export const PropertyCard = ({
     return (
       <div
         onClick={navigateToProperty}
-        className={`group relative flex flex-col sm:flex-row bg-white rounded-2xl transition-all duration-200 cursor-pointer select-none p-3 gap-4 border ${
-          isActive
-            ? "border-2 border-[#ff6900] shadow-md ring-1 ring-[#ff6900]/20 bg-orange-50/10"
-            : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-xs"
-        }`}
+        className={`group relative flex flex-col sm:flex-row bg-white rounded-2xl transition-all duration-200 cursor-pointer select-none p-3 gap-4 border ${isActive
+          ? "border-2 border-[#ff6900] shadow-md ring-1 ring-[#ff6900]/20 bg-orange-50/10"
+          : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-xs"
+          }`}
       >
         {/* Left Side: Photo Carousel */}
         <div className="relative w-full sm:w-60 md:w-64 h-48 shrink-0 rounded-xl overflow-hidden bg-neutral-100">
@@ -360,11 +349,10 @@ export const PropertyCard = ({
             aria-label="Wishlist"
           >
             <Heart
-              className={`w-4 h-4 transition-colors ${
-                isLiked
-                  ? "fill-[#ff6900] text-[#ff6900]"
-                  : "text-neutral-800 stroke-[2]"
-              }`}
+              className={`w-4 h-4 transition-colors ${isLiked
+                ? "fill-[#ff6900] text-[#ff6900]"
+                : "text-neutral-800 stroke-[2]"
+                }`}
             />
           </button>
 
@@ -374,11 +362,10 @@ export const PropertyCard = ({
               {images.slice(0, 5).map((_, idx) => (
                 <span
                   key={idx}
-                  className={`rounded-full transition-all ${
-                    idx === currentImageIndex
-                      ? "w-1.5 h-1.5 bg-white scale-125"
-                      : "w-1 h-1 bg-white/60"
-                  }`}
+                  className={`rounded-full transition-all ${idx === currentImageIndex
+                    ? "w-1.5 h-1.5 bg-white scale-125"
+                    : "w-1 h-1 bg-white/60"
+                    }`}
                 />
               ))}
             </div>
@@ -444,11 +431,10 @@ export const PropertyCard = ({
   return (
     <div
       onClick={navigateToProperty}
-      className={`group relative flex flex-col bg-white rounded-2xl transition-all duration-200 cursor-pointer select-none p-2.5 border ${
-        isActive
-          ? "border-2 border-[#ff6900] shadow-md ring-1 ring-[#ff6900]/20 bg-orange-50/10"
-          : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-xs"
-      }`}
+      className={`group relative flex flex-col bg-white rounded-2xl transition-all duration-200 cursor-pointer select-none p-2.5 border ${isActive
+        ? "border-2 border-[#ff6900] shadow-md ring-1 ring-[#ff6900]/20 bg-orange-50/10"
+        : "border-neutral-200/80 hover:border-neutral-300 hover:shadow-xs"
+        }`}
     >
       {/* 1. Image Carousel Container */}
       <div className="relative aspect-[20/19] w-full rounded-xl overflow-hidden bg-neutral-100 mb-3">
@@ -474,11 +460,10 @@ export const PropertyCard = ({
           aria-label="Wishlist"
         >
           <Heart
-            className={`w-5 h-5 drop-shadow-xs transition-colors ${
-              isLiked
-                ? "fill-[#ff6900] text-[#ff6900]"
-                : "text-neutral-800 stroke-white stroke-[2] fill-black/20"
-            }`}
+            className={`w-5 h-5 drop-shadow-xs transition-colors ${isLiked
+              ? "fill-[#ff6900] text-[#ff6900]"
+              : "text-neutral-800 stroke-white stroke-[2] fill-black/20"
+              }`}
           />
         </button>
 
@@ -507,11 +492,10 @@ export const PropertyCard = ({
               {images.slice(0, 5).map((_, idx) => (
                 <span
                   key={idx}
-                  className={`rounded-full transition-all ${
-                    idx === currentImageIndex
-                      ? "w-1.5 h-1.5 bg-white scale-125"
-                      : "w-1 h-1 bg-white/60"
-                  }`}
+                  className={`rounded-full transition-all ${idx === currentImageIndex
+                    ? "w-1.5 h-1.5 bg-white scale-125"
+                    : "w-1 h-1 bg-white/60"
+                    }`}
                 />
               ))}
             </div>

@@ -195,29 +195,29 @@ const BookingCard = ({
 
   const formattedCheckIn = checkIn
     ? new Date(checkIn).toLocaleDateString("en-IN", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      })
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    })
     : "N/A";
 
   const formattedCheckOut = checkOut
     ? new Date(checkOut).toLocaleDateString("en-IN", {
-        weekday: "short",
-        day: "numeric",
-        month: "short",
-      })
+      weekday: "short",
+      day: "numeric",
+      month: "short",
+    })
     : "N/A";
 
   const nights =
     checkIn && checkOut
       ? Math.max(
-          1,
-          Math.ceil(
-            (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
-              (1000 * 60 * 60 * 24)
-          )
+        1,
+        Math.ceil(
+          (new Date(checkOut).getTime() - new Date(checkIn).getTime()) /
+          (1000 * 60 * 60 * 24)
         )
+      )
       : 1;
 
   const pricingDetails = pricing || {
@@ -340,9 +340,8 @@ const BookingCard = ({
             }
           },
           prefill: {
-            name: `${booking.customerDetails?.firstName || ""} ${
-              booking.customerDetails?.lastName || ""
-            }`.trim(),
+            name: `${booking.customerDetails?.firstName || ""} ${booking.customerDetails?.lastName || ""
+              }`.trim(),
             email: booking.customerDetails?.email || "",
             contact: booking.customerDetails?.mobile || "",
           },
@@ -385,7 +384,7 @@ const BookingCard = ({
   return (
     <div className="bg-white rounded-2xl md:rounded-3xl border border-neutral-200/90 hover:border-[#ff6900]/40 shadow-xs hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col md:flex-row group">
       {/* 1. Left Image Section (Desktop: ~38% width, matching /category property card) */}
-      <div className="relative w-full md:w-[38%] lg:w-[36%] h-52 md:h-auto min-h-[220px] md:min-h-[250px] bg-neutral-900 shrink-0 overflow-hidden">
+      <div className="relative w-full md:w-[38%] lg:w-[36%] h-52 md:h-80 min-h-[220px] md:min-h-[250px] bg-neutral-900 shrink-0 overflow-hidden">
         <img
           src={coverImage}
           alt={propertyName}
@@ -456,8 +455,8 @@ const BookingCard = ({
                 {isPastStay
                   ? "Stay dates have passed. Payment no longer accepted."
                   : isExpired
-                  ? "Hold period expired. Please retry to get fresh payment order."
-                  : "Dates held! Complete payment before timer expires."}
+                    ? "Hold period expired. Please retry to get fresh payment order."
+                    : "Dates held! Complete payment before timer expires."}
               </span>
             </div>
             {!isPastStay && timeLeft && (
@@ -662,7 +661,7 @@ export default function BookingScreen() {
           const u = JSON.parse(storedUser);
           email = u?.email || "";
         }
-      } catch {}
+      } catch { }
       const res = await GetCustomerDisputesAPI(id, email);
       if (res?.success) {
         setCustomerDisputes(res.data || []);
@@ -864,8 +863,8 @@ export default function BookingScreen() {
                   isActive
                     ? "bg-[#ff6900] text-white shadow-xs font-bold"
                     : tab.hasAlert
-                    ? "bg-amber-50 text-amber-900 border border-amber-300 font-bold"
-                    : "bg-neutral-100 text-neutral-700"
+                      ? "bg-amber-50 text-amber-900 border border-amber-300 font-bold"
+                      : "bg-neutral-100 text-neutral-700"
                 )}
               >
                 <span>{tab.label}</span>
@@ -918,8 +917,8 @@ export default function BookingScreen() {
                           isActive
                             ? "bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white shadow-xs"
                             : tab.hasAlert
-                            ? "bg-amber-50 text-amber-900 border border-amber-200/80 hover:bg-amber-100/70"
-                            : "text-neutral-700 hover:bg-neutral-100/80"
+                              ? "bg-amber-50 text-amber-900 border border-amber-200/80 hover:bg-amber-100/70"
+                              : "text-neutral-700 hover:bg-neutral-100/80"
                         )}
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
@@ -929,8 +928,8 @@ export default function BookingScreen() {
                               isActive
                                 ? "text-white"
                                 : tab.hasAlert
-                                ? "text-amber-600 animate-pulse"
-                                : "text-neutral-500"
+                                  ? "text-amber-600 animate-pulse"
+                                  : "text-neutral-500"
                             )}
                           />
                           <span className="truncate">{tab.label}</span>
@@ -941,8 +940,8 @@ export default function BookingScreen() {
                             isActive
                               ? "bg-white/25 text-white"
                               : tab.hasAlert
-                              ? "bg-amber-200 text-amber-900"
-                              : "bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200/70"
+                                ? "bg-amber-200 text-amber-900"
+                                : "bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200/70"
                           )}
                         >
                           {tab.count}
@@ -972,7 +971,7 @@ export default function BookingScreen() {
                   className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold rounded-xl h-9 gap-1.5 shadow-xs cursor-pointer"
                 >
                   <Link
-                    href="https://wa.me/919999999999?text=Hello%20The%20Villa%20Camp%20Support,%20I%20need%20help%20with%20my%20reservation"
+                    href="https://wa.me/918669186483?text=Hello%20The%20Villa%20Camp%20Support,%20I%20need%20help%20with%20my%20reservation"
                     target="_blank"
                   >
                     <Phone className="w-3.5 h-3.5" />
@@ -1137,15 +1136,15 @@ export default function BookingScreen() {
                         {activeTab === "pending"
                           ? "No Pending Reservations"
                           : search
-                          ? "No Stays Match Search"
-                          : "No Bookings Found"}
+                            ? "No Stays Match Search"
+                            : "No Bookings Found"}
                       </h3>
                       <p className="text-xs text-neutral-500 max-w-sm mx-auto leading-relaxed">
                         {activeTab === "pending"
                           ? "You have no incomplete payments. All your reservations are confirmed and ready for your arrival!"
                           : search
-                          ? `No bookings found for "${search}". Try searching with a different property name or reference code.`
-                          : "You haven't made any reservations in this section yet. Find your next luxury villa or camping retreat today."}
+                            ? `No bookings found for "${search}". Try searching with a different property name or reference code.`
+                            : "You haven't made any reservations in this section yet. Find your next luxury villa or camping retreat today."}
                       </p>
                     </div>
                     <div className="pt-2">

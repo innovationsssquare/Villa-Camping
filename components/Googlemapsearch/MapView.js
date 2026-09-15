@@ -131,6 +131,14 @@ const MapView = ({
                 });
               }
             }}
+            onMouseEnter={() => {
+              if (
+                typeof window !== "undefined" &&
+                window.matchMedia("(hover: hover)").matches
+              ) {
+                handleSelectProperty(property);
+              }
+            }}
             image={property.images?.[0] || property.image}
             has3DTour={property.has3DTour}
           />
@@ -247,9 +255,9 @@ const MapView = ({
         style={{ borderRadius: "24px" }}
       />
 
-      {/* Redesigned Airbnb Map Popup Card (Dismisses on loading, location change, or filter change) */}
+      {/* Redesigned Airbnb Map Popup Card (Positioned at bottom on mobile, top-left on desktop) */}
       {!loading && selectedProperty && (
-        <div className="absolute top-[124px] left-3 sm:left-5 lg:top-5 lg:left-5 z-40 pointer-events-auto">
+        <div className="absolute bottom-3 left-3 right-3 sm:left-4 sm:right-4 max-w-[420px] mx-auto lg:top-5 lg:left-5 lg:bottom-auto lg:right-auto lg:max-w-none z-40 pointer-events-auto">
           <PropertyCard
             property={selectedProperty}
             onClose={() => handleSelectProperty(null)}
