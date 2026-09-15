@@ -366,6 +366,42 @@ const PropertyBooking = () => {
       return;
     }
 
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!checkInDate || !checkOutDate) {
+      addToast({
+        title: "Dates Required",
+        description: "Please select your stay check-in and check-out dates.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
+    if (new Date(checkInDate).setHours(0, 0, 0, 0) < today.getTime()) {
+      addToast({
+        title: "Invalid Check-in Date",
+        description: "Check-in date cannot be in the past. Please choose upcoming dates.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
+    if (new Date(checkOutDate).setHours(0, 0, 0, 0) <= new Date(checkInDate).setHours(0, 0, 0, 0)) {
+      addToast({
+        title: "Invalid Dates",
+        description: "Check-out date must be at least one day after check-in date.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
     // Availability re-check before opening Razorpay
     try {
       if (normalizedType === "villa") {

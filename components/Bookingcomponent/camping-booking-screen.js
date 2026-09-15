@@ -41,6 +41,7 @@ import {
 import confetti from "canvas-confetti";
 import { calculateBookingPrice } from "@/lib/bookingUtils";
 import { Createbooking, Verifybooking } from "@/lib/API/Booking/Booking";
+import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
 import { useToast } from "@/components/ui/toast-provider";
 import Successmodal from "./Successmodal";
 import ButtonLoader from "../Loadercomponents/button-loader";
@@ -315,6 +316,71 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
           }
         : null,
     };
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (!checkInDate || !checkOutDate) {
+      addToast({
+        title: "Dates Required",
+        description: "Please select your stay check-in and check-out dates.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
+    if (new Date(checkInDate).setHours(0, 0, 0, 0) < today.getTime()) {
+      addToast({
+        title: "Invalid Check-in Date",
+        description: "Check-in date cannot be in the past. Please choose upcoming dates.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
+    if (new Date(checkOutDate).setHours(0, 0, 0, 0) <= new Date(checkInDate).setHours(0, 0, 0, 0)) {
+      addToast({
+        title: "Invalid Dates",
+        description: "Check-out date must be at least one day after check-in date.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
+
+    // Availability re-check before booking
+    try {
+      const requestedTents = Object.entries(reduxSelectedTents).map(
+        ([type, t]) => ({
+          tentType: type,
+          quantity: t.quantity,
+        })
+      );
+      const avail = await Getcampingavability({
+        propertyId,
+        checkIn: checkin,
+        checkOut: checkout,
+        tents: requestedTents,
+      });
+      if (avail && avail.available === false) {
+        addToast({
+          title: "Tents Unavailable",
+          description:
+            avail.message || "Selected tents are no longer available for these dates.",
+          variant: "destructive",
+          duration: 2500,
+        });
+        setloading(false);
+        return;
+      }
+    } catch (e) {
+      console.warn("Tent availability verification check warning:", e);
+    }
+
     setIsBookingDetailsOpen(false);
     try {
       const response = await Createbooking(bookingData);

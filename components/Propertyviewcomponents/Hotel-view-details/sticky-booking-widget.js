@@ -56,6 +56,8 @@
   import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
   import { BaseUrl } from "@/lib/API/Baseurl";
   import { getDeviceId } from "@/lib/deviceId";
+  import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
+  import { addToast } from "@heroui/react";
 
   export default function StickyBookingWidget() {
     const [stickyState, setStickyState] = useState("normal");
@@ -823,7 +825,60 @@
 
               {/* Reserve Button */}
               <Button
-                onClick={() => {
+                onClick={async () => {
+                  if (!checkin || !checkout) {
+                    addToast({
+                      title: "Dates Required",
+                      description: "Please select your check-in and check-out dates.",
+                      color: "danger",
+                    });
+                    return;
+                  }
+
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  if (new Date(checkin).setHours(0, 0, 0, 0) < today.getTime()) {
+                    addToast({
+                      title: "Invalid Check-in Date",
+                      description: "Check-in date cannot be in the past. Please select upcoming dates.",
+                      color: "danger",
+                    });
+                    return;
+                  }
+
+                  if (new Date(checkout).setHours(0, 0, 0, 0) <= new Date(checkin).setHours(0, 0, 0, 0)) {
+                    addToast({
+                      title: "Invalid Dates",
+                      description: "Check-out date must be at least one day after check-in date.",
+                      color: "danger",
+                    });
+                    return;
+                  }
+
+                  // Check hotel room availability
+                  try {
+                    const requestedRooms = Object.entries(reduxSelectedRooms || {}).map(([type, r]) => ({
+                      roomType: type,
+                      quantity: r.quantity,
+                    }));
+                    const avail = await Gethotelavability({
+                      propertyId: hotel?._id,
+                      checkIn: checkin,
+                      checkOut: checkout,
+                      rooms: requestedRooms,
+                    });
+                    if (avail && avail.available === false) {
+                      addToast({
+                        title: "Rooms Unavailable",
+                        description: avail.message || "Selected rooms are no longer available for these dates.",
+                        color: "danger",
+                      });
+                      return;
+                    }
+                  } catch (e) {
+                    console.warn("Hotel availability pre-check failed:", e);
+                  }
+
                   dispatch(setPropertyId(hotel?._id));
                   dispatch(setcategoryId(hotel?.category));
                   dispatch(setOwnerId(hotel?.owner));

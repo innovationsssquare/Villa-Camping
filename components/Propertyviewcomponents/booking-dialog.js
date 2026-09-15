@@ -458,12 +458,107 @@ export default function BookingDialog({
       return;
     }
 
-    if (propertyType === "Camping" && totalSelectedTentsCount === 0) {
-      setIsTentSelectionOpen(true);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (new Date(checkinISO).setHours(0, 0, 0, 0) < today.getTime()) {
+      setTentError("Check-in date cannot be in the past. Please select upcoming dates.");
+      setActiveTab("dates");
+      setDateStep("checkin");
       return;
     }
 
-    if (propertyType === "Villa") {
+    if (new Date(checkoutISO).setHours(0, 0, 0, 0) <= new Date(checkinISO).setHours(0, 0, 0, 0)) {
+      setTentError("Check-out date must be at least one day after check-in date.");
+      setActiveTab("dates");
+      setDateStep("checkout");
+      return;
+    }
+
+    if (propertyType === "Camping") {
+      if (totalSelectedTentsCount === 0) {
+        setIsTentSelectionOpen(true);
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const requestedTents = Object.entries(reduxSelectedTents || {}).map(([type, t]) => ({
+          tentType: type,
+          quantity: t.quantity,
+        }));
+        const avail = await Getcampingavability({
+          propertyId,
+          checkIn: checkinISO,
+          checkOut: checkoutISO,
+          tents: requestedTents,
+        });
+        if (avail && avail.available === false) {
+          setIsLoading(false);
+          setTentError(avail.message || "Selected tents are not available for these dates.");
+          return;
+        }
+      } catch (e) {
+        console.warn("Camping availability check failed:", e);
+      }
+    } else if (propertyType === "Cottage") {
+      const totalSelectedCottagesCount = Object.values(reduxSelectedCottages || {}).reduce(
+        (sum, c) => sum + (c?.quantity || 0),
+        0
+      );
+      if (totalSelectedCottagesCount === 0) {
+        setTentError("Please select at least one cottage unit.");
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const requestedCottages = Object.entries(reduxSelectedCottages || {}).map(([type, c]) => ({
+          cottageType: type,
+          quantity: c.quantity,
+        }));
+        const avail = await Getcottageavability({
+          propertyId,
+          checkIn: checkinISO,
+          checkOut: checkoutISO,
+          cottages: requestedCottages,
+        });
+        if (avail && avail.available === false) {
+          setIsLoading(false);
+          setTentError(avail.message || "Selected cottages are not available for these dates.");
+          return;
+        }
+      } catch (e) {
+        console.warn("Cottage availability check failed:", e);
+      }
+    } else if (propertyType === "Hotel") {
+      const totalSelectedRoomsCount = Object.values(reduxSelectedRooms || {}).reduce(
+        (sum, r) => sum + (r?.quantity || 0),
+        0
+      );
+      if (totalSelectedRoomsCount === 0) {
+        setTentError("Please select at least one room unit.");
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const requestedRooms = Object.entries(reduxSelectedRooms || {}).map(([type, r]) => ({
+          roomType: type,
+          quantity: r.quantity,
+        }));
+        const avail = await Gethotelavability({
+          propertyId,
+          checkIn: checkinISO,
+          checkOut: checkoutISO,
+          rooms: requestedRooms,
+        });
+        if (avail && avail.available === false) {
+          setIsLoading(false);
+          setTentError(avail.message || "Selected rooms are not available for these dates.");
+          return;
+        }
+      } catch (e) {
+        console.warn("Hotel availability check failed:", e);
+      }
+    } else {
+      // Villa
       if (totalGuests > maxCap) {
         setTentError(`Selected guests (${totalGuests}) exceed maximum property capacity of ${maxCap}`);
         return;

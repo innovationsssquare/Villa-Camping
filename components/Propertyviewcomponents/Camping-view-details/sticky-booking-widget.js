@@ -53,6 +53,8 @@ import CouponsDrawer from "../coupons-drawer";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { useAuthModal } from "@/context/AuthModalContext";
+import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
+import { addToast } from "@heroui/react";
 
 export default function StickyBookingWidget() {
   const [datePopoverOpen, setDatePopoverOpen] = useState(false);
@@ -205,7 +207,73 @@ export default function StickyBookingWidget() {
     setCouponError("");
   };
 
-  const handleReserve = () => {
+  const handleReserve = async () => {
+    if (!checkin || !checkout) {
+      setDatePopoverOpen(true);
+      addToast({
+        title: "Dates Required",
+        description: "Please select your check-in and check-out dates.",
+        color: "danger",
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (new Date(checkin).setHours(0, 0, 0, 0) < today.getTime()) {
+      setDatePopoverOpen(true);
+      addToast({
+        title: "Invalid Check-in Date",
+        description: "Check-in date cannot be in the past. Please select upcoming dates.",
+        color: "danger",
+      });
+      return;
+    }
+
+    if (new Date(checkout).setHours(0, 0, 0, 0) <= new Date(checkin).setHours(0, 0, 0, 0)) {
+      setDatePopoverOpen(true);
+      addToast({
+        title: "Invalid Dates",
+        description: "Check-out date must be at least one day after check-in date.",
+        color: "danger",
+      });
+      return;
+    }
+
+    if (totalSelectedTentsCount === 0) {
+      setIsTentDrawerOpen(true);
+      addToast({
+        title: "Select Tents",
+        description: "Please select at least one tent unit to proceed.",
+        color: "danger",
+      });
+      return;
+    }
+
+    // Check availability
+    try {
+      const requestedTents = Object.entries(reduxSelectedTents || {}).map(([type, t]) => ({
+        tentType: type,
+        quantity: t.quantity,
+      }));
+      const avail = await Getcampingavability({
+        propertyId: camping?._id,
+        checkIn: checkin,
+        checkOut: checkout,
+        tents: requestedTents,
+      });
+      if (avail && avail.available === false) {
+        addToast({
+          title: "Tents Unavailable",
+          description: avail.message || "Selected tents are no longer available for these dates.",
+          color: "danger",
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn("Camping availability pre-check failed:", e);
+    }
+
     dispatch(setPropertyId(camping?._id));
     dispatch(setcategoryId(camping?.category));
     dispatch(setOwnerId(camping?.owner));

@@ -37,9 +37,13 @@ export async function POST(req) {
 
     await connectDB();
 
-    const dbUser = await User.findById(decoded.id || user._id)
+    let dbUser = await User.findById(decoded.id || user._id)
       .select(PUBLIC_USER_FIELDS)
       .lean();
+
+    if (!dbUser && user) {
+      dbUser = user;
+    }
 
     if (!dbUser) {
       return Response.json(

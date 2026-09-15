@@ -303,7 +303,7 @@ const ResponsiveAuthModal = ({
       const res = await fetch(`${BaseUrl}/auth/whatsapp/send-otp`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phoneNumber: rawNumber }),
+        body: JSON.stringify({ phoneNumber: rawNumber, role: "user" }),
       });
 
       const data = await res.json();
@@ -311,11 +311,20 @@ const ResponsiveAuthModal = ({
 
       setOtpSent(true);
       setCountdown(60);
-      addToast({
-        title: "WhatsApp OTP Sent!",
-        description: `Verification code sent to WhatsApp on +91 ${rawNumber}`,
-        color: "success",
-      });
+      if (data.devOtp) {
+        setOtp(data.devOtp);
+        addToast({
+          title: "Dev Mock OTP Ready",
+          description: `Code: ${data.devOtp} auto-filled (Dev Mode). Tap continue to verify!`,
+          color: "primary",
+        });
+      } else {
+        addToast({
+          title: "WhatsApp OTP Sent!",
+          description: `Verification code sent to WhatsApp on +91 ${rawNumber}`,
+          color: "success",
+        });
+      }
     } catch (err) {
       addToast({
         title: "Error Sending OTP",
@@ -348,6 +357,7 @@ const ResponsiveAuthModal = ({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           phoneNumber: rawNumber,
+          otp: codeToVerify,
           code: codeToVerify,
           deviceId,
           role: "user",

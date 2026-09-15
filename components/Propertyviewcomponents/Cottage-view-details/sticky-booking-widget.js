@@ -52,9 +52,10 @@ import Cookies from "js-cookie";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { calculateCottageTotal } from "@/lib/calculateCottageBasePrice";
 import CottageSelectionDrawer from "@/components/Cottagescreen/cottage-selection-drawer";
-import { Applycoupon, Getallcouponbypropertyid } from "@/lib/API/Coupon/Coupon";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { getDeviceId } from "@/lib/deviceId";
+import { Getcottageavability } from "@/lib/API/category/Cottage/Cottage";
+import { addToast } from "@heroui/react";
 
 export default function StickyBookingWidget() {
   const [stickyState, setStickyState] = useState("normal");
@@ -824,7 +825,60 @@ export default function StickyBookingWidget() {
 
             {/* Reserve Button */}
             <Button
-              onClick={() => {
+              onClick={async () => {
+                if (!checkin || !checkout) {
+                  addToast({
+                    title: "Dates Required",
+                    description: "Please select your check-in and check-out dates.",
+                    color: "danger",
+                  });
+                  return;
+                }
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (new Date(checkin).setHours(0, 0, 0, 0) < today.getTime()) {
+                  addToast({
+                    title: "Invalid Check-in Date",
+                    description: "Check-in date cannot be in the past. Please select upcoming dates.",
+                    color: "danger",
+                  });
+                  return;
+                }
+
+                if (new Date(checkout).setHours(0, 0, 0, 0) <= new Date(checkin).setHours(0, 0, 0, 0)) {
+                  addToast({
+                    title: "Invalid Dates",
+                    description: "Check-out date must be at least one day after check-in date.",
+                    color: "danger",
+                  });
+                  return;
+                }
+
+                // Check availability before navigating to checkout
+                try {
+                  const requestedCottages = Object.entries(reduxSelectedCottages).map(([type, c]) => ({
+                    cottageType: type,
+                    quantity: c.quantity,
+                  }));
+                  const avail = await Getcottageavability({
+                    propertyId: cottage?._id,
+                    checkIn: checkin,
+                    checkOut: checkout,
+                    cottages: requestedCottages,
+                  });
+                  if (avail && avail.available === false) {
+                    addToast({
+                      title: "Cottages Unavailable",
+                      description: avail.message || "Selected cottages are no longer available for these dates.",
+                      color: "danger",
+                    });
+                    return;
+                  }
+                } catch (e) {
+                  console.warn("Cottage availability pre-check failed:", e);
+                }
+
                 dispatch(setPropertyId(cottage?._id));
                 dispatch(setcategoryId(cottage?.category));
                 dispatch(setOwnerId(cottage?.owner));

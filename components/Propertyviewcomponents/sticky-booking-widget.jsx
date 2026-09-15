@@ -70,6 +70,9 @@ import {
 import { Getallcouponbypropertyid, Applycoupon } from "@/lib/API/Coupon/Coupon";
 import { getDeviceId } from "@/lib/deviceId";
 import { Checkvillaavailability } from "@/lib/API/category/Villa/Villa";
+import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
+import { Getcottageavability } from "@/lib/API/category/Cottage/Cottage";
+import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -1032,10 +1035,72 @@ export default function StickyBookingWidget() {
                 return;
               }
 
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              if (new Date(checkin).setHours(0, 0, 0, 0) < today.getTime()) {
+                setAvailabilityError("Check-in date cannot be in the past. Please select upcoming dates.");
+                setDatePopoverOpen(true);
+                return;
+              }
+
+              if (new Date(checkout).setHours(0, 0, 0, 0) <= new Date(checkin).setHours(0, 0, 0, 0)) {
+                setAvailabilityError("Check-out date must be at least one day after check-in date.");
+                setDatePopoverOpen(true);
+                return;
+              }
+
               setAvailabilityError("");
               setAvailabilityChecking(true);
-              if (!isSubtypeProperty) {
-                try {
+              try {
+                if (isCamping) {
+                  const requestedTents = Object.entries(reduxSelectedTents || {}).map(([type, t]) => ({
+                    tentType: type,
+                    quantity: t.quantity,
+                  }));
+                  const avail = await Getcampingavability({
+                    propertyId: villa?._id,
+                    checkIn: checkin,
+                    checkOut: checkout,
+                    tents: requestedTents,
+                  });
+                  if (avail && avail.available === false) {
+                    setAvailabilityError(avail.message || "Selected tents are not available for these dates.");
+                    setAvailabilityChecking(false);
+                    return;
+                  }
+                } else if (isCottage) {
+                  const requestedCottages = Object.entries(reduxSelectedCottages || {}).map(([type, c]) => ({
+                    cottageType: type,
+                    quantity: c.quantity,
+                  }));
+                  const avail = await Getcottageavability({
+                    propertyId: villa?._id,
+                    checkIn: checkin,
+                    checkOut: checkout,
+                    cottages: requestedCottages,
+                  });
+                  if (avail && avail.available === false) {
+                    setAvailabilityError(avail.message || "Selected cottages are not available for these dates.");
+                    setAvailabilityChecking(false);
+                    return;
+                  }
+                } else if (isHotel) {
+                  const requestedRooms = Object.entries(reduxSelectedRooms || {}).map(([type, r]) => ({
+                    roomType: type,
+                    quantity: r.quantity,
+                  }));
+                  const avail = await Gethotelavability({
+                    propertyId: villa?._id,
+                    checkIn: checkin,
+                    checkOut: checkout,
+                    rooms: requestedRooms,
+                  });
+                  if (avail && avail.available === false) {
+                    setAvailabilityError(avail.message || "Selected rooms are not available for these dates.");
+                    setAvailabilityChecking(false);
+                    return;
+                  }
+                } else {
                   const avail = await Checkvillaavailability({
                     propertyId: villa?._id,
                     checkIn: checkInDate.toISOString(),
@@ -1046,9 +1111,9 @@ export default function StickyBookingWidget() {
                     setAvailabilityChecking(false);
                     return;
                   }
-                } catch (e) {
-                  console.warn("Availability pre-check failed:", e);
                 }
+              } catch (e) {
+                console.warn("Availability pre-check failed:", e);
               }
               setAvailabilityChecking(false);
 
