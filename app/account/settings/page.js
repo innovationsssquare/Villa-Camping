@@ -11,7 +11,7 @@ import {
   Smartphone,
   CreditCard,
   ChevronRight,
-  Settings,
+  Settings as SettingsIcon,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -78,7 +78,7 @@ const SettingSection = ({ title, children }) => {
   );
 };
 
-const Settings = () => {
+const SettingsPage = () => {
   const navigate = useRouter();
   const { addToast } = useToast();
 
@@ -112,7 +112,7 @@ const Settings = () => {
             <div className="flex items-center gap-2.5">
               <UserSidebar />
               <div className="flex items-center gap-1.5">
-                <Settings className="w-4 h-4 text-[#ff6900]" />
+                <SettingsIcon className="w-4 h-4 text-[#ff6900]" />
                 <span className="text-sm font-bold text-neutral-900">Settings</span>
               </div>
             </div>
@@ -207,4 +207,4 @@ const Settings = () => {
   );
 };
 
-export default Settings;
+export default SettingsPage;
