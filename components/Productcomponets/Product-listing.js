@@ -156,19 +156,7 @@ export default function PropertyFilterListing({ categorySlug }) {
     }
   }, [paramCheckin, paramCheckout, paramAdults, paramChildren, dispatch]);
 
-  // 2.1 Enforce date & guest selection: redirect to / if dates are missing
-  useEffect(() => {
-    const hasIn = paramCheckin || checkin;
-    const hasOut = paramCheckout || checkout;
-    if (!hasIn || !hasOut) {
-      addToast({
-        title: "Select dates & guests first",
-        description: "Please choose your stay dates and guests before viewing stays.",
-        color: "warning",
-      });
-      router.replace("/");
-    }
-  }, [paramCheckin, checkin, paramCheckout, checkout, router]);
+
 
   // 3. Sync categorySlug parameter with Redux category state
   useEffect(() => {
