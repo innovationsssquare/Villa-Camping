@@ -707,7 +707,10 @@ export default function VillaReel({ villas = [] }) {
 
           {/* 4. Bottom Video Info & Booking CTA */}
           {currentVilla && (
-            <div className="absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-5 pb-[max(3rem,calc(env(safe-area-inset-bottom)+2.5rem))] flex flex-col gap-2 pointer-events-none">
+            <div
+              className="absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-5 flex flex-col gap-2 pointer-events-none"
+              style={{ paddingBottom: "max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))" }}
+            >
               {/* Location Tag & Rating */}
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/10">
@@ -759,7 +762,10 @@ export default function VillaReel({ villas = [] }) {
 
           {/* 5. Minimal Sleek Scrubber Bar (No Timing or Reel Count Text) */}
           {currentVilla && (
-            <div className="absolute bottom-[max(0.65rem,calc(env(safe-area-inset-bottom)+0.35rem))] left-0 right-0 z-30 px-3 sm:px-4 pointer-events-auto">
+            <div
+              className="absolute left-0 right-0 z-30 px-3 sm:px-4 pointer-events-auto"
+              style={{ bottom: "max(0.65rem, calc(env(safe-area-inset-bottom) + 0.35rem))" }}
+            >
               <div
                 onClick={handleProgressClick}
                 className="group relative h-1.5 sm:h-1 hover:h-2 w-full bg-white/20 rounded-full cursor-pointer transition-all backdrop-blur-xs flex items-center touch-manipulation"
@@ -776,7 +782,10 @@ export default function VillaReel({ villas = [] }) {
         </div>
 
         {/* 6. Side Action Rail (Desktop & Mobile Unified Strip) */}
-        <div className="absolute right-3 bottom-[max(8rem,calc(env(safe-area-inset-bottom)+7.5rem))] md:static md:right-auto md:bottom-auto md:ml-4 flex flex-col items-center gap-3 z-30 pointer-events-auto">
+        <div
+          className="absolute right-3 md:static md:right-auto md:bottom-auto md:ml-4 flex flex-col items-center gap-3 z-30 pointer-events-auto"
+          style={{ bottom: "max(8rem, calc(env(safe-area-inset-bottom) + 7.5rem))" }}
+        >
           {currentVilla && (
             <>
               {/* Wishlist Heart Button */}

@@ -380,7 +380,10 @@ function MobilePropertySkeleton() {
       </div>
 
       {/* 4. Mobile Sticky Bottom Pricing Bar Skeleton */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200/90 px-4 pt-2.5 pb-[max(0.75rem,env(safe-area-inset-bottom))] z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]">
+      <div
+        className="fixed bottom-0 left-0 right-0 bg-white/98 backdrop-blur-md border-t border-gray-200/90 px-4 pt-2.5 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.08)]"
+        style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
+      >
         <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
           <div className="min-w-0 flex-1 space-y-1.5">
             <div className="flex items-baseline gap-2">
