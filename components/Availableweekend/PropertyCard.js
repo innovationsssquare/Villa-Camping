@@ -73,20 +73,27 @@ import {
 import VideoModal from "./VideoModal";
 import { addToast } from "@heroui/react";
 import { getCategoryRouteName, buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
 
 export default function PropertyCardnew({ property }) {
   const dispatch = useDispatch();
   const router = useRouter();
+  const { openAuthModal } = useAuthModal();
 
   // Desktop carousel state
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Mobile carousel state (embla api from @/components/ui/carousel)
   const [mobileApi, setMobileApi] = useState(null);
-  const [currentMobileSlide, setCurrentMobileSlide] = useState(0);
+  const [mobileCurrentIndex, setMobileCurrentIndex] = useState(0);
 
+  // Video Reel Modal state
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
+  // Global Context/Redux
   const { selectedCategoryName, checkin, checkout } = useSelector(
-    (state) => state.booking
+    (state) => state.booking || {}
   );
   const categories = useSelector((state) => state.category?.categories || []);
 
@@ -102,12 +109,11 @@ export default function PropertyCardnew({ property }) {
     [checkout]
   );
 
-  // Sync mobile carousel slide snap
+  // Sync mobile carousel index on select
   useEffect(() => {
     if (!mobileApi) return;
-    setCurrentMobileSlide(mobileApi.selectedScrollSnap());
     const onSelect = () => {
-      setCurrentMobileSlide(mobileApi.selectedScrollSnap());
+      setMobileCurrentIndex(mobileApi.selectedScrollSnap());
     };
     mobileApi.on("select", onSelect);
     return () => {
@@ -117,13 +123,19 @@ export default function PropertyCardnew({ property }) {
 
   // Wishlist Redux integration
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
-  const wishlistSet = useMemo(() => new Set(wishlistIds), [wishlistIds]);
-  const wishlistKey = `Villa:${property?._id}`;
-  const isLiked = wishlistSet.has(wishlistKey);
+  const propertyId = property?.id || property?._id;
+  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
 
-  useEffect(() => {
-    dispatch(fetchWishlistIds({ id: "6833656360ed0e90157dd2e1" }));
-  }, [dispatch]);
+  const isLiked = useMemo(() => {
+    if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
+    const key = `${propertyType?.toLowerCase()}:${propertyId}`;
+    const rawId = String(propertyId);
+    return (
+      wishlistIds.includes(rawId) ||
+      wishlistIds.includes(key) ||
+      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === propertyId)
+    );
+  }, [wishlistIds, propertyId, propertyType]);
 
   // Extract display images safely
   const displayImages = useMemo(() => {
@@ -149,18 +161,25 @@ export default function PropertyCardnew({ property }) {
 
   const handleWishlist = (e) => {
     e.stopPropagation();
+    e.preventDefault();
+
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
+    }
+
     dispatch(
       optimisticToggle({
-        propertyId: property?._id,
-        propertyType: "villa",
-        userId: "6833656360ed0e90157dd2e1",
+        propertyId,
+        propertyType,
       })
     );
     dispatch(
       toggleWishlist({
-        propertyId: property?._id,
-        propertyType: "Villa",
-        userId: "6833656360ed0e90157dd2e1",
+        propertyId,
+        propertyType,
+        userId: currentUser._id,
       })
     );
   };

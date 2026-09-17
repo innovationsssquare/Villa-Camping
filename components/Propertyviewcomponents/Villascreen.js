@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -82,6 +82,9 @@ import ImageCarousel from "./Villaview/image-carousel";
 import { Separator } from "@/components/ui/separator";
 import GoogleMap from "./google-map";
 import Image from "next/image";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
+import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 
 const amenityIcons = {
   WiFi: Wifi,
@@ -100,7 +103,7 @@ const amenityIcons = {
 
 export default function Villascreen() {
   const dispatch = useDispatch();
-  const [isLiked, setIsLiked] = useState(false);
+  const { openAuthModal } = useAuthModal();
   const [isVideoPlaying, setIsVideoPlaying] = useState(false);
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
@@ -109,6 +112,31 @@ export default function Villascreen() {
   const { id } = params;
   const { villa, loading, error } = useSelector((state) => state.villa);
   const router = useRouter();
+
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+  const isLiked = useMemo(() => {
+    if (!wishlistIds || !Array.isArray(wishlistIds) || !id) return false;
+    const key = `villa:${id}`;
+    const rawId = String(id);
+    return (
+      wishlistIds.includes(rawId) ||
+      wishlistIds.includes(key) ||
+      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === id)
+    );
+  }, [wishlistIds, id]);
+
+  const handleWishlist = (e) => {
+    e?.stopPropagation?.();
+    e?.preventDefault?.();
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
+    }
+    dispatch(optimisticToggle({ propertyId: id, propertyType: "villa" }));
+    dispatch(toggleWishlist({ propertyId: id, propertyType: "villa", userId: currentUser._id }));
+  };
+
   useEffect(() => {
     dispatch(fetchVillaById(id));
   }, [id]);
@@ -229,7 +257,7 @@ export default function Villascreen() {
             variant="ghost"
             size="icon"
             className="absolute top-4 right-4 bg-white/90 hover:bg-white rounded-full z-10"
-            onClick={() => setIsLiked(!isLiked)}
+            onClick={handleWishlist}
           >
             <Heart
               className={`h-5 w-5 ${

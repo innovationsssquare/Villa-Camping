@@ -17,6 +17,8 @@ import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
 
 export const PropertyCard = ({
   property,
@@ -29,51 +31,53 @@ export const PropertyCard = ({
 }) => {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const { selectedCategoryName, checkin, checkout } = useSelector(
     (state) => state.booking || {}
   );
   const categories = useSelector((state) => state.category?.categories || []);
 
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [localLiked, setLocalLiked] = useState(false);
 
   // Redux Wishlist integration
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
-  const user = useSelector((state) => state.auth?.user || null);
   const propertyId = property.id || property._id;
   const propertyType = property.type || property.category || "villa";
 
-  const isLikedInStore = useMemo(() => {
-    if (!wishlistIds || !Array.isArray(wishlistIds)) return false;
+  const isLiked = useMemo(() => {
+    if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
     const key = `${propertyType?.toLowerCase()}:${propertyId}`;
+    const rawId = String(propertyId);
     return (
-      wishlistIds.includes(propertyId) ||
+      wishlistIds.includes(rawId) ||
       wishlistIds.includes(key) ||
-      wishlistIds.some((item) => item?.propertyId === propertyId)
+      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === propertyId)
     );
   }, [wishlistIds, propertyId, propertyType]);
 
-  const isLiked = isLikedInStore || localLiked;
-
   const handleWishlist = (e) => {
     e.stopPropagation();
-    setLocalLiked(!localLiked);
+    e.preventDefault();
 
-    if (user?._id) {
-      dispatch(
-        optimisticToggle({
-          propertyId,
-          propertyType,
-        })
-      );
-      dispatch(
-        toggleWishlist({
-          propertyId,
-          propertyType,
-          userId: user._id,
-        })
-      );
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
     }
+
+    dispatch(
+      optimisticToggle({
+        propertyId,
+        propertyType,
+      })
+    );
+    dispatch(
+      toggleWishlist({
+        propertyId,
+        propertyType,
+        userId: currentUser._id,
+      })
+    );
   };
 
   const images = useMemo(() => {
@@ -202,7 +206,7 @@ export const PropertyCard = ({
     return (
       <div
         onClick={navigateToProperty}
-        className="group/popup relative w-full sm:w-[380px] md:w-[410px] h-[126px] sm:h-[132px] bg-white rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in slide-in-from-bottom-3 duration-250 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all mb-8 flex flex-row items-stretch"
+        className="group/popup relative w-full sm:w-[380px] md:w-[410px] h-[126px] sm:h-[132px] bg-white rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in slide-in-from-bottom-3 duration-250 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all mb-12 flex flex-row items-stretch"
       >
         {/* Left Side: Square Thumbnail with Close X at Top-Left */}
         <div className="relative w-[126px] sm:w-[132px] h-full shrink-0 bg-neutral-100 overflow-hidden">

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Heart,
   Star,
@@ -17,6 +17,8 @@ import {
 } from "@/Redux/Slices/wishlistSlice";
 import { buildPropertyViewUrl } from "@/lib/categoryUtils";
 import { saveRecentlyVisited } from "@/lib/recentlyVisited";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
 
 export function PropertyCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -28,6 +30,7 @@ export function PropertyCard({ property }) {
   );
   const categories = useSelector((state) => state.category?.categories || []);
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
 
   // Extract display images
   const displayImages =
@@ -40,18 +43,24 @@ export function PropertyCard({ property }) {
       : ["/placeholder.svg"];
 
   // Wishlist state
-  const wishlistIds = useSelector((state) => state.wishlist.ids);
-  const wishlistSet = new Set(wishlistIds);
-  const wishlistKey = `Villa:${property._id}`;
-  const isLiked = wishlistSet.has(wishlistKey);
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+  const propertyId = property?._id || property?.id;
+  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+
+  const isLiked = useMemo(() => {
+    if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
+    const key = `${propertyType?.toLowerCase()}:${propertyId}`;
+    const rawId = String(propertyId);
+    return (
+      wishlistIds.includes(rawId) ||
+      wishlistIds.includes(key) ||
+      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === propertyId)
+    );
+  }, [wishlistIds, propertyId, propertyType]);
 
   useEffect(() => {
     setCurrentImageIndex(0);
   }, [property._id]);
-
-  useEffect(() => {
-    dispatch(fetchWishlistIds({ id: "6833656360ed0e90157dd2e1" }));
-  }, [dispatch]);
 
   const handleTouchStart = (e) => {
     setTouchEnd(null);
@@ -88,20 +97,28 @@ export function PropertyCard({ property }) {
     }
   };
 
-  const handleWishlist = () => {
+  const handleWishlist = (e) => {
+    e?.stopPropagation?.();
+    e?.preventDefault?.();
+
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
+    }
+
     dispatch(
       optimisticToggle({
-        propertyId: property._id,
-        propertyType: "villa",
-        userId: "6833656360ed0e90157dd2e1",
+        propertyId,
+        propertyType,
       })
     );
 
     dispatch(
       toggleWishlist({
-        propertyId: property._id,
-        propertyType: "Villa",
-        userId: "6833656360ed0e90157dd2e1",
+        propertyId,
+        propertyType,
+        userId: currentUser._id,
       })
     );
   };

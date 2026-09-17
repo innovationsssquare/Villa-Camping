@@ -17,14 +17,53 @@ import {
   Users,
 } from "lucide-react";
 
+import { useDispatch, useSelector } from "react-redux";
+import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
+
 export function PropertyCard({
   property,
   isSelected,
   onSelect,
   variant = "full",
 }) {
-  const [isFavorited, setIsFavorited] = useState(false);
+  const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+  const propertyId = property?.id || property?._id;
+  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+
+  const isFavorited = Array.isArray(wishlistIds) && propertyId
+    ? wishlistIds.includes(String(propertyId)) ||
+      wishlistIds.includes(`${propertyType?.toLowerCase()}:${propertyId}`) ||
+      wishlistIds.some((item) => item?.propertyId === String(propertyId) || item?.propertyId === propertyId)
+    : false;
+
+  const handleWishlist = (e) => {
+    e?.stopPropagation?.();
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
+    }
+
+    dispatch(
+      optimisticToggle({
+        propertyId,
+        propertyType,
+      })
+    );
+    dispatch(
+      toggleWishlist({
+        propertyId,
+        propertyType,
+        userId: currentUser._id,
+      })
+    );
+  };
 
   // Mock multiple images for carousel
   const images = [
@@ -143,10 +182,7 @@ export function PropertyCard({
               size="icon"
               variant="secondary"
               className="w-8 h-8 bg-white/90 hover:bg-white shadow-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsFavorited(!isFavorited);
-              }}
+              onClick={handleWishlist}
             >
               <Heart
                 className={`w-4 h-4 ${

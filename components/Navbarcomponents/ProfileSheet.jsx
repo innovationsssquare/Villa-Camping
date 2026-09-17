@@ -52,7 +52,9 @@ export function ProfileSheet() {
   const wishlistItems = useSelector((state) => state?.wishlist?.wishlists || []);
   const bookings = useSelector((state) => state?.myBookings?.bookings || []);
 
-  const wishlistCount = wishlistItems?.length || wishlistIds?.length || 0;
+  const wishlistCount =
+    wishlistItems?.length ||
+    (wishlistIds ? new Set(wishlistIds.map((id) => (id.includes(":") ? id.split(":")[1] : id))).size : 0);
   const bookingsCount = bookings?.length || 0;
 
   // Load user data on mount and whenever sheet opens

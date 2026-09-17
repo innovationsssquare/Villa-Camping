@@ -15,11 +15,15 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
 
 export function PropertyCard({ property }) {
-  const [isLiked, setIsLiked] = useState(false);
+  const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(null);
   const [touchEnd, setTouchEnd] = useState(null);
@@ -30,6 +34,39 @@ export function PropertyCard({ property }) {
     (state) => state.booking || {}
   );
   const categories = useSelector((state) => state.category?.categories || []);
+
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+  const propertyId = property?.id || property?._id;
+  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+
+  const isLiked = Array.isArray(wishlistIds) && propertyId
+    ? wishlistIds.includes(String(propertyId)) ||
+      wishlistIds.includes(`${propertyType?.toLowerCase()}:${propertyId}`) ||
+      wishlistIds.some((item) => item?.propertyId === String(propertyId) || item?.propertyId === propertyId)
+    : false;
+
+  const handleWishlist = (e) => {
+    e?.stopPropagation?.();
+    const currentUser = getStoredUser();
+    if (!currentUser?._id) {
+      openAuthModal();
+      return;
+    }
+
+    dispatch(
+      optimisticToggle({
+        propertyId,
+        propertyType,
+      })
+    );
+    dispatch(
+      toggleWishlist({
+        propertyId,
+        propertyType,
+        userId: currentUser._id,
+      })
+    );
+  };
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
@@ -110,7 +147,7 @@ export function PropertyCard({ property }) {
           isIconOnly
           variant="flat"
           className="bg-white/90 backdrop-blur-sm hover:bg-white rounded-full h-8 w-8"
-          onPress={() => setIsLiked(!isLiked)}
+          onPress={handleWishlist}
         >
           <Heart
             className={cn(

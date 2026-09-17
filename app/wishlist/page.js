@@ -23,17 +23,29 @@ import { NotificationSheet } from "@/components/Navbarcomponents/Notificationshe
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
 import { Button } from "@/components/ui/button";
 import { addToast } from "@heroui/react";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
+import { fetchWishlistIds } from "@/Redux/Slices/wishlistSlice";
 
 export default function WishlistPage() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { openAuthModal } = useAuthModal();
   const { wishlists, wishloading } = useSelector((state) => state.wishlist || {});
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoaded, setAuthLoaded] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    dispatch(fetchmyWishlists());
+    const user = getStoredUser();
+    setCurrentUser(user);
+    setAuthLoaded(true);
+    if (user?._id) {
+      dispatch(fetchmyWishlists(user._id));
+      dispatch(fetchWishlistIds(user._id));
+    }
   }, [dispatch]);
 
   const validWishlistItems = useMemo(() => {
@@ -194,7 +206,31 @@ export default function WishlistPage() {
         )}
 
         {/* Wishlist Items Grid */}
-        {wishloading ? (
+        {authLoaded && !currentUser?._id ? (
+          <div className="bg-white rounded-3xl p-8 sm:p-14 border border-neutral-200/90 text-center max-w-xl mx-auto shadow-2xs space-y-4 my-8">
+            <div className="w-16 h-16 rounded-full bg-orange-50 border border-orange-200 flex items-center justify-center text-[#ff6900] mx-auto shadow-xs">
+              <Heart className="w-8 h-8 text-[#ff6900] fill-orange-100" />
+            </div>
+
+            <div className="space-y-1.5">
+              <h3 className="text-xl sm:text-2xl font-extrabold text-neutral-900">
+                Sign In to View Your Wishlist
+              </h3>
+              <p className="text-xs sm:text-sm text-neutral-500 max-w-md mx-auto leading-relaxed">
+                Your saved luxury villas and camping retreats are securely tied to your account. Sign in to view and manage your saved stays.
+              </p>
+            </div>
+
+            <div className="pt-4">
+              <Button
+                onClick={() => openAuthModal({ returnUrl: "/wishlist" })}
+                className="bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-bold px-8 py-3.5 rounded-full shadow-md transition-all cursor-pointer"
+              >
+                Sign In / Register
+              </Button>
+            </div>
+          </div>
+        ) : wishloading ? (
           <div className="flex flex-col items-center justify-center min-h-[45vh] space-y-3">
             <ButtonLoader />
             <p className="text-xs text-neutral-400 font-medium">Fetching your saved luxury stays...</p>

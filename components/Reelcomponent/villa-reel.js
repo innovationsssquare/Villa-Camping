@@ -24,6 +24,8 @@ import {
   RefreshCcw,
 } from "lucide-react";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
+import { useAuthModal } from "@/context/AuthModalContext";
+import { getStoredUser } from "@/lib/auth";
 
 export default function VillaReel({ villas = [] }) {
   const router = useRouter();
@@ -37,10 +39,10 @@ export default function VillaReel({ villas = [] }) {
   const [duration, setDuration] = useState(0);
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
+  const { openAuthModal } = useAuthModal();
 
   // Redux Wishlist integration
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
-  const user = useSelector((state) => state.auth?.user || null);
 
   const containerRef = useRef(null);
   const videoRefs = useRef([]);
@@ -48,45 +50,23 @@ export default function VillaReel({ villas = [] }) {
   const lastTapRef = useRef(0);
 
   const currentVilla = currentIndex < villas.length ? villas[currentIndex] : null;
-  const isAtEndSlide = currentIndex >= villas.length;
 
-  // Unconditionally stop & silence all video elements
+  // Stop all video instances cleanly
   const stopAllVideos = useCallback(() => {
     videoRefs.current.forEach((video) => {
       if (video) {
-        try {
-          video.pause();
-          video.muted = true;
-        } catch (e) {}
+        video.pause();
+        video.currentTime = 0;
       }
     });
-    setIsPlaying(false);
   }, []);
 
-  // Safe navigation back to previous route or Home
-  const handleBack = useCallback(() => {
-    stopAllVideos();
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
-    } else {
-      router.push("/");
-    }
-  }, [router, stopAllVideos]);
-
-  // Route map for property types
-  const getPropertyRoute = (type) => {
-    const t = (type || "villa").toLowerCase();
-    if (t.includes("camp")) return "Camping";
-    if (t.includes("cottage")) return "Cottage";
-    if (t.includes("hotel")) return "Hotel";
-    return "Villa";
-  };
-
-  const navigateToProperty = useCallback(() => {
+  // Safe category navigation
+  const handleViewVilla = useCallback(() => {
     if (!currentVilla) return;
     stopAllVideos();
     const id = currentVilla.id || currentVilla._id;
-    const routeType = getPropertyRoute(currentVilla.propertyType);
+    const routeType = getCategoryRouteName(currentVilla.propertyType || "villa");
     router.push(`/view-${routeType}/${id}`);
   }, [currentVilla, router, stopAllVideos]);
 
@@ -96,10 +76,11 @@ export default function VillaReel({ villas = [] }) {
     const propertyId = currentVilla.id || currentVilla._id;
     const propertyType = currentVilla.propertyType || "villa";
     const key = `${propertyType.toLowerCase()}:${propertyId}`;
+    const rawId = String(propertyId);
     return (
-      wishlistIds.includes(propertyId) ||
+      wishlistIds.includes(rawId) ||
       wishlistIds.includes(key) ||
-      wishlistIds.some((item) => item?.propertyId === propertyId)
+      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === propertyId)
     );
   }, [wishlistIds, currentVilla]);
 
@@ -108,6 +89,12 @@ export default function VillaReel({ villas = [] }) {
     (e) => {
       e?.stopPropagation?.();
       if (!currentVilla) return;
+
+      const currentUser = getStoredUser();
+      if (!currentUser?._id) {
+        openAuthModal();
+        return;
+      }
 
       const propertyId = currentVilla.id || currentVilla._id;
       const propertyType = currentVilla.propertyType || "villa";
@@ -119,17 +106,15 @@ export default function VillaReel({ villas = [] }) {
         })
       );
 
-      if (user?._id) {
-        dispatch(
-          toggleWishlist({
-            propertyId,
-            propertyType,
-            userId: user._id,
-          })
-        );
-      }
+      dispatch(
+        toggleWishlist({
+          propertyId,
+          propertyType,
+          userId: currentUser._id,
+        })
+      );
     },
-    [currentVilla, dispatch, user]
+    [currentVilla, dispatch, openAuthModal]
   );
 
   // Format currency
