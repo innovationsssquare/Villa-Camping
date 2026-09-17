@@ -15,7 +15,7 @@ import {
   optimisticToggle,
   fetchWishlistIds,
 } from "@/Redux/Slices/wishlistSlice";
-import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { saveRecentlyVisited } from "@/lib/recentlyVisited";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
@@ -45,7 +45,7 @@ export function PropertyCard({ property }) {
   // Wishlist state
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property?._id || property?.id;
-  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+  const propertyType = getCleanPropertyType(property, [], selectedCategoryName);
 
   const isLiked = useMemo(() => {
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;

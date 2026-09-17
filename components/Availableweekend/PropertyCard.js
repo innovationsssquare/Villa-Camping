@@ -125,7 +125,7 @@ export default function PropertyCardnew({ property }) {
   // Wishlist Redux integration
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property?.id || property?._id;
-  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+  const propertyType = getCategoryRouteName(property, categories, selectedCategoryName);
 
   const isLiked = useMemo(() => {
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;

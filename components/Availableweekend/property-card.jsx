@@ -16,7 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
@@ -37,7 +37,7 @@ export function PropertyCard({ property }) {
 
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property?.id || property?._id;
-  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+  const propertyType = getCleanPropertyType(property, categories, selectedCategoryName);
 
   const isLiked = Array.isArray(wishlistIds) && propertyId
     ? wishlistIds.includes(String(propertyId)) ||

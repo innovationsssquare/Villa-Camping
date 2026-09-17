@@ -21,6 +21,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
+import { getCleanPropertyType } from "@/lib/categoryUtils";
 
 export function PropertyCard({
   property,
@@ -34,7 +35,7 @@ export function PropertyCard({
 
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property?.id || property?._id;
-  const propertyType = property?.propertyType || property?.type || property?.category || "villa";
+  const propertyType = getCleanPropertyType(property);
 
   const isFavorited = Array.isArray(wishlistIds) && propertyId
     ? wishlistIds.includes(String(propertyId)) ||

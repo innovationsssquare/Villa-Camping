@@ -16,7 +16,7 @@ import { getDisplayPrice } from "./getDisplayPrice";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
-import { buildPropertyViewUrl } from "@/lib/categoryUtils";
+import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
 
@@ -42,7 +42,7 @@ export const PropertyCard = ({
   // Redux Wishlist integration
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property.id || property._id;
-  const propertyType = property.type || property.category || "villa";
+  const propertyType = getCleanPropertyType(property, categories, selectedCategoryName);
 
   const isLiked = useMemo(() => {
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
