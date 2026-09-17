@@ -513,5 +513,13 @@ div.spinner div.bar12 {
   }
 }
 
-
-
+/* UI Button and Action SVG defaults (safe alternative to arbitrary [&_svg] selectors) */
+button > svg,
+[role="button"] > svg,
+[data-slot="dialog-close"] > svg,
+[data-slot="dropdown-menu-item"] > svg,
+[data-slot="select-trigger"] > svg,
+[data-slot="tabs-trigger"] > svg {
+  pointer-events: none;
+  flex-shrink: 0;
+}
