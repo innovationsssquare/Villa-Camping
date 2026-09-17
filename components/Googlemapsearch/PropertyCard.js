@@ -202,7 +202,7 @@ export const PropertyCard = ({
     return (
       <div
         onClick={navigateToProperty}
-        className="group/popup relative w-full sm:w-[380px] md:w-[410px] h-[126px] sm:h-[132px] bg-white rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in slide-in-from-bottom-3 duration-250 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all flex flex-row items-stretch"
+        className="group/popup relative w-full sm:w-[380px] md:w-[410px] h-[126px] sm:h-[132px] bg-white rounded-3xl shadow-[0_12px_36px_rgba(0,0,0,0.22)] overflow-hidden border border-neutral-200/90 animate-in fade-in slide-in-from-bottom-3 duration-250 cursor-pointer select-none hover:shadow-[0_16px_40px_rgba(0,0,0,0.28)] transition-all mb-8 flex flex-row items-stretch"
       >
         {/* Left Side: Square Thumbnail with Close X at Top-Left */}
         <div className="relative w-[126px] sm:w-[132px] h-full shrink-0 bg-neutral-100 overflow-hidden">
@@ -265,11 +265,10 @@ export const PropertyCard = ({
                 aria-label="Wishlist"
               >
                 <Heart
-                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${
-                    isLiked
-                      ? "fill-[#ff6900] text-[#ff6900]"
-                      : "text-neutral-700 stroke-[2]"
-                  }`}
+                  className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-colors ${isLiked
+                    ? "fill-[#ff6900] text-[#ff6900]"
+                    : "text-neutral-700 stroke-[2]"
+                    }`}
                 />
               </button>
             </div>
