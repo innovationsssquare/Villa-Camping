@@ -93,14 +93,14 @@ export function AppHeader() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 w-full px-4 py-2.5 z-50 transition-transform duration-300 ease-in-out md:hidden shadow-2xs border-b border-neutral-150",
+        "fixed top-0 left-0 right-0 w-full rounded-b-xl px-3 pt-1 pb-1.5 z-50 transition-transform  duration-300 ease-in-out md:hidden shadow-xs",
         isVisible
           ? "translate-y-0 bg-white/95 backdrop-blur-md"
-          : "-translate-y-full bg-white"
+          : "-translate-y-8 bg-white"
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5 min-w-0">
+        <div className="flex items-center gap-1.5">
           <UserSidebar />
           {isLocationPage ? (
             <div className="flex items-center gap-1 text-[10px]">
@@ -119,7 +119,7 @@ export function AppHeader() {
           ) : null}
         </div>
 
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1.5">
           <NotificationSheet />
         </div>
       </div>
