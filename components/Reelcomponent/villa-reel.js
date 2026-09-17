@@ -73,13 +73,15 @@ export default function VillaReel({ villas = [] }) {
   }, [router, stopAllVideos]);
 
   // Safe category navigation
-  const handleViewVilla = useCallback(() => {
+  const navigateToProperty = useCallback(() => {
     if (!currentVilla) return;
     stopAllVideos();
     const id = currentVilla.id || currentVilla._id;
     const routeType = getCategoryRouteName(currentVilla);
     router.push(`/view-${routeType}/${id}`);
   }, [currentVilla, router, stopAllVideos]);
+
+  const handleViewVilla = navigateToProperty;
 
   // Check if current villa is liked
   const isCurrentLiked = useMemo(() => {
