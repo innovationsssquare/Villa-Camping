@@ -26,6 +26,7 @@ import {
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
+import { getCategoryRouteName, getCleanPropertyType } from "@/lib/categoryUtils";
 
 export default function VillaReel({ villas = [] }) {
   const router = useRouter();
@@ -61,12 +62,22 @@ export default function VillaReel({ villas = [] }) {
     });
   }, []);
 
+  // Back navigation handler
+  const handleBack = useCallback(() => {
+    stopAllVideos();
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  }, [router, stopAllVideos]);
+
   // Safe category navigation
   const handleViewVilla = useCallback(() => {
     if (!currentVilla) return;
     stopAllVideos();
     const id = currentVilla.id || currentVilla._id;
-    const routeType = getCategoryRouteName(currentVilla.propertyType || "villa");
+    const routeType = getCategoryRouteName(currentVilla);
     router.push(`/view-${routeType}/${id}`);
   }, [currentVilla, router, stopAllVideos]);
 
@@ -74,7 +85,7 @@ export default function VillaReel({ villas = [] }) {
   const isCurrentLiked = useMemo(() => {
     if (!currentVilla || !wishlistIds || !Array.isArray(wishlistIds)) return false;
     const propertyId = currentVilla.id || currentVilla._id;
-    const propertyType = currentVilla.propertyType || "villa";
+    const propertyType = getCleanPropertyType(currentVilla);
     const key = `${propertyType.toLowerCase()}:${propertyId}`;
     const rawId = String(propertyId);
     return (
@@ -97,7 +108,7 @@ export default function VillaReel({ villas = [] }) {
       }
 
       const propertyId = currentVilla.id || currentVilla._id;
-      const propertyType = currentVilla.propertyType || "villa";
+      const propertyType = getCleanPropertyType(currentVilla);
 
       dispatch(
         optimisticToggle({
