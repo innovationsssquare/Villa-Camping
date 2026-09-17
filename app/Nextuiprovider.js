@@ -75,7 +75,21 @@ export function NextuiProviderWrapper({ children }) {
           {hideChrome(pathname) ? null : <Navbar />}
           {hideMobileHeader(pathname) ? null : <AppHeader />}
           <div className="z-[400]">
-            <ToastProvider placement={"top-center"} />
+            <ToastProvider
+              placement="top-center"
+              toastOffset={14}
+              toastProps={{
+                classNames: {
+                  base: "max-w-[92vw] sm:max-w-md py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl sm:rounded-2xl shadow-lg border border-black/5 dark:border-white/10 backdrop-blur-md",
+                  content: "gap-x-2.5 sm:gap-x-3 items-center",
+                  title: "text-xs sm:text-sm font-bold tracking-tight text-foreground leading-snug",
+                  description: "text-[11px] sm:text-xs text-default-500 leading-normal mt-0.5",
+                  icon: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
+                  loadingComponent: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
+                  closeButton: "w-5 h-5 -right-1 -top-1 sm:-right-2 sm:-top-2 text-xs",
+                },
+              }}
+            />
           </div>
           {children}
           {hideChrome(pathname) ? null : <BottomNav />}

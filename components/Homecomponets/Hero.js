@@ -102,18 +102,6 @@ export default function Hero() {
       }
     }
 
-    if (!checkin || !checkout || !isGuestSelected) {
-      addToast({
-        title: "Select stay dates & guests",
-        description: "Please select your check-in, check-out dates and guests before exploring stays.",
-        color: "warning",
-      });
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      return;
-    }
-
     const params = new URLSearchParams();
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);

@@ -208,75 +208,10 @@ export default function AirbnbNavbar() {
   };
 
   const handleGuestsClick = () => {
-    if (!checkin) {
-      addToast({
-        title: "Select check-in date first",
-        description: "Please choose your arrival date before adding guests",
-        color: "warning",
-      });
-      setActiveDropdown("checkin");
-      setFocusedSide("checkin");
-      return;
-    }
-    if (!checkout) {
-      addToast({
-        title: "Select check-out date first",
-        description: "Please choose your departure date before proceeding to guest selection",
-        color: "warning",
-      });
-      setActiveDropdown("checkout");
-      setFocusedSide("checkout");
-      return;
-    }
     setActiveDropdown(activeDropdown === "guests" ? null : "guests");
   };
 
-  // Enforce validation: Never allow "guests" dropdown to stay active if check-out date is missing
-  useEffect(() => {
-    if (activeDropdown === "guests" && (!checkin || !checkout)) {
-      if (!checkin) {
-        setActiveDropdown("checkin");
-        setFocusedSide("checkin");
-      } else {
-        setActiveDropdown("checkout");
-        setFocusedSide("checkout");
-      }
-    }
-  }, [activeDropdown, checkin, checkout]);
-
   const handleSearch = async () => {
-    if (!checkin) {
-      addToast({
-        title: "Select check-in date",
-        description: "Please choose your arrival date before searching stays",
-        color: "warning",
-      });
-      setActiveDropdown("checkin");
-      setFocusedSide("checkin");
-      return;
-    }
-
-    if (!checkout) {
-      addToast({
-        title: "Select check-out date",
-        description: "Please choose a check-out date to complete your search dates",
-        color: "warning",
-      });
-      setActiveDropdown("checkout");
-      setFocusedSide("checkout");
-      return;
-    }
-
-    if (!isGuestSelected) {
-      addToast({
-        title: "Select guests",
-        description: "Please specify number of guests for your stay",
-        color: "warning",
-      });
-      setActiveDropdown("guests");
-      return;
-    }
-
     setIsSearching(true);
     setActiveDropdown(null);
     if (isScrolled) {

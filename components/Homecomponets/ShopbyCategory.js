@@ -90,18 +90,6 @@ const ShopbyCategory = () => {
     dispatch(setSelectedCategory(id === "all-stays" ? null : id));
     dispatch(setSelectedCategoryname(name));
 
-    if (!checkin || !checkout || !isGuestSelected) {
-      addToast({
-        title: "Select stay dates & guests",
-        description: `Please select your check-in, check-out dates and guests to view available ${name} stays.`,
-        color: "warning",
-      });
-      if (typeof window !== "undefined") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
-      return;
-    }
-
     const params = new URLSearchParams();
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);

@@ -25,16 +25,31 @@ const mapVariantToColor = (variant) => {
  * Unified addToast function delegating to HeroUI Toast (same as Login modal)
  */
 export const addToast = (props = {}) => {
+  const defaultClassNames = {
+    title: "text-xs sm:text-sm font-bold tracking-tight leading-snug",
+    description: "text-[11px] sm:text-xs leading-normal mt-0.5",
+    icon: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
+  };
+
   if (typeof props === "string") {
-    return heroAddToast({ title: props, color: "primary" });
+    return heroAddToast({
+      title: props,
+      color: "primary",
+      classNames: defaultClassNames,
+    });
   }
 
   const color = props.color || mapVariantToColor(props.variant);
   return heroAddToast({
+    ...props,
     title: props.title,
     description: props.description,
     color,
-    timeout: props.duration || 4000,
+    timeout: props.duration || props.timeout || 4000,
+    classNames: {
+      ...defaultClassNames,
+      ...(props.classNames || {}),
+    },
   });
 };
 

@@ -182,36 +182,6 @@ export default function SearchStayPage() {
   };
 
   const handleSearch = () => {
-    if (!checkin) {
-      addToast({
-        title: "Select check-in date",
-        description: "Please choose your arrival date before searching stays",
-        color: "warning",
-      });
-      router.push("/date-selection");
-      return;
-    }
-
-    if (!checkout) {
-      addToast({
-        title: "Select check-out date",
-        description: "Please choose your departure date to complete search dates",
-        color: "warning",
-      });
-      router.push("/date-selection");
-      return;
-    }
-
-    if (!isGuestSelected) {
-      addToast({
-        title: "Select guests",
-        description: "Please specify number of guests for your stay",
-        color: "warning",
-      });
-      setIsGuestDrawerOpen(true);
-      return;
-    }
-
     setIsSearching(true);
 
     try {

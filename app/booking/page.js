@@ -30,6 +30,7 @@ import {
   Phone,
   HelpCircle,
   ArrowUpRight,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -41,9 +42,62 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
 import { ReviewDrawer } from "./Review-drawer";
 import { DisputeDrawer } from "./Dispute-drawer";
+import { DisputeTrackerModal } from "./Dispute-tracker-modal";
 import { GetCustomerDisputesAPI } from "@/lib/API/Dispute/Dispute";
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
 import { addToast } from "@heroui/react";
+
+/**
+ * Resolves exact GPS coordinates from property or booking records.
+ * Supports GeoJSON [longitude, latitude], standard [lat, lng], or { lat, lng } object.
+ */
+export function extractCoordinates(propertyId, booking) {
+  const candidates = [
+    propertyId?.coordinates,
+    propertyId?.location?.coordinates,
+    propertyId?.address?.coordinates,
+    booking?.coordinates,
+    booking?.location?.coordinates,
+  ];
+
+  for (const candidate of candidates) {
+    if (Array.isArray(candidate) && candidate.length >= 2) {
+      const a = Number(candidate[0]);
+      const b = Number(candidate[1]);
+      if (!isNaN(a) && !isNaN(b) && (a !== 0 || b !== 0)) {
+        // GeoJSON standard is [longitude, latitude], India long is ~68-98, lat is ~8-38
+        if (a > 50 && b < 50) {
+          return { lat: b, lng: a };
+        }
+        return { lat: a, lng: b };
+      }
+    } else if (candidate && typeof candidate === "object") {
+      const lat = Number(candidate.lat ?? candidate.latitude);
+      const lng = Number(candidate.lng ?? candidate.longitude);
+      if (!isNaN(lat) && !isNaN(lng) && (lat !== 0 || lng !== 0)) {
+        return { lat, lng };
+      }
+    } else if (typeof candidate === "string" && candidate.includes(",")) {
+      const parts = candidate.split(",").map((s) => Number(s.trim()));
+      if (parts.length >= 2 && !isNaN(parts[0]) && !isNaN(parts[1])) {
+        if (parts[0] > 50 && parts[1] < 50) return { lat: parts[1], lng: parts[0] };
+        return { lat: parts[0], lng: parts[1] };
+      }
+    }
+  }
+
+  const directLat = Number(
+    propertyId?.lat ?? propertyId?.latitude ?? booking?.lat ?? booking?.latitude
+  );
+  const directLng = Number(
+    propertyId?.lng ?? propertyId?.longitude ?? booking?.lng ?? booking?.longitude
+  );
+  if (!isNaN(directLat) && !isNaN(directLng) && (directLat !== 0 || directLng !== 0)) {
+    return { lat: directLat, lng: directLng };
+  }
+
+  return null;
+}
 
 const StatusBadge = ({ status, isPastStay }) => {
   const s = (status || "confirmed").toLowerCase();
@@ -100,6 +154,8 @@ const BookingCard = ({
   onWriteReview,
   onRaiseDispute,
   onPaymentSuccess,
+  customerDisputes = [],
+  onTrackDispute,
 }) => {
   const [showPriceBreakdown, setShowPriceBreakdown] = useState(false);
   const [copiedId, setCopiedId] = useState(false);
@@ -184,6 +240,14 @@ const BookingCard = ({
     ) {
       return propertyId.location;
     }
+    if (typeof propertyId?.address === "object" && propertyId?.address) {
+      const addrParts = [
+        propertyId.address.street,
+        propertyId.address.city,
+        propertyId.address.state,
+      ].filter(Boolean);
+      if (addrParts.length > 0) return addrParts.join(", ");
+    }
     return "Maharashtra, India";
   }, [propertyId]);
 
@@ -219,6 +283,13 @@ const BookingCard = ({
         )
       )
       : 1;
+
+  const existingDispute = useMemo(() => {
+    if (!customerDisputes || !Array.isArray(customerDisputes) || !_id) return null;
+    return customerDisputes.find(
+      (d) => String(d.bookingId?._id || d.bookingId) === String(_id)
+    );
+  }, [customerDisputes, _id]);
 
   const pricingDetails = pricing || {
     subtotal: 0,
@@ -371,11 +442,21 @@ const BookingCard = ({
   };
 
   const handleOpenMaps = () => {
-    const query = encodeURIComponent(`${propertyName}, ${locationText}`);
-    window.open(
-      `https://www.google.com/maps/search/?api=1&query=${query}`,
-      "_blank"
-    );
+    const coords = extractCoordinates(propertyId, booking);
+    if (coords && coords.lat && coords.lng) {
+      // Use exact GPS coordinates for precise Google Maps navigation directions
+      window.open(
+        `https://www.google.com/maps/dir/?api=1&destination=${coords.lat},${coords.lng}`,
+        "_blank"
+      );
+    } else {
+      // Fallback to property title & location search query
+      const query = encodeURIComponent(`${propertyName}, ${locationText}`);
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${query}`,
+        "_blank"
+      );
+    }
   };
 
   const isCompleted = (status || "").toLowerCase() === "completed";
@@ -406,15 +487,31 @@ const BookingCard = ({
           </div>
         </div>
 
+        {/* Absolute Directions Floating Icon Card */}
+        <button
+          type="button"
+          onClick={handleOpenMaps}
+          className="absolute top-11 sm:top-12 right-3 z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-full bg-white/95 hover:bg-white text-neutral-900 backdrop-blur-md border border-white/50 shadow-md text-[11px] font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer group"
+          title="Open directions in Google Maps"
+          aria-label="Open directions in Google Maps"
+        >
+          <Navigation className="w-3 h-3 text-[#ff6900] fill-[#ff6900]" />
+          <span>Directions</span>
+        </button>
+
         {/* Bottom Property Title & Location Over Image */}
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2 text-white z-10">
           <div className="min-w-0 flex-1">
             <h3 className="text-base font-extrabold tracking-tight truncate drop-shadow-sm text-white">
               {propertyName}
             </h3>
-            <div className="flex items-center gap-1 text-xs text-neutral-200 mt-0.5 truncate">
+            <div
+              onClick={handleOpenMaps}
+              className="flex items-center gap-1 text-xs text-neutral-200 hover:text-white mt-0.5 truncate cursor-pointer transition-colors"
+              title="Open directions in Google Maps"
+            >
               <MapPin className="w-3 h-3 text-[#ff6900] shrink-0" />
-              <span className="truncate text-[11px]">{locationText}</span>
+              <span className="truncate text-[11px] hover:underline underline-offset-2">{locationText}</span>
             </div>
           </div>
 
@@ -490,6 +587,33 @@ const BookingCard = ({
           </div>
         </div>
 
+        {/* Active Claim Tracker Alert on Booking Card */}
+        {existingDispute && (
+          <div
+            onClick={() => onTrackDispute && onTrackDispute(existingDispute)}
+            className="p-3 rounded-2xl bg-amber-50/90 border border-amber-200/90 flex items-center justify-between gap-2 text-xs text-amber-950 cursor-pointer hover:bg-amber-100/70 transition-all shadow-2xs group"
+            title="Click to track dispute progress"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <ShieldCheck className="w-4 h-4 text-amber-600 shrink-0" />
+              <div className="min-w-0">
+                <span className="font-extrabold text-neutral-900 block truncate text-[11.5px]">
+                  Claim #{existingDispute.disputeId || existingDispute._id?.slice(-6).toUpperCase()}: {(existingDispute.status || "Under Review").replace(/_/g, " ")}
+                </span>
+                <span className="text-[10.5px] text-amber-800 block truncate">
+                  {existingDispute.resolution?.amountRefunded > 0
+                    ? `Refund Approved: ₹${existingDispute.resolution.amountRefunded.toLocaleString("en-IN")}`
+                    : existingDispute.title || "Review in progress by support desk"}
+                </span>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-bold text-[#ff6900] group-hover:translate-x-0.5 transition-transform shrink-0">
+              <span>Track Status</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </div>
+          </div>
+        )}
+
         {/* Pricing Summary & Action Buttons */}
         <div className="flex items-center justify-between gap-3 pt-2 border-t border-neutral-150">
           <div>
@@ -553,15 +677,16 @@ const BookingCard = ({
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-1.5 shrink-0">
+            <div className="flex items-center gap-2 shrink-0">
+              {/* Directions CTA: Visible on desktop */}
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleOpenMaps}
-                className="rounded-xl text-xs font-semibold text-neutral-700 border-neutral-200 hover:bg-neutral-100 gap-1.5 h-8 sm:h-9 px-3 cursor-pointer"
+                className="hidden md:inline-flex rounded-xl text-xs font-semibold text-neutral-700 border-neutral-200 hover:bg-neutral-100 gap-1.5 h-8 sm:h-9 px-3 cursor-pointer shrink-0"
                 title="Open location on Google Maps"
               >
-                <Navigation className="w-3 h-3 text-[#ff6900]" />
+                <Navigation className="w-3.5 h-3.5 text-[#ff6900]" />
                 <span>Directions</span>
               </Button>
 
@@ -569,23 +694,36 @@ const BookingCard = ({
                 <Button
                   size="sm"
                   onClick={() => onWriteReview && onWriteReview(booking)}
-                  className="rounded-xl text-xs font-semibold bg-[#ff6900] hover:bg-[#e05d00] text-white gap-1 h-8 sm:h-9 px-3 cursor-pointer shadow-2xs"
+                  className="rounded-xl text-xs font-bold bg-[#ff6900] hover:bg-[#e05d00] text-white gap-1.5 h-8 sm:h-9 px-3.5 cursor-pointer shadow-2xs shrink-0"
                 >
-                  <Sparkles className="w-3 h-3" />
+                  <Sparkles className="w-3.5 h-3.5" />
                   <span>Review</span>
                 </Button>
               )}
 
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onRaiseDispute && onRaiseDispute(booking)}
-                className="rounded-xl text-xs font-semibold text-rose-600 border-rose-200 hover:bg-rose-50 gap-1 h-8 sm:h-9 px-2.5 cursor-pointer"
-                title="Report an issue with this stay"
-              >
-                <AlertCircle className="w-3 h-3" />
-                <span>Issue</span>
-              </Button>
+              {existingDispute ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onTrackDispute && onTrackDispute(existingDispute)}
+                  className="rounded-xl text-xs font-bold text-amber-800 border-amber-300 bg-amber-50 hover:bg-amber-100 gap-1.5 h-8 sm:h-9 px-3 cursor-pointer shrink-0 shadow-2xs"
+                  title="Track dispute resolution status"
+                >
+                  <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                  <span>Track Issue</span>
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onRaiseDispute && onRaiseDispute(booking)}
+                  className="rounded-xl text-xs font-bold text-rose-600 border-rose-200 hover:bg-rose-50 gap-1.5 h-8 sm:h-9 px-3 cursor-pointer shrink-0"
+                  title="Report an issue with this stay"
+                >
+                  <AlertCircle className="w-3.5 h-3.5" />
+                  <span>Report</span>
+                </Button>
+              )}
             </div>
           )}
         </div>
@@ -629,8 +767,10 @@ export default function BookingScreen() {
   const [activeTab, setActiveTab] = useState("all");
   const [reviewDrawerOpen, setReviewDrawerOpen] = useState(false);
   const [disputeDrawerOpen, setDisputeDrawerOpen] = useState(false);
+  const [disputeTrackerOpen, setDisputeTrackerOpen] = useState(false);
   const [selectedBookingForReview, setSelectedBookingForReview] = useState(null);
   const [selectedBookingForDispute, setSelectedBookingForDispute] = useState(null);
+  const [selectedDisputeForTracking, setSelectedDisputeForTracking] = useState(null);
   const [customerDisputes, setCustomerDisputes] = useState([]);
   const [disputesLoading, setDisputesLoading] = useState(false);
 
@@ -687,6 +827,11 @@ export default function BookingScreen() {
   const handleRaiseDispute = (booking) => {
     setSelectedBookingForDispute(booking);
     setDisputeDrawerOpen(true);
+  };
+
+  const handleTrackDispute = (dispute) => {
+    setSelectedDisputeForTracking(dispute);
+    setDisputeTrackerOpen(true);
   };
 
   const isCompletedByCheckout = (checkOut) => {
@@ -1055,12 +1200,13 @@ export default function BookingScreen() {
                         RESOLVED_SPLIT: "bg-indigo-50 text-indigo-800 border-indigo-200",
                         DISMISSED: "bg-neutral-100 text-neutral-800 border-neutral-200",
                       };
+                      const refundAmt = dispute.resolution?.amountRefunded || 0;
                       return (
                         <Card
                           key={dispute._id}
-                          className="border border-neutral-200/90 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xs bg-white space-y-3"
+                          className="border border-neutral-200/90 p-4 sm:p-5 rounded-2xl sm:rounded-3xl shadow-xs hover:shadow-md transition-all bg-white space-y-3.5"
                         >
-                          <div className="flex justify-between items-start">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-neutral-150 pb-3">
                             <div>
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="font-mono text-xs font-bold text-neutral-500">
@@ -1072,21 +1218,34 @@ export default function BookingScreen() {
                                     statusColorMap[dispute.status] || "bg-neutral-100 text-neutral-700"
                                   )}
                                 >
-                                  {dispute.status}
+                                  {dispute.status ? dispute.status.replace(/_/g, " ") : "OPEN"}
                                 </Badge>
                               </div>
                               <h4 className="font-bold text-base text-neutral-900">
                                 {dispute.propertyId?.name || dispute.propertyName || "Stay Claim"}
                               </h4>
                             </div>
-                            <div className="text-right">
-                              <span className="text-[10px] text-neutral-400 block">Claimed</span>
-                              <span className="font-extrabold text-rose-600 text-base">
-                                ₹{(dispute.disputedAmount || 0).toLocaleString("en-IN")}
-                              </span>
+                            <div className="flex items-center justify-between sm:justify-end gap-3">
+                              <div className="text-left sm:text-right">
+                                <span className="text-[10px] text-neutral-400 block uppercase font-bold">
+                                  {refundAmt > 0 ? "Refund Approved" : "Claimed Amount"}
+                                </span>
+                                <span className={cn("font-black text-base", refundAmt > 0 ? "text-emerald-600" : "text-rose-600")}>
+                                  ₹{(refundAmt > 0 ? refundAmt : dispute.disputedAmount || 0).toLocaleString("en-IN")}
+                                </span>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleTrackDispute(dispute)}
+                                className="rounded-xl text-xs font-bold bg-[#ff6900] hover:bg-[#e05d00] text-white gap-1.5 h-8 sm:h-9 px-3.5 cursor-pointer shadow-xs shrink-0"
+                              >
+                                <ShieldCheck className="w-3.5 h-3.5" />
+                                <span>Track Progress</span>
+                              </Button>
                             </div>
                           </div>
-                          <p className="text-xs text-neutral-600 bg-neutral-50 p-3 rounded-xl border border-neutral-150">
+
+                          <p className="text-xs text-neutral-600 bg-neutral-50 p-3 rounded-xl border border-neutral-150 leading-relaxed">
                             {dispute.description || "Issue filed regarding cleanliness, amenities or check-in."}
                           </p>
                         </Card>
@@ -1119,6 +1278,8 @@ export default function BookingScreen() {
                         booking={booking}
                         onWriteReview={handleWriteReview}
                         onRaiseDispute={handleRaiseDispute}
+                        customerDisputes={customerDisputes}
+                        onTrackDispute={handleTrackDispute}
                         onPaymentSuccess={() =>
                           customerId && dispatch(fetchMyBookings(customerId))
                         }
@@ -1173,6 +1334,11 @@ export default function BookingScreen() {
         onClose={() => setDisputeDrawerOpen(false)}
         booking={selectedBookingForDispute}
         onSuccess={() => customerId && loadCustomerDisputes(customerId)}
+      />
+      <DisputeTrackerModal
+        isOpen={disputeTrackerOpen}
+        onClose={() => setDisputeTrackerOpen(false)}
+        dispute={selectedDisputeForTracking}
       />
     </main>
   );
