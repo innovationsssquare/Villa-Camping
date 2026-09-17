@@ -1,10 +1,12 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Mywishlist } from "@/lib/API/User/User";
 
+import { BaseUrl } from "@/lib/API/Baseurl";
+
 /* ===============================
    Helpers
 ================================ */
-const API_BASE = process.env.NEXT_PUBLIC_PRODUCTION_URL;
+const API_BASE = BaseUrl;
 
 const normalizeKeys = (propertyType, propertyId) => {
   const type = (propertyType || "villa").toLowerCase();

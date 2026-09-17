@@ -87,6 +87,7 @@ export default function PropertyCardnew({ property }) {
   // Mobile carousel state (embla api from @/components/ui/carousel)
   const [mobileApi, setMobileApi] = useState(null);
   const [mobileCurrentIndex, setMobileCurrentIndex] = useState(0);
+  const currentMobileSlide = mobileCurrentIndex;
 
   // Video Reel Modal state
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
@@ -669,7 +670,7 @@ export default function PropertyCardnew({ property }) {
                     mobileApi?.scrollTo(index);
                   }}
                   className={`w-1.5 h-1.5 rounded-full transition-all ${
-                    index === currentMobileSlide ? "bg-white scale-125" : "bg-white/50"
+                    index === mobileCurrentIndex ? "bg-white scale-125" : "bg-white/50"
                   }`}
                   aria-label={`Go to slide ${index + 1}`}
                 />
