@@ -1,13 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Mywishlist } from "@/lib/API/User/User";
 
-import { BaseUrl } from "@/lib/API/Baseurl";
+import { BaseUrl, getBaseUrl } from "@/lib/API/Baseurl";
 
 /* ===============================
    Helpers
 ================================ */
-const API_BASE = BaseUrl;
-
 const normalizeKeys = (propertyType, propertyId) => {
   const type = (propertyType || "villa").toLowerCase();
   const rawId = String(propertyId);
@@ -26,7 +24,8 @@ export const toggleWishlist = createAsyncThunk(
     try {
       if (!userId) throw new Error("User authentication required");
 
-      const res = await fetch(`${API_BASE}/Wishlist/wishlist/toggle`, {
+      const baseUrl = getBaseUrl();
+      const res = await fetch(`${baseUrl}/Wishlist/wishlist/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -55,8 +54,9 @@ export const fetchWishlistIds = createAsyncThunk(
     try {
       if (!userId) return [];
 
+      const baseUrl = getBaseUrl();
       const res = await fetch(
-        `${API_BASE}/Wishlist/wishlist/ids/${userId}`,
+        `${baseUrl}/Wishlist/wishlist/ids/${userId}`,
         {
           method: "GET",
           headers: {
