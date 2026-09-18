@@ -527,7 +527,7 @@ const ResponsiveAuthModal = ({
 
               {/* Headline */}
               <h3 className="text-xl sm:text-[22px] font-serif font-bold text-white leading-tight drop-shadow-md mb-1.5">
-                Book a Room.<br />Enjoy A Villa Getaway
+                Book a Villa.<br />Enjoy A Villa Getaway
               </h3>
 
               {/* Subtitle */}
@@ -538,7 +538,7 @@ const ResponsiveAuthModal = ({
               {/* Price Pill with Dashed Border */}
               <div className="inline-block px-3 py-1 rounded-lg border border-dashed border-white/90 bg-black/25 backdrop-blur-xs">
                 <span className="text-xs font-semibold text-white tracking-wide">
-                  Rooms Starting at ₹4,999*
+                  Villas Starting at ₹4,999*
                 </span>
               </div>
             </div>

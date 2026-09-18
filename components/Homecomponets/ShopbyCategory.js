@@ -29,7 +29,6 @@ import VillaBanner from "@/public/Aboutusasset/Villabanner.jpg";
 import CampBanner from "@/public/Aboutusasset/Campbanner.jpg";
 import CottageBanner from "@/public/Aboutusasset/Cottagebanner.jpg";
 import HotelBanner from "@/public/Aboutusasset/Hotelbanner.jpg";
-import AllStaysBanner from "@/public/Homeasset/villa-hero.jpg";
 
 // Curated Category Metadata with Real Images
 const CATEGORY_META = {
@@ -63,15 +62,6 @@ const CATEGORY_META = {
   },
 };
 
-const ALL_STAYS_CARD = {
-  _id: "all-stays",
-  name: "All Stays",
-  subtitle: "500+ Curated Properties",
-  tag: "Full Catalog",
-  count: "500+ Stays",
-  realImage: AllStaysBanner,
-};
-
 const ShopbyCategory = () => {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -87,7 +77,7 @@ const ShopbyCategory = () => {
   }, [dispatch]);
 
   const handleSelectCategory = (id, name) => {
-    dispatch(setSelectedCategory(id === "all-stays" ? null : id));
+    dispatch(setSelectedCategory(id));
     dispatch(setSelectedCategoryname(name));
 
     const params = new URLSearchParams();
@@ -97,7 +87,7 @@ const ShopbyCategory = () => {
     if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
     const queryStr = params.toString();
 
-    const targetSlug = name === "All Stays" || id === "all-stays" ? "all" : name.toLowerCase();
+    const targetSlug = name ? name.toLowerCase() : "villa";
     router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
   };
 
@@ -115,9 +105,6 @@ const ShopbyCategory = () => {
   };
 
   const isSelected = (catName) => {
-    if (catName === "All Stays") {
-      return !selectedCategoryId || selectedCategoryName === "All Stays";
-    }
     return selectedCategoryName?.toLowerCase() === catName?.toLowerCase();
   };
 
@@ -175,91 +162,36 @@ const ShopbyCategory = () => {
 
         {/* Carousel: Small Mobile Cards (basis-[45%]), Multi-card on Tablet/Desktop */}
         {loading ? (
-          <div className="flex gap-2.5 sm:gap-4 overflow-hidden">
-            {[1, 2, 3, 4, 5].map((i) => (
+          <div className="flex gap-2.5 sm:gap-4 overflow-hidden md:justify-center">
+            {[1, 2, 3, 4].map((i) => (
               <div
                 key={i}
-                className="w-[145px] sm:w-1/3 lg:w-1/5 shrink-0 rounded-xl sm:rounded-2xl bg-neutral-100 h-36 sm:h-52 animate-pulse"
+                className="w-[145px] sm:w-1/3 md:w-1/4 max-w-[280px] shrink-0 rounded-xl sm:rounded-2xl bg-neutral-100 h-36 sm:h-52 animate-pulse"
               />
             ))}
           </div>
         ) : (
-          <Carousel
-            setApi={setCarouselApi}
-            opts={{
-              align: "start",
-              dragFree: true,
-              loop: false,
-            }}
-            className="w-full"
-          >
-            <CarouselContent className="-ml-2.5 sm:-ml-4">
+          <div className="w-full flex justify-center">
+            <Carousel
+              setApi={setCarouselApi}
+              opts={{
+                align: "start",
+                dragFree: true,
+                loop: false,
+              }}
+              className="w-full max-w-6xl mx-auto"
+            >
+              <CarouselContent className="-ml-2.5 sm:-ml-4 md:justify-center">
+                {/* Dynamic Categories with Real Photography */}
+                {displayCategories.map((category) => {
+                  const meta = getMeta(category.name);
+                  const selected = isSelected(category.name);
 
-              {/* 1. "All Stays" Primary Card with Real Image */}
-              <CarouselItem className="pl-2.5 sm:pl-4 basis-[45%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5">
-                <motion.div
-                  whileHover={{ y: -3 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={() => handleSelectCategory("all-stays", "All Stays")}
-                  className={`group relative flex flex-col rounded-xl sm:rounded-2xl overflow-hidden border transition-all duration-300 cursor-pointer h-full ${isSelected("All Stays")
-                    ? "border-[#ff6900] shadow-[0_6px_20px_rgba(255,105,0,0.18)] ring-2 ring-[#ff6900]/30"
-                    : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
-                    }`}
-                >
-                  {/* Real Image Container - Compact Height */}
-                  <div className="relative h-28 sm:h-36 md:h-44 lg:h-48 w-full overflow-hidden">
-                    <Image
-                      src={ALL_STAYS_CARD.realImage}
-                      alt="All Stays"
-                      fill
-                      sizes="(max-width: 640px) 45vw, (max-width: 1024px) 25vw, 20vw"
-                      className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
-                    />
-
-                    {/* Dark Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
-
-                    {/* Top Floating Badges */}
-                    <div className="absolute top-1.5 left-1.5 right-1.5 sm:top-2 sm:left-2 sm:right-2 flex items-center justify-between z-10">
-                      <span className="text-[8px] sm:text-[9px] md:text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-black/60 backdrop-blur-md text-white border border-white/20 shadow-2xs flex items-center gap-0.5">
-                        <Layers className="w-2.5 h-2.5 text-[#ff6900]" />
-                        <span className="hidden xs:inline">{ALL_STAYS_CARD.tag}</span>
-                        <span className="xs:hidden">All</span>
-                      </span>
-                      <span className="text-[8px] sm:text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[#ff6900] text-white shadow-2xs">
-                        {ALL_STAYS_CARD.count}
-                      </span>
-                    </div>
-
-                    {/* Bottom Category Info Overlaid on Photo */}
-                    <div className="absolute bottom-1.5 left-2 right-2 sm:bottom-2.5 sm:left-2.5 sm:right-2.5 z-10">
-                      <h3 className="text-white font-extrabold text-xs sm:text-sm md:text-base leading-tight drop-shadow-sm group-hover:text-orange-200 transition-colors">
-                        {ALL_STAYS_CARD.name}
-                      </h3>
-                      <p className="text-white/85 text-[9px] sm:text-[10px] md:text-xs mt-0.5 line-clamp-1 font-medium">
-                        {ALL_STAYS_CARD.subtitle}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Bottom Action Footer */}
-                  <div className="px-2.5 py-1.5 sm:py-2.5 bg-white flex items-center justify-between text-[10px] sm:text-xs font-semibold text-[#ff6900] group-hover:bg-orange-50/40 transition-colors">
-                    <span className="truncate">All stays</span>
-                    <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
-                  </div>
-                </motion.div>
-              </CarouselItem>
-
-              {/* 2. Dynamic Categories with Real Photography */}
-              {displayCategories.map((category) => {
-                const meta = getMeta(category.name);
-                const selected = isSelected(category.name);
-
-                return (
-                  <CarouselItem
-                    key={category._id || category.name}
-                    className="pl-2.5 sm:pl-4 basis-[45%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5"
-                  >
+                  return (
+                    <CarouselItem
+                      key={category._id || category.name}
+                      className="pl-2.5 sm:pl-4 basis-[45%] sm:basis-[30%] md:basis-1/4 lg:basis-1/4 max-w-[280px] md:max-w-none"
+                    >
                     <motion.div
                       whileHover={{ y: -3 }}
                       whileTap={{ scale: 0.98 }}
@@ -317,6 +249,7 @@ const ShopbyCategory = () => {
 
             </CarouselContent>
           </Carousel>
+          </div>
         )}
 
       </div>

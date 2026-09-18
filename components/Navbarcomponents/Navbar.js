@@ -227,9 +227,9 @@ export default function AirbnbNavbar() {
       const queryStr = params.toString();
 
       const targetSlug =
-        selectedCategoryName && selectedCategoryName !== "All Stays"
+        selectedCategoryName
           ? selectedCategoryName.toLowerCase()
-          : "all";
+          : "villa";
 
       router.push(`/category/${targetSlug}${queryStr ? `?${queryStr}` : ""}`);
     } catch (err) {

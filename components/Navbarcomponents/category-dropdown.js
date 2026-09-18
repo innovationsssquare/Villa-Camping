@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Search, Compass, Home, Tent, Trees, Hotel, Sparkles } from "lucide-react";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
-import { KNOWN_CATEGORY_IDS } from "@/lib/categoryUtils";
+import { KNOWN_CATEGORY_IDS, matchCategory } from "@/lib/categoryUtils";
 import Image from "next/image";
 
 export function CategorySearch({ onCategorySelect, isMobile = false }) {
@@ -14,13 +14,6 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
   const { categories, loading } = useSelector((state) => state.category);
 
   const defaultCategories = [
-    {
-      id: "all",
-      name: "All Stays",
-      description: "Anywhere in Maharashtra",
-      icon: Compass,
-      image: "/Productasset/Villaimg.png",
-    },
     {
       id: KNOWN_CATEGORY_IDS.VILLA,
       name: "Villas",
@@ -52,7 +45,7 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
   ];
 
   const handleSelect = (catId, catName) => {
-    let finalId = catId === "all" ? null : catId;
+    let finalId = catId;
     if (finalId) {
       const upper = String(finalId).trim().toUpperCase();
       if (KNOWN_CATEGORY_IDS[upper]) {
@@ -99,16 +92,15 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
         {searchTerm === "" ? (
           <div className="grid grid-cols-2 gap-3">
             {defaultCategories.map((item) => {
-              const matchedBackend = categories?.find(
-                (c) => c.name.toLowerCase() === item.name.toLowerCase()
-              );
+              const matchedBackend = matchCategory(item.name, categories);
               const targetId = matchedBackend ? matchedBackend._id : item.id;
+              const targetName = matchedBackend ? matchedBackend.name : item.name;
 
               return (
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => handleSelect(targetId, item.name)}
+                  onClick={() => handleSelect(targetId, targetName)}
                   className="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200/90 hover:border-black hover:shadow-sm transition-all duration-200 text-left cursor-pointer group bg-neutral-50/40 hover:bg-white"
                 >
                   <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:bg-black group-hover:text-white transition-colors shrink-0">

@@ -170,7 +170,7 @@ export default function SearchStayPage() {
   // Reset all filters
   const handleResetAll = () => {
     dispatch(setSelectedCategory(null));
-    dispatch(setSelectedCategoryname("All Stays"));
+    dispatch(setSelectedCategoryname(null));
     dispatch(setSelectedCategoryImage(null));
     dispatch(setCheckin(null));
     dispatch(setCheckout(null));
@@ -186,9 +186,9 @@ export default function SearchStayPage() {
 
     try {
       const targetSlug =
-        selectedCategoryName && selectedCategoryName !== "All Stays"
+        selectedCategoryName
           ? selectedCategoryName.toLowerCase()
-          : "all";
+          : "villa";
 
       const params = new URLSearchParams();
       if (checkin) params.set("checkin", checkin);
@@ -201,9 +201,9 @@ export default function SearchStayPage() {
     } catch (error) {
       console.error("Search error:", error);
       const targetSlug =
-        selectedCategoryName && selectedCategoryName !== "All Stays"
+        selectedCategoryName
           ? selectedCategoryName.toLowerCase()
-          : "all";
+          : "villa";
       router.push(`/category/${targetSlug}`);
     } finally {
       setIsSearching(false);
@@ -261,7 +261,7 @@ export default function SearchStayPage() {
             )
           }
           label="Stay Type"
-          value={selectedCategoryName || "All Stays"}
+          value={selectedCategoryName || "Select Stay Type"}
           subtitle="Villas, Campings, Cottages & Hotels"
           onClick={() => setIsCategoryDrawerOpen(true)}
         />

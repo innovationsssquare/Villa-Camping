@@ -51,15 +51,7 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
 
   // Merge API categories with rich descriptions and fallback icons
   const categoryList = useMemo(() => {
-    const list = [
-      {
-        _id: "all",
-        name: "All Stays",
-        description: "Browse all curated stays across Maharashtra",
-        icon: Compass,
-        image: "/Productasset/Villaimg.png",
-      },
-    ];
+    const list = [];
 
     if (categories && categories.length > 0) {
       categories.forEach((cat) => {
@@ -84,7 +76,7 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
         const meta = DEFAULT_METADATA[key];
         list.push({
           _id: key,
-          name: key.charAt(0).toUpperCase() + key.slice(1) + (key === "villa" || key === "cottage" || key === "hotel" ? "s" : ""),
+          name: key.charAt(0).toUpperCase() + key.slice(1),
           description: meta.description,
           icon: meta.icon,
           image: meta.defaultImg,
@@ -96,24 +88,16 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
   }, [categories]);
 
   const handleSelect = (category) => {
-    if (category._id === "all") {
-      dispatch(setSelectedCategory(null));
-      dispatch(setSelectedCategoryname("All Stays"));
-      dispatch(setSelectedCategoryImage("/Productasset/Villaimg.png"));
-    } else {
-      dispatch(setSelectedCategory(category._id));
-      dispatch(setSelectedCategoryname(category.name));
-      dispatch(setSelectedCategoryImage(category.image));
-    }
+    dispatch(setSelectedCategory(category._id));
+    dispatch(setSelectedCategoryname(category.name));
+    dispatch(setSelectedCategoryImage(category.image));
   };
 
   const isSelected = (cat) => {
-    if (cat._id === "all") {
-      return !selectedCategoryId || selectedCategoryName === "All Stays";
-    }
     return (
       selectedCategoryId === cat._id ||
-      selectedCategoryName?.toLowerCase() === cat.name?.toLowerCase()
+      (selectedCategoryName &&
+        selectedCategoryName.toLowerCase().startsWith(cat.name.toLowerCase().slice(0, 4)))
     );
   };
 

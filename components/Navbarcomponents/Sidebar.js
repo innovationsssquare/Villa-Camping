@@ -240,7 +240,7 @@ export function UserSidebar() {
               </button>
 
               <button
-                onClick={() => handleNavigate("/category/all")}
+                onClick={() => handleNavigate("/category/villa")}
                 className={cn(
                   "flex w-full items-center justify-between px-2.5 py-2 rounded-lg text-xs font-medium transition-all",
                   pathname.startsWith("/category") ? "bg-orange-50 text-[#ff6900] font-bold" : "text-neutral-700 hover:bg-neutral-50"
@@ -248,7 +248,7 @@ export function UserSidebar() {
               >
                 <div className="flex items-center gap-2">
                   <Compass className="w-3.5 h-3.5 text-neutral-500" />
-                  <span>All Stays</span>
+                  <span>Villas</span>
                 </div>
                 <ChevronRight className="w-3 h-3 text-neutral-400" />
               </button>

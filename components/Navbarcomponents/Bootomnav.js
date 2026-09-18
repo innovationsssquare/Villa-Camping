@@ -37,8 +37,8 @@ export function BottomNav() {
   }, [pathname]);
 
   const targetCategoryPath = selectedCategoryName
-    ? `/category/${selectedCategoryName}`
-    : "/category/all";
+    ? `/category/${selectedCategoryName.toLowerCase()}`
+    : "/category/villa";
 
   const navItems = [
     {

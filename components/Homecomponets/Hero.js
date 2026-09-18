@@ -52,8 +52,8 @@ const HERO_SLIDES = [
     title: "Unforgettable Getaways with Loved Ones",
     description:
       "Handpicked 3 to 7 BHK estates perfect for family reunions, celebrations, and friend trips.",
-    categorySlug: "all",
-    categoryName: "All Stays",
+    categorySlug: "villa",
+    categoryName: "Villas",
     highlight: "Group Estates",
   },
 ];
@@ -61,10 +61,10 @@ const HERO_SLIDES = [
 const POPULAR_DESTINATIONS = [
   { name: "Lonavala", emoji: "📍", slug: "villa" },
   { name: "Pawna Lake", emoji: "🌊", slug: "camp" },
-  { name: "Alibaug", emoji: "🏖️", slug: "all" },
+  { name: "Alibaug", emoji: "🏖️", slug: "villa" },
   { name: "Cottages", emoji: "🏡", slug: "cottage" },
   { name: "Private Pool", emoji: "🏊", slug: "villa" },
-  { name: "Pet Friendly", emoji: "🐾", slug: "all" },
+  { name: "Hotels", emoji: "🏨", slug: "hotel" },
 ];
 
 export default function Hero() {

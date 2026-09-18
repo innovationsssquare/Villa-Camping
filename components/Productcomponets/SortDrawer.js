@@ -27,6 +27,7 @@ import {
   setPropertyType,
   setSortBy,
 } from "@/Redux/Slices/propertyFilterSlice";
+import { normalizeCategoryStem } from "@/lib/categoryUtils";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -54,7 +55,9 @@ export function SortDrawer({ trigger }) {
   const dispatch = useDispatch();
 
   const { categories } = useSelector((state) => state.category);
-  const { selectedCategoryId } = useSelector((state) => state.booking);
+  const { selectedCategoryId, selectedCategoryName } = useSelector(
+    (state) => state.booking
+  );
   const { selectedPropertyTypes, sortBy, priceMin, priceMax } = useSelector(
     (state) => state.propertyFilter
   );
@@ -62,9 +65,19 @@ export function SortDrawer({ trigger }) {
   const [localSort, setLocalSort] = useState(sortBy);
 
   const activeCategory = useMemo(() => {
-    if (!selectedCategoryId || !categories?.length) return null;
-    return categories.find((c) => c._id === selectedCategoryId) || null;
-  }, [selectedCategoryId, categories]);
+    if (!categories?.length) return null;
+    return (
+      categories.find((c) => c._id === selectedCategoryId) ||
+      (selectedCategoryName
+        ? categories.find(
+            (c) =>
+              normalizeCategoryStem(c.name) ===
+              normalizeCategoryStem(selectedCategoryName)
+          )
+        : null) ||
+      null
+    );
+  }, [selectedCategoryId, selectedCategoryName, categories]);
 
   const availableSubtypes = useMemo(() => {
     if (!activeCategory) return [];
@@ -134,17 +147,15 @@ export function SortDrawer({ trigger }) {
                       setLocalSort(opt.value);
                       dispatch(setSortBy(opt.value));
                     }}
-                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${
-                      isSelected
+                    className={`p-2.5 rounded-xl border text-left transition-all cursor-pointer ${isSelected
                         ? "bg-orange-50/70 border-[#ff6900] shadow-2xs"
                         : "bg-neutral-50 hover:bg-neutral-100/80 border-neutral-200/80"
-                    }`}
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
-                        className={`text-xs font-bold ${
-                          isSelected ? "text-[#ff6900]" : "text-neutral-800"
-                        }`}
+                        className={`text-xs font-bold ${isSelected ? "text-[#ff6900]" : "text-neutral-800"
+                          }`}
                       >
                         {opt.label}
                       </span>
@@ -168,23 +179,12 @@ export function SortDrawer({ trigger }) {
               <span>Stay Category</span>
             </h4>
             <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  dispatch(setSelectedCategory(null));
-                  dispatch(setSelectedCategoryname("All Stays"));
-                  dispatch(clearPropertyType());
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                  !selectedCategoryId
-                    ? "bg-[#ff6900] text-white border-[#ff6900] shadow-xs"
-                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80"
-                }`}
-              >
-                All Stays
-              </button>
               {categories.map((cat) => {
-                const isSelected = selectedCategoryId === cat._id;
+                const isSelected =
+                  selectedCategoryId === cat._id ||
+                  (selectedCategoryName &&
+                    normalizeCategoryStem(selectedCategoryName) ===
+                      normalizeCategoryStem(cat.name));
                 return (
                   <button
                     key={cat._id}
@@ -194,11 +194,10 @@ export function SortDrawer({ trigger }) {
                       dispatch(setSelectedCategoryname(cat.name));
                       dispatch(clearPropertyType());
                     }}
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${
-                      isSelected
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer border ${isSelected
                         ? "bg-[#ff6900] text-white border-[#ff6900] shadow-xs"
                         : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80"
-                    }`}
+                      }`}
                   >
                     {cat.name}
                   </button>
@@ -227,11 +226,10 @@ export function SortDrawer({ trigger }) {
                           dispatch(setPropertyType(type));
                         }
                       }}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${
-                        isSelected
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer border ${isSelected
                           ? "bg-orange-50 border-[#ff6900] text-[#ff6900] font-bold"
                           : "bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border-neutral-200"
-                      }`}
+                        }`}
                     >
                       {type}
                     </button>

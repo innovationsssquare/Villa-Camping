@@ -57,7 +57,11 @@ import { Slider } from "@/components/ui/slider";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
-import { KNOWN_CATEGORY_IDS } from "@/lib/categoryUtils";
+import {
+  KNOWN_CATEGORY_IDS,
+  matchCategory,
+  normalizeCategoryStem,
+} from "@/lib/categoryUtils";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -160,43 +164,33 @@ export default function PropertyFilterListing({ categorySlug }) {
 
   // 3. Sync categorySlug parameter with Redux category state
   useEffect(() => {
-    if (categorySlug === "all") {
-      dispatch(setSelectedCategory(null));
-      dispatch(setSelectedCategoryname("All Stays"));
-      dispatch(clearPropertyType());
-      dispatch(setCurrentPage(1));
-    } else if (categorySlug && categories?.length > 0) {
-      const matchedCategory = categories.find(
-        (cat) =>
-          cat.slug?.toLowerCase() === categorySlug.toLowerCase() ||
-          cat.name?.toLowerCase() === categorySlug.toLowerCase()
-      );
+    if (categorySlug && categories?.length > 0) {
+      const matchedCategory = matchCategory(categorySlug, categories);
       if (matchedCategory) {
         dispatch(setSelectedCategory(matchedCategory._id));
         dispatch(setSelectedCategoryname(matchedCategory.name));
         dispatch(clearPropertyType());
         dispatch(setCurrentPage(1));
+      } else {
+        const fallback = categories[0];
+        if (fallback) {
+          dispatch(setSelectedCategory(fallback._id));
+          dispatch(setSelectedCategoryname(fallback.name));
+          dispatch(clearPropertyType());
+          dispatch(setCurrentPage(1));
+        }
       }
     }
   }, [categorySlug, categories, dispatch]);
 
   // 4. Fetch properties from backend with pagination & filters
   useEffect(() => {
-    // Resolve category ID with immediate fallback to slug or KNOWN_CATEGORY_IDS
+    // Resolve category ID with matchCategory
     let effectiveCategory = null;
-    if (categorySlug && categorySlug !== "all") {
-      const matched = categories?.find(
-        (c) =>
-          c.slug?.toLowerCase() === categorySlug.toLowerCase() ||
-          c.name?.toLowerCase() === categorySlug.toLowerCase()
-      );
+    if (categorySlug) {
+      const matched = matchCategory(categorySlug, categories);
       if (matched) {
         effectiveCategory = matched._id;
-      } else {
-        const upper = categorySlug.toUpperCase();
-        if (KNOWN_CATEGORY_IDS[upper]) {
-          effectiveCategory = KNOWN_CATEGORY_IDS[upper];
-        }
       }
     }
     if (!effectiveCategory) {
@@ -360,11 +354,10 @@ export default function PropertyFilterListing({ categorySlug }) {
               <button
                 type="button"
                 onClick={() => setShowFilterSidebar(!showFilterSidebar)}
-                className={`h-10 px-4 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${
-                  showFilterSidebar
+                className={`h-10 px-4 rounded-xl border text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-2xs ${showFilterSidebar
                     ? "bg-neutral-900 text-white border-neutral-900 hover:bg-black"
                     : "bg-white text-neutral-800 border-neutral-200/90 hover:border-neutral-400"
-                }`}
+                  }`}
                 title={showFilterSidebar ? "Hide Filters" : "Show Filters"}
               >
                 {showFilterSidebar ? (
@@ -513,7 +506,7 @@ export default function PropertyFilterListing({ categorySlug }) {
               )}
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
-              {selectedCategoryName || "All Stays"}
+              {selectedCategoryName || "Stays"}
             </h1>
             <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
               Verified premium stays with private pools, mountain views & instant confirmation
@@ -568,7 +561,11 @@ export default function PropertyFilterListing({ categorySlug }) {
                       </h4>
                       <div className="space-y-1.5">
                         {categories?.map((cat) => {
-                          const isSelected = selectedCategoryId === cat._id;
+                          const isSelected =
+                            selectedCategoryId === cat._id ||
+                            (selectedCategoryName &&
+                              normalizeCategoryStem(selectedCategoryName) ===
+                                normalizeCategoryStem(cat.name));
                           return (
                             <button
                               key={cat._id}
@@ -590,11 +587,10 @@ export default function PropertyFilterListing({ categorySlug }) {
                                   `/category/${cat.slug || cat.name.toLowerCase()}${q ? `?${q}` : ""}`
                                 );
                               }}
-                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                                isSelected
+                              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${isSelected
                                   ? "bg-orange-50 text-[#ff6900] border border-orange-200/80 shadow-2xs"
                                   : "text-neutral-700 hover:bg-neutral-100"
-                              }`}
+                                }`}
                             >
                               <span>{cat.name}</span>
                               {isSelected && (
@@ -627,11 +623,10 @@ export default function PropertyFilterListing({ categorySlug }) {
                                   }
                                   dispatch(setCurrentPage(1));
                                 }}
-                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                                  isSelected
+                                className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${isSelected
                                     ? "bg-neutral-900 text-white shadow-xs"
                                     : "bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700"
-                                }`}
+                                  }`}
                               >
                                 {type}
                               </button>
@@ -738,11 +733,10 @@ export default function PropertyFilterListing({ categorySlug }) {
                     type="button"
                     disabled={currentActivePage <= 1 || dataloading}
                     onClick={() => handlePageChange(currentActivePage - 1)}
-                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${
-                      currentActivePage <= 1
+                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${currentActivePage <= 1
                         ? "opacity-40 cursor-not-allowed border-neutral-200 text-neutral-400 bg-neutral-50"
                         : "border-neutral-200/90 hover:border-[#ff6900] text-neutral-800 bg-white hover:bg-orange-50/50 cursor-pointer shadow-2xs"
-                    }`}
+                      }`}
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Previous</span>
@@ -767,11 +761,10 @@ export default function PropertyFilterListing({ categorySlug }) {
                         type="button"
                         disabled={dataloading}
                         onClick={() => handlePageChange(p)}
-                        className={`w-9 h-9 rounded-xl text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${
-                          isActive
+                        className={`w-9 h-9 rounded-xl text-xs font-bold flex items-center justify-center transition-all cursor-pointer ${isActive
                             ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-105"
                             : "bg-white hover:bg-neutral-100 text-neutral-700 border border-neutral-200/80 hover:border-neutral-300"
-                        }`}
+                          }`}
                       >
                         {p}
                       </button>
@@ -783,11 +776,10 @@ export default function PropertyFilterListing({ categorySlug }) {
                     type="button"
                     disabled={currentActivePage >= totalPages || dataloading}
                     onClick={() => handlePageChange(currentActivePage + 1)}
-                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${
-                      currentActivePage >= totalPages
+                    className={`h-9 px-3 rounded-xl border text-xs font-bold flex items-center gap-1 transition-all ${currentActivePage >= totalPages
                         ? "opacity-40 cursor-not-allowed border-neutral-200 text-neutral-400 bg-neutral-50"
                         : "border-neutral-200/90 hover:border-[#ff6900] text-neutral-800 bg-white hover:bg-orange-50/50 cursor-pointer shadow-2xs"
-                    }`}
+                      }`}
                   >
                     <span className="hidden sm:inline">Next</span>
                     <ChevronRight className="w-3.5 h-3.5" />
