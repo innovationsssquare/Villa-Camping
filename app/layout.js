@@ -7,6 +7,7 @@ import { ToastProvider } from "@/components/ui/toast-provider";
 import { Suspense } from "react";
 import ButtonLoader from "@/components/Loadercomponents/button-loader";
 import WebPermissionsPrompt from "@/components/Permissions/web-permissions-prompt";
+import AIConciergeBot from "@/components/AIConcierge/AIConciergeBot";
 import { Inter } from "next/font/google";
 
 const geist = Inter({
@@ -89,6 +90,7 @@ export default function RootLayout({ children }) {
         <NextuiProviderWrapper>
           <ToastProvider>
             <WebPermissionsPrompt />
+            <AIConciergeBot />
             {children}
           </ToastProvider>
         </NextuiProviderWrapper>

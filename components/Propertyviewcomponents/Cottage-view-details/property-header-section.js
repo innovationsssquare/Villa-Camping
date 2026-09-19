@@ -12,10 +12,16 @@ import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useCottage } from "@/lib/context/CottageContext";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
+import { Heart } from "lucide-react";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const cottage = useCottage();
+  const { isLiked, handleWishlist } = useWishlist({
+    property: cottage,
+    propertyType: "cottage",
+  });
   const basePrice =
     Number(cottage?.basePricePerNight) ||
     Number(cottage?.pricing?.weekdayPrice) ||
@@ -49,30 +55,51 @@ export default function PropertyHeaderSection() {
               </div>
             </div>
 
-            <div className="flex items-center gap-6 mb-8">
-              <Badge
-                variant="secondary"
-                className="bg-white/20 backdrop-blur-sm text-black border-white/30 px-3 py-1.5"
-              >
-                <FaAward className="w-4 h-4 mr-1.5 text-black" />
-                Like a 5⭐ Hotel
-              </Badge>
-
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <FaStar className="w-5 h-5 text-amber-400" />
-                  <span className="font-bold text-lg text-black drop-shadow">
-                    {cottage?.averageRating || "0"}
-                  </span>
-                  <span className="text-black/80">/5</span>
-                </div>
-                <Button
-                  variant="link"
-                  className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow"
+            <div className="flex items-center justify-between gap-6 mb-8 flex-wrap">
+              <div className="flex items-center gap-6 flex-wrap">
+                <Badge
+                  variant="secondary"
+                  className="bg-white/20 backdrop-blur-sm text-black border-white/30 px-3 py-1.5"
                 >
-                  {cottage?.totalReviews || 0} Reviews
-                </Button>
+                  <FaAward className="w-4 h-4 mr-1.5 text-black" />
+                  Like a 5⭐ Hotel
+                </Badge>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    <FaStar className="w-5 h-5 text-amber-400" />
+                    <span className="font-bold text-lg text-black drop-shadow">
+                      {cottage?.averageRating || "0"}
+                    </span>
+                    <span className="text-black/80">/5</span>
+                  </div>
+                  <Button
+                    variant="link"
+                    className="text-black hover:text-white/80 p-0 h-auto font-medium drop-shadow"
+                  >
+                    {cottage?.totalReviews || 0} Reviews
+                  </Button>
+                </div>
               </div>
+
+              {/* Wishlist Button */}
+              <button
+                type="button"
+                onClick={handleWishlist}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all cursor-pointer active:scale-95 shadow-2xs ${
+                  isLiked
+                    ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+                    : "bg-white border-neutral-200/80 text-gray-700 hover:bg-neutral-50 hover:text-red-500"
+                }`}
+                aria-label={isLiked ? "Remove from wishlist" : "Save to wishlist"}
+              >
+                <Heart
+                  className={`w-4 h-4 transition-colors ${
+                    isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
+                  }`}
+                />
+                <span>{isLiked ? "Saved" : "Save"}</span>
+              </button>
             </div>
 
             {/* Details Grid */}

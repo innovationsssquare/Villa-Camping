@@ -13,18 +13,27 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+import { useWishlist } from "@/hooks/useWishlist";
+
 export default function ImageGalleryDialog({
   isOpen,
   onClose,
   images,
   initialIndex = 0,
+  property,
+  propertyId,
+  propertyType,
 }) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const [isLiked, setIsLiked] = useState(false);
+  const { isLiked, handleWishlist } = useWishlist({
+    property,
+    propertyId,
+    propertyType,
+  });
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
@@ -187,12 +196,17 @@ export default function ImageGalleryDialog({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setIsLiked(!isLiked)}
-                className={`rounded-full hover:bg-white/20 ${
-                  isLiked ? "text-red-500" : "text-white"
+                onClick={handleWishlist}
+                className={`rounded-full hover:bg-white/20 transition-all active:scale-90 ${
+                  isLiked ? "text-red-500 hover:text-red-400" : "text-white hover:text-red-400"
                 }`}
+                aria-label={isLiked ? "Remove from wishlist" : "Add to wishlist"}
               >
-                <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
+                <Heart
+                  className={`w-5 h-5 transition-all duration-200 ${
+                    isLiked ? "fill-red-500 text-red-500 scale-110" : ""
+                  }`}
+                />
               </Button>
             </div>
           </div>

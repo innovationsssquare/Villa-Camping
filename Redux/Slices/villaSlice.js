@@ -2,12 +2,17 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { GetVillabyid } from "@/lib/API/category/Villa/Villa"; 
 
-// Thunk for fetching villa by id
 export const fetchVillaById = createAsyncThunk(
   "villa/fetchById",
   async (id, { rejectWithValue }) => {
     try {
       const response = await GetVillabyid(id);
+      if (
+        response?.data &&
+        (response.data.isapproved !== "approved" || response.data.isLive === false)
+      ) {
+        return rejectWithValue("This property is unavailable or pending verification");
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

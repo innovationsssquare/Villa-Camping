@@ -9,16 +9,17 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import ImageGalleryDialog from "./image-gallery-dialog";
 import VideoDialog from "./video-dialog";
 import Image from "next/image";
 import { useVilla } from "@/lib/context/VillaContext";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function PremiumPropertyHero() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isLiked, setIsLiked] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0 });
@@ -29,6 +30,10 @@ export default function PremiumPropertyHero() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const imageRef = useRef(null);
   const villa = useVilla();
+  const { isLiked, handleWishlist } = useWishlist({
+    property: villa,
+    propertyType: "villa",
+  });
 
 ;
 
@@ -164,8 +169,24 @@ export default function PremiumPropertyHero() {
               </div>
             </div>
 
+            {/* Floating Wishlist Heart Button */}
+            <button
+              type="button"
+              onClick={handleWishlist}
+              className="absolute top-6 right-6 p-2.5 bg-white/95 hover:bg-white backdrop-blur-md rounded-full shadow-lg z-20 border border-black/5 hover:scale-110 active:scale-90 transition-all cursor-pointer flex items-center justify-center"
+              aria-label={isLiked ? "Remove from wishlist" : "Save to wishlist"}
+            >
+              <Heart
+                className={`w-5 h-5 transition-colors ${
+                  isLiked
+                    ? "fill-red-500 text-red-500"
+                    : "text-gray-700 hover:text-red-500"
+                }`}
+              />
+            </button>
+
             {/* Zoom Controls */}
-            <div className="absolute top-6 right-6 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+            <div className="absolute top-20 right-6 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
               <Button
                 size="icon"
                 className="bg-white/90 hover:bg-white text-gray-700 hover:text-[#ff6900] rounded-full shadow-lg backdrop-blur-sm"
@@ -319,6 +340,8 @@ export default function PremiumPropertyHero() {
         onClose={() => setIsGalleryOpen(false)}
         images={villa?.images}
         initialIndex={galleryStartIndex}
+        property={villa}
+        propertyType="villa"
       />
     </div>
   );

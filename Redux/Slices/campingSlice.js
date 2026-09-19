@@ -5,12 +5,17 @@ import {
   Getcampingdaydetails,
 } from "@/lib/API/category/Camping/Camping";
 
-// Thunk for fetching villa by id
 export const fetchCampingById = createAsyncThunk(
   "camping/fetchById",
   async (id, { rejectWithValue }) => {
     try {
       const response = await GetCampingbyid(id);
+      if (
+        response?.data &&
+        (response.data.isapproved !== "approved" || response.data.isLive === false)
+      ) {
+        return rejectWithValue("This property is unavailable or pending verification");
+      }
       return response.data;
     } catch (error) {
       return rejectWithValue(error.message || "Something went wrong");

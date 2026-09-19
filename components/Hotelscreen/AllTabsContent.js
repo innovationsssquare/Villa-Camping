@@ -119,8 +119,12 @@ const AllTabsContent = ({ refs = {} }) => {
         const res = await fetch(`${BaseUrl}/Hotel/get/hotels`);
         if (res.ok) {
           const data = await res.json();
-          const list = data?.data || data?.properties || (Array.isArray(data) ? data : []);
-          const others = list.filter((p) => String(p._id) !== String(hotel?._id));
+          const others = list.filter((p) => {
+            const isCurrent = String(p._id) === String(hotel?._id);
+            const isApproved = p.isapproved === "approved";
+            const isLive = p.isLive !== false;
+            return !isCurrent && isApproved && isLive;
+          });
           if (isMounted) {
             setNearbyHotels(others);
           }

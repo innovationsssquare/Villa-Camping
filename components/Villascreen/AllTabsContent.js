@@ -192,9 +192,12 @@ const AllTabsContent = ({ refs }) => {
             data?.properties ||
             (Array.isArray(data) ? data : []);
 
-          const otherVillas = list.filter(
-            (p) => String(p._id) !== String(villa?._id)
-          );
+          const otherVillas = list.filter((p) => {
+            const isCurrent = String(p._id) === String(villa?._id);
+            const isApproved = p.isapproved === "approved";
+            const isLive = p.isLive !== false;
+            return !isCurrent && isApproved && isLive;
+          });
 
           if (otherVillas.length > 0) {
             const matched = otherVillas.filter((p) => {

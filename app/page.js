@@ -14,6 +14,7 @@ import {Testimonials} from "@/components/Homecomponets/Testimonials";
 import TrendingVideos from "@/components/Homecomponets/Trendingvideos";
 import WeekendGetaway from "@/components/Homecomponets/weekend-getaway";
 import { WhyChooseUs } from "@/components/Homecomponets/WhyChooseUs";
+import ListYourProperty from "@/components/Homecomponets/ListYourProperty";
 import { AnimatedTestimonials } from "@/components/ui/animated-testimonials";
 
 export default function Home() {
@@ -32,6 +33,7 @@ export default function Home() {
       <TrendingVideos/>
       <PropertyReviews/>
       <WhyChooseUs/>
+      <ListYourProperty />
       {/* <Experiences/>
       <Testimonials/> */}
 

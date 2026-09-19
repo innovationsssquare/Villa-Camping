@@ -340,10 +340,13 @@ export default function PropertyContentSections() {
             data?.properties ||
             (Array.isArray(data) ? data : []);
 
-          // Filter out current villa
-          const otherVillas = list.filter(
-            (p) => String(p._id) !== String(villa?._id)
-          );
+          // Filter out current villa and only keep verified, approved, and live stays
+          const otherVillas = list.filter((p) => {
+            const isCurrent = String(p._id) === String(villa?._id);
+            const isApproved = p.isapproved === "approved";
+            const isLive = p.isLive !== false;
+            return !isCurrent && isApproved && isLive;
+          });
 
           if (otherVillas.length > 0) {
             // Prioritize matching by location ObjectId or city

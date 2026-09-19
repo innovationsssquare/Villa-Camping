@@ -137,8 +137,12 @@ export default function PropertyContentSections() {
         const res = await fetch(`${BaseUrl}/Camping/get/campings`);
         if (res.ok) {
           const data = await res.json();
-          const list = data?.data || (Array.isArray(data) ? data : []);
-          const others = list.filter((p) => String(p._id) !== String(camping?._id));
+          const others = list.filter((p) => {
+            const isCurrent = String(p._id) === String(camping?._id);
+            const isApproved = p.isapproved === "approved";
+            const isLive = p.isLive !== false;
+            return !isCurrent && isApproved && isLive;
+          });
           if (isMounted) {
             setNearbyCampings(others);
           }

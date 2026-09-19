@@ -11,6 +11,7 @@ import { useCottage } from "@/lib/context/CottageContext";
 import { useRouter } from "next/navigation";
 import ImageGalleryDialog from "../Propertyviewcomponents/image-gallery-dialog";
 import VideoModal from "../Availableweekend/VideoModal";
+import { useWishlist } from "@/hooks/useWishlist";
 
 const CottageHero = () => {
   const cottage = useCottage();
@@ -19,6 +20,10 @@ const CottageHero = () => {
   const [api, setApi] = useState();
   const [isGalleryOpen, setIsGalleryOpen] = useState(false);
   const [galleryStartIndex, setGalleryStartIndex] = useState(0);
+  const { isLiked, handleWishlist } = useWishlist({
+    property: cottage,
+    propertyType: "cottage",
+  });
 
   useEffect(() => {
     if (!api) return;
@@ -78,8 +83,19 @@ const CottageHero = () => {
           )}
 
           {/* Heart Icon */}
-          <button className="absolute top-3 right-3 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xs z-10 border border-black/5 text-gray-700 hover:text-[#ff6900] active:scale-90 transition-transform">
-            <Heart className="w-4 h-4" />
+          <button
+            type="button"
+            onClick={handleWishlist}
+            className="absolute top-3 right-3 p-2 bg-white/95 backdrop-blur-md rounded-full shadow-xs z-10 border border-black/5 active:scale-90 transition-transform cursor-pointer flex items-center justify-center"
+            aria-label={isLiked ? "Remove from wishlist" : "Save to wishlist"}
+          >
+            <Heart
+              className={`w-4 h-4 transition-colors ${
+                isLiked
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-700 hover:text-red-500"
+              }`}
+            />
           </button>
 
           {/* View Photos & Video Buttons */}
@@ -126,6 +142,8 @@ const CottageHero = () => {
         images={images}
         initialIndex={galleryStartIndex}
         title={cottage?.name}
+        property={cottage}
+        propertyType="cottage"
       />
     </>
   );

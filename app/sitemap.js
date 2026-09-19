@@ -109,12 +109,14 @@ export default async function sitemap() {
         const json = await res.json();
         const items = json.data || json || [];
         if (!Array.isArray(items)) return [];
-        return items.map((item) => ({
-          url: `${siteUrl}/${routePrefix}/${item._id}`,
-          lastModified: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-          changeFrequency: "daily",
-          priority: 0.8,
-        }));
+        return items
+          .filter((item) => item.isapproved === "approved" && item.isLive !== false)
+          .map((item) => ({
+            url: `${siteUrl}/${routePrefix}/${item._id}`,
+            lastModified: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+            changeFrequency: "daily",
+            priority: 0.8,
+          }));
       } catch (err) {
         console.warn(`Sitemap fetch error for ${endpoint}:`, err.message);
         return [];

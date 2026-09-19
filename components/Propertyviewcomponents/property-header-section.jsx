@@ -11,12 +11,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useVilla } from "@/lib/context/VillaContext";
-import { Tent, Home, Hotel } from "lucide-react";
+import { Tent, Home, Hotel, Heart } from "lucide-react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const villa = useVilla();
+  const { isLiked, handleWishlist } = useWishlist({
+    property: villa,
+    propertyType: "villa",
+  });
 
   const allAmenities = villa?.amenities || [];
   const displayedAmenities = showAllAmenities
@@ -39,31 +44,52 @@ export default function PropertyHeaderSection() {
         </div>
       </div>
 
-      {/* Rating & Reviews */}
-      <div className="flex items-center gap-4 mb-6 flex-wrap">
-        <Badge
-          variant="secondary"
-          className="bg-amber-50/80 text-amber-900 border border-amber-200/70 px-3.5 py-1.5 rounded-full font-semibold shadow-xs"
-        >
-          <FaAward className="w-4 h-4 mr-1.5 text-amber-600" />
-          Like a 5⭐ Hotel
-        </Badge>
-
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200/80">
-            <FaStar className="w-4 h-4 text-amber-400" />
-            <span className="font-bold text-base text-gray-900">
-              {villa?.averageRating || "4.8"}
-            </span>
-            <span className="text-gray-400 text-xs">/5</span>
-          </div>
-          <Button
-            variant="link"
-            className="text-gray-700 hover:text-[#ff6900] p-0 h-auto font-medium text-sm transition-colors underline-offset-4 hover:underline"
+      {/* Rating & Reviews + Wishlist Action */}
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <div className="flex items-center gap-4 flex-wrap">
+          <Badge
+            variant="secondary"
+            className="bg-amber-50/80 text-amber-900 border border-amber-200/70 px-3.5 py-1.5 rounded-full font-semibold shadow-xs"
           >
-            {villa?.totalReviews || 0} Verified Reviews
-          </Button>
+            <FaAward className="w-4 h-4 mr-1.5 text-amber-600" />
+            Like a 5⭐ Hotel
+          </Badge>
+
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-1.5 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200/80">
+              <FaStar className="w-4 h-4 text-amber-400" />
+              <span className="font-bold text-base text-gray-900">
+                {villa?.averageRating || "4.8"}
+              </span>
+              <span className="text-gray-400 text-xs">/5</span>
+            </div>
+            <Button
+              variant="link"
+              className="text-gray-700 hover:text-[#ff6900] p-0 h-auto font-medium text-sm transition-colors underline-offset-4 hover:underline"
+            >
+              {villa?.totalReviews || 0} Verified Reviews
+            </Button>
+          </div>
         </div>
+
+        {/* Wishlist Button */}
+        <button
+          type="button"
+          onClick={handleWishlist}
+          className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-semibold transition-all cursor-pointer active:scale-95 shadow-2xs ${
+            isLiked
+              ? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
+              : "bg-white border-neutral-200/80 text-gray-700 hover:bg-neutral-50 hover:text-red-500"
+          }`}
+          aria-label={isLiked ? "Remove from wishlist" : "Save to wishlist"}
+        >
+          <Heart
+            className={`w-4 h-4 transition-colors ${
+              isLiked ? "fill-red-500 text-red-500" : "text-gray-600"
+            }`}
+          />
+          <span>{isLiked ? "Saved" : "Save"}</span>
+        </button>
       </div>
 
       {/* Property Details Badges */}
