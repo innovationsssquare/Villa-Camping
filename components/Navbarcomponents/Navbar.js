@@ -342,7 +342,7 @@ export default function AirbnbNavbar() {
                       className={`w-4.5 h-4.5 transition-colors ${pathname === "/" ? "text-[#ff6900]" : "text-neutral-400 group-hover:text-neutral-700"
                         }`}
                     />
-                    <span>Stays</span>
+                    <span>Stays</span> 
                     {pathname === "/" && (
                       <motion.div
                         layoutId="activeNavTab"
