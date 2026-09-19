@@ -23,7 +23,7 @@ function getGeminiApiKey() {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8086/api/v1";
+  process.env.NEXT_PUBLIC_PRODUCTION_URL || "http://localhost:8086/api/v1";
 
 // In-memory cache for dynamic backend locations
 let cachedLocationsData = null;
@@ -582,17 +582,15 @@ export async function POST(req) {
           ? ` available for your selected dates`
           : "";
 
-        replyText = `Here are verified ${
-          targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
-        }${locText}${guestText}${dateText}. Tell me which one catches your eye and I'll prepare the pricing and details for your dates!`;
+        replyText = `Here are verified ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
+          }${locText}${guestText}${dateText}. Tell me which one catches your eye and I'll prepare the pricing and details for your dates!`;
       }
     } else {
       if (targetBudget && targetLocation) {
-        replyText = `I'm afraid I couldn't find ${
-          targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
-        } in ${targetLocation} within ₹${targetBudget.toLocaleString(
-          "en-IN"
-        )} a night just now. Might you consider stretching the budget a little, or shall I connect you with our concierge team on WhatsApp for custom rates?`;
+        replyText = `I'm afraid I couldn't find ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
+          } in ${targetLocation} within ₹${targetBudget.toLocaleString(
+            "en-IN"
+          )} a night just now. Might you consider stretching the budget a little, or shall I connect you with our concierge team on WhatsApp for custom rates?`;
       } else {
         replyText = `I couldn't find exact matches for those criteria, but here are our top-rated guest favorites nearby that you might love!`;
       }
