@@ -960,6 +960,11 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
+  // Hide chatbot entirely on /shorts page
+  if (isShortsPage) {
+    return null;
+  }
+
   return (
     <>
       {/* =========================================================================
