@@ -283,9 +283,8 @@ function ChatPropertyCarousel({ properties, onSelectProperty }) {
                 e.stopPropagation();
                 scrollToCard(idx);
               }}
-              className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                currentIndex === idx ? "w-4 bg-neutral-900" : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
-              }`}
+              className={`h-1.5 rounded-full transition-all cursor-pointer ${currentIndex === idx ? "w-4 bg-neutral-900" : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
+                }`}
               aria-label={`Go to stay ${idx + 1}`}
             />
           ))}
@@ -387,22 +386,20 @@ function PropertySpacesCarousel({ spaces, amenities = [], propertyCategory = "Vi
         <button
           type="button"
           onClick={() => setActiveTab("spaces")}
-          className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-            activeTab === "spaces"
+          className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeTab === "spaces"
               ? "bg-neutral-900 text-white shadow-2xs"
               : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
-          }`}
+            }`}
         >
           The spaces
         </button>
         <button
           type="button"
           onClick={() => setActiveTab("amenities")}
-          className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${
-            activeTab === "amenities"
+          className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeTab === "amenities"
               ? "bg-neutral-900 text-white shadow-2xs"
               : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
-          }`}
+            }`}
         >
           What this {propertyCategory.toLowerCase()} offers
         </button>
@@ -503,9 +500,8 @@ function PropertySpacesCarousel({ spaces, amenities = [], propertyCategory = "Vi
                     e.stopPropagation();
                     scrollToCard(idx);
                   }}
-                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                    currentIndex === idx ? "w-4 bg-neutral-900" : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
-                  }`}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${currentIndex === idx ? "w-4 bg-neutral-900" : "w-1.5 bg-neutral-300 hover:bg-neutral-400"
+                    }`}
                   aria-label={`Go to space ${idx + 1}`}
                 />
               ))}
@@ -622,12 +618,12 @@ export default function AIConciergeBot() {
   const propertyCategory = isVillaPage
     ? "Villa"
     : isCampingPage
-    ? "Camping"
-    : isCottagePage
-    ? "Cottage"
-    : isHotelPage
-    ? "Hotel"
-    : "Stay";
+      ? "Camping"
+      : isCottagePage
+        ? "Cottage"
+        : isHotelPage
+          ? "Hotel"
+          : "Stay";
 
   const propertyId = isPropertyPage ? pathname.split("/").filter(Boolean)[1] : null;
 
@@ -640,12 +636,12 @@ export default function AIConciergeBot() {
   const activeProperty = isVillaPage
     ? villaData
     : isCampingPage
-    ? campingData
-    : isCottagePage
-    ? cottageData
-    : isHotelPage
-    ? hotelData
-    : null;
+      ? campingData
+      : isCottagePage
+        ? cottageData
+        : isHotelPage
+          ? hotelData
+          : null;
 
   const propertyQuickPills = [
     { id: "spaces", label: "The spaces", query: `What are the spaces in this ${propertyCategory.toLowerCase()}?` },
@@ -831,8 +827,7 @@ export default function AIConciergeBot() {
       sender: "user",
       text:
         queryText ||
-        `Looking for ${selectedCategory.toLowerCase()}s in ${
-          customFilters?.location || destination || "Lonavala"
+        `Looking for ${selectedCategory.toLowerCase()}s in ${customFilters?.location || destination || "Lonavala"
         } for ${customFilters?.guests || adults} guests`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     };
@@ -968,7 +963,7 @@ export default function AIConciergeBot() {
           1. FLOATING MASCOT TRIGGER BUTTON (Placed on RIGHT side)
          ========================================================================= */}
       {!isOpen && (
-        <div className="fixed bottom-6 right-6 z-[9990]">
+        <div className="fixed md:bottom-6 md:right-6 bottom-24 right-6 z-[9990]">
           <button
             type="button"
             onClick={(e) => {
@@ -1082,724 +1077,713 @@ export default function AIConciergeBot() {
               </div>
             </div>
 
-          {/* =========================================================================
+            {/* =========================================================================
               SCREEN 1: WELCOME & QUICK DISCOVERY
              ========================================================================= */}
-          {activeScreen === "welcome" && (
-            <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col items-center text-center no-scrollbar">
-              {/* Heading */}
-              <h2 className="text-xl sm:text-2xl font-serif text-neutral-900 font-normal tracking-tight mb-1">
-                Welcome to The Villa Camp ✨
-              </h2>
+            {activeScreen === "welcome" && (
+              <div className="flex-1 overflow-y-auto px-3.5 py-3 flex flex-col items-center text-center no-scrollbar">
+                {/* Heading */}
+                <h2 className="text-xl sm:text-2xl font-serif text-neutral-900 font-normal tracking-tight mb-1">
+                  Welcome to The Villa Camp ✨
+                </h2>
 
-              {/* Decorative Divider */}
-              <div className="flex items-center justify-center gap-2 w-full my-1.5 text-neutral-300">
-                <div className="h-px bg-neutral-200 w-12" />
-                <span className="text-[9px] text-[#ff8566]">◆</span>
-                <div className="h-px bg-neutral-200 w-12" />
-              </div>
+                {/* Decorative Divider */}
+                <div className="flex items-center justify-center gap-2 w-full my-1.5 text-neutral-300">
+                  <div className="h-px bg-neutral-200 w-12" />
+                  <span className="text-[9px] text-[#ff8566]">◆</span>
+                  <div className="h-px bg-neutral-200 w-12" />
+                </div>
 
-              {/* Language Selector Dropdown */}
-              <div className="relative my-1.5">
-                <button
-                  onClick={() => setIsLangOpen((prev) => !prev)}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-neutral-200 text-neutral-800 text-xs font-medium shadow-2xs hover:bg-neutral-50 transition-colors"
-                >
-                  <Compass className="w-3.5 h-3.5 text-neutral-600" />
-                  <span>{selectedLang}</span>
-                  {isLangOpen ? (
-                    <ChevronUp className="w-3 h-3 text-[#ff8566]" />
-                  ) : (
-                    <ChevronDown className="w-3 h-3 text-[#ff8566]" />
+                {/* Language Selector Dropdown */}
+                <div className="relative my-1.5">
+                  <button
+                    onClick={() => setIsLangOpen((prev) => !prev)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white border border-neutral-200 text-neutral-800 text-xs font-medium shadow-2xs hover:bg-neutral-50 transition-colors"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-neutral-600" />
+                    <span>{selectedLang}</span>
+                    {isLangOpen ? (
+                      <ChevronUp className="w-3 h-3 text-[#ff8566]" />
+                    ) : (
+                      <ChevronDown className="w-3 h-3 text-[#ff8566]" />
+                    )}
+                  </button>
+
+                  {/* Collapsible Languages Grid */}
+                  {isLangOpen && (
+                    <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 w-[310px] p-2 bg-white rounded-2xl border border-neutral-200 shadow-xl z-30 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
+                      {LANGUAGES.map((lang) => (
+                        <button
+                          key={lang.code}
+                          onClick={() => {
+                            setSelectedLang(lang.name);
+                            setIsLangOpen(false);
+                          }}
+                          className={`px-2 py-1.5 rounded-xl text-[11px] font-medium transition-all ${selectedLang === lang.name
+                              ? "bg-neutral-900 text-white"
+                              : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100 border border-neutral-100"
+                            }`}
+                        >
+                          {lang.name}
+                        </button>
+                      ))}
+                    </div>
                   )}
+                </div>
+
+                {/* CATEGORY SELECTOR TABS (Villa, Camping, Cottage, Hotel) */}
+                <div className="w-full my-2.5">
+                  <div className="grid grid-cols-4 gap-1.5 p-1 bg-neutral-200/50 rounded-2xl border border-neutral-200/80">
+                    {CATEGORIES.map((cat) => {
+                      const Icon = cat.icon;
+                      const isSelected = selectedCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`py-2 px-1.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${isSelected
+                              ? "bg-white text-neutral-900 shadow-xs font-bold"
+                              : "text-neutral-600 hover:text-neutral-900 font-medium"
+                            }`}
+                        >
+                          <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
+                          <span className="text-[10px] leading-tight truncate w-full text-center">
+                            {cat.name}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Main CTA: Help me Find a Stay */}
+                <button
+                  onClick={() => setActiveScreen("filter")}
+                  className="w-full my-2 py-3 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white flex items-center justify-between group transition-all duration-200 shadow-md active:scale-98"
+                >
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span className="font-semibold text-sm">
+                      Help me Find a {selectedCategory}
+                    </span>
+                  </div>
+                  <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+                    <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  </div>
                 </button>
 
-                {/* Collapsible Languages Grid */}
-                {isLangOpen && (
-                  <div className="absolute left-1/2 -translate-x-1/2 mt-1.5 w-[310px] p-2 bg-white rounded-2xl border border-neutral-200 shadow-xl z-30 grid grid-cols-4 gap-1.5 animate-in fade-in zoom-in-95 duration-150">
-                    {LANGUAGES.map((lang) => (
-                      <button
-                        key={lang.code}
-                        onClick={() => {
-                          setSelectedLang(lang.name);
-                          setIsLangOpen(false);
-                        }}
-                        className={`px-2 py-1.5 rounded-xl text-[11px] font-medium transition-all ${
-                          selectedLang === lang.name
-                            ? "bg-neutral-900 text-white"
-                            : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100 border border-neutral-100"
-                        }`}
-                      >
-                        {lang.name}
-                      </button>
-                    ))}
+                {/* What are you looking for section */}
+                <div className="w-full mt-1.5">
+                  <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400 mb-2.5">
+                    WHAT ARE YOU LOOKING FOR?
+                  </p>
+
+                  <div className="flex flex-wrap gap-1.5 justify-center">
+                    {VIBE_CHIPS.map((chip) => {
+                      const Icon = chip.icon;
+                      return (
+                        <button
+                          key={chip.id}
+                          onClick={() => handleChipClick(chip)}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-orange-50/80 border border-neutral-200/90 hover:border-orange-300 text-neutral-700 hover:text-[#ff6900] text-xs font-medium shadow-2xs transition-all active:scale-95"
+                        >
+                          <Icon className="w-3 h-3 text-[#ff8566]" />
+                          <span>{chip.label}</span>
+                        </button>
+                      );
+                    })}
                   </div>
-                )}
-              </div>
-
-              {/* CATEGORY SELECTOR TABS (Villa, Camping, Cottage, Hotel) */}
-              <div className="w-full my-2.5">
-                <div className="grid grid-cols-4 gap-1.5 p-1 bg-neutral-200/50 rounded-2xl border border-neutral-200/80">
-                  {CATEGORIES.map((cat) => {
-                    const Icon = cat.icon;
-                    const isSelected = selectedCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`py-2 px-1.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${
-                          isSelected
-                            ? "bg-white text-neutral-900 shadow-xs font-bold"
-                            : "text-neutral-600 hover:text-neutral-900 font-medium"
-                        }`}
-                      >
-                        <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
-                        <span className="text-[10px] leading-tight truncate w-full text-center">
-                          {cat.name}
-                        </span>
-                      </button>
-                    );
-                  })}
                 </div>
               </div>
+            )}
 
-              {/* Main CTA: Help me Find a Stay */}
-              <button
-                onClick={() => setActiveScreen("filter")}
-                className="w-full my-2 py-3 px-4 rounded-2xl bg-neutral-900 hover:bg-black text-white flex items-center justify-between group transition-all duration-200 shadow-md active:scale-98"
-              >
-                <div className="flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-400" />
-                  <span className="font-semibold text-sm">
-                    Help me Find a {selectedCategory}
-                  </span>
-                </div>
-                <div className="w-6 h-6 rounded-full bg-neutral-800 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                  <ArrowRight className="w-3.5 h-3.5 text-white" />
-                </div>
-              </button>
-
-              {/* What are you looking for section */}
-              <div className="w-full mt-1.5">
-                <p className="text-[10px] uppercase font-bold tracking-widest text-neutral-400 mb-2.5">
-                  WHAT ARE YOU LOOKING FOR?
-                </p>
-
-                <div className="flex flex-wrap gap-1.5 justify-center">
-                  {VIBE_CHIPS.map((chip) => {
-                    const Icon = chip.icon;
-                    return (
-                      <button
-                        key={chip.id}
-                        onClick={() => handleChipClick(chip)}
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white hover:bg-orange-50/80 border border-neutral-200/90 hover:border-orange-300 text-neutral-700 hover:text-[#ff6900] text-xs font-medium shadow-2xs transition-all active:scale-95"
-                      >
-                        <Icon className="w-3 h-3 text-[#ff8566]" />
-                        <span>{chip.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* =========================================================================
+            {/* =========================================================================
               SCREEN 2: STRUCTURED FILTER DRAWER (With Modern Calendar & Category Tabs)
              ========================================================================= */}
-          {activeScreen === "filter" && (
-            <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3 text-neutral-800 no-scrollbar">
-              {/* CATEGORY SELECTOR CARDS */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5">
-                  STAY TYPE
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  {CATEGORIES.map((cat) => {
-                    const Icon = cat.icon;
-                    const isSelected = selectedCategory === cat.id;
-                    return (
-                      <button
-                        key={cat.id}
-                        type="button"
-                        onClick={() => setSelectedCategory(cat.id)}
-                        className={`p-2 rounded-xl border flex items-center gap-2 transition-all ${
-                          isSelected
-                            ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
-                            : "bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300"
-                        }`}
-                      >
-                        <Icon className={`w-4 h-4 shrink-0 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
-                        <div className="text-left min-w-0 flex-1">
-                          <p className="text-xs font-bold truncate leading-tight">{cat.name}</p>
-                          <p className={`text-[9px] truncate leading-tight ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>
-                            {cat.desc}
-                          </p>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Where to Input */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">
-                  WHERE TO?
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={destination}
-                    onChange={(e) => setDestination(e.target.value)}
-                    placeholder="Goa, Lonavala, Udaipur..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-200 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-900 shadow-2xs"
-                  />
-                  {/* Autocomplete quick chips */}
-                  <div className="flex gap-1.5 overflow-x-auto py-1 mt-1 scrollbar-none">
-                    {knownLocations.map((loc) => (
-                      <button
-                        key={loc}
-                        type="button"
-                        onClick={() => setDestination(loc)}
-                        className={`text-[10px] px-2.5 py-0.5 rounded-full border transition-colors shrink-0 ${
-                          destination === loc
-                            ? "bg-neutral-900 text-white border-neutral-900"
-                            : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"
-                        }`}
-                      >
-                        {loc}
-                      </button>
-                    ))}
+            {activeScreen === "filter" && (
+              <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3 text-neutral-800 no-scrollbar">
+                {/* CATEGORY SELECTOR CARDS */}
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1.5">
+                    STAY TYPE
+                  </label>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {CATEGORIES.map((cat) => {
+                      const Icon = cat.icon;
+                      const isSelected = selectedCategory === cat.id;
+                      return (
+                        <button
+                          key={cat.id}
+                          type="button"
+                          onClick={() => setSelectedCategory(cat.id)}
+                          className={`p-2 rounded-xl border flex items-center gap-2 transition-all ${isSelected
+                              ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
+                              : "bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300"
+                            }`}
+                        >
+                          <Icon className={`w-4 h-4 shrink-0 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
+                          <div className="text-left min-w-0 flex-1">
+                            <p className="text-xs font-bold truncate leading-tight">{cat.name}</p>
+                            <p className={`text-[9px] truncate leading-tight ${isSelected ? "text-neutral-300" : "text-neutral-400"}`}>
+                              {cat.desc}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
-              </div>
 
-              {/* Budget Per Night Slider */}
-              <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-2xs">
-                <div className="flex items-center justify-between text-xs mb-2">
-                  <span className="font-bold text-[10px] uppercase tracking-wider text-neutral-500">
-                    BUDGET PER NIGHT
-                  </span>
-                  <span className="font-semibold text-neutral-900 text-xs">
-                    {isAnyBudget ? "Any budget" : `Up to ₹${budgetMax.toLocaleString("en-IN")}`}
-                  </span>
+                {/* Where to Input */}
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-1">
+                    WHERE TO?
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={destination}
+                      onChange={(e) => setDestination(e.target.value)}
+                      placeholder="Goa, Lonavala, Udaipur..."
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-white border border-neutral-200 text-xs sm:text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:ring-1 focus:ring-neutral-900 shadow-2xs"
+                    />
+                    {/* Autocomplete quick chips */}
+                    <div className="flex gap-1.5 overflow-x-auto py-1 mt-1 scrollbar-none">
+                      {knownLocations.map((loc) => (
+                        <button
+                          key={loc}
+                          type="button"
+                          onClick={() => setDestination(loc)}
+                          className={`text-[10px] px-2.5 py-0.5 rounded-full border transition-colors shrink-0 ${destination === loc
+                              ? "bg-neutral-900 text-white border-neutral-900"
+                              : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"
+                            }`}
+                        >
+                          {loc}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 </div>
 
-                <input
-                  type="range"
-                  min="5000"
-                  max="60000"
-                  step="2500"
-                  value={budgetMax}
-                  disabled={isAnyBudget}
-                  onChange={(e) => {
-                    setBudgetMax(Number(e.target.value));
-                    setIsAnyBudget(false);
-                  }}
-                  className="w-full accent-[#ff8566] cursor-pointer"
-                />
+                {/* Budget Per Night Slider */}
+                <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-2xs">
+                  <div className="flex items-center justify-between text-xs mb-2">
+                    <span className="font-bold text-[10px] uppercase tracking-wider text-neutral-500">
+                      BUDGET PER NIGHT
+                    </span>
+                    <span className="font-semibold text-neutral-900 text-xs">
+                      {isAnyBudget ? "Any budget" : `Up to ₹${budgetMax.toLocaleString("en-IN")}`}
+                    </span>
+                  </div>
 
-                <div className="flex items-center justify-between mt-1 text-[10px] text-neutral-400">
-                  <span>₹5,000</span>
-                  <button
-                    type="button"
-                    onClick={() => setIsAnyBudget((prev) => !prev)}
-                    className={`font-semibold underline ${
-                      isAnyBudget ? "text-[#ff6900]" : "text-neutral-500"
-                    }`}
-                  >
-                    Any budget
-                  </button>
-                  <span>₹60,000+</span>
+                  <input
+                    type="range"
+                    min="5000"
+                    max="60000"
+                    step="2500"
+                    value={budgetMax}
+                    disabled={isAnyBudget}
+                    onChange={(e) => {
+                      setBudgetMax(Number(e.target.value));
+                      setIsAnyBudget(false);
+                    }}
+                    className="w-full accent-[#ff8566] cursor-pointer"
+                  />
+
+                  <div className="flex items-center justify-between mt-1 text-[10px] text-neutral-400">
+                    <span>₹5,000</span>
+                    <button
+                      type="button"
+                      onClick={() => setIsAnyBudget((prev) => !prev)}
+                      className={`font-semibold underline ${isAnyBudget ? "text-[#ff6900]" : "text-neutral-500"
+                        }`}
+                    >
+                      Any budget
+                    </button>
+                    <span>₹60,000+</span>
+                  </div>
                 </div>
-              </div>
 
-              {/* =========================================================================
+                {/* =========================================================================
                   MODERN LUXURY CALENDAR PICKER (Replaces ugly native browser datepicker)
                  ========================================================================= */}
-              <div>
-                <div className="grid grid-cols-2 gap-2">
-                  {/* Check-In Trigger */}
-                  <button
-                    type="button"
-                    onClick={() => setIsCalendarOpen((prev) => !prev)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
-                      isCalendarOpen
-                        ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
-                        : "border-neutral-200 bg-white hover:bg-neutral-50"
-                    }`}
-                  >
-                    <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
-                      CHECK-IN
-                    </span>
-                    <span className="text-xs font-semibold text-neutral-900 flex items-center justify-between mt-0.5">
-                      {selectedCheckIn ? format(selectedCheckIn, "dd MMM, yyyy") : "Add date"}
-                      <ChevronDown className="w-3 h-3 text-neutral-400" />
-                    </span>
-                  </button>
+                <div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {/* Check-In Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setIsCalendarOpen((prev) => !prev)}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${isCalendarOpen
+                          ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
+                          : "border-neutral-200 bg-white hover:bg-neutral-50"
+                        }`}
+                    >
+                      <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
+                        CHECK-IN
+                      </span>
+                      <span className="text-xs font-semibold text-neutral-900 flex items-center justify-between mt-0.5">
+                        {selectedCheckIn ? format(selectedCheckIn, "dd MMM, yyyy") : "Add date"}
+                        <ChevronDown className="w-3 h-3 text-neutral-400" />
+                      </span>
+                    </button>
 
-                  {/* Check-Out Trigger */}
-                  <button
-                    type="button"
-                    onClick={() => setIsCalendarOpen((prev) => !prev)}
-                    className={`p-2.5 rounded-xl border text-left transition-all ${
-                      isCalendarOpen
-                        ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
-                        : "border-neutral-200 bg-white hover:bg-neutral-50"
-                    }`}
-                  >
-                    <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
-                      CHECK-OUT
-                    </span>
-                    <span className="text-xs font-semibold text-neutral-900 flex items-center justify-between mt-0.5">
-                      {selectedCheckOut ? format(selectedCheckOut, "dd MMM, yyyy") : "Add date"}
-                      <ChevronDown className="w-3 h-3 text-neutral-400" />
-                    </span>
-                  </button>
-                </div>
+                    {/* Check-Out Trigger */}
+                    <button
+                      type="button"
+                      onClick={() => setIsCalendarOpen((prev) => !prev)}
+                      className={`p-2.5 rounded-xl border text-left transition-all ${isCalendarOpen
+                          ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
+                          : "border-neutral-200 bg-white hover:bg-neutral-50"
+                        }`}
+                    >
+                      <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
+                        CHECK-OUT
+                      </span>
+                      <span className="text-xs font-semibold text-neutral-900 flex items-center justify-between mt-0.5">
+                        {selectedCheckOut ? format(selectedCheckOut, "dd MMM, yyyy") : "Add date"}
+                        <ChevronDown className="w-3 h-3 text-neutral-400" />
+                      </span>
+                    </button>
+                  </div>
 
-                {/* Inline Luxury Calendar Dropdown */}
-                {isCalendarOpen && (
-                  <div className="mt-2 p-3 bg-white rounded-2xl border border-neutral-200 shadow-md animate-in fade-in zoom-in-95 duration-150">
-                    {/* Month Navigator Header */}
-                    <div className="flex items-center justify-between mb-2 px-1">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentCalendarMonth((prev) => subMonths(prev, 1))}
-                        className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-600"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <h4 className="font-bold text-xs text-neutral-900">
-                        {format(currentCalendarMonth, "MMMM yyyy")}
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentCalendarMonth((prev) => addMonths(prev, 1))}
-                        className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-600"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {/* Weekday Names */}
-                    <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-neutral-400">
-                      <span>Su</span>
-                      <span>Mo</span>
-                      <span>Tu</span>
-                      <span>We</span>
-                      <span>Th</span>
-                      <span>Fr</span>
-                      <span>Sa</span>
-                    </div>
-
-                    {/* Day Cells Grid */}
-                    <div className="grid grid-cols-7 gap-1 text-center">
-                      {/* Empty padding days before the 1st */}
-                      {Array.from({ length: startingDayIndex }).map((_, idx) => (
-                        <div key={`empty-${idx}`} className="h-7 w-7" />
-                      ))}
-
-                      {/* Month Days */}
-                      {daysInMonth.map((day) => {
-                        const today = new Date();
-                        today.setHours(0, 0, 0, 0);
-                        const isPast = isBefore(day, today);
-                        const isStart = selectedCheckIn && isSameDay(day, selectedCheckIn);
-                        const isEnd = selectedCheckOut && isSameDay(day, selectedCheckOut);
-                        const isInRange =
-                          selectedCheckIn &&
-                          selectedCheckOut &&
-                          isWithinInterval(day, { start: selectedCheckIn, end: selectedCheckOut });
-
-                        const dateStr = format(day, "yyyy-MM-dd");
-                        const isHol = isHoliday ? isHoliday(dateStr) : false;
-                        const holName = isHol && getHolidayName ? getHolidayName(dateStr) : null;
-                        const isLW = isLongWeekend ? isLongWeekend(dateStr) : false;
-
-                        let dayStyle = "text-neutral-700 hover:bg-neutral-100";
-                        if (isPast) {
-                          dayStyle = "text-neutral-300 pointer-events-none";
-                        } else if (isStart || isEnd) {
-                          dayStyle = "bg-neutral-900 text-white font-bold shadow-xs";
-                        } else if (isInRange) {
-                          dayStyle = "bg-orange-100/70 text-[#ff6900] font-semibold";
-                        }
-
-                        return (
-                          <button
-                            key={day.toISOString()}
-                            type="button"
-                            disabled={isPast}
-                            onClick={() => handleDateClick(day)}
-                            title={holName ? `🎉 ${holName}` : isLW ? "Long Weekend" : undefined}
-                            className={`h-8 w-7 rounded-full mx-auto flex flex-col items-center justify-center text-xs relative transition-colors ${dayStyle}`}
-                          >
-                            <span className="leading-none">{format(day, "d")}</span>
-                            {isHol && (
-                              <span
-                                className={`w-1 h-1 rounded-full shrink-0 mt-0.5 ${
-                                  isStart || isEnd ? "bg-amber-300" : "bg-[#ff6900]"
-                                }`}
-                              />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    {/* Quick Pick: Upcoming Indian Holidays & Long Weekends */}
-                    <div className="mt-2.5 pt-2 border-t border-neutral-100">
-                      <div className="flex items-center justify-between text-[10px] text-neutral-500 font-semibold mb-1">
-                        <span className="flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-[#ff6900]" />
-                          Upcoming Indian Holidays
-                        </span>
+                  {/* Inline Luxury Calendar Dropdown */}
+                  {isCalendarOpen && (
+                    <div className="mt-2 p-3 bg-white rounded-2xl border border-neutral-200 shadow-md animate-in fade-in zoom-in-95 duration-150">
+                      {/* Month Navigator Header */}
+                      <div className="flex items-center justify-between mb-2 px-1">
+                        <button
+                          type="button"
+                          onClick={() => setCurrentCalendarMonth((prev) => subMonths(prev, 1))}
+                          className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-600"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <h4 className="font-bold text-xs text-neutral-900">
+                          {format(currentCalendarMonth, "MMMM yyyy")}
+                        </h4>
+                        <button
+                          type="button"
+                          onClick={() => setCurrentCalendarMonth((prev) => addMonths(prev, 1))}
+                          className="w-7 h-7 rounded-full hover:bg-neutral-100 flex items-center justify-center text-neutral-600"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                        {allHolidays?.slice(0, 8).map((h) => {
-                          const hDate = new Date(h.date);
-                          const isPastH = isBefore(hDate, new Date());
-                          if (isPastH) return null;
+
+                      {/* Weekday Names */}
+                      <div className="grid grid-cols-7 gap-1 text-center mb-1 text-[10px] font-bold text-neutral-400">
+                        <span>Su</span>
+                        <span>Mo</span>
+                        <span>Tu</span>
+                        <span>We</span>
+                        <span>Th</span>
+                        <span>Fr</span>
+                        <span>Sa</span>
+                      </div>
+
+                      {/* Day Cells Grid */}
+                      <div className="grid grid-cols-7 gap-1 text-center">
+                        {/* Empty padding days before the 1st */}
+                        {Array.from({ length: startingDayIndex }).map((_, idx) => (
+                          <div key={`empty-${idx}`} className="h-7 w-7" />
+                        ))}
+
+                        {/* Month Days */}
+                        {daysInMonth.map((day) => {
+                          const today = new Date();
+                          today.setHours(0, 0, 0, 0);
+                          const isPast = isBefore(day, today);
+                          const isStart = selectedCheckIn && isSameDay(day, selectedCheckIn);
+                          const isEnd = selectedCheckOut && isSameDay(day, selectedCheckOut);
+                          const isInRange =
+                            selectedCheckIn &&
+                            selectedCheckOut &&
+                            isWithinInterval(day, { start: selectedCheckIn, end: selectedCheckOut });
+
+                          const dateStr = format(day, "yyyy-MM-dd");
+                          const isHol = isHoliday ? isHoliday(dateStr) : false;
+                          const holName = isHol && getHolidayName ? getHolidayName(dateStr) : null;
+                          const isLW = isLongWeekend ? isLongWeekend(dateStr) : false;
+
+                          let dayStyle = "text-neutral-700 hover:bg-neutral-100";
+                          if (isPast) {
+                            dayStyle = "text-neutral-300 pointer-events-none";
+                          } else if (isStart || isEnd) {
+                            dayStyle = "bg-neutral-900 text-white font-bold shadow-xs";
+                          } else if (isInRange) {
+                            dayStyle = "bg-orange-100/70 text-[#ff6900] font-semibold";
+                          }
+
                           return (
                             <button
-                              key={h.date}
+                              key={day.toISOString()}
                               type="button"
-                              onClick={() => {
-                                const startDate = new Date(h.date);
-                                const endDate = new Date(h.date);
-                                endDate.setDate(endDate.getDate() + 2); // 2-night holiday trip
-                                setSelectedCheckIn(startDate);
-                                setSelectedCheckOut(endDate);
-                                setCurrentCalendarMonth(startDate);
-                              }}
-                              className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ea580c] hover:bg-orange-100 whitespace-nowrap transition-colors shrink-0 flex items-center gap-1"
+                              disabled={isPast}
+                              onClick={() => handleDateClick(day)}
+                              title={holName ? `🎉 ${holName}` : isLW ? "Long Weekend" : undefined}
+                              className={`h-8 w-7 rounded-full mx-auto flex flex-col items-center justify-center text-xs relative transition-colors ${dayStyle}`}
                             >
-                              <span>🎉</span>
-                              <span>{h.name}</span>
-                              <span className="text-neutral-400 font-normal">({format(hDate, "d MMM")})</span>
+                              <span className="leading-none">{format(day, "d")}</span>
+                              {isHol && (
+                                <span
+                                  className={`w-1 h-1 rounded-full shrink-0 mt-0.5 ${isStart || isEnd ? "bg-amber-300" : "bg-[#ff6900]"
+                                    }`}
+                                />
+                              )}
                             </button>
                           );
                         })}
                       </div>
-                    </div>
 
-                    {/* Bottom Action Footer */}
-                    <div className="mt-2 pt-2 border-t border-neutral-100 flex items-center justify-between">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setSelectedCheckIn(null);
-                          setSelectedCheckOut(null);
-                        }}
-                        className="text-[10px] text-neutral-500 hover:text-neutral-800 underline flex items-center gap-1"
-                      >
-                        <RotateCcw className="w-2.5 h-2.5" /> Clear
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setIsCalendarOpen(false)}
-                        className="px-3 py-1 rounded-lg bg-neutral-900 text-white text-[11px] font-bold"
-                      >
-                        Done
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Guest Counters */}
-              <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-2xs space-y-2.5">
-                {/* Adults */}
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs font-bold text-neutral-900">Adults</p>
-                    <p className="text-[10px] text-neutral-400">Age 13 years and more</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setAdults((prev) => Math.max(1, prev - 1))}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="font-semibold text-xs w-4 text-center">{adults}</span>
-                    <button
-                      type="button"
-                      onClick={() => setAdults((prev) => prev + 1)}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Children */}
-                <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-                  <div>
-                    <p className="text-xs font-bold text-neutral-900">Children</p>
-                    <p className="text-[10px] text-neutral-400">Age 3-12 years</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setChildrenCount((prev) => Math.max(0, prev - 1))}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="font-semibold text-xs w-4 text-center">
-                      {childrenCount}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setChildrenCount((prev) => prev + 1)}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-
-                {/* Infants */}
-                <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
-                  <div>
-                    <p className="text-xs font-bold text-neutral-900">Infants</p>
-                    <p className="text-[10px] text-neutral-400">Age 0-2 years</p>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <button
-                      type="button"
-                      onClick={() => setInfantsCount((prev) => Math.max(0, prev - 1))}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Minus className="w-3 h-3" />
-                    </button>
-                    <span className="font-semibold text-xs w-4 text-center">
-                      {infantsCount}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setInfantsCount((prev) => prev + 1)}
-                      className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
-                    >
-                      <Plus className="w-3 h-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Button: Find Stays */}
-              <button
-                type="button"
-                onClick={handleStructuredSubmit}
-                className="w-full py-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md active:scale-98"
-              >
-                Find Available {selectedCategory}s
-              </button>
-            </div>
-          )}
-
-          {/* =========================================================================
-              SCREEN 3: CONVERSATIONAL THREAD & PROPERTY CAROUSEL
-             ========================================================================= */}
-          {activeScreen === "chat" && (
-            <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3 flex flex-col no-scrollbar">
-              {/* Category / Property Mode Ribbon in Chat Header */}
-              {isPropertyPage ? (
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
-                  {propertyQuickPills.map((pill) => (
-                    <button
-                      key={pill.id}
-                      type="button"
-                      onClick={() => handleSendMessage(pill.query)}
-                      className="text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap bg-white border border-neutral-200/90 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 shadow-2xs transition-all active:scale-95 cursor-pointer"
-                    >
-                      {pill.label}
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
-                  {CATEGORIES.map((cat) => (
-                    <button
-                      key={cat.id}
-                      onClick={() => {
-                        setSelectedCategory(cat.id);
-                        handleSendMessage(`Show me ${cat.name.toLowerCase()}s in Lonavala`, {
-                          category: cat.id,
-                          location: destination || "Lonavala",
-                        });
-                      }}
-                      className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition-all ${
-                        selectedCategory === cat.id
-                          ? "bg-neutral-900 text-white shadow-2xs"
-                          : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
-                      }`}
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Message History */}
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex flex-col ${
-                    msg.sender === "user" ? "items-end" : "items-start"
-                  }`}
-                >
-                  {/* User Speech Bubble (Sky-Blue - User Image 1) */}
-                  {msg.sender === "user" ? (
-                    <div className="flex flex-col items-end">
-                      <div className="bg-[#a5c9f3]/85 text-neutral-900 rounded-2xl rounded-tr-xs px-4 py-2.5 text-xs sm:text-[13px] leading-relaxed max-w-[85%] shadow-2xs">
-                        <p>{msg.text}</p>
-                      </div>
-                      <span className="text-[10px] text-neutral-400 mt-1 mr-1">
-                        {msg.time}
-                      </span>
-                    </div>
-                  ) : (
-                    /* AI Concierge Card (Clean Luxury White) */
-                    <div className="w-full max-w-[96%] bg-white rounded-2xl rounded-tl-xs p-3.5 border border-neutral-200/80 shadow-2xs">
-                      {/* Decorative diamond accent */}
-                      <div className="flex items-center gap-1 text-[10px] text-neutral-400 mb-1.5">
-                        <span className="text-[#ff8566]">◆</span>
-                        <div className="h-px bg-neutral-100 flex-1" />
-                      </div>
-
-                      {/* Bot Message Narrative */}
-                      <p className="text-xs sm:text-[13px] text-neutral-800 leading-relaxed font-normal whitespace-pre-line">
-                        {msg.text}
-                      </p>
-
-                      {/* Spaces & Amenities Carousel (StayVista Reference UI) */}
-                      {msg.spaces && msg.spaces.length > 0 && (
-                        <PropertySpacesCarousel
-                          spaces={msg.spaces}
-                          amenities={msg.amenities || []}
-                          propertyCategory={propertyCategory}
-                          initialTab={msg.activeTab || "spaces"}
-                        />
-                      )}
-
-                      {/* Property House Rules & Timings View */}
-                      {msg.activeTab === "rules" && (
-                        <PropertyRulesView rules={msg.rules} timings={msg.timings} />
-                      )}
-
-                      {/* Property Meals & Dining View */}
-                      {msg.activeTab === "meals" && (
-                        <PropertyMealsView meals={msg.meals} />
-                      )}
-
-                      {/* Properties Carousel with smooth scroll buttons and mouse wheel support */}
-                      {msg.properties && msg.properties.length > 0 && (
-                        <ChatPropertyCarousel
-                          properties={msg.properties}
-                          onSelectProperty={() => setIsOpen(false)}
-                        />
-                      )}
-
-                      {/* WhatsApp Concierge Hotline Button if no direct matches */}
-                      {!isPropertyPage && (!msg.properties || msg.properties.length === 0) && (
-                        <div className="mt-3 pt-2 border-t border-neutral-100">
-                          <a
-                            href="https://wa.me/918669186483?text=Hi%2C%20I%20am%20looking%20for%20villa%20recommendations%20on%20TheVillaCamp!"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#25d366] hover:bg-[#20ba59] text-white text-xs font-semibold shadow-2xs transition-colors"
-                          >
-                            <MessageCircle className="w-3.5 h-3.5" />
-                            <span>Chat with Concierge on WhatsApp</span>
-                          </a>
+                      {/* Quick Pick: Upcoming Indian Holidays & Long Weekends */}
+                      <div className="mt-2.5 pt-2 border-t border-neutral-100">
+                        <div className="flex items-center justify-between text-[10px] text-neutral-500 font-semibold mb-1">
+                          <span className="flex items-center gap-1">
+                            <Sparkles className="w-3 h-3 text-[#ff6900]" />
+                            Upcoming Indian Holidays
+                          </span>
                         </div>
-                      )}
+                        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                          {allHolidays?.slice(0, 8).map((h) => {
+                            const hDate = new Date(h.date);
+                            const isPastH = isBefore(hDate, new Date());
+                            if (isPastH) return null;
+                            return (
+                              <button
+                                key={h.date}
+                                type="button"
+                                onClick={() => {
+                                  const startDate = new Date(h.date);
+                                  const endDate = new Date(h.date);
+                                  endDate.setDate(endDate.getDate() + 2); // 2-night holiday trip
+                                  setSelectedCheckIn(startDate);
+                                  setSelectedCheckOut(endDate);
+                                  setCurrentCalendarMonth(startDate);
+                                }}
+                                className="text-[9px] font-semibold px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-[#ea580c] hover:bg-orange-100 whitespace-nowrap transition-colors shrink-0 flex items-center gap-1"
+                              >
+                                <span>🎉</span>
+                                <span>{h.name}</span>
+                                <span className="text-neutral-400 font-normal">({format(hDate, "d MMM")})</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
 
-                      <span className="block text-[9px] text-neutral-400 text-right mt-1.5">
-                        {msg.time}
-                      </span>
+                      {/* Bottom Action Footer */}
+                      <div className="mt-2 pt-2 border-t border-neutral-100 flex items-center justify-between">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedCheckIn(null);
+                            setSelectedCheckOut(null);
+                          }}
+                          className="text-[10px] text-neutral-500 hover:text-neutral-800 underline flex items-center gap-1"
+                        >
+                          <RotateCcw className="w-2.5 h-2.5" /> Clear
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsCalendarOpen(false)}
+                          className="px-3 py-1 rounded-lg bg-neutral-900 text-white text-[11px] font-bold"
+                        >
+                          Done
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
-              ))}
 
-              {/* Modern AI Thinking State (Matching User Image 1: ✨ Just a moment...) */}
-              {isLoading && (
-                <div className="self-start w-[240px] bg-white rounded-2xl rounded-tl-xs p-3.5 border border-neutral-200/80 shadow-2xs space-y-2 animate-in fade-in duration-200">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#ff6900] animate-spin" />
-                    <span className="text-xs font-semibold text-[#ff6900]">
-                      Just a moment...
-                    </span>
+                {/* Guest Counters */}
+                <div className="bg-white p-3 rounded-2xl border border-neutral-200/80 shadow-2xs space-y-2.5">
+                  {/* Adults */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-bold text-neutral-900">Adults</p>
+                      <p className="text-[10px] text-neutral-400">Age 13 years and more</p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setAdults((prev) => Math.max(1, prev - 1))}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="font-semibold text-xs w-4 text-center">{adults}</span>
+                      <button
+                        type="button"
+                        onClick={() => setAdults((prev) => prev + 1)}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="space-y-1.5 pt-0.5">
-                    <div className="h-2 bg-neutral-200/60 rounded-full w-4/5 animate-pulse" />
-                    <div className="h-2 bg-neutral-200/60 rounded-full w-full animate-pulse delay-75" />
-                    <div className="h-2 bg-neutral-200/60 rounded-full w-3/5 animate-pulse delay-150" />
+
+                  {/* Children */}
+                  <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                    <div>
+                      <p className="text-xs font-bold text-neutral-900">Children</p>
+                      <p className="text-[10px] text-neutral-400">Age 3-12 years</p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setChildrenCount((prev) => Math.max(0, prev - 1))}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="font-semibold text-xs w-4 text-center">
+                        {childrenCount}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setChildrenCount((prev) => prev + 1)}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Infants */}
+                  <div className="flex items-center justify-between pt-2 border-t border-neutral-100">
+                    <div>
+                      <p className="text-xs font-bold text-neutral-900">Infants</p>
+                      <p className="text-[10px] text-neutral-400">Age 0-2 years</p>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <button
+                        type="button"
+                        onClick={() => setInfantsCount((prev) => Math.max(0, prev - 1))}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </button>
+                      <span className="font-semibold text-xs w-4 text-center">
+                        {infantsCount}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setInfantsCount((prev) => prev + 1)}
+                        className="w-7 h-7 rounded-full border border-neutral-200 flex items-center justify-center text-neutral-600 hover:bg-neutral-50"
+                      >
+                        <Plus className="w-3 h-3" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              )}
 
-              <div ref={messagesEndRef} />
-            </div>
-          )}
+                {/* Action Button: Find Stays */}
+                <button
+                  type="button"
+                  onClick={handleStructuredSubmit}
+                  className="w-full py-3 rounded-xl bg-neutral-900 hover:bg-black text-white text-xs font-bold transition-all shadow-md active:scale-98"
+                >
+                  Find Available {selectedCategory}s
+                </button>
+              </div>
+            )}
 
-          {/* =========================================================================
+            {/* =========================================================================
+              SCREEN 3: CONVERSATIONAL THREAD & PROPERTY CAROUSEL
+             ========================================================================= */}
+            {activeScreen === "chat" && (
+              <div className="flex-1 overflow-y-auto px-3.5 py-3 space-y-3 flex flex-col no-scrollbar">
+                {/* Category / Property Mode Ribbon in Chat Header */}
+                {isPropertyPage ? (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
+                    {propertyQuickPills.map((pill) => (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => handleSendMessage(pill.query)}
+                        className="text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap bg-white border border-neutral-200/90 text-neutral-700 hover:border-neutral-400 hover:bg-neutral-50 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                      >
+                        {pill.label}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar shrink-0">
+                    {CATEGORIES.map((cat) => (
+                      <button
+                        key={cat.id}
+                        onClick={() => {
+                          setSelectedCategory(cat.id);
+                          handleSendMessage(`Show me ${cat.name.toLowerCase()}s in Lonavala`, {
+                            category: cat.id,
+                            location: destination || "Lonavala",
+                          });
+                        }}
+                        className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition-all ${selectedCategory === cat.id
+                            ? "bg-neutral-900 text-white shadow-2xs"
+                            : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                          }`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Message History */}
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex flex-col ${msg.sender === "user" ? "items-end" : "items-start"
+                      }`}
+                  >
+                    {/* User Speech Bubble (Sky-Blue - User Image 1) */}
+                    {msg.sender === "user" ? (
+                      <div className="flex flex-col items-end">
+                        <div className="bg-[#a5c9f3]/85 text-neutral-900 rounded-2xl rounded-tr-xs px-4 py-2.5 text-xs sm:text-[13px] leading-relaxed max-w-[85%] shadow-2xs">
+                          <p>{msg.text}</p>
+                        </div>
+                        <span className="text-[10px] text-neutral-400 mt-1 mr-1">
+                          {msg.time}
+                        </span>
+                      </div>
+                    ) : (
+                      /* AI Concierge Card (Clean Luxury White) */
+                      <div className="w-full max-w-[96%] bg-white rounded-2xl rounded-tl-xs p-3.5 border border-neutral-200/80 shadow-2xs">
+                        {/* Decorative diamond accent */}
+                        <div className="flex items-center gap-1 text-[10px] text-neutral-400 mb-1.5">
+                          <span className="text-[#ff8566]">◆</span>
+                          <div className="h-px bg-neutral-100 flex-1" />
+                        </div>
+
+                        {/* Bot Message Narrative */}
+                        <p className="text-xs sm:text-[13px] text-neutral-800 leading-relaxed font-normal whitespace-pre-line">
+                          {msg.text}
+                        </p>
+
+                        {/* Spaces & Amenities Carousel (StayVista Reference UI) */}
+                        {msg.spaces && msg.spaces.length > 0 && (
+                          <PropertySpacesCarousel
+                            spaces={msg.spaces}
+                            amenities={msg.amenities || []}
+                            propertyCategory={propertyCategory}
+                            initialTab={msg.activeTab || "spaces"}
+                          />
+                        )}
+
+                        {/* Property House Rules & Timings View */}
+                        {msg.activeTab === "rules" && (
+                          <PropertyRulesView rules={msg.rules} timings={msg.timings} />
+                        )}
+
+                        {/* Property Meals & Dining View */}
+                        {msg.activeTab === "meals" && (
+                          <PropertyMealsView meals={msg.meals} />
+                        )}
+
+                        {/* Properties Carousel with smooth scroll buttons and mouse wheel support */}
+                        {msg.properties && msg.properties.length > 0 && (
+                          <ChatPropertyCarousel
+                            properties={msg.properties}
+                            onSelectProperty={() => setIsOpen(false)}
+                          />
+                        )}
+
+                        {/* WhatsApp Concierge Hotline Button if no direct matches */}
+                        {!isPropertyPage && (!msg.properties || msg.properties.length === 0) && (
+                          <div className="mt-3 pt-2 border-t border-neutral-100">
+                            <a
+                              href="https://wa.me/918669186483?text=Hi%2C%20I%20am%20looking%20for%20villa%20recommendations%20on%20TheVillaCamp!"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#25d366] hover:bg-[#20ba59] text-white text-xs font-semibold shadow-2xs transition-colors"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              <span>Chat with Concierge on WhatsApp</span>
+                            </a>
+                          </div>
+                        )}
+
+                        <span className="block text-[9px] text-neutral-400 text-right mt-1.5">
+                          {msg.time}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* Modern AI Thinking State (Matching User Image 1: ✨ Just a moment...) */}
+                {isLoading && (
+                  <div className="self-start w-[240px] bg-white rounded-2xl rounded-tl-xs p-3.5 border border-neutral-200/80 shadow-2xs space-y-2 animate-in fade-in duration-200">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-[#ff6900] animate-spin" />
+                      <span className="text-xs font-semibold text-[#ff6900]">
+                        Just a moment...
+                      </span>
+                    </div>
+                    <div className="space-y-1.5 pt-0.5">
+                      <div className="h-2 bg-neutral-200/60 rounded-full w-4/5 animate-pulse" />
+                      <div className="h-2 bg-neutral-200/60 rounded-full w-full animate-pulse delay-75" />
+                      <div className="h-2 bg-neutral-200/60 rounded-full w-3/5 animate-pulse delay-150" />
+                    </div>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+            )}
+
+            {/* =========================================================================
               PERSISTENT BOTTOM INPUT BAR
              ========================================================================= */}
-          <div className="p-3 bg-[#fbfaf6] border-t border-neutral-200/70 shrink-0">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleSendMessage();
-              }}
-              className="bg-white rounded-2xl shadow-sm border border-neutral-200/80 px-3 py-1.5 flex items-center gap-2"
-            >
-              <input
-                type="text"
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                placeholder={
-                  isPropertyPage
-                    ? `Ask about this ${propertyCategory.toLowerCase()}...`
-                    : activeScreen === "chat"
-                    ? "Where would you like to go next?"
-                    : "Find your escape..."
-                }
-                className="flex-1 text-xs sm:text-sm text-neutral-800 placeholder:text-neutral-400 bg-transparent focus:outline-none"
-              />
-
-              {/* Speech-to-text mic icon */}
-              <button
-                type="button"
-                onClick={toggleVoiceInput}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${
-                  isListening
-                    ? "bg-red-500 text-white animate-pulse"
-                    : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
-                }`}
-                title={isListening ? "Listening... click to stop" : "Voice search"}
+            <div className="p-3 bg-[#fbfaf6] border-t border-neutral-200/70 shrink-0">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSendMessage();
+                }}
+                className="bg-white rounded-2xl shadow-sm border border-neutral-200/80 px-3 py-1.5 flex items-center gap-2"
               >
-                {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              </button>
+                <input
+                  type="text"
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  placeholder={
+                    isPropertyPage
+                      ? `Ask about this ${propertyCategory.toLowerCase()}...`
+                      : activeScreen === "chat"
+                        ? "Where would you like to go next?"
+                        : "Find your escape..."
+                  }
+                  className="flex-1 text-xs sm:text-sm text-neutral-800 placeholder:text-neutral-400 bg-transparent focus:outline-none"
+                />
 
-              {/* Coral send button */}
-              <button
-                type="submit"
-                disabled={!inputValue.trim() && !isLoading}
-                className="w-8 h-8 rounded-full bg-[#f68282] hover:bg-[#ea6d6d] disabled:opacity-50 text-white flex items-center justify-center transition-transform active:scale-95 shadow-2xs"
-                title="Send query"
-              >
-                <Send className="w-3.5 h-3.5" />
-              </button>
-            </form>
+                {/* Speech-to-text mic icon */}
+                <button
+                  type="button"
+                  onClick={toggleVoiceInput}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isListening
+                      ? "bg-red-500 text-white animate-pulse"
+                      : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                    }`}
+                  title={isListening ? "Listening... click to stop" : "Voice search"}
+                >
+                  {isListening ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                </button>
+
+                {/* Coral send button */}
+                <button
+                  type="submit"
+                  disabled={!inputValue.trim() && !isLoading}
+                  className="w-8 h-8 rounded-full bg-[#f68282] hover:bg-[#ea6d6d] disabled:opacity-50 text-white flex items-center justify-center transition-transform active:scale-95 shadow-2xs"
+                  title="Send query"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                </button>
+              </form>
+            </div>
           </div>
-        </div>
         </>
       )}
     </>
