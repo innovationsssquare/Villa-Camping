@@ -608,6 +608,9 @@ function PropertyMealsView({ meals = null }) {
 export default function AIConciergeBot() {
   const pathname = usePathname() || "";
 
+  // Hide chatbot on /shorts pages
+  const isShortsPage = pathname.toLowerCase().startsWith("/shorts");
+
   // 1. Detect if browsing a specific property view page
   const isVillaPage = pathname.toLowerCase().includes("/view-villa");
   const isCampingPage = pathname.toLowerCase().includes("/view-camping");
