@@ -4,6 +4,8 @@ import {
   Star,
   ChevronLeft,
   ChevronRight,
+  Sparkles,
+  Flame,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -153,6 +155,15 @@ export function PropertyCard({ property }) {
     ? Number(property.rating).toFixed(property.rating % 1 === 0 ? 1 : 2)
     : "5.0";
 
+  // Promotional & dynamic ranking badge calculations
+  const isPromoted = Boolean(property.isCurrentlyPromoted || property.isPromoted);
+  const promoBadge = property.customBadge || "Spotlight";
+  const isMostBooked = Boolean(
+    property.isMostBooked ||
+    Number(property.totalBookingsCount) >= 2 ||
+    Number(property.popularityScore) >= 15
+  );
+
   // Guest favourite badge check
   const isGuestFavourite =
     Number(rating) >= 4.8 ||
@@ -180,14 +191,30 @@ export function PropertyCard({ property }) {
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
-        {/* Top Left: "Guest favourite" badge (matches Airbnb screenshot) */}
-        {isGuestFavourite && (
-          <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 bg-white/95 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm flex items-center border border-black/5">
-            <span className="text-[9px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
-              Guest favourite
-            </span>
-          </div>
-        )}
+        {/* Top Left Badges: Promoted Spotlight, Most Booked, or Guest Favourite */}
+        <div className="absolute top-2 left-2 sm:top-3 sm:left-3 z-10 flex flex-col gap-1 items-start">
+          {isPromoted ? (
+            <div className="bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+              <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white" />
+              <span className="text-[9px] sm:text-xs font-bold tracking-tight">
+                {promoBadge}
+              </span>
+            </div>
+          ) : isMostBooked ? (
+            <div className="bg-gradient-to-r from-red-600 to-amber-600 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+              <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-200 fill-amber-200" />
+              <span className="text-[9px] sm:text-xs font-bold tracking-tight">
+                Most Booked
+              </span>
+            </div>
+          ) : isGuestFavourite ? (
+            <div className="bg-white/95 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm flex items-center border border-black/5">
+              <span className="text-[9px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
+                Guest favourite
+              </span>
+            </div>
+          ) : null}
+        </div>
 
         {/* Top Right: Wishlist Heart Icon (Airbnb style with translucent fill & drop shadow) */}
         <button

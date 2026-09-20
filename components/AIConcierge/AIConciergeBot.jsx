@@ -39,6 +39,7 @@ import {
   Utensils,
   Clock,
   CheckCircle2,
+  Flame,
 } from "lucide-react";
 import { format, isBefore, isSameDay, addMonths, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, getDay, isWithinInterval } from "date-fns";
 import { useIndianHolidays } from "@/hooks/useIndianHolidays";
@@ -231,6 +232,17 @@ function ChatPropertyCarousel({ properties, onSelectProperty }) {
               <span className="absolute top-2 left-2 bg-black/60 backdrop-blur-xs text-white text-[9px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wider pointer-events-none">
                 {property.category}
               </span>
+              {property.isPromoted ? (
+                <span className="absolute top-2 right-2 bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs flex items-center gap-0.5 pointer-events-none">
+                  <Sparkles className="w-2.5 h-2.5 fill-white text-white" />
+                  {property.customBadge || "Spotlight"}
+                </span>
+              ) : property.isMostBooked ? (
+                <span className="absolute top-2 right-2 bg-gradient-to-r from-red-600 to-amber-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs flex items-center gap-0.5 pointer-events-none">
+                  <Flame className="w-2.5 h-2.5 fill-amber-200 text-amber-200" />
+                  Most Booked
+                </span>
+              ) : null}
             </div>
 
             {/* Card Details */}
@@ -607,16 +619,17 @@ function PropertyMealsView({ meals = null }) {
 
 export default function AIConciergeBot() {
   const pathname = usePathname() || "";
+  const cleanPath = (pathname || "").toLowerCase().trim();
 
-  // Hide chatbot on /shorts pages
-  const isShortsPage = pathname.toLowerCase().startsWith("/shorts");
-
-  // 1. Detect if browsing a specific property view page
-  const isVillaPage = pathname.toLowerCase().includes("/view-villa");
-  const isCampingPage = pathname.toLowerCase().includes("/view-camping");
-  const isCottagePage = pathname.toLowerCase().includes("/view-cottage");
-  const isHotelPage = pathname.toLowerCase().includes("/view-hotel");
+  // 1. Only allow chatbot on Homepage ("/" or "") and Property View Pages
+  const isHomePage = cleanPath === "" || cleanPath === "/";
+  const isVillaPage = cleanPath.startsWith("/view-villa") || cleanPath.startsWith("/view-villas");
+  const isCampingPage = cleanPath.startsWith("/view-camping");
+  const isCottagePage = cleanPath.startsWith("/view-cottage");
+  const isHotelPage = cleanPath.startsWith("/view-hotel");
   const isPropertyPage = isVillaPage || isCampingPage || isCottagePage || isHotelPage;
+
+  const shouldShowBot = isHomePage || isPropertyPage;
 
   const propertyCategory = isVillaPage
     ? "Villa"
@@ -629,6 +642,37 @@ export default function AIConciergeBot() {
           : "Stay";
 
   const propertyId = isPropertyPage ? pathname.split("/").filter(Boolean)[1] : null;
+
+  // Reactive detection of whether any booking drawer or external modal is currently open in the DOM
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    const checkDrawer = () => {
+      const hasDrawer =
+        document.body.hasAttribute("data-drawer-open") ||
+        !!document.querySelector('[data-slot="drawer-content"]') ||
+        !!document.querySelector('[data-slot="drawer-overlay"]') ||
+        !!document.querySelector('[data-vaul-drawer]') ||
+        !!document.querySelector('[role="dialog"]:not([data-ai-concierge="true"])') ||
+        !!document.querySelector('.heroui-modal-backdrop') ||
+        !!document.querySelector('[data-modal-open="true"]');
+      setIsDrawerOpen(hasDrawer);
+    };
+
+    checkDrawer();
+
+    const observer = new MutationObserver(checkDrawer);
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-drawer-open", "data-state", "class", "style"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   // Retrieve active property from Redux store
   const villaData = useSelector((state) => state.villa?.villa);
@@ -960,8 +1004,8 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
-  // Hide chatbot entirely on /shorts page
-  if (isShortsPage) {
+  // Only show chatbot on Homepage ("/") and Property View pages (/view-Villa, /view-Camping, etc.)
+  if (!shouldShowBot) {
     return null;
   }
 
@@ -969,9 +1013,13 @@ export default function AIConciergeBot() {
     <>
       {/* =========================================================================
           1. FLOATING MASCOT TRIGGER BUTTON (Placed on RIGHT side)
+          Automatically hidden when any booking drawer or modal is active
          ========================================================================= */}
-      {!isOpen && (
-        <div className="fixed md:bottom-6 md:right-6 bottom-24 right-6 z-[9990]">
+      {!isOpen && !isDrawerOpen && (
+        <div
+          data-ai-concierge-mascot="true"
+          className="fixed md:bottom-6 md:right-6 bottom-24 right-6 z-[9990] transition-all duration-200"
+        >
           <button
             type="button"
             onClick={(e) => {
@@ -1013,10 +1061,11 @@ export default function AIConciergeBot() {
       {/* =========================================================================
           2. MAIN AI CONCIERGE MODAL / DRAWER (Anchored on RIGHT side)
          ========================================================================= */}
-      {isOpen && (
+      {isOpen && !isDrawerOpen && (
         <>
           {/* Subtle click-outside backdrop */}
           <div
+            data-ai-concierge="true"
             className="fixed inset-0 z-[9998] bg-black/20 backdrop-blur-[0.5px]"
             onClick={() => {
               setIsOpen(false);
@@ -1025,6 +1074,7 @@ export default function AIConciergeBot() {
           />
 
           <div
+            data-ai-concierge="true"
             className="fixed bottom-3 sm:bottom-6 right-2 sm:right-6 z-[9999] w-[calc(100vw-1rem)] sm:w-[355px] h-[630px] max-h-[92vh] bg-[#fbfaf6] rounded-[28px] shadow-2xl border border-neutral-200/90 flex flex-col overflow-hidden no-scrollbar animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >

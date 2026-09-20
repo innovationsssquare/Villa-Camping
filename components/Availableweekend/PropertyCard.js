@@ -319,6 +319,14 @@ export default function PropertyCardnew({ property }) {
     property?.tags?.includes("Best Rated") ||
     property?.tags?.includes("Guest favourite");
 
+  const isPromoted = Boolean(property?.isCurrentlyPromoted || property?.isPromoted);
+  const promoBadge = property?.customBadge || "Spotlight";
+  const isMostBooked = Boolean(
+    property?.isMostBooked ||
+    Number(property?.totalBookingsCount) >= 2 ||
+    Number(property?.popularityScore) >= 15
+  );
+
   const displayAmenities = property?.topamenities?.slice(0, 5) || [];
   const extraAmenitiesCount = Math.max(
     0,
@@ -345,15 +353,31 @@ export default function PropertyCardnew({ property }) {
             className="object-cover group-hover:scale-105 transition-transform duration-600 ease-out"
           />
 
-          {/* Top-Left: Guest Favourite / Best Rated Badge */}
-          {isGuestFavourite && (
-            <div className="absolute top-3 left-3 z-10 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-black/5 flex items-center gap-1.5">
-              <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
-              <span className="text-[11px] font-bold text-neutral-900 tracking-tight">
-                {property?.tags?.[0] || "Guest favourite"}
-              </span>
-            </div>
-          )}
+          {/* Top-Left: Promoted Spotlight, Most Booked, or Guest Favourite */}
+          <div className="absolute top-3 left-3 z-10 flex flex-col gap-1 items-start">
+            {isPromoted ? (
+              <div className="bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white px-3 py-1 rounded-full shadow-md flex items-center gap-1.5 border border-white/20">
+                <Sparkles className="w-3 h-3 text-white fill-white" />
+                <span className="text-[11px] font-bold tracking-tight">
+                  {promoBadge}
+                </span>
+              </div>
+            ) : isMostBooked ? (
+              <div className="bg-gradient-to-r from-red-600 to-amber-600 text-white px-3 py-1 rounded-full shadow-md flex items-center gap-1.5 border border-white/20">
+                <Flame className="w-3 h-3 text-amber-200 fill-amber-200" />
+                <span className="text-[11px] font-bold tracking-tight">
+                  Most Booked
+                </span>
+              </div>
+            ) : isGuestFavourite ? (
+              <div className="bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-black/5 flex items-center gap-1.5">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400 shrink-0" />
+                <span className="text-[11px] font-bold text-neutral-900 tracking-tight">
+                  {property?.tags?.[0] || "Guest favourite"}
+                </span>
+              </div>
+            ) : null}
+          </div>
 
           {/* Top-Right: Wishlist Heart & Share Action */}
           <div className="absolute top-3 right-3 z-10 flex items-center gap-1.5">
@@ -678,18 +702,28 @@ export default function PropertyCardnew({ property }) {
             </div>
           )}
 
-          {/* Tags (Top Left) */}
-          <div className="absolute top-3 left-3 flex gap-1.5 z-10">
-            {property?.tags &&
-              property.tags.slice(0, 2).map((tag, index) => (
-                <div
-                  key={index}
-                  className="bg-white/95 backdrop-blur-md text-neutral-900 px-2.5 py-1 rounded-full font-bold text-[11px] shadow-xs flex items-center gap-1 border border-black/5"
-                >
-                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                  <span>{tag}</span>
-                </div>
-              ))}
+          {/* Top Left Badges: Promoted Spotlight, Most Booked, or Guest Favourite */}
+          <div className="absolute top-3 left-3 flex flex-col gap-1 items-start z-10">
+            {isPromoted ? (
+              <div className="bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+                <Sparkles className="w-2.5 h-2.5 text-white fill-white" />
+                <span className="text-[10px] font-bold tracking-tight">
+                  {promoBadge}
+                </span>
+              </div>
+            ) : isMostBooked ? (
+              <div className="bg-gradient-to-r from-red-600 to-amber-600 text-white px-2.5 py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
+                <Flame className="w-2.5 h-2.5 text-amber-200 fill-amber-200" />
+                <span className="text-[10px] font-bold tracking-tight">
+                  Most Booked
+                </span>
+              </div>
+            ) : isGuestFavourite ? (
+              <div className="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full font-bold text-[10px] shadow-xs flex items-center gap-1 border border-black/5">
+                <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                <span>{property?.tags?.[0] || "Guest favourite"}</span>
+              </div>
+            ) : null}
           </div>
 
           {/* Action Buttons (Top Right) */}

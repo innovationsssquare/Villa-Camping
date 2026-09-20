@@ -33,6 +33,18 @@ body::-webkit-scrollbar {
     scrollbar-width: none !important;
   }
 
+  /* Automatically hide AI chatbot when any drawer or modal is open */
+  body[data-drawer-open="true"] [data-ai-concierge-mascot="true"],
+  body:has([data-slot="drawer-content"]) [data-ai-concierge-mascot="true"],
+  body:has([data-slot="drawer-overlay"]) [data-ai-concierge-mascot="true"],
+  body:has([data-vaul-drawer]) [data-ai-concierge-mascot="true"],
+  body:has([data-modal-open="true"]) [data-ai-concierge-mascot="true"] {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+
   .custom-radio {
     position: relative;
     width: 20px;
