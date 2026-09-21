@@ -224,7 +224,7 @@ export default function TentSelectionDrawer({
 
   return (
     <Drawer open={isOpen} onOpenChange={(open) => !open && onClose()} shouldScaleBackground={false}>
-      <DrawerContent className="max-h-[92vh] p-0 rounded-t-3xl bg-white border-t border-gray-100 z-[160]">
+      <DrawerContent className="max-h-[92vh] p-0 rounded-t-3xl bg-white border-t border-gray-100">
         {/* Handle */}
         <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto my-3" />
 

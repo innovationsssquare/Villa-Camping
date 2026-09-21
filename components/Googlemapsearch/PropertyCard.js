@@ -129,7 +129,6 @@ export const PropertyCard = ({
   }
 
   const basePrice = getDisplayPrice(property.price);
-  const twoNightsPrice = basePrice * 2;
 
   const propertyTypeName = property.type
     ? property.type.charAt(0).toUpperCase() + property.type.slice(1)
@@ -304,10 +303,10 @@ export const PropertyCard = ({
             {/* Row 5: Price */}
             <div className="flex items-baseline gap-1">
               <span className="font-extrabold text-neutral-900 text-xs sm:text-sm">
-                {formatRupee(twoNightsPrice || basePrice)}
+                {formatRupee(basePrice)}
               </span>
               <span className="text-neutral-500 text-[10px] font-normal">
-                for 2 nights
+                night
               </span>
             </div>
           </div>
@@ -416,10 +415,10 @@ export const PropertyCard = ({
           <div className="pt-2 border-t border-neutral-100 flex items-baseline justify-between gap-2">
             <div>
               <span className="font-extrabold text-neutral-900 text-base">
-                {formatRupee(twoNightsPrice || basePrice)}
+                {formatRupee(basePrice)}
               </span>
               <span className="text-neutral-600 text-xs ml-1">
-                for 2 nights
+                night
               </span>
             </div>
           </div>

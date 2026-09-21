@@ -123,6 +123,7 @@ const FixedBookingBar = () => {
         propertyType="Hotel"
         pricing={hotel?.pricing}
         rooms={hotel?.rooms}
+        maxCapacity={hotel?.maxCapacity}
         initialTab={bookingTab}
         // customerId:={}
       />

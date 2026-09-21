@@ -122,6 +122,7 @@ const FixedBookingBar = () => {
         propertyType="Cottage"
         pricing={cottage?.pricing}
         cottages={cottage?.cottages}
+        maxCapacity={cottage?.maxCapacity}
         initialTab={bookingTab}
         // customerId:={}
       />

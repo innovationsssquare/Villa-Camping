@@ -863,7 +863,7 @@ export default function PropertyCardnew({ property }) {
               <div>
                 <div className="text-xs text-neutral-500 font-medium">Price start</div>
                 <div className="text-[11px] text-neutral-400">
-                  for 1 Nights
+                  per night
                 </div>
               </div>
               <div className="flex flex-col justify-center items-end">

@@ -148,9 +148,12 @@ export function PropertyCard({ property }) {
 
   // Pricing & Rating calculations
   const nightPrice = Number(
-    property.pricing?.weekendPrice || property.pricing?.weekdayPrice || 0
+    property.pricing?.weekendPrice ||
+      property.pricing?.weekdayPrice ||
+      property.price ||
+      property.basePricePerNight ||
+      0
   );
-  const twoNightsPrice = nightPrice * 2;
   const rating = property.rating
     ? Number(property.rating).toFixed(property.rating % 1 === 0 ? 1 : 2)
     : "5.0";
@@ -299,16 +302,14 @@ export function PropertyCard({ property }) {
             }`}
         </h3>
 
-        {/* Line 2: Price for 2 nights · Star Rating */}
+        {/* Line 2: Price per night · Star Rating */}
         <div className="text-[10px] sm:text-[11px] md:text-xs text-neutral-600 mt-0.5 flex items-center justify-between gap-1 leading-tight">
           <div className="flex items-baseline gap-1 truncate">
             <span className="font-semibold text-neutral-900">
-              {twoNightsPrice > 0
-                ? formatRupee(twoNightsPrice)
-                : formatRupee(nightPrice)}
+              {formatRupee(nightPrice)}
             </span>
             <span className="text-neutral-500 font-normal text-[9px] sm:text-[10px]">
-              {twoNightsPrice > 0 ? "2 nights" : "night"}
+              night
             </span>
           </div>
           <span className="inline-flex items-center gap-0.5 text-neutral-900 font-medium flex-shrink-0">
