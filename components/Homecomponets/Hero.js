@@ -15,7 +15,7 @@ import {
   CheckCircle2,
   Compass,
 } from "lucide-react";
-import Banner1 from "@/public/Aboutusasset/Villabanner.jpg";
+import Banner1 from "@/public/Loginasset/villa_banner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
 import { addToast } from "@heroui/react";
 
@@ -76,6 +76,8 @@ export default function Hero() {
   );
 
   const [activeSlide, setActiveSlide] = useState(0);
+  // Set SHOW_HERO_VIDEO to true to re-enable the background video
+  const SHOW_HERO_VIDEO = false;
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef(null);
 
@@ -113,58 +115,60 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative w-full pt-[70px] md:pt-[136px] overflow-hidden bg-neutral-950">
+    <section className="relative w-full pt-[70px] md:pt-[136px] overflow-hidden  ">
       {/* Background Container - Dynamic Content-Driven Height with No Clipping */}
-      <div className="relative w-full min-h-[360px] sm:min-h-[420px] md:min-h-[560px] lg:min-h-[620px] h-auto flex flex-col justify-between rounded-b-[1.75rem] sm:rounded-b-[2.5rem] md:rounded-b-[3.5rem] overflow-hidden shadow-xl">
-        
-        {/* HTML5 Video: Always Muted, Loop, Autoplay, PlaysInline */}
-        <video
-          ref={videoRef}
-          className="absolute inset-0 w-full h-full object-cover scale-105 transition-transform duration-1000"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster={Banner1.src}
-          onLoadedData={() => setVideoLoaded(true)}
-        >
-          <source
-            src="https://res.cloudinary.com/dznqbnzzd/video/upload/v1781779851/Video_Project_ohyotj.mp4"
-            type="video/mp4"
-          />
-        </video>
-
-        {/* Fallback Poster Background if video is buffering */}
-        <div
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            videoLoaded ? "opacity-0 pointer-events-none" : "opacity-100"
-          }`}
-        >
+      <div className="relative w-full min-h-[360px] sm:min-h-[420px] md:min-h-[560px] lg:min-h-[620px] h-auto flex flex-col justify-between rounded-b-[1.75rem] sm:rounded-b-[2.5rem] md:rounded-b-[3.5rem] overflow-hidden shadow-xl ">
+        {/* Hero Background Banner Image - Bright & Vibrant */}
+        <div className="absolute inset-0">
           <Image
             src={Banner1}
             alt="TheVillaCamp Luxury Stays"
             fill
             priority
-            className="object-cover"
+            sizes="100vw"
+            className="object-cover object-center brightness-105 contrast-[1.02]"
           />
         </div>
 
-        {/* Cinematic Multi-Layer Gradient Overlays */}
-        {/* Ambient Top Shade */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/30 to-transparent pointer-events-none z-[1]" />
+        {/* HTML5 Video: Set SHOW_HERO_VIDEO to true to re-enable video later */}
+        {SHOW_HERO_VIDEO && (
+          <video
+            ref={videoRef}
+            className={`absolute inset-0 w-full h-full object-cover scale-105 transition-opacity duration-1000 ${videoLoaded ? "opacity-100" : "opacity-0"
+              }`}
+            autoPlay
+            muted
+            loop
+            playsInline
+            poster={Banner1.src}
+            onLoadedData={() => setVideoLoaded(true)}
+          >
+            <source
+              src="https://res.cloudinary.com/dznqbnzzd/video/upload/v1781779851/Video_Project_ohyotj.mp4"
+              type="video/mp4"
+            />
+          </video>
+        )}
 
-        {/* Core Cinematic Vignette & Bottom Depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none z-[1]" />
+        {/* Lighter Gradient Overlays - Keeps Banner Image Bright while ensuring text contrast */}
+        {/* Soft Ambient Top Shade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent pointer-events-none z-[1]" />
+
+        {/* Text backdrop on left side so white text is crisp */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent pointer-events-none z-[1]" />
+
+        {/* Subtle Bottom Vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none z-[1]" />
 
         {/* Subtle Orange Ambient Glow */}
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ff6900]/20 rounded-full blur-3xl pointer-events-none z-[1]" />
+        <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none z-[1]" />
 
         {/* Hero Content Overlay with Generous Spacing so Content Breathes Naturally */}
         <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-9 md:pt-12 pb-8 sm:pb-12 md:pb-16 flex flex-col justify-between flex-1">
-          
+
           {/* Main Messaging & Action Area */}
           <div className="max-w-3xl flex flex-col">
-            
+
             {/* Eyebrow Badge with increased breathing room */}
             <motion.div
               initial={{ opacity: 0, y: -8 }}
@@ -175,7 +179,7 @@ export default function Hero() {
               <Sparkles className="w-3.5 h-3.5 text-[#ff6900] animate-pulse shrink-0" />
               <span>{HERO_SLIDES[activeSlide].tag}</span>
               <span className="w-1 h-1 rounded-full bg-white/60 mx-0.5" />
-              <span className="text-white/80 font-normal">Maharashtra</span>
+              <span className="text-white/80 font-normal">Lonavala</span>
             </motion.div>
 
             {/* Dynamic Animated Headline & Subtitle with Enhanced Spacing */}
@@ -188,14 +192,14 @@ export default function Hero() {
                   exit={{ opacity: 0, y: -8 }}
                   transition={{ duration: 0.35, ease: "easeOut" }}
                 >
-                  <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.2] sm:leading-[1.18]">
+                  <h1 className="text-xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.2] sm:leading-[1.18] drop-shadow-md">
                     Escape to Extraordinary.
                     <br />
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-100 to-[#ff7a1a]">
                       {HERO_SLIDES[activeSlide].title}
                     </span>
                   </h1>
-                  <p className="text-white/85 text-xs sm:text-sm md:text-base max-w-xl mt-2.5 sm:mt-3.5 font-normal leading-relaxed line-clamp-1 sm:line-clamp-2">
+                  <p className="text-white/90 text-xs sm:text-sm md:text-base max-w-xl mt-2.5 sm:mt-3.5 font-normal leading-relaxed line-clamp-1 sm:line-clamp-2 drop-shadow-sm">
                     {HERO_SLIDES[activeSlide].description}
                   </p>
                 </motion.div>
@@ -247,7 +251,7 @@ export default function Hero() {
 
           {/* Bottom Area: Social Proof Trust Badges & Slide Dots with Enhanced Top Spacing */}
           <div className="mt-6 sm:mt-10 pt-4 sm:pt-5 border-t border-white/15 flex items-center justify-between gap-4">
-            
+
             {/* Desktop / Tablet Trust Badges Strip */}
             <div className="hidden sm:grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               <div className="flex items-center gap-2">
@@ -310,11 +314,10 @@ export default function Hero() {
                   key={idx}
                   type="button"
                   onClick={() => setActiveSlide(idx)}
-                  className={`transition-all duration-300 rounded-full h-1 cursor-pointer ${
-                    activeSlide === idx
-                      ? "w-4 bg-[#ff6900]"
-                      : "w-1.5 bg-white/40 hover:bg-white/70"
-                  }`}
+                  className={`transition-all duration-300 rounded-full h-1 cursor-pointer ${activeSlide === idx
+                    ? "w-4 bg-[#ff6900]"
+                    : "w-1.5 bg-white/40 hover:bg-white/70"
+                    }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
