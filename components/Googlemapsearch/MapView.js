@@ -73,6 +73,14 @@ const MapView = ({
     onPropertySelect?.(null);
   }, [selectedLocation]);
 
+  // Clear popup card if 0 properties are found
+  useEffect(() => {
+    if (!properties || properties.length === 0) {
+      setInternalSelectedProperty(null);
+      onPropertySelect?.(null);
+    }
+  }, [properties]);
+
   // 3. Sync activePropertyId from parent (card click, marker click, or filter reset)
   useEffect(() => {
     if (!activePropertyId) {
@@ -116,6 +124,18 @@ const MapView = ({
         div.style.pointerEvents = "auto";
         div.id = `map-marker-${property.id}`;
         this._div = div;
+
+        if (window.google?.maps?.OverlayView?.preventMapHitsFrom) {
+          window.google.maps.OverlayView.preventMapHitsFrom(div);
+        }
+        if (window.google?.maps?.OverlayView?.preventMapHitsAndGesturesFrom) {
+          window.google.maps.OverlayView.preventMapHitsAndGesturesFrom(div);
+        }
+
+        div.addEventListener("click", (e) => e.stopPropagation());
+        div.addEventListener("mousedown", (e) => e.stopPropagation());
+        div.addEventListener("pointerdown", (e) => e.stopPropagation());
+        div.addEventListener("touchstart", (e) => e.stopPropagation(), { passive: true });
 
         const root = createRoot(div);
         root.render(
@@ -256,8 +276,11 @@ const MapView = ({
       />
 
       {/* Redesigned Airbnb Map Popup Card (Positioned at bottom on mobile, top-left on desktop) */}
-      {!loading && selectedProperty && (
-        <div className="absolute bottom-3 left-3 right-3 sm:left-4 sm:right-4 max-w-[420px] mx-auto lg:top-5 lg:left-5 lg:bottom-auto lg:right-auto lg:max-w-none z-40 pointer-events-auto">
+      {!loading && properties?.length > 0 && selectedProperty && (
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className="absolute bottom-3 left-3 right-3 sm:left-4 sm:right-4 max-w-[420px] mx-auto lg:top-5 lg:left-5 lg:bottom-auto lg:right-auto lg:max-w-none z-40 pointer-events-auto"
+        >
           <PropertyCard
             property={selectedProperty}
             onClose={() => handleSelectProperty(null)}

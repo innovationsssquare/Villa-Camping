@@ -240,6 +240,13 @@ const Mappropertyview = () => {
     mapData?.[0]?.location ||
     "Destination";
 
+  // Automatically clear active property ID when 0 properties are found
+  useEffect(() => {
+    if (filteredAndSortedProperties.length === 0) {
+      setActivePropertyId(null);
+    }
+  }, [filteredAndSortedProperties.length]);
+
   // When card in list is clicked -> set active & highlight marker/popup on map
   const handleCardClick = (property) => {
     setActivePropertyId(property.id);

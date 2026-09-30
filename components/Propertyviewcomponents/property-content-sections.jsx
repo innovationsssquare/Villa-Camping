@@ -1030,25 +1030,34 @@ export default function PropertyContentSections() {
 
 
 
-                  {/* Included Perks */}
-                  {Array.isArray(selectedEventForModal.perks) && selectedEventForModal.perks.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
-                        Included Highlights
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {selectedEventForModal.perks.map((perk, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 p-2.5 rounded-xl bg-orange-50/40 border border-orange-100/70 text-xs text-gray-800"
-                          >
-                            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                            <span>{perk}</span>
-                          </div>
-                        ))}
-                      </div>
+                  {/* Included Perks / Inclusions */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Included Highlights & Inclusions
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {(
+                        Array.isArray(selectedEventForModal.inclusions) && selectedEventForModal.inclusions.length > 0
+                          ? selectedEventForModal.inclusions
+                          : Array.isArray(selectedEventForModal.perks) && selectedEventForModal.perks.length > 0
+                          ? selectedEventForModal.perks
+                          : [
+                              "Live Barbecue Skewers (Veg & Non-Veg)",
+                              "Sunset Sundowner Music Playlist",
+                              "Campfire Setup by the Pool Deck",
+                              "Chef's Special Marinades",
+                            ]
+                      ).map((perk, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 p-2.5 rounded-xl bg-orange-50/40 border border-orange-100/70 text-xs text-gray-800"
+                        >
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                          <span>{perk}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </div>
               </ScrollArea>
 

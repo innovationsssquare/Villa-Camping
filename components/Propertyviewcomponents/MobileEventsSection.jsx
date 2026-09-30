@@ -211,11 +211,11 @@ export default function MobileEventsSection({ property, propertyType = "villa" }
                   <DialogTitle className="text-base sm:text-lg font-bold text-gray-900 leading-snug">
                     {selectedEvent.title}
                   </DialogTitle>
-                  {selectedEvent.price !== undefined && (
-                    <span className="inline-block mt-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-neutral-900 text-white">
-                      {Number(selectedEvent.price) > 0 ? `₹${selectedEvent.price} / person` : "Included with Stay"}
-                    </span>
-                  )}
+                  <span className="inline-block mt-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-neutral-900 text-white shadow-xs">
+                    {Number(selectedEvent.price) > 0
+                      ? `₹${Number(selectedEvent.price).toLocaleString("en-IN")} / person`
+                      : "Included with Stay"}
+                  </span>
                 </div>
               </div>
 
@@ -242,23 +242,30 @@ export default function MobileEventsSection({ property, propertyType = "villa" }
                     {selectedEvent.startDate && (
                       <div className="flex items-center gap-2 text-gray-700">
                         <Calendar className="w-4 h-4 text-[#ff6900] shrink-0" />
-                        <span>
+                        <span className="font-medium">
                           {new Date(selectedEvent.startDate).toLocaleDateString("en-IN", {
                             weekday: "short",
                             day: "numeric",
-                            month: "long",
+                            month: "short",
                             year: "numeric",
                           })}
                           {selectedEvent.endDate &&
-                            ` - ${new Date(selectedEvent.endDate).toLocaleDateString("en-IN", {
+                            ` – ${new Date(selectedEvent.endDate).toLocaleDateString("en-IN", {
+                              weekday: "short",
                               day: "numeric",
-                              month: "long",
+                              month: "short",
+                              year: "numeric",
                             })}`}
                         </span>
                       </div>
                     )}
 
-
+                    <div className="flex items-center gap-2 text-gray-700">
+                      <Clock className="w-4 h-4 text-[#ff6900] shrink-0" />
+                      <span className="font-medium">
+                        {selectedEvent.timings || "06:30 PM – 09:30 PM"}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Description */}
@@ -271,20 +278,29 @@ export default function MobileEventsSection({ property, propertyType = "villa" }
                     </div>
                   )}
 
-                  {/* Inclusions / Perks if available */}
-                  {Array.isArray(selectedEvent.perks) && selectedEvent.perks.length > 0 && (
-                    <div className="space-y-1.5">
-                      <h5 className="text-xs font-bold text-gray-900">What's Included:</h5>
-                      <div className="grid grid-cols-1 gap-1.5">
-                        {selectedEvent.perks.map((p, i) => (
-                          <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                            <span>{p}</span>
-                          </div>
-                        ))}
-                      </div>
+                  {/* What's Included / Inclusions */}
+                  <div className="space-y-1.5 pt-1">
+                    <h5 className="text-xs font-bold text-gray-900">What's Included:</h5>
+                    <div className="grid grid-cols-1 gap-1.5">
+                      {(
+                        Array.isArray(selectedEvent.inclusions) && selectedEvent.inclusions.length > 0
+                          ? selectedEvent.inclusions
+                          : Array.isArray(selectedEvent.perks) && selectedEvent.perks.length > 0
+                          ? selectedEvent.perks
+                          : [
+                              "Live Barbecue Skewers (Veg & Non-Veg)",
+                              "Sunset Sundowner Music Playlist",
+                              "Campfire Setup by the Pool Deck",
+                              "Chef's Special Marinades",
+                            ]
+                      ).map((p, i) => (
+                        <div key={i} className="flex items-center gap-2 text-xs text-gray-700">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>{p}</span>
+                        </div>
+                      ))}
                     </div>
-                  )}
+                  </div>
                 </div>
               </ScrollArea>
 

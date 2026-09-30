@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import {
   Drawer,
   DrawerContent,
@@ -271,11 +271,22 @@ export default function BookingDialog({
     return new Date(today.getFullYear(), today.getMonth(), 1);
   });
 
+  const hasClearedDates = useRef(false);
+
   // Sync tab & step on open
   useEffect(() => {
     if (isOpen) {
       if (initialTab) setActiveTab(normalizeInitialTab(initialTab));
-      if (checkinISO && !checkoutISO) {
+      if (!checkinISO && !checkoutISO && !hasClearedDates.current) {
+        const today = new Date();
+        const day = today.getDay();
+        const daysUntilFriday = (5 - day + 7) % 7 || 7;
+        const defaultCheckin = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilFriday);
+        const defaultCheckout = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysUntilFriday + 1);
+        dispatch(setCheckin(defaultCheckin.toISOString()));
+        dispatch(setCheckout(defaultCheckout.toISOString()));
+        setCurrentCalendarMonth(new Date(defaultCheckin.getFullYear(), defaultCheckin.getMonth(), 1));
+      } else if (checkinISO && !checkoutISO) {
         setDateStep("checkout");
         const d = new Date(checkinISO);
         setCurrentCalendarMonth(new Date(d.getFullYear(), d.getMonth(), 1));
@@ -283,7 +294,7 @@ export default function BookingDialog({
         setDateStep("checkin");
       }
     }
-  }, [isOpen, initialTab, checkinISO, checkoutISO]);
+  }, [isOpen, initialTab, checkinISO, checkoutISO, dispatch]);
 
   // Day details fetching for accurate availability & pricing
   const formattedDate = useMemo(() => {
@@ -1067,7 +1078,7 @@ export default function BookingDialog({
             data-vaul-no-drag
             className="flex-1 min-h-0 h-[calc(88vh-130px)] px-3.5 overflow-y-auto overscroll-contain"
           >
-            <div className="space-y-3 pb-8">
+            <div className="space-y-3 pb-28 sm:pb-32">
               {/* TAB 1: DATES SELECTION (Sequential 1-Month Responsive Flow) */}
               {activeTab === "dates" && (
                 <div className="space-y-2.5 animate-in fade-in-50 duration-200">
@@ -1146,6 +1157,7 @@ export default function BookingDialog({
                       <button
                         type="button"
                         onClick={() => {
+                          hasClearedDates.current = true;
                           dispatch(setCheckin(null));
                           dispatch(setCheckout(null));
                           setDateStep("checkin");
@@ -2069,7 +2081,7 @@ export default function BookingDialog({
               {isLoading ? (
                 <ButtonLoader />
               ) : !areDatesSelected ? (
-                "Select Dates"
+                activeTab === "dates" ? "Select Dates" : "Select Dates to Book"
               ) : isUnitBased && activeUnitCount === 0 ? (
                 propertyType === "Camping"
                   ? "Select Tents"
