@@ -364,10 +364,15 @@ export async function POST(req) {
             ? `${BACKEND_URL}/Cottage/get/cottage/${propertyId}`
             : `${BACKEND_URL}/Hotel/get/hotel/${propertyId}`;
 
-        const res = await fetch(catUrl, { next: { revalidate: 60 } });
+        const res = await fetch(catUrl, { cache: "no-store" });
         if (res.ok) {
           const json = await res.json();
-          property = json.data;
+          const p = json.data;
+          const isDeleted = p && (p.deletedAt != null || p.status === "deleted");
+          const isApproved = p && String(p.isapproved || p.isApproved || "").toLowerCase() === "approved";
+          if (p && !isDeleted && isApproved) {
+            property = p;
+          }
         }
       } catch (err) {
         console.warn("Failed to fetch property for concierge:", err.message);
@@ -377,7 +382,7 @@ export async function POST(req) {
     if (!property) {
       return NextResponse.json({
         success: false,
-        replyText: "I'm having a little trouble retrieving the details for this stay. Please refresh the page or ask our concierge team directly!",
+        replyText: "This stay is currently unavailable or has been removed from our active listings. Please explore our other verified properties on The Villa Camp or contact our concierge team!",
         spaces: [],
         amenities: [],
         rules: [],

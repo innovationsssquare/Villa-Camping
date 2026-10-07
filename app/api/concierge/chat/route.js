@@ -23,12 +23,14 @@ function getGeminiApiKey() {
 }
 
 const BACKEND_URL =
-  process.env.NEXT_PUBLIC_PRODUCTION_URL || "http://localhost:8086/api/v1";
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  process.env.NEXT_PUBLIC_PRODUCTION_URL ||
+  "http://localhost:8086/api/v1";
 
 // In-memory cache for dynamic backend locations
 let cachedLocationsData = null;
 let lastLocationFetchTime = 0;
-const LOCATION_CACHE_TTL = 60 * 1000; // 60 seconds
+const LOCATION_CACHE_TTL = 10 * 1000; // 10 seconds
 
 /**
  * Fetch dynamic locations directly from backend /Location/get/locations
@@ -41,7 +43,7 @@ async function fetchDynamicLocations() {
 
   try {
     const res = await fetch(`${BACKEND_URL}/Location/get/locations`, {
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (res.ok) {
       const json = await res.json();
@@ -85,18 +87,8 @@ async function fetchDynamicLocations() {
 
   if (!cachedLocationsData) {
     cachedLocationsData = {
-      locations: [
-        { id: "68dd044b77ece828e66545cc", name: "Lonavala", aliases: ["lonavala", "lonavla"] },
-        { id: "68dd08dc77ece828e66545ea", name: "Malavli", aliases: ["malavli", "malavali"] },
-        { id: "68dd0be777ece828e66545ed", name: "Karla-Lonavala", aliases: ["karla", "karla-lonavala"] },
-        { id: "695cd0ae0671ed613fd45e70", name: "Gold Vally", aliases: ["gold vally", "gold valley"] },
-      ],
-      locationMap: {
-        "68dd044b77ece828e66545cc": "Lonavala",
-        "68dd08dc77ece828e66545ea": "Malavli",
-        "68dd0be777ece828e66545ed": "Karla-Lonavala",
-        "695cd0ae0671ed613fd45e70": "Gold Vally",
-      },
+      locations: [],
+      locationMap: {},
     };
   }
 
@@ -113,6 +105,113 @@ const VIBE_TAGS = {
   scenic: ["scenic", "view", "mountain", "hill", "views"],
   pool: ["pool", "swimming", "swim", "plunge"],
 };
+
+const MONTHS_MAP = {
+  jan: 0, january: 0, feb: 1, february: 1, mar: 2, march: 2,
+  apr: 3, april: 3, may: 4, jun: 5, june: 5, jul: 6, july: 6,
+  aug: 7, august: 7, sep: 8, sept: 8, september: 8,
+  oct: 9, october: 9, nov: 10, november: 10, dec: 11, december: 11,
+};
+
+/**
+ * Robust date parser supporting ISO, '07 Oct to 08 Oct', '7 to 8 oct', 'oct 7 to oct 8', etc.
+ */
+function parseQueryDates(text) {
+  if (!text) return null;
+  const q = text.toLowerCase();
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const currentMonth = now.getMonth();
+  const currentDay = now.getDate();
+  const pad = (n) => String(n).padStart(2, "0");
+
+  // 1. ISO format: YYYY-MM-DD to YYYY-MM-DD
+  const isoMatches = q.match(/\b(\d{4}-\d{2}-\d{2})\b/g);
+  if (isoMatches && isoMatches.length >= 2) {
+    return { checkIn: isoMatches[0], checkOut: isoMatches[1] };
+  }
+
+  // 2. Pattern: DD Mon (YYYY)? to/till/- DD Mon (YYYY)?
+  const monPattern = /\b(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]{3,9})(?:\s+(\d{4}))?\s*(?:to|till|until|-)\s*(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]{3,9})(?:\s+(\d{4}))?\b/i;
+  const m1 = q.match(monPattern);
+  if (m1) {
+    const d1 = parseInt(m1[1], 10);
+    const mon1 = MONTHS_MAP[m1[2].toLowerCase()];
+    let y1 = m1[3] ? parseInt(m1[3], 10) : currentYear;
+
+    const d2 = parseInt(m1[4], 10);
+    const mon2 = MONTHS_MAP[m1[5].toLowerCase()];
+    let y2 = m1[6] ? parseInt(m1[6], 10) : (m1[3] ? parseInt(m1[3], 10) : currentYear);
+
+    if (mon1 !== undefined && mon2 !== undefined) {
+      if (!m1[3] && (mon1 < currentMonth || (mon1 === currentMonth && d1 < currentDay))) {
+        y1 += 1;
+        y2 += 1;
+      }
+      return {
+        checkIn: `${y1}-${pad(mon1 + 1)}-${pad(d1)}`,
+        checkOut: `${y2}-${pad(mon2 + 1)}-${pad(d2)}`,
+      };
+    }
+  }
+
+  // 3. Pattern: DD to DD Mon (YYYY)? e.g. "07 to 08 Oct" or "7-8 october"
+  const sameMonthPattern = /\b(\d{1,2})(?:st|nd|rd|th)?\s*(?:to|till|until|-)\s*(\d{1,2})(?:st|nd|rd|th)?\s+([a-z]{3,9})(?:\s+(\d{4}))?\b/i;
+  const m2 = q.match(sameMonthPattern);
+  if (m2) {
+    const d1 = parseInt(m2[1], 10);
+    const d2 = parseInt(m2[2], 10);
+    const mon = MONTHS_MAP[m2[3].toLowerCase()];
+    let y = m2[4] ? parseInt(m2[4], 10) : currentYear;
+    if (mon !== undefined) {
+      if (!m2[4] && (mon < currentMonth || (mon === currentMonth && d1 < currentDay))) {
+        y += 1;
+      }
+      return {
+        checkIn: `${y}-${pad(mon + 1)}-${pad(d1)}`,
+        checkOut: `${y}-${pad(mon + 1)}-${pad(d2)}`,
+      };
+    }
+  }
+
+  // 4. Pattern: Mon DD to Mon DD e.g. "oct 7 to oct 8"
+  const monFirstPattern = /\b([a-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?\s*(?:to|till|until|-)\s*([a-z]{3,9})?\s*(\d{1,2})(?:st|nd|rd|th)?(?:\s+(\d{4}))?\b/i;
+  const m3 = q.match(monFirstPattern);
+  if (m3) {
+    const mon1 = MONTHS_MAP[m3[1].toLowerCase()];
+    const d1 = parseInt(m3[2], 10);
+    let y1 = m3[3] ? parseInt(m3[3], 10) : currentYear;
+
+    const mon2 = m3[4] ? MONTHS_MAP[m3[4].toLowerCase()] : mon1;
+    const d2 = parseInt(m3[5], 10);
+    let y2 = m3[6] ? parseInt(m3[6], 10) : y1;
+
+    if (mon1 !== undefined && mon2 !== undefined) {
+      if (!m3[3] && (mon1 < currentMonth || (mon1 === currentMonth && d1 < currentDay))) {
+        y1 += 1;
+        y2 += 1;
+      }
+      return {
+        checkIn: `${y1}-${pad(mon1 + 1)}-${pad(d1)}`,
+        checkOut: `${y2}-${pad(mon2 + 1)}-${pad(d2)}`,
+      };
+    }
+  }
+
+  return null;
+}
+
+function formatDateRange(checkIn, checkOut) {
+  if (!checkIn || !checkOut) return "";
+  try {
+    const d1 = new Date(checkIn);
+    const d2 = new Date(checkOut);
+    const opts = { day: "2-digit", month: "short" };
+    return `${d1.toLocaleDateString("en-US", opts)} – ${d2.toLocaleDateString("en-US", opts)}`;
+  } catch {
+    return `${checkIn} to ${checkOut}`;
+  }
+}
 
 /**
  * Intelligent Rule-based NLP Query Parser (Zero external API cost fallback)
@@ -169,7 +268,7 @@ function parseNaturalLanguage(text = "", knownLocations = []) {
     guests: null,
     budgetMax: null,
     vibes: [],
-    dates: null,
+    dates: parseQueryDates(text),
     conversationalResponse: null,
   };
 
@@ -220,17 +319,68 @@ function parseNaturalLanguage(text = "", knownLocations = []) {
     }
   }
 
-  // 6. Detect ISO / Formatted Dates
-  const dateMatches = query.match(/\b\d{4}-\d{2}-\d{2}\b/g);
-  if (dateMatches && dateMatches.length >= 2) {
-    parsed.dates = { checkIn: dateMatches[0], checkOut: dateMatches[1] };
+  // 6. Dates already parsed with parseQueryDates
+  if (!parsed.dates) {
+    const dateMatches = query.match(/\b\d{4}-\d{2}-\d{2}\b/g);
+    if (dateMatches && dateMatches.length >= 2) {
+      parsed.dates = { checkIn: dateMatches[0], checkOut: dateMatches[1] };
+    }
   }
 
   return parsed;
 }
 
 /**
- * Fetch approved stays across Villa, Camping, Cottage, and Hotel
+ * Format property into normalized card structure
+ */
+function formatPropertyCard(p, locationMap = {}) {
+  const cat = p.propertyCategory || "Villa";
+  const price =
+    p.pricing?.weekdayPrice ||
+    p.pricing?.basePrice ||
+    p.price ||
+    12000;
+  const rating = Number(p.averageRating || p.rating || 4.8).toFixed(1);
+  const image =
+    (Array.isArray(p.images) && p.images[0]) ||
+    "/Homeasset/nearby-villa.jpg";
+
+  const guests =
+    p.capacity?.maxGuests || (p.bhkType ? parseInt(p.bhkType) * 3 : 10);
+  const rooms =
+    p.capacity?.bedrooms || (p.bhkType ? parseInt(p.bhkType) : 3);
+  const baths =
+    p.capacity?.bathrooms || rooms;
+
+  const amenities =
+    Array.isArray(p.amenities) && p.amenities.length > 0
+      ? p.amenities.slice(0, 3)
+      : ["Private Pool", "BBQ Grill", "Lawn"];
+
+  const rawLoc = locationMap[p.location] || p.address?.city || p.address?.area || "Lonavala";
+  const resolvedLocationName = `${rawLoc.trim().toUpperCase()}, MAHARASHTRA`;
+
+  return {
+    id: p._id,
+    name: p.name || p.title || "Luxury Stay",
+    category: cat,
+    link: `/view-${cat}/${p._id}`,
+    rating: rating,
+    location: resolvedLocationName,
+    price: price,
+    image: image,
+    guests: guests,
+    rooms: rooms,
+    baths: baths,
+    amenities: amenities,
+    isPromoted: Boolean(p.isPromoted),
+    isMostBooked: (p.totalBookingsCount || 0) >= 2,
+    customBadge: p.customBadge || "",
+  };
+}
+
+/**
+ * Fetch approved stays live from MongoDB (no stale cache)
  */
 async function fetchApprovedProperties(category) {
   const endpoints = [];
@@ -250,7 +400,7 @@ async function fetchApprovedProperties(category) {
   const results = await Promise.allSettled(
     endpoints.map(async ({ cat, url }) => {
       try {
-        const res = await fetch(url, { next: { revalidate: 30 } });
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) return [];
         const json = await res.json();
         const items = Array.isArray(json.data) ? json.data : [];
@@ -268,12 +418,46 @@ async function fetchApprovedProperties(category) {
     }
   });
 
-  // Filter strictly approved stays (exclude soft-deleted)
+  // Filter strictly approved & live stays (exclude soft-deleted or removed)
   return all.filter((p) => {
     const approvedStatus = String(p.isapproved || p.isApproved || "").toLowerCase();
-    const isSoftDeleted = p.deletedAt != null;
-    return approvedStatus === "approved" && !isSoftDeleted;
+    const isSoftDeleted = p.deletedAt != null || p.status === "deleted";
+    return approvedStatus === "approved" && !isSoftDeleted && p.isLive !== false;
   });
+}
+
+/**
+ * Check live stay availability against backend MongoDB / Booking collection
+ */
+async function checkStayAvailability(propertyId, category, checkIn, checkOut) {
+  if (!propertyId || !checkIn || !checkOut) return true;
+  try {
+    const res = await fetch(`${BACKEND_URL}/User/check-availability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId, category, checkIn, checkOut }),
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const json = await res.json();
+      return json.available === true;
+    }
+
+    // Fallback to /User/villa/check-availability
+    const villaRes = await fetch(`${BACKEND_URL}/User/villa/check-availability`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ propertyId, checkIn, checkOut }),
+      cache: "no-store",
+    });
+    if (villaRes.ok) {
+      const vJson = await villaRes.json();
+      return vJson.available === true;
+    }
+  } catch (err) {
+    console.warn("checkStayAvailability warning:", err.message);
+  }
+  return false;
 }
 
 export async function GET() {
@@ -311,21 +495,36 @@ export async function GET() {
 }
 
 /**
- * Call Google Gemini (using active model gemini-3.1-flash-lite) for Advanced Conversational NLU
+ * Call Google Gemini (using active model gemini-3.1-flash-lite) grounded in real active database catalog
  */
-async function callGemini(query, language = "English", knownLocations = []) {
+async function callGemini(query, language = "English", knownLocations = [], catalogSummary = "") {
   const apiKey = getGeminiApiKey();
   if (!apiKey || !query || query.trim().length === 0) return null;
 
   const locationNames = knownLocations.map((l) => l.name);
   const locationExamples = locationNames.length > 0 ? locationNames.join(", ") : "Lonavala, Malavli, Karla, Gold Vally";
 
+  const todayIST = new Date().toLocaleDateString("en-US", {
+    timeZone: "Asia/Kolkata",
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+  const todayISO = new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Kolkata",
+  }); // YYYY-MM-DD
+
   try {
     const prompt = `You are "VillaCamp AI", the friendly luxury stay concierge for "The Villa Camp" (an exclusive booking platform for luxury villas, camping tents, cottages, and hotels).
 
 A guest said: "${query}".
 Guest's preferred language: ${language}.
+Current Date in India (IST): ${todayIST} (${todayISO}).
 Known destinations on our platform: ${locationExamples}.
+
+Live Database Catalog Ground Truth & Availability:
+${catalogSummary || "Active database catalog is live."}
 
 Instructions:
 1. Determine the guest's intent:
@@ -334,9 +533,12 @@ Instructions:
    - "stay_search": User is asking for stays, villas, tents, cottages, hotels, locations, dates, amenities, group sizes, or budget.
 
 2. Generate the "conversationalResponse":
-   - If "greeting": Respond with a warm, polite hospitality greeting welcoming them to The Villa Camp (e.g. "Namaste! 🙏 Welcome to The Villa Camp — I'd love to help you plan a wonderful stay. Tell me a destination (${locationNames.slice(0, 3).join(", ") || "Lonavala, Malavli, Karla"}...), your dates and group size, or the occasion you're planning — and I'll find stays you'll love. Where shall we begin?"). DO NOT recommend specific properties yet.
-   - If "unrelated": Politely and charmingly respond in ${language}, keeping strictly in character as The Villa Camp's stay concierge, and courteously guide the guest back to planning their getaway (villas, campsites, cottages, or hotels). DO NOT recommend specific properties.
-   - If "stay_search": Extract stay details and craft a 1-2 sentence response acknowledging their criteria and introducing the curated options.
+   - If "greeting": Respond with a warm, polite hospitality greeting welcoming them to The Villa Camp. DO NOT recommend specific properties yet.
+   - If "unrelated": Politely and charmingly respond in ${language}, keeping strictly in character as The Villa Camp's stay concierge, and courteously guide the guest back to planning their getaway. DO NOT recommend specific properties.
+   - If "stay_search":
+     * If properties are listed as "ALREADY BOOKED / UNAVAILABLE" for the guest's requested dates: Politely inform the guest that the property is already booked for those dates. Suggest alternative dates or invite them to connect with our concierge team on WhatsApp (+91 86691 86483). DO NOT claim or pretend the property is available for those dates.
+     * If the database catalog has 0 properties or NO matching properties exist: Politely inform the guest that no properties are currently available in the database for those criteria, and invite them to check back soon or connect with our concierge team on WhatsApp (+91 86691 86483). DO NOT fabricate, invent, or name deleted properties.
+     * If matching properties exist and are CONFIRMED AVAILABLE: Acknowledge their criteria and warmly introduce the options in 1-2 sentences.
 
 3. Extract parameters (for "stay_search" only, otherwise return null):
    - "location": matched destination string or null
@@ -344,7 +546,7 @@ Instructions:
    - "guests": integer or null
    - "budgetMax": integer or null
    - "vibes": array of strings (e.g. ["lake_view", "pool", "pet_friendly", "romantic", "celebration", "scenic"])
-   - "dates": object or null with "checkIn" and "checkOut" in YYYY-MM-DD
+   - "dates": object or null with "checkIn" and "checkOut" in YYYY-MM-DD. Relative to today's date (${todayISO}), compute exact dates.
 
 Return strictly a valid JSON object matching:
 {
@@ -395,15 +597,74 @@ export async function POST(req) {
     const body = await req.json();
     const { message, filters = {}, language = "English" } = body;
 
-    // 1. Fetch dynamic backend locations
+    // 1. Fetch dynamic backend locations (live)
     const { locations, locationMap } = await fetchDynamicLocations();
 
-    // 2. Classify intent and extract preferences with Gemini 3.5 Flash or local NLP
-    const geminiResult = await callGemini(message, language, locations);
+    // 2. Fetch live catalog across all categories for real database ground truth
+    const allCatalogProperties = await fetchApprovedProperties();
+
+    // 3. Early date extraction (from filters or natural language query)
+    const earlyDates =
+      filters.dates ||
+      (filters.checkIn && filters.checkOut
+        ? { checkIn: filters.checkIn, checkOut: filters.checkOut }
+        : null) ||
+      parseQueryDates(message);
+
+    // 4. Pre-check live availability if dates are known
+    const availabilityMap = {};
+    if (earlyDates?.checkIn && earlyDates?.checkOut) {
+      await Promise.all(
+        allCatalogProperties.map(async (p) => {
+          const isAvail = await checkStayAvailability(
+            p._id,
+            p.propertyCategory || "Villa",
+            earlyDates.checkIn,
+            earlyDates.checkOut
+          );
+          availabilityMap[String(p._id)] = isAvail;
+        })
+      );
+    }
+
+    // 5. Construct ground truth catalog summary with live availability status
+    let catalogSummary = "";
+    if (allCatalogProperties.length === 0) {
+      catalogSummary = "Active properties in database: NONE (0 properties in database)";
+    } else if (earlyDates?.checkIn && earlyDates?.checkOut) {
+      const availableList = allCatalogProperties.filter((p) => availabilityMap[String(p._id)] === true);
+      const bookedList = allCatalogProperties.filter((p) => availabilityMap[String(p._id)] === false);
+      catalogSummary = `Guest requested dates: ${earlyDates.checkIn} to ${earlyDates.checkOut}.
+Live Availability:
+- CONFIRMED AVAILABLE (${availableList.length}): ${availableList.map((p) => `${p.name} (${p.propertyCategory || "Villa"} in ${locationMap[p.location] || p.address?.city || "Lonavala"})`).join(", ") || "NONE"}
+- ALREADY BOOKED / UNAVAILABLE (${bookedList.length}): ${bookedList.map((p) => `${p.name} (${p.propertyCategory || "Villa"} in ${locationMap[p.location] || p.address?.city || "Lonavala"})`).join(", ") || "NONE"}`;
+    } else {
+      catalogSummary = `Active properties in database (${allCatalogProperties.length}): ${allCatalogProperties.map((p) => `${p.name} (${p.propertyCategory || "Villa"} in ${locationMap[p.location] || p.address?.city || "Lonavala"})`).slice(0, 8).join(", ")}`;
+    }
+
+    // 6. Classify intent and extract preferences with Gemini or local NLP
+    const geminiResult = await callGemini(message, language, locations, catalogSummary);
     const nlp = geminiResult || parseNaturalLanguage(message || "", locations);
 
-    // 3. If intent is greeting or off-topic / unrelated:
-    // Strictly stay in hospitality context and DO NOT dump properties!
+    // Resolve final target dates (merging earlyDates and nlp.dates)
+    const targetDates = earlyDates || nlp.dates || null;
+
+    // If Gemini detected dates that were not checked yet, run availability check for them
+    if (!earlyDates && targetDates?.checkIn && targetDates?.checkOut) {
+      await Promise.all(
+        allCatalogProperties.map(async (p) => {
+          const isAvail = await checkStayAvailability(
+            p._id,
+            p.propertyCategory || "Villa",
+            targetDates.checkIn,
+            targetDates.checkOut
+          );
+          availabilityMap[String(p._id)] = isAvail;
+        })
+      );
+    }
+
+    // 7. If intent is greeting or off-topic / unrelated:
     const isGreeting = nlp.intent === "greeting";
     const isUnrelated = nlp.intent === "unrelated";
     const hasSearchLocation = Boolean(filters.location || nlp.location);
@@ -432,19 +693,20 @@ export async function POST(req) {
       });
     }
 
-    // 4. Check if explicit search criteria were provided
+    // 8. Check if search criteria were provided
     const hasExplicitFilters = Boolean(
       filters.category ||
       filters.location ||
       filters.budgetMax ||
       (filters.guests && filters.guests > 2) ||
-      filters.vibe
+      filters.vibe ||
+      targetDates
     );
 
     const isStaySearch =
       hasExplicitFilters ||
       nlp.intent === "stay_search" ||
-      (!nlp.intent && (nlp.location || nlp.category || nlp.budgetMax || (nlp.vibes && nlp.vibes.length > 0)));
+      (!nlp.intent && (nlp.location || nlp.category || nlp.budgetMax || (nlp.vibes && nlp.vibes.length > 0) || targetDates));
 
     if (!isStaySearch) {
       const sampleLocs = locations.slice(0, 3).map((l) => l.name).join(", ") || "Lonavala, Malavli, Karla";
@@ -467,7 +729,7 @@ export async function POST(req) {
       });
     }
 
-    // 5. It is a stay search: Extract search filters
+    // 9. Extract search filters
     const targetLocation = filters.location || nlp.location || null;
     const targetCategory = filters.category || nlp.category || null;
     const targetBudget = filters.budgetMax || nlp.budgetMax || null;
@@ -477,11 +739,45 @@ export async function POST(req) {
       ...(nlp.vibes || []),
     ];
 
-    // 6. Fetch approved properties across requested categories
-    const properties = await fetchApprovedProperties(targetCategory);
+    // Filter properties for the requested category
+    const categoryProperties = targetCategory
+      ? allCatalogProperties.filter(
+          (p) => (p.propertyCategory || "Villa").toLowerCase() === targetCategory.toLowerCase()
+        )
+      : allCatalogProperties;
 
-    // 7. Score & filter properties
-    const filtered = properties.filter((p) => {
+    // SCENARIO 1: Entire catalog is empty OR requested category has 0 properties in the database
+    if (categoryProperties.length === 0) {
+      let emptyMessage = "";
+      if (allCatalogProperties.length === 0) {
+        emptyMessage = `We currently do not have any verified stays available in our database at the moment. Our collection is regularly updated with new exclusive properties — please check back shortly, or connect directly with our 24/7 concierge team on WhatsApp (+91 86691 86483) for customized bookings!`;
+      } else if (targetCategory) {
+        const availableCategories = Array.from(
+          new Set(allCatalogProperties.map((p) => p.propertyCategory || "Villa"))
+        );
+        emptyMessage = `We currently do not have any active ${targetCategory.toLowerCase()} listings in our database. However, we do have verified ${availableCategories.join(" and ")} available! Would you like to explore those, or connect with our concierge team on WhatsApp (+91 86691 86483)?`;
+      } else {
+        emptyMessage = `We couldn't find any stays in our database at the moment. Feel free to connect directly with our concierge team on WhatsApp (+91 86691 86483) for personal assistance!`;
+      }
+
+      return NextResponse.json({
+        success: true,
+        hasMatches: false,
+        replyText: emptyMessage,
+        properties: [],
+        extractedQuery: {
+          location: targetLocation,
+          category: targetCategory,
+          budgetMax: targetBudget,
+          guests: targetGuests,
+          vibes: targetVibes,
+          dates: targetDates,
+        },
+      });
+    }
+
+    // 10. Filter available category properties by criteria (budget, guests, location)
+    const filtered = categoryProperties.filter((p) => {
       // Price ceiling filter
       const price =
         p.pricing?.weekdayPrice ||
@@ -504,14 +800,16 @@ export async function POST(req) {
       // Location match (if provided)
       if (targetLocation) {
         const resolvedName = (locationMap[p.location] || "").toLowerCase();
-        const pLocStr = `${resolvedName} ${JSON.stringify(p.location || "")} ${p.address || ""}`.toLowerCase();
+        const pLocStr = `${resolvedName} ${JSON.stringify(p.location || "")} ${JSON.stringify(p.address || "")}`.toLowerCase();
         const targetLower = targetLocation.toLowerCase();
         const matchesLoc = pLocStr.includes(targetLower) || resolvedName.includes(targetLower);
 
-        // Lonavala regional coverage (Malavli, Karla, Gold Vally are in the Lonavala belt)
+        // Lonavala regional coverage (Malavli, Karla, Gold Vally, Kusegaon)
         const isLonavalaBelt =
           (targetLower.includes("lonavala") || targetLower.includes("lonavla")) &&
-          ["lonavala", "karla", "karla-lonavala", "malavli", "gold vally"].includes(resolvedName);
+          ["lonavala", "karla", "karla-lonavala", "malavli", "gold vally", "kusegaon"].some((term) =>
+            pLocStr.includes(term) || resolvedName.includes(term)
+          );
 
         if (!matchesLoc && !isLonavalaBelt) {
           return false;
@@ -521,85 +819,142 @@ export async function POST(req) {
       return true;
     });
 
-    // 8. Format normalized property cards
-    const propertyCards = (filtered.length > 0 ? filtered : properties.slice(0, 4)).map(
-      (p) => {
-        const cat = p.propertyCategory || "Villa";
-        const price =
-          p.pricing?.weekdayPrice ||
-          p.pricing?.basePrice ||
-          p.price ||
-          15000;
-        const rating =
-          Number(p.averageRating || p.rating || (4.6 + (p.name.length % 5) * 0.1)).toFixed(1);
-        const image =
-          (Array.isArray(p.images) && p.images[0]) ||
-          "/Homeasset/nearby-villa.jpg";
+    // SCENARIO 2A: Properties exist in DB, but NONE match the user's filters (budget, location, or guests)
+    if (filtered.length === 0) {
+      let replyText = "";
+      let fallbackProperties = [];
 
-        const guests =
-          p.capacity?.maxGuests || (p.bhkType ? parseInt(p.bhkType) * 3 : 12);
-        const rooms =
-          p.capacity?.bedrooms || (p.bhkType ? parseInt(p.bhkType) : 4);
-        const baths =
-          p.capacity?.bathrooms || rooms;
-
-        const amenities = Array.isArray(p.amenities) && p.amenities.length > 0
-          ? p.amenities.slice(0, 3)
-          : ["Private Pool", "BBQ Grill", "Lawn"];
-
-        const resolvedLocationName = locationMap[p.location]
-          ? `${locationMap[p.location].toUpperCase()}, MAHARASHTRA`
-          : "LONAVALA, MAHARASHTRA";
-
-        return {
-          id: p._id,
-          name: p.name || p.title || "Luxury Stay",
-          category: cat,
-          link: `/view-${cat}/${p._id}`,
-          rating: rating,
-          location: resolvedLocationName,
-          price: price,
-          image: image,
-          guests: guests,
-          rooms: rooms,
-          baths: baths,
-          amenities: amenities,
-        };
+      if (targetBudget) {
+        const minPrice = Math.min(
+          ...categoryProperties
+            .map((p) => p.pricing?.weekdayPrice || p.pricing?.basePrice || p.price || 0)
+            .filter((pr) => pr > 0)
+        );
+        replyText = `I couldn't find any ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"}${targetLocation ? ` in ${targetLocation}` : ""} under ₹${targetBudget.toLocaleString("en-IN")}/night. Stays in our verified collection start from ₹${minPrice.toLocaleString("en-IN")}/night. Here are our available verified options in the database:`;
+        fallbackProperties = categoryProperties.slice(0, 4);
+      } else if (targetLocation) {
+        const availableLocs = Array.from(
+          new Set(
+            categoryProperties
+              .map((p) => locationMap[p.location] || p.address?.city || p.location?.name)
+              .filter(Boolean)
+          )
+        );
+        replyText = `We currently don't have active ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"} in ${targetLocation}. Our verified properties are situated in ${availableLocs.join(", ") || "Lonavala"}. Here are the stays currently available in our collection:`;
+        fallbackProperties = categoryProperties.slice(0, 4);
+      } else if (targetGuests) {
+        const maxCapacity = Math.max(
+          ...categoryProperties.map((p) => p.capacity?.maxGuests || p.maxGuests || 0)
+        );
+        replyText = `None of our current listings can accommodate ${targetGuests} guests in a single property (our maximum capacity is ${maxCapacity} guests). However, our concierge team can arrange adjacent stays or split reservations. Feel free to contact our concierge team on WhatsApp (+91 86691 86483)!`;
+        fallbackProperties = [];
+      } else {
+        replyText = `I couldn't find exact matches for those criteria in our current database, but here are our available verified stays you can explore:`;
+        fallbackProperties = categoryProperties.slice(0, 4);
       }
-    );
 
-    // 9. Formulate friendly conversational reply
-    let replyText = "";
-    const hasSpecificMatch = filtered.length > 0;
+      const propertyCards = fallbackProperties.map((p) => formatPropertyCard(p, locationMap));
 
-    if (hasSpecificMatch) {
-      if (geminiResult?.conversationalResponse && nlp.intent === "stay_search") {
+      return NextResponse.json({
+        success: true,
+        hasMatches: false,
+        replyText,
+        properties: propertyCards,
+        extractedQuery: {
+          location: targetLocation,
+          category: targetCategory,
+          budgetMax: targetBudget,
+          guests: targetGuests,
+          vibes: targetVibes,
+          dates: targetDates,
+        },
+      });
+    }
+
+    // SCENARIO 2B: Criteria matched, but verify LIVE AVAILABILITY for requested dates
+    if (targetDates?.checkIn && targetDates?.checkOut) {
+      const availableForDates = filtered.filter((p) => availabilityMap[String(p._id)] === true);
+      const bookedForDates = filtered.filter((p) => availabilityMap[String(p._id)] === false);
+
+      if (availableForDates.length === 0) {
+        const dateStr = formatDateRange(targetDates.checkIn, targetDates.checkOut);
+        let replyText = "";
+        if (bookedForDates.length > 0) {
+          const bookedNames = bookedForDates.map((p) => p.name).join(", ");
+          replyText = `I checked our live reservation system for ${dateStr}, and unfortunately ${bookedNames} is already booked for those dates.\n\nWould you like to explore alternative dates (such as next weekend or mid-week), or connect directly with our 24/7 concierge team on WhatsApp (+91 86691 86483) for customized arrangements?`;
+        } else {
+          replyText = `We don't have any verified ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"} available for ${dateStr}. Please consider checking alternative dates, or message our concierge team on WhatsApp (+91 86691 86483)!`;
+        }
+
+        return NextResponse.json({
+          success: true,
+          hasMatches: false,
+          replyText,
+          properties: [],
+          extractedQuery: {
+            location: targetLocation,
+            category: targetCategory,
+            budgetMax: targetBudget,
+            guests: targetGuests,
+            vibes: targetVibes,
+            dates: targetDates,
+          },
+        });
+      }
+
+      // Properties confirmed available for the dates!
+      const propertyCards = availableForDates.map((p) => formatPropertyCard(p, locationMap));
+      const dateStr = formatDateRange(targetDates.checkIn, targetDates.checkOut);
+      let replyText = "";
+      if (
+        geminiResult?.conversationalResponse &&
+        nlp.intent === "stay_search" &&
+        !geminiResult.conversationalResponse.includes("favorites nearby") &&
+        !geminiResult.conversationalResponse.toLowerCase().includes("booked")
+      ) {
         replyText = geminiResult.conversationalResponse;
       } else {
         const locText = targetLocation ? ` in ${targetLocation}` : "";
         const guestText = targetGuests ? ` for ${targetGuests} guests` : "";
-        const dateText = nlp.dates
-          ? ` available for your selected dates`
-          : "";
+        replyText = `Good news! Here are verified ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"}${locText}${guestText} confirmed available for ${dateStr}:`;
+      }
 
-        replyText = `Here are verified ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
-          }${locText}${guestText}${dateText}. Tell me which one catches your eye and I'll prepare the pricing and details for your dates!`;
-      }
+      return NextResponse.json({
+        success: true,
+        hasMatches: true,
+        replyText,
+        properties: propertyCards.slice(0, 6),
+        extractedQuery: {
+          location: targetLocation,
+          category: targetCategory,
+          budgetMax: targetBudget,
+          guests: targetGuests,
+          vibes: targetVibes,
+          dates: targetDates,
+        },
+      });
+    }
+
+    // SCENARIO 3: Matches found in active database (no specific dates queried)
+    const propertyCards = filtered.map((p) => formatPropertyCard(p, locationMap));
+
+    let replyText = "";
+    if (
+      geminiResult?.conversationalResponse &&
+      nlp.intent === "stay_search" &&
+      !geminiResult.conversationalResponse.includes("favorites nearby")
+    ) {
+      replyText = geminiResult.conversationalResponse;
     } else {
-      if (targetBudget && targetLocation) {
-        replyText = `I'm afraid I couldn't find ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"
-          } in ${targetLocation} within ₹${targetBudget.toLocaleString(
-            "en-IN"
-          )} a night just now. Might you consider stretching the budget a little, or shall I connect you with our concierge team on WhatsApp for custom rates?`;
-      } else {
-        replyText = `I couldn't find exact matches for those criteria, but here are our top-rated guest favorites nearby that you might love!`;
-      }
+      const locText = targetLocation ? ` in ${targetLocation}` : "";
+      const guestText = targetGuests ? ` for ${targetGuests} guests` : "";
+      replyText = `Here are verified ${targetCategory ? targetCategory.toLowerCase() + "s" : "stays"}${locText}${guestText}. Tell me which one catches your eye and I'll prepare the pricing and details for your dates!`;
     }
 
     return NextResponse.json({
       success: true,
-      hasMatches: hasSpecificMatch,
-      replyText: replyText,
+      hasMatches: true,
+      replyText,
       properties: propertyCards.slice(0, 6),
       extractedQuery: {
         location: targetLocation,
@@ -607,7 +962,7 @@ export async function POST(req) {
         budgetMax: targetBudget,
         guests: targetGuests,
         vibes: targetVibes,
-        dates: nlp.dates,
+        dates: targetDates,
       },
     });
   } catch (error) {
@@ -616,7 +971,7 @@ export async function POST(req) {
       {
         success: false,
         replyText:
-          "I ran into a quick hiccup searching our catalog. Here are some of our guest favorite stays you can explore right now:",
+          "I ran into a quick hiccup searching our live catalog. Please feel free to explore our collection or connect with our concierge team on WhatsApp (+91 86691 86483)!",
         properties: [],
       },
       { status: 500 }

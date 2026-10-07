@@ -200,9 +200,11 @@ export const fetchReviewHighlights = createAsyncThunk(
 );
 
 export const fetchAllReels = createAsyncThunk("reels/fetchAll", async () => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_PRODUCTION_URL}/User/api/reels`
-  );
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.NEXT_PUBLIC_PRODUCTION_URL ||
+    "http://localhost:8086/api/v1";
+  const res = await fetch(`${baseUrl}/User/api/reels`);
   const json = await res.json();
 
   const nowIST = new Date(

@@ -1,14 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import {
-  MapPin,
-  Star,
-  HomeIcon,
-  ArrowRight,
-  Sparkles,
-  RefreshCcw,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import {
   Carousel,
   CarouselContent,
@@ -16,84 +12,147 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import {
   fetchdestination,
   setselectedLocationId,
 } from "@/Redux/Slices/propertiesSlice";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
 import { CarouselIndicator } from "../Availableweekend/carousel-indicators";
-import { cn } from "@/lib/utils";
 
-function DestinationCard({ destination }) {
+// Curated Airbnb-style punchy taglines for destinations
+const CURATED_TAGLINES = {
+  lonavala: "Misty hills & waterfalls",
+  alibaug: "Pristine beach escapes",
+  goa: "Tropical beaches & nightlife",
+  mahabaleshwar: "Strawberry farms & valleys",
+  karjat: "Riverfront retreats & trails",
+  "pawna lake": "Scenic lakeside camping",
+  igatpuri: "Foggy valleys & waterfalls",
+  khandala: "Lush cliffs & viewpoints",
+  panchgani: "Tableland & scenic views",
+  mulshi: "Lakeside serenity & dams",
+  kashid: "White sand shores",
+  daman: "Quiet beaches & colonial charm",
+  dubai: "Prime beach spot",
+  "kuala lumpur": "For the Petronas Towers",
+  bangkok: "Vibrant nightlife",
+};
+
+// Fallback destinations when API is empty or loading
+const FALLBACK_DESTINATIONS = [
+  {
+    _id: "dest-1",
+    name: "Lonavala",
+    description: "Misty hills & waterfalls",
+    coverImage:
+      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
+  },
+  {
+    _id: "dest-2",
+    name: "Alibaug",
+    description: "Pristine beach escapes",
+    coverImage:
+      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
+  },
+  {
+    _id: "dest-3",
+    name: "Goa",
+    description: "Tropical beaches & nightlife",
+    coverImage:
+      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/8a570db4-22b1-4d16-ae65-06aec4745c2c_etvwiw.jpg",
+  },
+  {
+    _id: "dest-4",
+    name: "Mahabaleshwar",
+    description: "Strawberry farms & valleys",
+    coverImage:
+      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80",
+  },
+  {
+    _id: "dest-5",
+    name: "Pawna Lake",
+    description: "Scenic lakeside camping",
+    coverImage:
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
+  },
+  {
+    _id: "dest-6",
+    name: "Karjat",
+    description: "Riverfront retreats & trails",
+    coverImage:
+      "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=800&q=80",
+  },
+  {
+    _id: "dest-7",
+    name: "Igatpuri",
+    description: "Foggy valleys & waterfalls",
+    coverImage:
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
+  },
+];
+
+function getSubtitle(dest) {
+  const key = (dest?.name || "").toLowerCase().trim();
+  if (CURATED_TAGLINES[key]) {
+    return CURATED_TAGLINES[key];
+  }
+  if (dest?.description) {
+    const cleanDesc = dest.description.split(",")[0]?.split(".")[0]?.trim();
+    if (cleanDesc && cleanDesc.length <= 32) {
+      return cleanDesc;
+    }
+    return dest.description;
+  }
+  const stays = dest?.properties || dest?.totalProperties;
+  if (stays) {
+    return `${stays} luxury stays`;
+  }
+  return "Popular getaway spot";
+}
+
+function DestinationCard({ destination, defaultImage }) {
   const router = useRouter();
   const dispatch = useDispatch();
 
   const handleDestinationClick = () => {
-    dispatch(setselectedLocationId(destination._id));
-    router.push("/search-your-gateway");
+    if (destination?._id && !destination._id.startsWith("dest-")) {
+      dispatch(setselectedLocationId(destination._id));
+    }
+    router.push(
+      `/search-your-gateway?location=${encodeURIComponent(
+        destination?.name || ""
+      )}`
+    );
   };
 
-  const propertyCount =
-    destination?.properties || destination?.totalProperties || 0;
-  const rating = destination?.rating || "4.8";
+  const imageSrc = destination?.coverImage || defaultImage;
+  const subtitle = getSubtitle(destination);
 
   return (
     <div
       onClick={handleDestinationClick}
-      className="group relative flex flex-col rounded-2xl overflow-hidden border border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer h-full"
+      className="group cursor-pointer select-none flex flex-col w-full"
     >
-      {/* Scenic Photo Container */}
-      <div className="relative aspect-[4/3] sm:h-44 md:h-48 w-full overflow-hidden bg-neutral-100">
+      {/* 1:1 Aspect Ratio Squircle Image Container */}
+      <div className="relative aspect-square w-full rounded-[22px] sm:rounded-[26px] overflow-hidden bg-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
         <Image
-          src={destination?.coverImage || "/placeholder.svg"}
-          alt={destination.name || "Destination"}
+          src={imageSrc}
+          alt={destination?.name || "Destination"}
           fill
           unoptimized
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 30vw, 20vw"
-          className="object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+          sizes="(max-width: 640px) 145px, (max-width: 1024px) 195px, 220px"
+          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
-
-        {/* Gradient Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/5" />
-
-        {/* Top Floating Badges */}
-        <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
-          {/* Rating Pill */}
-          <div className="bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-1 border border-black/5">
-            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-400 text-amber-400" />
-            <span className="text-[10px] sm:text-xs font-bold text-neutral-900">
-              {rating}
-            </span>
-          </div>
-
-          {/* Property Count Badge */}
-          <div className="bg-[#ff6900] text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow-2xs flex items-center gap-1">
-            <HomeIcon className="w-2.5 h-2.5" />
-            <span>{propertyCount} stays</span>
-          </div>
-        </div>
-
-        {/* Bottom Destination Info Overlaid on Photo */}
-        <div className="absolute bottom-2 left-2.5 right-2.5 z-10">
-          <h3 className="text-white font-extrabold text-xs sm:text-sm md:text-base leading-tight drop-shadow-sm group-hover:text-orange-200 transition-colors flex items-center gap-1">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#ff6900] shrink-0" />
-            <span className="truncate">{destination.name}</span>
-          </h3>
-          {destination.description && (
-            <p className="text-white/80 text-[9px] sm:text-[10px] md:text-xs mt-0.5 line-clamp-1 font-medium">
-              {destination.description}
-            </p>
-          )}
-        </div>
       </div>
 
-      {/* Bottom Action Footer */}
-      <div className="px-2.5 py-1.5 sm:py-2 bg-white flex items-center justify-between text-[10px] sm:text-xs font-semibold text-[#ff6900] group-hover:bg-orange-50/40 transition-colors">
-        <span className="truncate">View on map</span>
-        <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5" />
+      {/* Typography Block Below Image (Matching Airbnb Reference UI) */}
+      <div className="mt-2 sm:mt-2.5 px-0.5">
+        <h3 className="font-semibold text-neutral-900 text-[14px] sm:text-[15px] md:text-base leading-snug truncate group-hover:text-[#ff6900] transition-colors">
+          {destination?.name}
+        </h3>
+        <p className="text-[12px] sm:text-[13px] md:text-sm text-[#717171] leading-tight truncate mt-0.5">
+          {subtitle}
+        </p>
       </div>
     </div>
   );
@@ -101,11 +160,11 @@ function DestinationCard({ destination }) {
 
 function DestinationSkeleton() {
   return (
-    <div className="flex flex-col rounded-2xl overflow-hidden border border-neutral-200/80 bg-white w-full">
-      <Skeleton className="w-full aspect-[4/3] rounded-none" />
-      <div className="p-2.5 space-y-1.5 bg-white">
-        <Skeleton className="h-3.5 w-3/4 rounded-md" />
-        <Skeleton className="h-3 w-1/2 rounded-md" />
+    <div className="flex flex-col w-full">
+      <Skeleton className="w-full aspect-square rounded-[22px] sm:rounded-[26px]" />
+      <div className="mt-2 sm:mt-2.5 px-0.5 space-y-1">
+        <Skeleton className="h-4 w-3/4 rounded-md" />
+        <Skeleton className="h-3.5 w-1/2 rounded-md" />
       </div>
     </div>
   );
@@ -113,7 +172,7 @@ function DestinationSkeleton() {
 
 export function DestinationHighlights() {
   const dispatch = useDispatch();
-  const { destinationLoading, destinationData, destinationError } = useSelector(
+  const { destinationLoading, destinationData } = useSelector(
     (state) => state.properties
   );
 
@@ -122,8 +181,10 @@ export function DestinationHighlights() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    dispatch(fetchdestination());
-  }, [dispatch]);
+    if (!destinationData || destinationData.length === 0) {
+      dispatch(fetchdestination());
+    }
+  }, [dispatch, destinationData]);
 
   useEffect(() => {
     if (!api) return;
@@ -147,10 +208,18 @@ export function DestinationHighlights() {
     api?.scrollTo(index);
   };
 
+  const displayList =
+    Array.isArray(destinationData) && destinationData.length > 0
+      ? destinationData
+      : FALLBACK_DESTINATIONS;
+
+  const loading =
+    destinationLoading && (!destinationData || destinationData.length === 0);
+
   return (
     <section className="w-full py-2 sm:py-10 md:py-4 bg-white">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        {/* Section Header - Centered with App-style Typography */}
+        {/* Section Header - Centered with Unified App Theme */}
         <div className="relative text-center max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-2">
           {/* Eyebrow Badge */}
           <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-orange-50 border border-orange-200 text-[#ff6900] text-[10px] sm:text-xs font-semibold mb-1.5 sm:mb-2 shadow-2xs">
@@ -160,7 +229,7 @@ export function DestinationHighlights() {
             <span className="text-neutral-600 font-normal">Explore Locations</span>
           </div>
 
-          {/* Heading */}
+          {/* Heading with Unified Brand Orange Accent */}
           <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-neutral-900 tracking-tight leading-snug">
             Choose Your{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-[#ea580c]">
@@ -172,73 +241,63 @@ export function DestinationHighlights() {
           </p>
         </div>
 
-        {/* Loading Skeleton (Horizontal Carousel Layout for both Mobile and Desktop) */}
-        {destinationLoading && (
-          <div className="flex gap-2.5 sm:gap-3.5 overflow-hidden w-full py-2">
-            {[...Array(5)].map((_, i) => (
+        {/* Carousel & Cards Container */}
+        {loading ? (
+          <div className="flex gap-3 sm:gap-3.5 overflow-hidden w-full py-1">
+            {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="basis-[48%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5 shrink-0"
+                className="basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
               >
                 <DestinationSkeleton />
               </div>
             ))}
           </div>
-        )}
-
-        {/* Error State */}
-        {destinationError && (
-          <div className="py-12 text-center">
-            <p className="text-sm text-neutral-500">
-              Unable to load destinations right now.
-            </p>
-            <button
-              type="button"
-              onClick={() => dispatch(fetchdestination())}
-              className="mt-3 inline-flex items-center gap-1 text-xs text-[#ff6900] font-semibold hover:underline"
+        ) : (
+          <div className="relative py-1">
+            <Carousel
+              setApi={(api) => setApi(api)}
+              opts={{
+                align: "start",
+                dragFree: true,
+              }}
+              className="w-full"
             >
-              <RefreshCcw className="w-3 h-3" /> Retry
-            </button>
+              <CarouselContent className="-ml-3 sm:-ml-3.5">
+                {displayList.map((destination, index) => {
+                  const fallbackImg =
+                    FALLBACK_DESTINATIONS[index % FALLBACK_DESTINATIONS.length]
+                      .coverImage;
+
+                  return (
+                    <CarouselItem
+                      key={destination._id || `dest-${index}`}
+                      className="pl-3 sm:pl-3.5 basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
+                    >
+                      <DestinationCard
+                        destination={destination}
+                        defaultImage={fallbackImg}
+                      />
+                    </CarouselItem>
+                  );
+                })}
+              </CarouselContent>
+
+              {/* Desktop Carousel Navigation Controls */}
+              <CarouselPrevious className="hidden md:flex -left-4 sm:-left-5 bg-white/95 backdrop-blur-sm border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all" />
+              <CarouselNext className="hidden md:flex -right-4 sm:-right-5 bg-white/95 backdrop-blur-sm border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all" />
+            </Carousel>
+
+            {/* Bottom Carousel Indicator Pills */}
+            <CarouselIndicator
+              current={current}
+              count={count}
+              variant="pills"
+              onDotClick={handleDotClick}
+              className="mt-3 sm:mt-4"
+            />
           </div>
         )}
-
-        {/* Destinations Carousel */}
-        {!destinationLoading &&
-          destinationData &&
-          destinationData.length > 0 && (
-            <div className="relative py-2">
-              <Carousel
-                setApi={(api) => setApi(api)}
-                opts={{
-                  align: "start",
-                  dragFree: true,
-                }}
-                className="w-full"
-              >
-                <CarouselContent className="-ml-2.5 sm:-ml-3.5">
-                  {destinationData.map((destination) => (
-                    <CarouselItem
-                      key={destination._id || destination.name}
-                      className="pl-2.5 sm:pl-3.5 basis-[48%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5"
-                    >
-                      <DestinationCard destination={destination} />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-                <CarouselPrevious className="hidden sm:flex -left-4 sm:-left-5 bg-white border border-neutral-200 text-neutral-700 hover:text-black shadow-md hover:scale-105" />
-                <CarouselNext className="hidden sm:flex -right-4 sm:-right-5 bg-white border border-neutral-200 text-neutral-700 hover:text-black shadow-md hover:scale-105" />
-              </Carousel>
-
-              {/* Bottom Carousel Indicator for both Mobile and Desktop */}
-              <CarouselIndicator
-                current={current}
-                count={count}
-                variant="pills"
-                onDotClick={handleDotClick}
-                className="mt-3"
-              />
-            </div>
-          )}
       </div>
     </section>
   );

@@ -132,19 +132,19 @@ export default function PropertyFilterListing({ categorySlug }) {
   const paramAdults = searchParams?.get("adults");
   const paramChildren = searchParams?.get("children");
 
-  const { categories } = useSelector((state) => state.category);
+  const { categories, isLoaded: categoriesLoaded } = useSelector((state) => state.category);
   const { selectedCategoryId, selectedCategoryName, checkin, checkout } =
     useSelector((state) => state.booking);
   const { dataloading, data, pagination } = useSelector(
     (state) => state.properties
   );
 
-  // 1. Ensure categories are loaded
+  // 1. Ensure categories are loaded once
   useEffect(() => {
-    if (!categories || categories.length === 0) {
+    if (!categoriesLoaded) {
       dispatch(fetchAllCategories());
     }
-  }, [categories, dispatch]);
+  }, [categoriesLoaded, dispatch]);
 
   // 2. Sync URL search params (dates and guests) into Redux
   useEffect(() => {
@@ -159,8 +159,6 @@ export default function PropertyFilterListing({ categorySlug }) {
       );
     }
   }, [paramCheckin, paramCheckout, paramAdults, paramChildren, dispatch]);
-
-
 
   // 3. Sync categorySlug parameter with Redux category state
   useEffect(() => {
@@ -182,6 +180,11 @@ export default function PropertyFilterListing({ categorySlug }) {
       }
     }
   }, [categorySlug, categories, dispatch]);
+
+  // Stable string key for selectedPropertyTypes array to prevent reference instability loops
+  const propertyTypesKey = Array.isArray(selectedPropertyTypes)
+    ? selectedPropertyTypes.join(",")
+    : selectedPropertyTypes || "";
 
   // 4. Fetch properties from backend with pagination & filters
   useEffect(() => {
@@ -205,18 +208,8 @@ export default function PropertyFilterListing({ categorySlug }) {
       }
     }
 
-    let effectiveCheckIn = paramCheckin || checkin;
-    let effectiveCheckOut = paramCheckout || checkout;
-
-    if (!effectiveCheckIn) {
-      effectiveCheckIn = new Date().toISOString();
-    }
-    if (!effectiveCheckOut) {
-      const inDate = new Date(effectiveCheckIn);
-      effectiveCheckOut = new Date(
-        inDate.getTime() + 24 * 60 * 60 * 1000
-      ).toISOString();
-    }
+    const effectiveCheckIn = paramCheckin || checkin || "";
+    const effectiveCheckOut = paramCheckout || checkout || "";
 
     if (effectiveCategory) {
       dispatch(
@@ -238,12 +231,11 @@ export default function PropertyFilterListing({ categorySlug }) {
     dispatch,
     selectedCategoryId,
     categorySlug,
-    categories,
     checkin,
     checkout,
     paramCheckin,
     paramCheckout,
-    selectedPropertyTypes,
+    propertyTypesKey,
     priceMin,
     priceMax,
     sortBy,

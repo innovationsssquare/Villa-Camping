@@ -960,14 +960,18 @@ export default function BookingPreviewScreen() {
                 <Tent className="w-3.5 h-3.5 text-[#ff6900]" /> Selected Tents
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {Object.entries(reduxSelectedTents).map(([type, t]) => (
-                  <span
-                    key={type}
-                    className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-[11px] font-semibold"
-                  >
-                    {t.quantity}× {type}
-                  </span>
-                ))}
+                {Object.entries(reduxSelectedTents).map(([type, t]) => {
+                  const label = t.typeName || t.tentType || (/^[0-9a-fA-F]{24}$/.test(type) ? "Tent" : type);
+                  const display = /tent$/i.test(label) ? label : `${label} Tent`;
+                  return (
+                    <span
+                      key={type}
+                      className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-[11px] font-semibold"
+                    >
+                      {t.quantity}× {display}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -978,14 +982,18 @@ export default function BookingPreviewScreen() {
                 <Home className="w-3.5 h-3.5 text-[#ff6900]" /> Selected Cottages
               </p>
               <div className="flex flex-wrap gap-1.5">
-                {Object.entries(reduxSelectedCottages).map(([type, c]) => (
-                  <span
-                    key={type}
-                    className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-[11px] font-semibold"
-                  >
-                    {c.quantity}× {type}
-                  </span>
-                ))}
+                {Object.entries(reduxSelectedCottages).map(([type, c]) => {
+                  const label = c.typeName || c.cottageType || (/^[0-9a-fA-F]{24}$/.test(type) ? "Cottage" : type);
+                  const display = /cottage$/i.test(label) ? label : `${label} Cottage`;
+                  return (
+                    <span
+                      key={type}
+                      className="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-800 text-[11px] font-semibold"
+                    >
+                      {c.quantity}× {display}
+                    </span>
+                  );
+                })}
               </div>
             </div>
           )}

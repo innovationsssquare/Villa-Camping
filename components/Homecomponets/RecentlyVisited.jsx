@@ -13,6 +13,7 @@ import Weekendcard from "../Availableweekend/Weekendcard";
 import { CarouselIndicator } from "../Availableweekend/carousel-indicators";
 import {
   getRecentlyVisited,
+  validateAndPruneRecentlyVisited,
   RECENTLY_VISITED_EVENT,
 } from "@/lib/recentlyVisited";
 
@@ -23,22 +24,34 @@ export default function RecentlyVisited() {
   const [count, setCount] = useState(0);
   const [mounted, setMounted] = useState(false);
 
-  // Load from localStorage and listen to updates
+  // Load from localStorage and validate with live database
   useEffect(() => {
     setMounted(true);
-    const loadProperties = () => {
-      const items = getRecentlyVisited();
-      setVisitedProperties(items);
+    let isCancelled = false;
+
+    const loadAndValidate = async () => {
+      // 1. Initial immediate snapshot from cache
+      const initial = getRecentlyVisited();
+      if (!isCancelled && initial.length > 0) {
+        setVisitedProperties(initial);
+      }
+
+      // 2. Validate against live backend (auto-prunes dropped/deleted DB items)
+      const validItems = await validateAndPruneRecentlyVisited();
+      if (!isCancelled) {
+        setVisitedProperties(validItems);
+      }
     };
 
-    loadProperties();
+    loadAndValidate();
 
-    window.addEventListener(RECENTLY_VISITED_EVENT, loadProperties);
-    window.addEventListener("storage", loadProperties);
+    window.addEventListener(RECENTLY_VISITED_EVENT, loadAndValidate);
+    window.addEventListener("storage", loadAndValidate);
 
     return () => {
-      window.removeEventListener(RECENTLY_VISITED_EVENT, loadProperties);
-      window.removeEventListener("storage", loadProperties);
+      isCancelled = true;
+      window.removeEventListener(RECENTLY_VISITED_EVENT, loadAndValidate);
+      window.removeEventListener("storage", loadAndValidate);
     };
   }, []);
 
