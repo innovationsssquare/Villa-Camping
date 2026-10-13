@@ -25,10 +25,20 @@ const mapVariantToColor = (variant) => {
  * Unified addToast function delegating to HeroUI Toast (same as Login modal)
  */
 export const addToast = (props = {}) => {
+  const isDestructive =
+    (typeof props === "object" && (props?.variant === "destructive" || props?.color === "danger"));
+
   const defaultClassNames = {
-    title: "text-xs sm:text-sm font-bold tracking-tight leading-snug",
-    description: "text-[11px] sm:text-xs leading-normal mt-0.5",
-    icon: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
+    base: isDestructive
+      ? "bg-white dark:bg-[#18181B] text-neutral-900 dark:text-neutral-100 shadow-2xl border-2 border-rose-500/50 rounded-2xl opacity-100"
+      : "bg-white dark:bg-[#18181B] text-neutral-900 dark:text-neutral-100 shadow-2xl border border-neutral-200 dark:border-neutral-800 rounded-2xl opacity-100",
+    title: isDestructive
+      ? "text-xs sm:text-sm font-bold text-rose-600 dark:text-rose-400 tracking-tight leading-snug"
+      : "text-xs sm:text-sm font-bold text-neutral-900 dark:text-neutral-100 tracking-tight leading-snug",
+    description: "text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-300 leading-normal mt-0.5",
+    icon: isDestructive
+      ? "w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-rose-500"
+      : "w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-[#ff6900]",
   };
 
   if (typeof props === "string") {

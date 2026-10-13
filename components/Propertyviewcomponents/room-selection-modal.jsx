@@ -67,17 +67,6 @@ export default function RoomSelectionModal({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  // 3. Sync Redux state to local on open
-  useEffect(() => {
-    if (!isOpen) return;
-    const mapped = {};
-    Object.entries(reduxSelectedRooms || {}).forEach(([roomType, r]) => {
-      mapped[roomType] = r.quantity || 0;
-    });
-    setLocalSelected(mapped);
-    setRoomError("");
-  }, [isOpen, reduxSelectedRooms]);
-
   const roomsForDay = useMemo(() => {
     return dayDetails?.data?.tents || dayDetails?.data?.rooms || dayDetails?.rooms || [];
   }, [dayDetails]);
@@ -122,48 +111,88 @@ export default function RoomSelectionModal({
 
   // 4. Availability & Price lookup
   const getAvailabilityForRoom = (room) => {
-    const typeKey = (room.roomType || room.name || "").trim();
+    const typeKey = (room?.roomType || room?.name || "").trim();
     const summary = roomsForDay.find(
       (r) =>
         (r.roomType || r.name || "").trim().toLowerCase() ===
         typeKey.toLowerCase()
     );
-    const configuredTotal = room.totalRooms ?? room.totaltents ?? 1;
+    const configuredTotal = room?.totalRooms ?? room?.totaltents ?? 1;
 
     if (!summary) {
       return {
         total: configuredTotal,
         booked: 0,
         available: configuredTotal,
-        weekdayPrice: room.pricing?.weekdayPrice || 0,
+        weekdayPrice: room?.pricing?.weekdayPrice || 0,
         weekendPrice:
-          room.pricing?.weekendPrice || room.pricing?.weekdayPrice || 0,
+          room?.pricing?.weekendPrice || room?.pricing?.weekdayPrice || 0,
       };
     }
     const availableCount =
-      summary.available ??
-      Math.max(
-        0,
-        (summary.total ?? configuredTotal) - (summary.booked ?? 0)
-      );
+      summary.available !== undefined
+        ? Math.max(0, Number(summary.available))
+        : Math.max(
+            0,
+            (Number(summary.total) || configuredTotal) - (Number(summary.booked) || 0)
+          );
     return {
       total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
       available: availableCount,
-      weekdayPrice: summary.price?.weekday ?? room.pricing?.weekdayPrice ?? 0,
+      weekdayPrice: summary.price?.weekday ?? room?.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
-        room.pricing?.weekendPrice ??
+        room?.pricing?.weekendPrice ??
         summary.price?.weekday ??
         0,
     };
   };
 
+  // 3. Sync Redux state to local on open and auto-clamp to available inventory
+  useEffect(() => {
+    if (!isOpen) return;
+    const mapped = {};
+    Object.entries(reduxSelectedRooms || {}).forEach(([roomType, r]) => {
+      const cfg = getRoomConfig(roomType);
+      const avail = getAvailabilityForRoom(cfg || { roomType });
+      const requestedQty = r?.quantity || 0;
+      mapped[roomType] = Math.max(0, Math.min(requestedQty, avail.available));
+    });
+    setLocalSelected(mapped);
+    setRoomError("");
+  }, [isOpen, reduxSelectedRooms]);
+
+  // Re-clamp local selection whenever live roomsForDay updates
+  useEffect(() => {
+    if (!isOpen || safeRooms.length === 0) return;
+    setLocalSelected((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      safeRooms.forEach((r) => {
+        const typeKey = r.roomType || r.name || "";
+        const avail = getAvailabilityForRoom(r).available;
+        const currentQty = next[typeKey] || 0;
+        const clamped = Math.max(0, Math.min(currentQty, avail));
+        if (clamped !== currentQty) {
+          next[typeKey] = clamped;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [isOpen, roomsForDay, safeRooms]);
+
+  const allRoomsSoldOut = useMemo(() => {
+    if (safeRooms.length === 0) return false;
+    return safeRooms.every((r) => getAvailabilityForRoom(r).available <= 0);
+  }, [safeRooms, roomsForDay]);
+
   const handleRoomQtyChange = (roomType, qty, available) => {
-    if (qty < 0 || qty > available) return;
+    const clampedQty = Math.max(0, Math.min(qty, available));
     setLocalSelected((prev) => ({
       ...prev,
-      [roomType]: qty,
+      [roomType]: clampedQty,
     }));
     if (roomError) setRoomError("");
   };
@@ -185,8 +214,23 @@ export default function RoomSelectionModal({
 
   const applySelection = () => {
     if (totalSelectedRooms === 0) {
-      setRoomError("Please select at least one room unit to proceed.");
+      setRoomError("Please select at least one available room unit to proceed.");
       return;
+    }
+
+    // Validate no sold out or over-capacity rooms are included
+    for (const [roomType, qty] of Object.entries(localSelected)) {
+      if (qty <= 0) continue;
+      const cfg = getRoomConfig(roomType);
+      const avail = getAvailabilityForRoom(cfg || { roomType });
+      if (avail.available <= 0) {
+        setRoomError(`${roomType} is sold out for ${formattedDate || "this date"}. Please select another room.`);
+        return;
+      }
+      if (qty > avail.available) {
+        setRoomError(`Only ${avail.available} unit(s) of ${roomType} available, but ${qty} selected.`);
+        return;
+      }
     }
 
     if (totalGuests > 0 && totalGuests > totalCapacity) {
@@ -279,6 +323,13 @@ export default function RoomSelectionModal({
             </div>
           )}
 
+          {allRoomsSoldOut && (
+            <div className="p-3 sm:p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+              <span>All rooms are completely sold out for {formattedDate || "these dates"}. Please select different dates to stay.</span>
+            </div>
+          )}
+
           {dayDetailsLoading && (
             <div className="py-2 text-center text-xs text-gray-500 animate-pulse">
               Checking real-time live availability...
@@ -302,7 +353,7 @@ export default function RoomSelectionModal({
                   currentQty > 0
                     ? "border-[#ff6900] bg-orange-50/20 shadow-sm"
                     : isSoldOut
-                    ? "border-gray-100 bg-gray-50/60 opacity-60"
+                    ? "border-red-100 bg-red-50/30 opacity-75"
                     : "border-gray-200/90 bg-white hover:border-orange-200"
                 }`}
               >
@@ -323,13 +374,13 @@ export default function RoomSelectionModal({
                           {typeKey}
                         </h4>
                         {isSoldOut ? (
-                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">
+                          <Badge variant="destructive" className="text-[10px] px-2 py-0.5 font-bold uppercase tracking-wide bg-red-100 text-red-700 border-red-200">
                             Sold Out
                           </Badge>
                         ) : (
                           <Badge
                             variant="secondary"
-                            className="text-[10px] px-2 py-0.5 h-5 bg-emerald-50 text-emerald-700 border-emerald-200"
+                            className="text-[10px] px-2 py-0.5 h-5 bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
                           >
                             {available} of {total} left
                           </Badge>
@@ -358,7 +409,7 @@ export default function RoomSelectionModal({
                   <div className="flex items-center gap-3 self-end sm:self-center">
                     <button
                       type="button"
-                      disabled={currentQty === 0 || isSoldOut}
+                      disabled={currentQty === 0}
                       onClick={() => handleRoomQtyChange(typeKey, currentQty - 1, available)}
                       className="w-8 h-8 rounded-full border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all cursor-pointer text-gray-700"
                     >
@@ -369,7 +420,7 @@ export default function RoomSelectionModal({
                     </span>
                     <button
                       type="button"
-                      disabled={currentQty >= available || isSoldOut}
+                      disabled={isSoldOut || currentQty >= available}
                       onClick={() => handleRoomQtyChange(typeKey, currentQty + 1, available)}
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
                     >
@@ -400,7 +451,8 @@ export default function RoomSelectionModal({
             </Button>
             <Button
               onClick={applySelection}
-              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs sm:text-sm font-bold px-6 shadow-md shadow-orange-500/20 h-9 sm:h-10 flex-1 sm:flex-initial"
+              disabled={totalSelectedRooms === 0 || allRoomsSoldOut}
+              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold px-6 shadow-md shadow-orange-500/20 h-9 sm:h-10 flex-1 sm:flex-initial"
             >
               Confirm Selection
             </Button>

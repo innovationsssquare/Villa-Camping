@@ -76,6 +76,8 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   const [openmodel, setopenmodal] = useState(false);
   const [open, setOpen] = useState(false);
   const [opensucessmodal, setOpensuccesmodal] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState(null);
+  const [createdBookingData, setCreatedBookingData] = useState(null);
   const [loadingg, setloading] = useState(false);
 
   // Property Events state
@@ -211,12 +213,38 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   };
 
   const handleContinue = () => {
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please check the box below to accept the Terms & Conditions and Cancellation Policy.",
+        variant: "destructive",
+        duration: 3500,
+      });
+      const el = document.getElementById("terms-container-camping");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-orange-500", "ring-offset-2");
+        setTimeout(() => el.classList.remove("ring-2", "ring-orange-500", "ring-offset-2"), 2500);
+      }
+      return;
+    }
     setIsBookingDetailsOpen(true);
   };
 
   const handleProceedToPayment = async () => {
     setIsBookingDetailsOpen(false);
     setloading(true);
+
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please accept the terms and conditions to proceed with your booking.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
 
     if (finalTotal === null || finalTotal === undefined) {
       addToast({
@@ -389,6 +417,8 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
       if (response?.success === true) {
         const Bookingid = response?.data?.booking._id;
         const orderData = response.data.order;
+        setCreatedBookingId(Bookingid);
+        setCreatedBookingData(response?.data?.booking);
         var razorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
           amount: orderData?.amount,
@@ -413,6 +443,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
               if (verifyResponse?.success) {
                 setloading(false);
                 setOpensuccesmodal(true);
+                router.push(`/booking/success?bookingId=${Bookingid}`);
               } else {
                 addToast({
                   title: "Payment Failed",
@@ -489,9 +520,18 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
 
   if (opensucessmodal) {
     return (
-      <div className="flex justify-center items-center w-full h-[50vh]">
-        <Successmodal />
-      </div>
+      <Successmodal
+        bookingId={createdBookingId}
+        bookingData={createdBookingData}
+        property={property}
+        pricingDetails={{
+          totalAmount: finalPayableTotal,
+        }}
+        customerDetails={customerDetails}
+        checkInDate={checkInDate}
+        checkOutDate={checkOutDate}
+        totalDays={nights}
+      />
     );
   }
 
@@ -862,26 +902,31 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
         </div>
 
         {/* Terms Acceptance */}
-        <div className="flex items-start gap-3 mb-4">
+        <div
+          id="terms-container-camping"
+          className={`p-3.5 rounded-2xl border transition-all duration-300 flex items-start gap-3 mb-4 ${
+            acceptedTerms
+              ? "bg-emerald-50/50 border-emerald-300 text-neutral-900"
+              : "bg-orange-50/60 border-orange-300 text-neutral-900 shadow-xs"
+          }`}
+        >
           <Checkbox
+            id="terms-camping-cb"
             checked={acceptedTerms}
             onCheckedChange={(checked) => setAcceptedTerms(checked)}
-            className="mt-1"
+            className="mt-0.5 h-5 w-5 rounded-md border-neutral-400 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
           />
-          <div className="text-xs">
-            <span className="text-gray-700">I have read and accepted the </span>
-            <a href="#" className="text-blue-600 underline">
+          <label htmlFor="terms-camping-cb" className="text-xs text-neutral-700 leading-relaxed cursor-pointer select-none flex-1">
+            <span>I have read and accepted the </span>
+            <a href="/terms-of-service" target="_blank" className="font-bold text-[#ff6900] underline">
               Terms & Conditions
             </a>
-            <span className="text-gray-700"> , </span>
-            <a href="#" className="text-blue-600 underline">
-              Privacy Policies
-            </a>
-            <span className="text-gray-700"> , </span>
-            <a href="#" className="text-blue-600 underline">
+            <span>, </span>
+            <a href="/cancellation-policy" target="_blank" className="font-bold text-[#ff6900] underline">
               Cancellation Policy
             </a>
-          </div>
+            <span> and House Rules.</span>
+          </label>
         </div>
       </div>
 
@@ -963,7 +1008,8 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
                 </div>
                 <Button
                   onClick={handleContinue}
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-3 rounded-full"
+                  disabled={loadingg}
+                  className="bg-[#ff6900] hover:bg-[#e05d00] text-white px-8 py-3 rounded-full font-bold text-sm shadow-md cursor-pointer"
                 >
                   Continue
                 </Button>
@@ -978,7 +1024,8 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
                 </div>
                 <Button
                   onClick={handleNext}
-                  className="bg-black text-white hover:bg-gray-800 px-8 py-3 rounded-full"
+                  disabled={loadingg}
+                  className="bg-[#ff6900] hover:bg-[#e05d00] text-white px-8 py-3 rounded-full font-bold text-sm shadow-md cursor-pointer"
                 >
                   Next
                 </Button>

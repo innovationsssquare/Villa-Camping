@@ -1,11 +1,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Mywishlist } from "@/lib/API/User/User";
-
+import Cookies from "js-cookie";
 import { BaseUrl, getBaseUrl } from "@/lib/API/Baseurl";
 
 /* ===============================
    Helpers
 ================================ */
+const getAuthHeaders = () => {
+  const token =
+    Cookies.get("token") ||
+    (typeof window !== "undefined"
+      ? localStorage.getItem("thevilla_token") ||
+        (() => {
+          try {
+            return JSON.parse(localStorage.getItem("thevilla_user") || "{}")?.token;
+          } catch {
+            return null;
+          }
+        })()
+      : null);
+
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { token, Authorization: `Bearer ${token}` } : {}),
+  };
+};
+
 const normalizeKeys = (propertyType, propertyId) => {
   const type = (propertyType || "villa").toLowerCase();
   const rawId = String(propertyId);
@@ -27,9 +47,7 @@ export const toggleWishlist = createAsyncThunk(
       const baseUrl = getBaseUrl();
       const res = await fetch(`${baseUrl}/Wishlist/wishlist/toggle`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: getAuthHeaders(),
         body: JSON.stringify({ propertyId, propertyType, userId }),
       });
 
@@ -59,9 +77,7 @@ export const fetchWishlistIds = createAsyncThunk(
         `${baseUrl}/Wishlist/wishlist/ids/${userId}`,
         {
           method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: getAuthHeaders(),
         }
       );
 

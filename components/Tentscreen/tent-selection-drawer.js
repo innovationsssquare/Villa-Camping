@@ -67,17 +67,6 @@ export default function TentSelectionDrawer({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  // 3. Sync Redux state to local on open
-  useEffect(() => {
-    if (!isOpen) return;
-    const mapped = {};
-    Object.entries(reduxSelectedTents || {}).forEach(([tentType, t]) => {
-      mapped[tentType] = t.quantity || 0;
-    });
-    setLocalSelected(mapped);
-    setTentError("");
-  }, [isOpen, reduxSelectedTents]);
-
   const tentsForDay = useMemo(() => {
     return dayDetails?.data?.tents || dayDetails?.tents || [];
   }, [dayDetails]);
@@ -155,6 +144,25 @@ export default function TentSelectionDrawer({
     };
   };
 
+  const allTentsSoldOut = useMemo(() => {
+    if (safeTents.length === 0) return false;
+    return safeTents.every((t) => getAvailabilityForTent(t).available <= 0);
+  }, [safeTents, tentsForDay]);
+
+  // 3. Sync Redux state to local on open
+  useEffect(() => {
+    if (!isOpen) return;
+    const mapped = {};
+    Object.entries(reduxSelectedTents || {}).forEach(([tentType, t]) => {
+      const cfg = getTentConfig(tentType);
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      const qty = t.quantity || 0;
+      mapped[tentType] = Math.max(0, Math.min(avail.available, qty));
+    });
+    setLocalSelected(mapped);
+    setTentError("");
+  }, [isOpen, reduxSelectedTents, tentsForDay, safeTents]);
+
   const handleTentQtyChange = (tentType, qty, available) => {
     if (qty < 0 || qty > available) return;
     setLocalSelected((prev) => ({
@@ -183,6 +191,21 @@ export default function TentSelectionDrawer({
     if (totalSelectedTents === 0) {
       setTentError("Please select at least one tent unit.");
       return;
+    }
+
+    // Validate availability
+    for (const [tentType, qty] of Object.entries(localSelected)) {
+      if (qty <= 0) continue;
+      const cfg = getTentConfig(tentType);
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      if (avail.available <= 0) {
+        setTentError(`${tentType} is sold out for this date. Please choose another tent.`);
+        return;
+      }
+      if (qty > avail.available) {
+        setTentError(`Only ${avail.available} unit(s) of ${tentType} available, but ${qty} selected.`);
+        return;
+      }
     }
 
     if (totalGuests > 0 && totalGuests > totalCapacity) {
@@ -251,6 +274,14 @@ export default function TentSelectionDrawer({
           </button>
         </div>
 
+        {/* All Tents Sold Out Banner */}
+        {allTentsSoldOut && (
+          <div className="mx-5 mt-3 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-semibold flex items-center gap-2">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>All tents are completely sold out for this date. Please select different dates.</span>
+          </div>
+        )}
+
         {/* Capacity Indicator */}
         <div className="px-5 pt-3">
           <div className="p-2.5 rounded-xl bg-orange-50/70 border border-orange-100 flex items-center justify-between text-xs">
@@ -296,6 +327,8 @@ export default function TentSelectionDrawer({
                   className={`p-3 rounded-2xl border transition-all flex items-center justify-between gap-3 ${
                     qty > 0
                       ? "border-[#ff6900] bg-orange-50/20 shadow-2xs"
+                      : !isAvailable
+                      ? "border-red-100 bg-red-50/30 opacity-75"
                       : "border-gray-200 bg-white"
                   }`}
                 >
@@ -304,9 +337,16 @@ export default function TentSelectionDrawer({
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-gray-900 text-sm truncate">
-                      {tent.tentType}
-                    </h4>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h4 className="font-bold text-gray-900 text-sm truncate">
+                        {tent.tentType}
+                      </h4>
+                      {!isAvailable && (
+                        <span className="text-[10px] px-1.5 py-0.5 font-bold uppercase rounded bg-red-100 text-red-600 border border-red-200">
+                          Sold Out
+                        </span>
+                      )}
+                    </div>
                     <div className="text-[11px] text-gray-500">
                       Up to {tent.maxCapacity || 2} Guests
                     </div>
@@ -390,12 +430,14 @@ export default function TentSelectionDrawer({
           <Button
             type="button"
             onClick={applySelection}
-            className="rounded-xl bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold px-6 h-11 shadow-md cursor-pointer"
+            disabled={totalSelectedTents === 0 || allTentsSoldOut}
+            className="rounded-xl bg-[#ff6900] hover:bg-[#e05d00] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-semibold px-6 h-11 shadow-md cursor-pointer"
           >
-            Apply Tents
+            {allTentsSoldOut ? "Sold Out" : "Apply Tents"}
           </Button>
         </div>
       </DrawerContent>
     </Drawer>
   );
 }
+

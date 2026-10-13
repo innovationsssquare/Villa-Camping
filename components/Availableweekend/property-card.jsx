@@ -39,6 +39,13 @@ export function PropertyCard({ property }) {
   const propertyId = property?.id || property?._id;
   const propertyType = getCleanPropertyType(property, categories, selectedCategoryName);
 
+  useEffect(() => {
+    const currentUser = getStoredUser();
+    if (currentUser?._id && (!wishlistIds || wishlistIds.length === 0)) {
+      dispatch(fetchWishlistIds(currentUser._id));
+    }
+  }, [dispatch, wishlistIds]);
+
   const isLiked = Array.isArray(wishlistIds) && propertyId
     ? wishlistIds.includes(String(propertyId)) ||
       wishlistIds.includes(`${propertyType?.toLowerCase()}:${propertyId}`) ||

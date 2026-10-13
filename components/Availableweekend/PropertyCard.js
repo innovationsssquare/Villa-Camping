@@ -127,6 +127,13 @@ export default function PropertyCardnew({ property }) {
   const propertyId = property?.id || property?._id;
   const propertyType = getCategoryRouteName(property, categories, selectedCategoryName);
 
+  useEffect(() => {
+    const currentUser = getStoredUser();
+    if (currentUser?._id && (!wishlistIds || wishlistIds.length === 0)) {
+      dispatch(fetchWishlistIds(currentUser._id));
+    }
+  }, [dispatch, wishlistIds]);
+
   const isLiked = useMemo(() => {
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
     const key = `${propertyType?.toLowerCase()}:${propertyId}`;

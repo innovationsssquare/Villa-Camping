@@ -38,6 +38,7 @@ import EventDetailsModal from "@/components/Bookingcomponent/EventDetailsModal";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchproperty } from "@/Redux/Slices/propertiesSlice";
 import Image from "next/image";
+import Link from "next/link";
 import {
   setAppliedCoupon,
   removeCoupon,
@@ -95,6 +96,8 @@ export default function BookingPreviewScreen() {
 
   const [openmodel, setopenmodal] = useState(false);
   const [opensucessmodal, setOpensuccesmodal] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState(null);
+  const [createdBookingData, setCreatedBookingData] = useState(null);
   const [loadingg, setloading] = useState(false);
   const [isCouponsDrawerOpen, setIsCouponsDrawerOpen] = useState(false);
   const [isBookingDetailsOpen, setIsBookingDetailsOpen] = useState(false);
@@ -373,10 +376,19 @@ export default function BookingPreviewScreen() {
     if (!acceptedTerms) {
       addToast({
         title: "Terms & Conditions Required",
-        description: "Please accept the terms and conditions to proceed.",
+        description: "Please check the box below to accept the Terms & Conditions and Cancellation Policy.",
         variant: "destructive",
-        duration: 2500,
+        duration: 3500,
       });
+
+      const el = document.getElementById("terms-container-mobile") || document.getElementById("terms-mobile");
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-orange-500", "ring-offset-2");
+        setTimeout(() => {
+          el.classList.remove("ring-2", "ring-orange-500", "ring-offset-2");
+        }, 2500);
+      }
       return;
     }
 
@@ -396,6 +408,17 @@ export default function BookingPreviewScreen() {
   const handleProceedToPayment = async () => {
     setIsBookingDetailsOpen(false);
     setloading(true);
+
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please accept the terms and conditions to proceed.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
 
     if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {
       addToast({
@@ -721,6 +744,8 @@ export default function BookingPreviewScreen() {
         }
         const Bookingid = response?.data?.booking._id;
         const orderData = response.data.order;
+        setCreatedBookingId(Bookingid);
+        setCreatedBookingData(response?.data?.booking);
 
         const razorpayOptions = {
           key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
@@ -742,6 +767,7 @@ export default function BookingPreviewScreen() {
               if (verifyResponse?.success) {
                 setloading(false);
                 setOpensuccesmodal(true);
+                router.push(`/booking/success?bookingId=${Bookingid}`);
               } else {
                 addToast({
                   title: "Payment Failed",
@@ -816,8 +842,23 @@ export default function BookingPreviewScreen() {
 
   if (opensucessmodal) {
     return (
-      <div className="flex justify-center items-center w-full min-h-[70vh] px-4">
-        <Successmodal />
+      <div className="md:hidden block">
+        <Successmodal
+          bookingId={createdBookingId}
+          bookingData={createdBookingData}
+          property={property}
+          pricingDetails={{
+            totalAmount: finalPayableTotal,
+            subtotal: basePrice,
+            taxAmount: dynamicTaxAmount,
+            discountAmount: discountAmount,
+            mealExtraCharge: totalMealCharge,
+          }}
+          customerDetails={customerDetails}
+          checkInDate={checkin}
+          checkOutDate={checkout}
+          totalDays={nights}
+        />
       </div>
     );
   }
@@ -1471,29 +1512,36 @@ export default function BookingPreviewScreen() {
             </div>
           </div>
 
-          <div className="pt-2 border-t border-gray-100 flex items-start gap-2.5">
+          <div
+            id="terms-container-mobile"
+            className={`p-3.5 rounded-2xl border transition-all duration-300 flex items-start gap-3 ${
+              acceptedTerms
+                ? "bg-emerald-50/50 border-emerald-300 text-neutral-900"
+                : "bg-orange-50/60 border-orange-300 text-neutral-900 shadow-xs"
+            }`}
+          >
             <Checkbox
               id="terms-mobile"
               checked={acceptedTerms}
               onCheckedChange={(checked) => dispatch(setAcceptedTerms(Boolean(checked)))}
-              className="mt-0.5 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
+              className="mt-0.5 h-5 w-5 rounded-md border-neutral-400 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
             />
             <label
               htmlFor="terms-mobile"
-              className="text-[11px] text-gray-600 leading-snug cursor-pointer select-none"
+              className="text-xs text-neutral-700 leading-relaxed cursor-pointer select-none flex-1"
             >
               I agree to the{" "}
-              <a href="#" className="font-semibold text-gray-900 underline underline-offset-2">
+              <Link href="/terms-of-service" target="_blank" className="font-bold text-[#ff6900] underline underline-offset-2">
                 House Rules
-              </a>
+              </Link>
               ,{" "}
-              <a href="#" className="font-semibold text-gray-900 underline underline-offset-2">
+              <Link href="/cancellation-policy" target="_blank" className="font-bold text-[#ff6900] underline underline-offset-2">
                 Cancellation Policy
-              </a>
-              , and{" "}
-              <a href="#" className="font-semibold text-gray-900 underline underline-offset-2">
+              </Link>{" "}
+              and{" "}
+              <Link href="/terms-of-service" target="_blank" className="font-bold text-[#ff6900] underline underline-offset-2">
                 Terms of Service
-              </a>
+              </Link>
               .
             </label>
           </div>
@@ -1520,7 +1568,7 @@ export default function BookingPreviewScreen() {
           <Button
             onClick={handlePayClick}
             disabled={loadingg}
-            className="flex-1 max-w-[150px] h-9 rounded-lg bg-gradient-to-r from-[#ff6900] to-[#ff8533] hover:from-[#e05d00] hover:to-[#ff6900] text-white font-semibold text-xs shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 px-3"
+            className="flex-1 max-w-[150px] h-9 rounded-lg bg-gradient-to-r from-[#ff6900] to-[#ff8533] hover:from-[#e05d00] hover:to-[#ff6900] text-white font-semibold text-xs shadow-xs active:scale-95 transition-all flex items-center justify-center gap-1.5 px-3 cursor-pointer"
           >
             <Lock className="w-3.5 h-3.5" />
             <span>Proceed to Pay</span>

@@ -1,9 +1,9 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useRouter } from "next/navigation";
 import { Sparkles } from "lucide-react";
 import {
   Carousel,
@@ -110,51 +110,126 @@ function getSubtitle(dest) {
   return "Popular getaway spot";
 }
 
-function DestinationCard({ destination, defaultImage }) {
-  const router = useRouter();
+/**
+ * Builds dynamic Schema.org JSON-LD structured data for search engine bots
+ */
+function buildDestinationJsonLd(destinations) {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Top Holiday Destinations & Weekend Getaways in Maharashtra",
+    "description":
+      "Browse handpicked vacation destinations featuring luxury private pool villas, lakeside camping, wooden cottages, and boutique resorts in Maharashtra.",
+    "numberOfItems": destinations.length,
+    "itemListElement": destinations.map((dest, index) => {
+      const subtitle = getSubtitle(dest);
+      const targetUrl = `${siteUrl}/search-your-gateway?location=${encodeURIComponent(
+        dest.name || ""
+      )}`;
+
+      const item = {
+        "@type": "TouristDestination",
+        "name": `${dest.name}, Maharashtra`,
+        "description": dest.description || subtitle,
+        "url": targetUrl,
+        "touristType": [
+          "Weekend Getaways",
+          "Family Vacations",
+          "Luxury Villas",
+          "Nature Camping",
+          "Hill Station Retreats",
+        ],
+      };
+
+      if (dest.coverImage) {
+        item.image = dest.coverImage;
+      }
+
+      if (Array.isArray(dest.coordinates) && dest.coordinates.length >= 2) {
+        item.geo = {
+          "@type": "GeoCoordinates",
+          "longitude": dest.coordinates[0],
+          "latitude": dest.coordinates[1],
+        };
+      }
+
+      return {
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": dest.name,
+        "url": targetUrl,
+        "item": item,
+      };
+    }),
+  };
+}
+
+function DestinationCard({ destination, defaultImage, priority = false }) {
   const dispatch = useDispatch();
 
   const handleDestinationClick = () => {
     if (destination?._id && !destination._id.startsWith("dest-")) {
       dispatch(setselectedLocationId(destination._id));
     }
-    router.push(
-      `/search-your-gateway?location=${encodeURIComponent(
-        destination?.name || ""
-      )}`
-    );
   };
 
   const imageSrc = destination?.coverImage || defaultImage;
   const subtitle = getSubtitle(destination);
+  const targetUrl = `/search-your-gateway?location=${encodeURIComponent(
+    destination?.name || ""
+  )}`;
 
   return (
-    <div
+    <Link
+      href={targetUrl}
       onClick={handleDestinationClick}
-      className="group cursor-pointer select-none flex flex-col w-full"
+      title={`Book luxury villas and stays in ${destination?.name || "Maharashtra"}`}
+      aria-label={`Explore stays in ${destination?.name || "Maharashtra"} - ${subtitle}`}
+      className="group cursor-pointer select-none flex flex-col w-full focus:outline-hidden focus-visible:ring-2 focus-visible:ring-[#ff6900] rounded-[24px]"
     >
-      {/* 1:1 Aspect Ratio Squircle Image Container */}
-      <div className="relative aspect-square w-full rounded-[22px] sm:rounded-[26px] overflow-hidden bg-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
-        <Image
-          src={imageSrc}
-          alt={destination?.name || "Destination"}
-          fill
-          unoptimized
-          sizes="(max-width: 640px) 145px, (max-width: 1024px) 195px, 220px"
-          className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-        />
-      </div>
+      <article
+        itemScope
+        itemType="https://schema.org/TouristDestination"
+        className="flex flex-col w-full"
+      >
+        <meta itemProp="name" content={`${destination?.name}, Maharashtra`} />
+        <meta itemProp="description" content={subtitle} />
+        <meta itemProp="url" content={targetUrl} />
+        {imageSrc && <meta itemProp="image" content={imageSrc} />}
 
-      {/* Typography Block Below Image (Matching Airbnb Reference UI) */}
-      <div className="mt-2 sm:mt-2.5 px-0.5">
-        <h3 className="font-semibold text-neutral-900 text-[14px] sm:text-[15px] md:text-base leading-snug truncate group-hover:text-[#ff6900] transition-colors">
-          {destination?.name}
-        </h3>
-        <p className="text-[12px] sm:text-[13px] md:text-sm text-[#717171] leading-tight truncate mt-0.5">
-          {subtitle}
-        </p>
-      </div>
-    </div>
+        {/* 1:1 Aspect Ratio Squircle Image Container */}
+        <div className="relative aspect-square w-full rounded-[22px] sm:rounded-[26px] overflow-hidden bg-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <Image
+            src={imageSrc}
+            alt={`Luxury villas, homestays, and camping retreats in ${destination?.name || "Maharashtra"} - ${subtitle}`}
+            title={`Explore accommodations in ${destination?.name}`}
+            fill
+            unoptimized
+            priority={priority}
+            sizes="(max-width: 640px) 145px, (max-width: 1024px) 195px, 220px"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+          />
+        </div>
+
+        {/* Typography Block Below Image */}
+        <div className="mt-2 sm:mt-2.5 px-0.5">
+          <h3
+            itemProp="name"
+            className="font-semibold text-neutral-900 text-[14px] sm:text-[15px] md:text-base leading-snug truncate group-hover:text-[#ff6900] transition-colors"
+          >
+            {destination?.name}
+          </h3>
+          <p
+            itemProp="description"
+            className="text-[12px] sm:text-[13px] md:text-sm text-[#717171] leading-tight truncate mt-0.5"
+          >
+            {subtitle}
+          </p>
+        </div>
+      </article>
+    </Link>
   );
 }
 
@@ -208,16 +283,52 @@ export function DestinationHighlights() {
     api?.scrollTo(index);
   };
 
-  const displayList =
-    Array.isArray(destinationData) && destinationData.length > 0
+  const displayList = useMemo(() => {
+    return Array.isArray(destinationData) && destinationData.length > 0
       ? destinationData
       : FALLBACK_DESTINATIONS;
+  }, [destinationData]);
+
+  // Dynamic SEO JSON-LD Structured Data based on current dynamic destinations
+  const jsonLdData = useMemo(() => {
+    return buildDestinationJsonLd(displayList);
+  }, [displayList]);
+
+  // Dynamic dynamic keyword snippet for SEO header
+  const dynamicLocationsSnippet = useMemo(() => {
+    if (Array.isArray(destinationData) && destinationData.length > 0) {
+      const topNames = destinationData.slice(0, 3).map((d) => d.name);
+      return `${topNames.join(", ")}, and scenic Maharashtra hill stations.`;
+    }
+    return "Lonavala, Pawna Lake, and scenic Maharashtra hill stations.";
+  }, [destinationData]);
 
   const loading =
     destinationLoading && (!destinationData || destinationData.length === 0);
 
   return (
-    <section className="w-full py-2 sm:py-10 md:py-4 bg-white">
+    <section
+      aria-labelledby="destination-highlights-heading"
+      className="w-full py-2 sm:py-10 md:py-4 bg-white"
+    >
+      {/* 🚀 Dynamic SEO Structured Data (JSON-LD ItemList & TouristDestination Schema) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLdData) }}
+      />
+
+      {/* 🤖 Visually Hidden Crawlable Semantic Content for Search Engines */}
+      <div className="sr-only">
+        <h2>Popular Vacation Spots, Villas & Stays in Maharashtra</h2>
+        <p>
+          Discover verified accommodations across Maharashtra&apos;s most popular
+          destinations:{" "}
+          {displayList.map((d) => d.name).join(", ")}. Book private pool
+          villas, lakeside camping, wooden cottages, and luxury stays with
+          ThevillaCamp.
+        </p>
+      </div>
+
       <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         {/* Section Header - Centered with Unified App Theme */}
         <div className="relative text-center max-w-2xl mx-auto mb-4 sm:mb-6 md:mb-8 px-2">
@@ -230,14 +341,17 @@ export function DestinationHighlights() {
           </div>
 
           {/* Heading with Unified Brand Orange Accent */}
-          <h2 className="text-lg sm:text-2xl md:text-3xl font-extrabold text-neutral-900 tracking-tight leading-snug">
+          <h2
+            id="destination-highlights-heading"
+            className="text-lg sm:text-2xl md:text-3xl font-extrabold text-neutral-900 tracking-tight leading-snug"
+          >
             Choose Your{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-[#ea580c]">
               Destination
             </span>
           </h2>
           <p className="text-[11px] sm:text-xs md:text-sm text-neutral-500 mt-1 leading-relaxed max-w-md mx-auto">
-            Discover the perfect escape across Lonavala, Pawna Lake, and scenic Maharashtra hill stations.
+            Discover the perfect escape across {dynamicLocationsSnippet}
           </p>
         </div>
 
@@ -277,15 +391,22 @@ export function DestinationHighlights() {
                       <DestinationCard
                         destination={destination}
                         defaultImage={fallbackImg}
+                        priority={index < 2}
                       />
                     </CarouselItem>
                   );
                 })}
               </CarouselContent>
 
-              {/* Desktop Carousel Navigation Controls */}
-              <CarouselPrevious className="hidden md:flex -left-4 sm:-left-5 bg-white/95 backdrop-blur-sm border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all" />
-              <CarouselNext className="hidden md:flex -right-4 sm:-right-5 bg-white/95 backdrop-blur-sm border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all" />
+              {/* Desktop Carousel Navigation Controls with Accessible Labels */}
+              <CarouselPrevious
+                aria-label="Previous holiday destinations"
+                className="hidden md:flex -left-4 sm:-left-5 bg-white/95 backdrop-blur-xs border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all"
+              />
+              <CarouselNext
+                aria-label="Next holiday destinations"
+                className="hidden md:flex -right-4 sm:-right-5 bg-white/95 backdrop-blur-xs border border-neutral-200/90 shadow-md text-neutral-800 hover:text-black hover:scale-105 active:scale-95 transition-all"
+              />
             </Carousel>
 
             {/* Bottom Carousel Indicator Pills */}

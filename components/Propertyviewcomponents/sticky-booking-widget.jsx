@@ -57,7 +57,13 @@ import {
   setcategoryId,
   setOwnerId,
   setPropertyType,
+  setSelectedRooms,
+  setSelectedTents,
+  setSelectedCottages,
 } from "@/Redux/Slices/bookingSlice";
+import { getCampingDayDetailsThunk } from "@/Redux/Slices/campingSlice";
+import { getCottageDayDetailsThunk } from "@/Redux/Slices/cottageSlice";
+import { getHotelDayDetailsThunk } from "@/Redux/Slices/hotelSlice";
 import Cookies from "js-cookie";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { useVilla } from "@/lib/context/VillaContext";
@@ -105,6 +111,14 @@ export default function StickyBookingWidget() {
   const isCottage = Boolean(villa?.cottages && villa.cottages.length > 0);
   const isHotel = Boolean(villa?.rooms && villa.rooms.length > 0);
 
+  const areDatesSelected = Boolean(checkin && checkout);
+
+  const dayTents = useSelector(
+    (state) =>
+      state.camping?.dayDetails?.data?.tents ||
+      state.camping?.dayDetails?.tents ||
+      []
+  );
   const dayCottages = useSelector(
     (state) =>
       state.cottage?.dayDetails?.data?.cottages ||
@@ -121,6 +135,317 @@ export default function StickyBookingWidget() {
       state.hotel?.dayDetails?.tents ||
       []
   );
+
+  const formattedCheckinDate = useMemo(() => {
+    if (!checkin) return null;
+    const d = new Date(checkin);
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+  }, [checkin]);
+
+  useEffect(() => {
+    if (!villa?._id || !formattedCheckinDate) return;
+    if (isCamping) {
+      dispatch(getCampingDayDetailsThunk({ id: villa._id, date: formattedCheckinDate }));
+    } else if (isCottage) {
+      dispatch(getCottageDayDetailsThunk({ id: villa._id, date: formattedCheckinDate }));
+    } else if (isHotel) {
+      dispatch(getHotelDayDetailsThunk({ id: villa._id, date: formattedCheckinDate }));
+    }
+  }, [villa?._id, formattedCheckinDate, isCamping, isCottage, isHotel, dispatch]);
+
+  const safeRooms = useMemo(() => {
+    if (!Array.isArray(villa?.rooms)) return [];
+    const map = new Map();
+    villa.rooms.forEach((r, idx) => {
+      const rawType = r.roomType || r.name || `Room ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...r,
+          roomType: typeKey,
+          totalRooms: Number(r.totalRooms ?? r.totaltents ?? r.totalUnits ?? 1),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totalRooms =
+          (Number(existing.totalRooms) || 0) +
+          Number(r.totalRooms ?? r.totaltents ?? r.totalUnits ?? 1);
+        const hasImages =
+          existing.roomimages?.length || existing.images?.length;
+        if (!hasImages && (r.roomimages?.length || r.images?.length)) {
+          existing.roomimages = r.roomimages || r.images;
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [villa?.rooms]);
+
+  const safeTents = useMemo(() => {
+    if (!Array.isArray(villa?.tents)) return [];
+    const map = new Map();
+    villa.tents.forEach((t, idx) => {
+      const rawType = t.tentType || t.name || `Tent ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...t,
+          tentType: typeKey,
+          totaltents: Number(t.totaltents ?? t.totalUnits ?? 1),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totaltents =
+          (Number(existing.totaltents) || 0) +
+          Number(t.totaltents ?? t.totalUnits ?? 1);
+        const hasImages =
+          existing.tentimages?.length || existing.images?.length;
+        if (!hasImages && (t.tentimages?.length || t.images?.length)) {
+          existing.tentimages = t.tentimages || t.images;
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [villa?.tents]);
+
+  const safeCottages = useMemo(() => {
+    if (!Array.isArray(villa?.cottages)) return [];
+    const map = new Map();
+    villa.cottages.forEach((c, idx) => {
+      const rawType = c.cottageType || c.name || `Cottage ${idx + 1}`;
+      const typeKey = rawType.trim();
+      const lowerKey = typeKey.toLowerCase();
+      if (!map.has(lowerKey)) {
+        map.set(lowerKey, {
+          ...c,
+          cottageType: typeKey,
+          totalcottage: Number(
+            c.totalcottage ?? c.totaltents ?? c.totalCottages ?? c.totalUnits ?? 1
+          ),
+        });
+      } else {
+        const existing = map.get(lowerKey);
+        existing.totalcottage =
+          (Number(existing.totalcottage) || 0) +
+          Number(
+            c.totalcottage ?? c.totaltents ?? c.totalCottages ?? c.totalUnits ?? 1
+          );
+        const hasImages =
+          existing.cottageimages?.length || existing.images?.length;
+        if (!hasImages && (c.cottageimages?.length || c.images?.length)) {
+          existing.cottageimages = c.cottageimages || c.images;
+        }
+      }
+    });
+    return Array.from(map.values());
+  }, [villa?.cottages]);
+
+  const getAvailabilityForRoom = (room) => {
+    const typeKey = (room.roomType || room.name || "").trim();
+    const summary = (dayRooms || []).find(
+      (r) =>
+        (r.roomType || r.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
+    );
+    const configuredTotal = room.totalRooms || room.totaltents || 1;
+    if (!summary) {
+      return {
+        total: configuredTotal,
+        booked: 0,
+        available: configuredTotal,
+        weekdayPrice: room.pricing?.weekdayPrice || room.price || 0,
+        weekendPrice:
+          room.pricing?.weekendPrice ||
+          room.price ||
+          room.pricing?.weekdayPrice ||
+          0,
+      };
+    }
+    const availableCount =
+      summary.available ??
+      Math.max(0, (summary.total ?? configuredTotal) - (summary.booked ?? 0));
+    return {
+      total: summary.total ?? configuredTotal,
+      booked: summary.booked ?? 0,
+      available: availableCount,
+      weekdayPrice:
+        summary.price?.weekday ??
+        room.pricing?.weekdayPrice ??
+        room.price ??
+        0,
+      weekendPrice:
+        summary.price?.weekend ??
+        room.pricing?.weekendPrice ??
+        summary.price?.weekday ??
+        room.price ??
+        0,
+    };
+  };
+
+  const getAvailabilityForTent = (tent) => {
+    const typeKey = (tent.tentType || tent.name || "").trim();
+    const summary = (dayTents || []).find(
+      (t) =>
+        (t.tentType || t.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
+    );
+    const configuredTotal = tent.totaltents || 1;
+    if (!summary) {
+      return {
+        total: configuredTotal,
+        booked: 0,
+        available: configuredTotal,
+        weekdayPrice: tent.pricing?.weekdayPrice || 0,
+        weekendPrice:
+          tent.pricing?.weekendPrice || tent.pricing?.weekdayPrice || 0,
+      };
+    }
+    const availableCount =
+      summary.available ??
+      Math.max(0, (summary.total ?? configuredTotal) - (summary.booked ?? 0));
+    return {
+      total: summary.total ?? configuredTotal,
+      booked: summary.booked ?? 0,
+      available: availableCount,
+      weekdayPrice: summary.price?.weekday ?? tent.pricing?.weekdayPrice ?? 0,
+      weekendPrice:
+        summary.price?.weekend ??
+        tent.pricing?.weekendPrice ??
+        summary.price?.weekday ??
+        0,
+    };
+  };
+
+  const getAvailabilityForCottage = (cot) => {
+    const typeKey = (cot.cottageType || cot.name || "").trim();
+    const summary = (dayCottages || []).find(
+      (c) =>
+        (c.cottageType || c.name || "").trim().toLowerCase() ===
+        typeKey.toLowerCase()
+    );
+    const configuredTotal = cot.totalcottage || cot.totaltents || 1;
+    if (!summary) {
+      return {
+        total: configuredTotal,
+        booked: 0,
+        available: configuredTotal,
+        weekdayPrice: cot.pricing?.weekdayPrice || cot.price || 0,
+        weekendPrice:
+          cot.pricing?.weekendPrice || cot.price || cot.pricing?.weekdayPrice || 0,
+      };
+    }
+    const availableCount =
+      summary.available ??
+      Math.max(0, (summary.total ?? configuredTotal) - (summary.booked ?? 0));
+    return {
+      total: summary.total ?? configuredTotal,
+      booked: summary.booked ?? 0,
+      available: availableCount,
+      weekdayPrice:
+        summary.price?.weekday ??
+        cot.pricing?.weekdayPrice ??
+        cot.price ??
+        0,
+      weekendPrice:
+        summary.price?.weekend ??
+        cot.pricing?.weekendPrice ??
+        summary.price?.weekday ??
+        cot.price ??
+        0,
+    };
+  };
+
+  // Auto-sanitize Redux rooms when live availability loads
+  useEffect(() => {
+    if (!isHotel || !reduxSelectedRooms || Object.keys(reduxSelectedRooms).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedRooms).forEach(([roomType, r]) => {
+      const cfg = safeRooms.find(
+        (sr) => (sr.roomType || sr.name || "").trim().toLowerCase() === roomType.toLowerCase()
+      );
+      const avail = getAvailabilityForRoom(cfg || { roomType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (r.quantity > avail.available) {
+        sanitized[roomType] = { ...r, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[roomType] = r;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedRooms(sanitized));
+    }
+  }, [isHotel, dayRooms, safeRooms, dispatch]);
+
+  // Auto-sanitize Redux tents
+  useEffect(() => {
+    if (!isCamping || !reduxSelectedTents || Object.keys(reduxSelectedTents).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedTents).forEach(([tentType, t]) => {
+      const cfg = safeTents.find(
+        (st) => (st.tentType || st.name || "").trim().toLowerCase() === tentType.toLowerCase()
+      );
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (t.quantity > avail.available) {
+        sanitized[tentType] = { ...t, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[tentType] = t;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedTents(sanitized));
+    }
+  }, [isCamping, dayTents, safeTents, dispatch]);
+
+  // Auto-sanitize Redux cottages
+  useEffect(() => {
+    if (!isCottage || !reduxSelectedCottages || Object.keys(reduxSelectedCottages).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedCottages).forEach(([cottageType, c]) => {
+      const cfg = safeCottages.find(
+        (sc) => (sc.cottageType || sc.name || "").trim().toLowerCase() === cottageType.toLowerCase()
+      );
+      const avail = getAvailabilityForCottage(cfg || { cottageType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (c.quantity > avail.available) {
+        sanitized[cottageType] = { ...c, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[cottageType] = c;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedCottages(sanitized));
+    }
+  }, [isCottage, dayCottages, safeCottages, dispatch]);
+
+  const allUnitsSoldOut = useMemo(() => {
+    if (!areDatesSelected) return false;
+    if (isHotel && safeRooms.length > 0) {
+      return safeRooms.every((r) => getAvailabilityForRoom(r).available <= 0);
+    }
+    if (isCamping && safeTents.length > 0) {
+      return safeTents.every((t) => getAvailabilityForTent(t).available <= 0);
+    }
+    if (isCottage && safeCottages.length > 0) {
+      return safeCottages.every((c) => getAvailabilityForCottage(c).available <= 0);
+    }
+    return false;
+  }, [areDatesSelected, isHotel, safeRooms, dayRooms, isCamping, safeTents, dayTents, isCottage, safeCottages, dayCottages]);
 
   const totalSelectedTentsCount = Object.values(reduxSelectedTents || {}).reduce(
     (s, t) => s + (t.quantity || 0),
@@ -190,7 +515,6 @@ export default function StickyBookingWidget() {
 
   const holidayDates = useHolidayDates();
 
-  const areDatesSelected = Boolean(checkin && checkout);
   const checkInDate = checkin ? new Date(checkin) : null;
   const checkOutDate = checkout ? new Date(checkout) : null;
 
@@ -984,6 +1308,14 @@ export default function StickyBookingWidget() {
           </div>
 
           {/* Capacity & Availability Alerts */}
+          {allUnitsSoldOut && (
+            <div className="mb-2.5 p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2 text-red-700 text-xs">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+              <span className="text-[11px] leading-tight font-semibold">
+                All {isCamping ? "tents" : isCottage ? "cottages" : isHotel ? "rooms" : "units"} are completely sold out for {formattedCheckinDate ? format(new Date(checkin), "MMM dd, yyyy") : "selected dates"}. Please select different dates.
+              </span>
+            </div>
+          )}
           {isOverCapacity && (
             <div className="mb-2.5 p-2 bg-red-50 border border-red-200 rounded-xl flex items-center space-x-2 text-red-700 text-xs">
               <AlertCircle className="w-3.5 h-3.5 flex-shrink-0 text-red-500" />
@@ -1001,6 +1333,10 @@ export default function StickyBookingWidget() {
           <Button
             onClick={async () => {
               if (isOverCapacity) return;
+              if (allUnitsSoldOut) {
+                setAvailabilityError("All units are sold out for these dates. Please choose different dates.");
+                return;
+              }
 
               // If camping and no tents selected yet, prompt tent selection modal
               if (isCamping && totalSelectedTentsCount === 0) {
@@ -1047,6 +1383,51 @@ export default function StickyBookingWidget() {
                 setAvailabilityError("Check-out date must be at least one day after check-in date.");
                 setDatePopoverOpen(true);
                 return;
+              }
+
+              // Pre-check selected units against live dayDetails
+              if (isHotel) {
+                for (const [type, r] of Object.entries(reduxSelectedRooms || {})) {
+                  if ((r.quantity || 0) <= 0) continue;
+                  const cfg = safeRooms.find((sr) => (sr.roomType || sr.name || "").trim().toLowerCase() === type.toLowerCase());
+                  const avail = getAvailabilityForRoom(cfg || { roomType: type });
+                  if (avail.available <= 0) {
+                    setAvailabilityError(`${type} is sold out for these dates.`);
+                    return;
+                  }
+                  if (r.quantity > avail.available) {
+                    setAvailabilityError(`Only ${avail.available} ${type} available, but ${r.quantity} selected.`);
+                    return;
+                  }
+                }
+              } else if (isCamping) {
+                for (const [type, t] of Object.entries(reduxSelectedTents || {})) {
+                  if ((t.quantity || 0) <= 0) continue;
+                  const cfg = safeTents.find((st) => (st.tentType || st.name || "").trim().toLowerCase() === type.toLowerCase());
+                  const avail = getAvailabilityForTent(cfg || { tentType: type });
+                  if (avail.available <= 0) {
+                    setAvailabilityError(`${type} is sold out for these dates.`);
+                    return;
+                  }
+                  if (t.quantity > avail.available) {
+                    setAvailabilityError(`Only ${avail.available} ${type} available, but ${t.quantity} selected.`);
+                    return;
+                  }
+                }
+              } else if (isCottage) {
+                for (const [type, c] of Object.entries(reduxSelectedCottages || {})) {
+                  if ((c.quantity || 0) <= 0) continue;
+                  const cfg = safeCottages.find((sc) => (sc.cottageType || sc.name || "").trim().toLowerCase() === type.toLowerCase());
+                  const avail = getAvailabilityForCottage(cfg || { cottageType: type });
+                  if (avail.available <= 0) {
+                    setAvailabilityError(`${type} is sold out for these dates.`);
+                    return;
+                  }
+                  if (c.quantity > avail.available) {
+                    setAvailabilityError(`Only ${avail.available} ${type} available, but ${c.quantity} selected.`);
+                    return;
+                  }
+                }
               }
 
               setAvailabilityError("");
@@ -1140,18 +1521,22 @@ export default function StickyBookingWidget() {
 
               router.push("/checkout");
             }}
-            disabled={isOverCapacity || availabilityChecking}
+            disabled={isOverCapacity || availabilityChecking || allUnitsSoldOut}
             className={`w-full text-white font-bold py-3.5 rounded-xl transition-all duration-300 text-sm flex items-center justify-center gap-2 cursor-pointer shadow-md ${
-              !areDatesSelected ||
-              (isCamping && totalSelectedTentsCount === 0) ||
-              (isCottage && totalSelectedCottagesCount === 0) ||
-              (isHotel && totalSelectedRoomsCount === 0)
+              allUnitsSoldOut
+                ? "bg-red-600/90 cursor-not-allowed opacity-80 shadow-none hover:bg-red-600/90"
+                : !areDatesSelected ||
+                (isCamping && totalSelectedTentsCount === 0) ||
+                (isCottage && totalSelectedCottagesCount === 0) ||
+                (isHotel && totalSelectedRoomsCount === 0)
                 ? "bg-neutral-900 hover:bg-black shadow-neutral-800/20"
                 : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] shadow-orange-500/25 hover:shadow-orange-500/40 hover:scale-[1.01] active:scale-[0.99]"
             }`}
           >
             {availabilityChecking ? (
               "Checking Availability..."
+            ) : allUnitsSoldOut ? (
+              "Sold Out for Selected Dates"
             ) : isOverCapacity ? (
               `Max ${maxCapacity} Guests Allowed`
             ) : isCamping && totalSelectedTentsCount === 0 ? (

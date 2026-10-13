@@ -12,15 +12,9 @@ import Image from "next/image";
 import { clearSelectedTents, removeCoupon } from "@/Redux/Slices/bookingSlice";
 import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  toggleWishlist,
-  optimisticToggle,
-  fetchWishlistIds,
-} from "@/Redux/Slices/wishlistSlice";
 import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { saveRecentlyVisited } from "@/lib/recentlyVisited";
-import { useAuthModal } from "@/context/AuthModalContext";
-import { getStoredUser } from "@/lib/auth";
+import { useWishlist } from "@/hooks/useWishlist";
 
 export function PropertyCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -32,7 +26,6 @@ export function PropertyCard({ property }) {
   );
   const categories = useSelector((state) => state.category?.categories || []);
   const dispatch = useDispatch();
-  const { openAuthModal } = useAuthModal();
 
   // Extract display images
   const displayImages =
@@ -44,21 +37,15 @@ export function PropertyCard({ property }) {
       ? [property.coverImage]
       : ["/placeholder.svg"];
 
-  // Wishlist state
-  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+  // Wishlist integration via standard useWishlist hook
   const propertyId = property?._id || property?.id;
-  const propertyType = getCleanPropertyType(property, [], selectedCategoryName);
+  const propertyType = getCleanPropertyType(property, categories, selectedCategoryName);
 
-  const isLiked = useMemo(() => {
-    if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
-    const key = `${propertyType?.toLowerCase()}:${propertyId}`;
-    const rawId = String(propertyId);
-    return (
-      wishlistIds.includes(rawId) ||
-      wishlistIds.includes(key) ||
-      wishlistIds.some((item) => item?.propertyId === rawId || item?.propertyId === propertyId)
-    );
-  }, [wishlistIds, propertyId, propertyType]);
+  const { isLiked, handleWishlist } = useWishlist({
+    property,
+    propertyId,
+    propertyType,
+  });
 
   useEffect(() => {
     setCurrentImageIndex(0);
@@ -97,32 +84,6 @@ export function PropertyCard({ property }) {
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
-  };
-
-  const handleWishlist = (e) => {
-    e?.stopPropagation?.();
-    e?.preventDefault?.();
-
-    const currentUser = getStoredUser();
-    if (!currentUser?._id) {
-      openAuthModal();
-      return;
-    }
-
-    dispatch(
-      optimisticToggle({
-        propertyId,
-        propertyType,
-      })
-    );
-
-    dispatch(
-      toggleWishlist({
-        propertyId,
-        propertyType,
-        userId: currentUser._id,
-      })
-    );
   };
 
   const handleCardClick = () => {
@@ -222,10 +183,7 @@ export function PropertyCard({ property }) {
         {/* Top Right: Wishlist Heart Icon (Airbnb style with translucent fill & drop shadow) */}
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            handleWishlist();
-          }}
+          onClick={handleWishlist}
           className="absolute top-1.5 right-1.5 sm:top-2.5 sm:right-2.5 z-10 p-1 sm:p-1.5 rounded-full hover:scale-115 active:scale-90 transition-transform cursor-pointer"
           aria-label="Save to wishlist"
         >

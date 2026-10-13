@@ -494,6 +494,92 @@ export default function BookingDialog({
     if (tentError) setTentError("");
   };
 
+  // Auto-sanitize Redux rooms when live availability loads
+  useEffect(() => {
+    if (propertyType !== "Hotel" || !reduxSelectedRooms || Object.keys(reduxSelectedRooms).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedRooms).forEach(([roomType, r]) => {
+      const cfg = safeRooms.find(
+        (sr) => (sr.roomType || sr.name || "").trim().toLowerCase() === roomType.toLowerCase()
+      );
+      const avail = getAvailabilityForRoom(cfg || { roomType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (r.quantity > avail.available) {
+        sanitized[roomType] = { ...r, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[roomType] = r;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedRooms(sanitized));
+    }
+  }, [propertyType, dayRooms, safeRooms, dispatch]);
+
+  // Auto-sanitize Redux tents
+  useEffect(() => {
+    if (propertyType !== "Camping" || !reduxSelectedTents || Object.keys(reduxSelectedTents).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedTents).forEach(([tentType, t]) => {
+      const cfg = safeTents.find(
+        (st) => (st.tentType || st.name || "").trim().toLowerCase() === tentType.toLowerCase()
+      );
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (t.quantity > avail.available) {
+        sanitized[tentType] = { ...t, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[tentType] = t;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedTents(sanitized));
+    }
+  }, [propertyType, dayTents, safeTents, dispatch]);
+
+  // Auto-sanitize Redux cottages
+  useEffect(() => {
+    if (propertyType !== "Cottage" || !reduxSelectedCottages || Object.keys(reduxSelectedCottages).length === 0) return;
+    let modified = false;
+    const sanitized = {};
+    Object.entries(reduxSelectedCottages).forEach(([cottageType, c]) => {
+      const cfg = safeCottages.find(
+        (sc) => (sc.cottageType || sc.name || "").trim().toLowerCase() === cottageType.toLowerCase()
+      );
+      const avail = getAvailabilityForCottage(cfg || { cottageType });
+      if (avail.available <= 0) {
+        modified = true;
+      } else if (c.quantity > avail.available) {
+        sanitized[cottageType] = { ...c, quantity: avail.available };
+        modified = true;
+      } else {
+        sanitized[cottageType] = c;
+      }
+    });
+    if (modified) {
+      dispatch(setSelectedCottages(sanitized));
+    }
+  }, [propertyType, dayCottages, safeCottages, dispatch]);
+
+  const allUnitsSoldOut = useMemo(() => {
+    if (!areDatesSelected) return false;
+    if (propertyType === "Hotel" && safeRooms.length > 0) {
+      return safeRooms.every((r) => getAvailabilityForRoom(r).available <= 0);
+    }
+    if (propertyType === "Camping" && safeTents.length > 0) {
+      return safeTents.every((t) => getAvailabilityForTent(t).available <= 0);
+    }
+    if (propertyType === "Cottage" && safeCottages.length > 0) {
+      return safeCottages.every((c) => getAvailabilityForCottage(c).available <= 0);
+    }
+    return false;
+  }, [areDatesSelected, propertyType, safeRooms, dayRooms, safeTents, dayTents, safeCottages, dayCottages]);
+
   // Indian Holidays Hook for current calendar year
   const calendarYear = currentCalendarMonth.getFullYear();
   const { isHoliday, getHolidayName, isLongWeekend } = useIndianHolidays(calendarYear);
@@ -809,6 +895,11 @@ export default function BookingDialog({
       return;
     }
 
+    if (allUnitsSoldOut) {
+      setTentError(`All ${propertyType === "Camping" ? "tents" : propertyType === "Cottage" ? "cottages" : "rooms"} are sold out for these dates. Please select different dates.`);
+      return;
+    }
+
     if (propertyType === "Camping") {
       if (totalSelectedTentsCount === 0) {
         setActiveTab("units");
@@ -822,6 +913,21 @@ export default function BookingDialog({
         );
         return;
       }
+
+      for (const [type, t] of Object.entries(reduxSelectedTents || {})) {
+        if ((t.quantity || 0) <= 0) continue;
+        const cfg = safeTents.find((st) => (st.tentType || st.name || "").trim().toLowerCase() === type.toLowerCase());
+        const avail = getAvailabilityForTent(cfg || { tentType: type });
+        if (avail.available <= 0) {
+          setTentError(`${type} is sold out for these dates.`);
+          return;
+        }
+        if (t.quantity > avail.available) {
+          setTentError(`Only ${avail.available} unit(s) of ${type} available, but ${t.quantity} selected.`);
+          return;
+        }
+      }
+
       setIsLoading(true);
       try {
         const requestedTents = Object.entries(reduxSelectedTents || {}).map(([type, t]) => ({
@@ -855,6 +961,21 @@ export default function BookingDialog({
         );
         return;
       }
+
+      for (const [type, c] of Object.entries(reduxSelectedCottages || {})) {
+        if ((c.quantity || 0) <= 0) continue;
+        const cfg = safeCottages.find((sc) => (sc.cottageType || sc.name || "").trim().toLowerCase() === type.toLowerCase());
+        const avail = getAvailabilityForCottage(cfg || { cottageType: type });
+        if (avail.available <= 0) {
+          setTentError(`${type} is sold out for these dates.`);
+          return;
+        }
+        if (c.quantity > avail.available) {
+          setTentError(`Only ${avail.available} unit(s) of ${type} available, but ${c.quantity} selected.`);
+          return;
+        }
+      }
+
       setIsLoading(true);
       try {
         const requestedCottages = Object.entries(reduxSelectedCottages || {}).map(([type, c]) => ({
@@ -888,6 +1009,21 @@ export default function BookingDialog({
         );
         return;
       }
+
+      for (const [type, r] of Object.entries(reduxSelectedRooms || {})) {
+        if ((r.quantity || 0) <= 0) continue;
+        const cfg = safeRooms.find((sr) => (sr.roomType || sr.name || "").trim().toLowerCase() === type.toLowerCase());
+        const avail = getAvailabilityForRoom(cfg || { roomType: type });
+        if (avail.available <= 0) {
+          setTentError(`${type} is sold out for these dates.`);
+          return;
+        }
+        if (r.quantity > avail.available) {
+          setTentError(`Only ${avail.available} unit(s) of ${type} available, but ${r.quantity} selected.`);
+          return;
+        }
+      }
+
       setIsLoading(true);
       try {
         const requestedRooms = Object.entries(reduxSelectedRooms || {}).map(([type, r]) => ({
@@ -952,6 +1088,7 @@ export default function BookingDialog({
 
   const isProceedDisabled =
     isLoading ||
+    allUnitsSoldOut ||
     (!isUnitBased && isOverCapacity) ||
     (isUnitBased && activeUnitCount > 0 && activeUnitCapacity < totalGuests);
 
@@ -1524,6 +1661,14 @@ export default function BookingDialog({
               {/* TAB 3: ACCOMMODATION / UNIT SELECTION */}
               {activeTab === "units" && isUnitBased && (
                 <div className="space-y-3 animate-in fade-in-50 duration-200">
+                  {/* Sold out alert banner */}
+                  {allUnitsSoldOut && (
+                    <div className="p-2.5 rounded-xl border border-red-200 bg-red-50 text-red-700 text-xs flex items-center gap-2 font-medium">
+                      <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                      <span>All {propertyType === "Camping" ? "tents" : propertyType === "Cottage" ? "cottages" : "rooms"} are completely sold out for {formattedDate || "these dates"}. Please select different dates to stay.</span>
+                    </div>
+                  )}
+
                   {/* Capacity Status Banner */}
                   <div
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-xs ${
@@ -1571,6 +1716,7 @@ export default function BookingDialog({
                           const typeKey = tent.tentType;
                           const currentQty = reduxSelectedTents?.[typeKey]?.quantity || 0;
                           const avail = getAvailabilityForTent(tent);
+                          const isSoldOut = avail.available <= 0;
                           const tentImg = tent.tentimages?.[0] || tent.images?.[0] || "/placeholder.svg";
                           const isWeekendSelected = checkInDate ? (checkInDate.getDay() === 5 || checkInDate.getDay() === 6) : false;
                           const displayPrice = isWeekendSelected ? avail.weekendPrice : avail.weekdayPrice;
@@ -1581,6 +1727,8 @@ export default function BookingDialog({
                               className={`p-3 rounded-2xl border transition-all ${
                                 currentQty > 0
                                   ? "bg-orange-50/40 border-orange-300 ring-1 ring-orange-200 shadow-2xs"
+                                  : isSoldOut
+                                  ? "bg-red-50/30 border-red-100 opacity-75 shadow-none"
                                   : "bg-white border-neutral-200/90 shadow-2xs"
                               }`}
                             >
@@ -1601,9 +1749,15 @@ export default function BookingDialog({
                                       <h4 className="text-xs font-bold text-neutral-900 truncate">
                                         {tent.tentType} Tent
                                       </h4>
-                                      <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
-                                        {avail.available} left
-                                      </span>
+                                      {isSoldOut ? (
+                                        <span className="text-[10px] font-bold text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded uppercase tracking-wide shrink-0">
+                                          Sold Out
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
+                                          {avail.available} left
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[10.5px] text-neutral-500 mt-0.5">
                                       <Users className="w-3 h-3 text-[#ff6900]" />
@@ -1635,7 +1789,7 @@ export default function BookingDialog({
                                       <button
                                         type="button"
                                         onClick={() => handleTentQtyChange(tent, 1)}
-                                        disabled={currentQty >= avail.available}
+                                        disabled={isSoldOut || currentQty >= avail.available}
                                         className="w-7 h-7 rounded-full border border-neutral-300 hover:border-neutral-800 disabled:opacity-30 disabled:hover:border-neutral-300 flex items-center justify-center text-neutral-700 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
                                         aria-label={`Increase ${tent.tentType}`}
                                       >
@@ -1661,6 +1815,7 @@ export default function BookingDialog({
                           const typeKey = cot.cottageType;
                           const currentQty = reduxSelectedCottages?.[typeKey]?.quantity || 0;
                           const avail = getAvailabilityForCottage(cot);
+                          const isSoldOut = avail.available <= 0;
                           const cotImg = cot.cottageimages?.[0] || cot.images?.[0] || "/placeholder.svg";
                           const isWeekendSelected = checkInDate ? (checkInDate.getDay() === 5 || checkInDate.getDay() === 6) : false;
                           const displayPrice = isWeekendSelected ? avail.weekendPrice : avail.weekdayPrice;
@@ -1671,6 +1826,8 @@ export default function BookingDialog({
                               className={`p-3 rounded-2xl border transition-all ${
                                 currentQty > 0
                                   ? "bg-orange-50/40 border-orange-300 ring-1 ring-orange-200 shadow-2xs"
+                                  : isSoldOut
+                                  ? "bg-red-50/30 border-red-100 opacity-75 shadow-none"
                                   : "bg-white border-neutral-200/90 shadow-2xs"
                               }`}
                             >
@@ -1691,9 +1848,15 @@ export default function BookingDialog({
                                       <h4 className="text-xs font-bold text-neutral-900 truncate">
                                         {cot.cottageType}
                                       </h4>
-                                      <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
-                                        {avail.available} left
-                                      </span>
+                                      {isSoldOut ? (
+                                        <span className="text-[10px] font-bold text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded uppercase tracking-wide shrink-0">
+                                          Sold Out
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
+                                          {avail.available} left
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[10.5px] text-neutral-500 mt-0.5">
                                       <Users className="w-3 h-3 text-[#ff6900]" />
@@ -1725,7 +1888,7 @@ export default function BookingDialog({
                                       <button
                                         type="button"
                                         onClick={() => handleCottageQtyChange(cot, 1)}
-                                        disabled={currentQty >= avail.available}
+                                        disabled={isSoldOut || currentQty >= avail.available}
                                         className="w-7 h-7 rounded-full border border-neutral-300 hover:border-neutral-800 disabled:opacity-30 disabled:hover:border-neutral-300 flex items-center justify-center text-neutral-700 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
                                         aria-label={`Increase ${cot.cottageType}`}
                                       >
@@ -1751,6 +1914,7 @@ export default function BookingDialog({
                           const typeKey = room.roomType;
                           const currentQty = reduxSelectedRooms?.[typeKey]?.quantity || 0;
                           const avail = getAvailabilityForRoom(room);
+                          const isSoldOut = avail.available <= 0;
                           const roomImg = room.roomimages?.[0] || room.images?.[0] || "/placeholder.svg";
                           const isWeekendSelected = checkInDate ? (checkInDate.getDay() === 5 || checkInDate.getDay() === 6) : false;
                           const displayPrice = isWeekendSelected ? avail.weekendPrice : avail.weekdayPrice;
@@ -1761,6 +1925,8 @@ export default function BookingDialog({
                               className={`p-3 rounded-2xl border transition-all ${
                                 currentQty > 0
                                   ? "bg-orange-50/40 border-orange-300 ring-1 ring-orange-200 shadow-2xs"
+                                  : isSoldOut
+                                  ? "bg-red-50/30 border-red-100 opacity-75 shadow-none"
                                   : "bg-white border-neutral-200/90 shadow-2xs"
                               }`}
                             >
@@ -1781,9 +1947,15 @@ export default function BookingDialog({
                                       <h4 className="text-xs font-bold text-neutral-900 truncate">
                                         {room.roomType}
                                       </h4>
-                                      <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
-                                        {avail.available} left
-                                      </span>
+                                      {isSoldOut ? (
+                                        <span className="text-[10px] font-bold text-red-700 bg-red-100 border border-red-200 px-2 py-0.5 rounded uppercase tracking-wide shrink-0">
+                                          Sold Out
+                                        </span>
+                                      ) : (
+                                        <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-1.5 py-0.5 rounded shrink-0">
+                                          {avail.available} left
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex items-center gap-1.5 text-[10.5px] text-neutral-500 mt-0.5">
                                       <Users className="w-3 h-3 text-[#ff6900]" />
@@ -1815,7 +1987,7 @@ export default function BookingDialog({
                                       <button
                                         type="button"
                                         onClick={() => handleRoomQtyChange(room, 1)}
-                                        disabled={currentQty >= avail.available}
+                                        disabled={isSoldOut || currentQty >= avail.available}
                                         className="w-7 h-7 rounded-full border border-neutral-300 hover:border-neutral-800 disabled:opacity-30 disabled:hover:border-neutral-300 flex items-center justify-center text-neutral-700 active:scale-95 transition-all cursor-pointer disabled:cursor-not-allowed"
                                         aria-label={`Increase ${room.roomType}`}
                                       >
@@ -2076,10 +2248,16 @@ export default function BookingDialog({
                 handleBooking();
               }}
               disabled={isProceedDisabled}
-              className="flex-1 max-w-[190px] h-10 bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white font-bold text-xs sm:text-sm rounded-xl shadow-md shadow-orange-500/25 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+              className={`flex-1 max-w-[190px] h-10 text-white font-bold text-xs sm:text-sm rounded-xl active:scale-95 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                allUnitsSoldOut
+                  ? "bg-red-600/90 cursor-not-allowed opacity-80 shadow-none hover:bg-red-600/90"
+                  : "bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] shadow-md shadow-orange-500/25 disabled:opacity-50"
+              }`}
             >
               {isLoading ? (
                 <ButtonLoader />
+              ) : allUnitsSoldOut ? (
+                "Sold Out for Dates"
               ) : !areDatesSelected ? (
                 activeTab === "dates" ? "Select Dates" : "Select Dates to Book"
               ) : isUnitBased && activeUnitCount === 0 ? (

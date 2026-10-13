@@ -22,6 +22,7 @@ const hideChrome = (pathname) => {
     pathname === "/checkout" ||
     pathname === "/camping-checkout" ||
     pathname === "/search-your-gateway" ||
+    p.startsWith("/booking/success") ||
     p.startsWith("/view-camping") ||
     p.startsWith("/view-cottage") ||
     p.startsWith("/view-hotel") ||
@@ -29,14 +30,19 @@ const hideChrome = (pathname) => {
   );
 };
 
-const hideMobileHeader = (pathname) =>
-  hideChrome(pathname) ||
-  pathname === "/account" ||
-  pathname === "/wishlist" ||
-  pathname === "/account/settings" ||
-  pathname === "/notifications" ||
-  pathname === "/booking" ||
-  pathname?.startsWith("/account/");
+const hideMobileHeader = (pathname) => {
+  const p = pathname?.toLowerCase() || "";
+  return (
+    hideChrome(pathname) ||
+    p.startsWith("/booking/success") ||
+    pathname === "/account" ||
+    pathname === "/wishlist" ||
+    pathname === "/account/settings" ||
+    pathname === "/notifications" ||
+    pathname === "/booking" ||
+    pathname?.startsWith("/account/")
+  );
+};
 
 export function NextuiProviderWrapper({ children }) {
   const pathname = usePathname();
@@ -74,19 +80,19 @@ export function NextuiProviderWrapper({ children }) {
           </Suspense>
           {hideChrome(pathname) ? null : <Navbar />}
           {hideMobileHeader(pathname) ? null : <AppHeader />}
-          <div className="z-[400]">
+          <div className="relative z-[9999]">
             <ToastProvider
               placement="top-center"
-              toastOffset={14}
+              toastOffset={16}
               toastProps={{
                 classNames: {
-                  base: "max-w-[92vw] sm:max-w-md py-2 px-3 sm:py-2.5 sm:px-4 rounded-xl sm:rounded-2xl shadow-lg border border-black/5 dark:border-white/10 backdrop-blur-md",
+                  base: "max-w-[92vw] sm:max-w-md py-2.5 px-3.5 sm:py-3 sm:px-4 rounded-2xl shadow-2xl border border-neutral-200/90 dark:border-neutral-800 bg-white dark:bg-[#18181B] text-neutral-900 dark:text-neutral-100 opacity-100",
                   content: "gap-x-2.5 sm:gap-x-3 items-center",
-                  title: "text-xs sm:text-sm font-bold tracking-tight text-foreground leading-snug",
-                  description: "text-[11px] sm:text-xs text-default-500 leading-normal mt-0.5",
+                  title: "text-xs sm:text-sm font-bold tracking-tight text-neutral-900 dark:text-neutral-100 leading-snug",
+                  description: "text-[11px] sm:text-xs text-neutral-600 dark:text-neutral-400 leading-normal mt-0.5",
                   icon: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
                   loadingComponent: "w-4 h-4 sm:w-5 sm:h-5 shrink-0",
-                  closeButton: "w-5 h-5 -right-1 -top-1 sm:-right-2 sm:-top-2 text-xs",
+                  closeButton: "w-5 h-5 -right-1 -top-1 sm:-right-2 sm:-top-2 text-xs text-neutral-500",
                 },
               }}
             />

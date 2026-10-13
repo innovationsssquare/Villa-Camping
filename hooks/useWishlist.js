@@ -38,9 +38,10 @@ export function useWishlist({
     propPropertyId || property?._id || property?.id || contextVilla?._id;
   const propertyId = rawPropertyId ? String(rawPropertyId) : null;
 
+  const categories = useSelector((state) => state.category?.categories || []);
   const resolvedType =
     propPropertyType ||
-    (property ? getCleanPropertyType(property, [], "villa") : "villa") ||
+    (property ? getCleanPropertyType(property, categories, "villa") : "villa") ||
     "villa";
   const propertyType = String(resolvedType).toLowerCase();
   const propertyName = property?.name || "Property";
@@ -60,13 +61,23 @@ export function useWishlist({
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
     const rawId = String(propertyId);
     const key = `${propertyType}:${rawId}`;
+    const altKey1 = `${propertyType}s:${rawId}`;
+    const altKey2 = `${propertyType.replace(/s$/, "")}:${rawId}`;
 
     return (
       wishlistIds.includes(rawId) ||
       wishlistIds.includes(key) ||
+      wishlistIds.includes(altKey1) ||
+      wishlistIds.includes(altKey2) ||
       wishlistIds.some((item) => {
         if (!item) return false;
-        if (typeof item === "string") return item === rawId || item === key;
+        if (typeof item === "string")
+          return (
+            item === rawId ||
+            item === key ||
+            item === altKey1 ||
+            item === altKey2
+          );
         return String(item.propertyId) === rawId || String(item._id) === rawId;
       })
     );

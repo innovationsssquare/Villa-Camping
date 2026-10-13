@@ -67,17 +67,6 @@ export default function TentSelectionModal({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  // 3. Sync Redux state to local on open
-  useEffect(() => {
-    if (!isOpen) return;
-    const mapped = {};
-    Object.entries(reduxSelectedTents || {}).forEach(([tentType, t]) => {
-      mapped[tentType] = t.quantity || 0;
-    });
-    setLocalSelected(mapped);
-    setTentError("");
-  }, [isOpen, reduxSelectedTents]);
-
   const tentsForDay = useMemo(() => {
     return dayDetails?.data?.tents || dayDetails?.tents || [];
   }, [dayDetails]);
@@ -122,44 +111,87 @@ export default function TentSelectionModal({
 
   // 4. Availability & Price lookup
   const getAvailabilityForTent = (tent) => {
-    const typeKey = (tent.tentType || tent.name || "").trim();
+    const typeKey = (tent?.tentType || tent?.name || "").trim();
     const summary = tentsForDay.find(
       (t) =>
         (t.tentType || t.name || "").trim().toLowerCase() ===
         typeKey.toLowerCase()
     );
-    const configuredTotal = tent.totaltents || 0;
+    const configuredTotal = tent?.totaltents || 1;
     if (!summary) {
       return {
         total: configuredTotal,
         booked: 0,
         available: configuredTotal,
-        weekdayPrice: tent.pricing?.weekdayPrice || 0,
+        weekdayPrice: tent?.pricing?.weekdayPrice || 0,
         weekendPrice:
-          tent.pricing?.weekendPrice || tent.pricing?.weekdayPrice || 0,
+          tent?.pricing?.weekendPrice || tent?.pricing?.weekdayPrice || 0,
       };
     }
     const availableCount =
-      summary.available ??
-      Math.max(0, (summary.total ?? configuredTotal) - (summary.booked ?? 0));
+      summary.available !== undefined
+        ? Math.max(0, Number(summary.available))
+        : Math.max(
+            0,
+            (Number(summary.total) || configuredTotal) - (Number(summary.booked) || 0)
+          );
     return {
       total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
       available: availableCount,
-      weekdayPrice: summary.price?.weekday ?? tent.pricing?.weekdayPrice ?? 0,
+      weekdayPrice: summary.price?.weekday ?? tent?.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
-        tent.pricing?.weekendPrice ??
+        tent?.pricing?.weekendPrice ??
         summary.price?.weekday ??
         0,
     };
   };
 
+  // 3. Sync Redux state to local on open and auto-clamp
+  useEffect(() => {
+    if (!isOpen) return;
+    const mapped = {};
+    Object.entries(reduxSelectedTents || {}).forEach(([tentType, t]) => {
+      const cfg = getTentConfig(tentType);
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      const requestedQty = t?.quantity || 0;
+      mapped[tentType] = Math.max(0, Math.min(requestedQty, avail.available));
+    });
+    setLocalSelected(mapped);
+    setTentError("");
+  }, [isOpen, reduxSelectedTents]);
+
+  // Re-clamp local selection when live tentsForDay updates
+  useEffect(() => {
+    if (!isOpen || safeTents.length === 0) return;
+    setLocalSelected((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      safeTents.forEach((t) => {
+        const typeKey = t.tentType || t.name || "";
+        const avail = getAvailabilityForTent(t).available;
+        const currentQty = next[typeKey] || 0;
+        const clamped = Math.max(0, Math.min(currentQty, avail));
+        if (clamped !== currentQty) {
+          next[typeKey] = clamped;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [isOpen, tentsForDay, safeTents]);
+
+  const allTentsSoldOut = useMemo(() => {
+    if (safeTents.length === 0) return false;
+    return safeTents.every((t) => getAvailabilityForTent(t).available <= 0);
+  }, [safeTents, tentsForDay]);
+
   const handleTentQtyChange = (tentType, qty, available) => {
-    if (qty < 0 || qty > available) return;
+    const clampedQty = Math.max(0, Math.min(qty, available));
     setLocalSelected((prev) => ({
       ...prev,
-      [tentType]: qty,
+      [tentType]: clampedQty,
     }));
     if (tentError) setTentError("");
   };
@@ -181,8 +213,23 @@ export default function TentSelectionModal({
 
   const applySelection = () => {
     if (totalSelectedTents === 0) {
-      setTentError("Please select at least one tent unit to proceed.");
+      setTentError("Please select at least one available tent unit to proceed.");
       return;
+    }
+
+    // Validate availability
+    for (const [tentType, qty] of Object.entries(localSelected)) {
+      if (qty <= 0) continue;
+      const cfg = getTentConfig(tentType);
+      const avail = getAvailabilityForTent(cfg || { tentType });
+      if (avail.available <= 0) {
+        setTentError(`${tentType} is sold out for ${formattedDate || "this date"}. Please select another tent.`);
+        return;
+      }
+      if (qty > avail.available) {
+        setTentError(`Only ${avail.available} unit(s) of ${tentType} available, but ${qty} selected.`);
+        return;
+      }
     }
 
     if (totalGuests > 0 && totalGuests > totalCapacity) {
@@ -201,6 +248,7 @@ export default function TentSelectionModal({
           (t.tentType || t.name || "").trim().toLowerCase() ===
           tentType.trim().toLowerCase()
       );
+      const avail = getAvailabilityForTent(cfg || { tentType });
 
       payload[tentType] = {
         unitType: "Tent",
@@ -213,6 +261,8 @@ export default function TentSelectionModal({
           cfg?.pricing?.weekendPrice ||
           cfg?.pricing?.weekdayPrice ||
           0,
+        available: avail.available,
+        totalTents: avail.total,
         maxCapacity: cfg?.maxCapacity || 2,
       };
     });
@@ -267,6 +317,13 @@ export default function TentSelectionModal({
         {/* Tent Cards List */}
         <ScrollArea className="flex-1 min-h-0">
           <div className="p-4 sm:p-6 space-y-3 sm:space-y-4">
+          {allTentsSoldOut && (
+            <div className="p-3 sm:p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+              <span>All tents are completely sold out for {formattedDate || "these dates"}. Please choose different dates to stay.</span>
+            </div>
+          )}
+
           {safeTents.length === 0 ? (
             <div className="text-center py-10 text-gray-500 text-sm">
               No tent configurations found for this campsite.
@@ -287,6 +344,8 @@ export default function TentSelectionModal({
                   className={`p-4 rounded-xl border transition-all duration-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
                     qty > 0
                       ? "border-[#ff6900] bg-orange-50/20 shadow-sm"
+                      : !isAvailable
+                      ? "border-red-100 bg-red-50/30 opacity-75"
                       : "border-gray-200 hover:border-gray-300 bg-white"
                   }`}
                 >
@@ -337,7 +396,7 @@ export default function TentSelectionModal({
                             ✓ {availability.available} units available
                           </span>
                         ) : (
-                          <span className="text-red-500 font-medium">
+                          <span className="text-red-700 bg-red-100 px-2 py-0.5 rounded font-bold uppercase text-[10px]">
                             Sold Out for selected date
                           </span>
                         )}
@@ -418,7 +477,8 @@ export default function TentSelectionModal({
             <Button
               type="button"
               onClick={applySelection}
-              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] text-white text-xs font-semibold px-5 h-9 shadow-md transition-all cursor-pointer flex-1 sm:flex-initial"
+              disabled={totalSelectedTents === 0 || allTentsSoldOut}
+              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c55000] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-semibold px-5 h-9 shadow-md transition-all cursor-pointer flex-1 sm:flex-initial"
             >
               Confirm Selection
             </Button>

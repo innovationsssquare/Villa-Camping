@@ -68,21 +68,6 @@ export default function RoomSelectionDrawer({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  /* --------------------------------------------------
-   * 3️⃣ Sync local state when drawer opens
-   * -------------------------------------------------- */
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const mapped = {};
-    Object.entries(reduxSelectedRooms || {}).forEach(
-      ([roomType, t]) => (mapped[roomType] = t.quantity)
-    );
-
-    setLocalSelected(mapped);
-    setTentError("");
-  }, [isOpen, reduxSelectedRooms]);
-
   const roomsForDay = useMemo(() => {
     return dayDetails?.rooms || dayDetails?.data?.rooms || [];
   }, [dayDetails]);
@@ -184,6 +169,29 @@ export default function RoomSelectionDrawer({
     });
   }, [roomsForDay, safeRooms]);
 
+  const allRoomsSoldOut = useMemo(() => {
+    if (!displayRooms || displayRooms.length === 0) return false;
+    return displayRooms.every((r) => (r.available ?? 0) <= 0);
+  }, [displayRooms]);
+
+  /* --------------------------------------------------
+   * 3️⃣ Sync local state when drawer opens
+   * -------------------------------------------------- */
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const mapped = {};
+    Object.entries(reduxSelectedRooms || {}).forEach(([roomType, t]) => {
+      const cfg = getTentConfig(roomType);
+      const avail = getAvailabilityForTent(cfg || { roomType });
+      const qty = t.quantity || 0;
+      mapped[roomType] = Math.max(0, Math.min(avail.available, qty));
+    });
+
+    setLocalSelected(mapped);
+    setTentError("");
+  }, [isOpen, reduxSelectedRooms, roomsForDay, safeRooms]);
+
   /* --------------------------------------------------
    * 5️⃣ Quantity handler
    * -------------------------------------------------- */
@@ -199,38 +207,7 @@ export default function RoomSelectionDrawer({
   };
 
   /* --------------------------------------------------
-   * 6️⃣ Validation + Apply
-   * -------------------------------------------------- */
-  const validateAndApply = () => {
-    const totalSelected = Object.values(localSelectedTents).reduce(
-      (s, q) => s + q,
-      0
-    );
-
-    if (totalSelected === 0) {
-      setTentError("Please select at least one tent");
-      return;
-    }
-
-    const totalCapacity = Object.entries(localSelectedTents).reduce(
-      (sum, [tentType, qty]) => sum + getTentCapacity(tentType) * qty,
-      0
-    );
-
-    if (totalGuests > totalCapacity) {
-      setTentError(
-        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
-      );
-      return;
-    }
-
-    onTentSelectionChange(localSelectedTents);
-    setTentError("");
-    onClose();
-  };
-
-  /* --------------------------------------------------
-   * 7️⃣ Helpers
+   * 6️⃣ Helpers
    * -------------------------------------------------- */
   const formatRupee = (amount) =>
     `₹${new Intl.NumberFormat("en-IN", {
@@ -244,8 +221,23 @@ export default function RoomSelectionDrawer({
     );
 
     if (totalSelected === 0) {
-      setTentError("Please select at least one room");
+      setTentError("Please select at least one available room");
       return;
+    }
+
+    // Validate availability
+    for (const [roomType, qty] of Object.entries(localSelected)) {
+      if (qty <= 0) continue;
+      const cfg = getTentConfig(roomType);
+      const avail = getAvailabilityForTent(cfg || { roomType });
+      if (avail.available <= 0) {
+        setTentError(`${roomType} is sold out for this date. Please choose another room.`);
+        return;
+      }
+      if (qty > avail.available) {
+        setTentError(`Only ${avail.available} unit(s) of ${roomType} available, but ${qty} selected.`);
+        return;
+      }
     }
 
     let totalCapacity = 0;
@@ -255,7 +247,7 @@ export default function RoomSelectionDrawer({
 
     if (totalGuests > totalCapacity) {
       setTentError(
-        `Selected tents allow ${totalCapacity} guests, but you selected ${totalGuests}`
+        `Selected rooms allow ${totalCapacity} guests, but you selected ${totalGuests}`
       );
       return;
     }
@@ -265,15 +257,17 @@ export default function RoomSelectionDrawer({
       if (qty <= 0) return;
 
       const cfg = getTentConfig(roomType);
-      const day = roomsForDay.find((t) => t.roomType === roomType);
+      const day = roomsForDay.find(
+        (t) => (t.roomType || "").trim().toLowerCase() === roomType.toLowerCase()
+      );
 
       payload[roomType] = {
         unitType: "Room",
         unitId: cfg?._id,
         typeName: roomType,
         quantity: qty,
-        weekdayPrice: day?.price?.weekday || 0,
-        weekendPrice: day?.price?.weekend || 0,
+        weekdayPrice: day?.price?.weekday || cfg?.pricing?.weekdayPrice || 0,
+        weekendPrice: day?.price?.weekend || cfg?.pricing?.weekendPrice || 0,
         maxCapacity: cfg?.maxCapacity || 0,
       };
     });
@@ -293,7 +287,7 @@ export default function RoomSelectionDrawer({
   );
 
   /* --------------------------------------------------
-   * 8️⃣ UI
+   * 7️⃣ UI
    * -------------------------------------------------- */
   return (
     <Drawer open={isOpen} onOpenChange={onClose} shouldScaleBackground={false}>
@@ -301,7 +295,7 @@ export default function RoomSelectionDrawer({
         <DrawerHeader className="p-0">
           <div className="flex items-center justify-between px-4 py-3 border-b">
             <DrawerTitle className="text-xl font-bold">
-              Select Tents
+              Select Rooms
             </DrawerTitle>
             <Button isIconOnly variant="light" onPress={onClose}>
               <X size={16} />
@@ -325,7 +319,7 @@ export default function RoomSelectionDrawer({
                   <span className="font-semibold">{totalGuests}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span>Selected Tents</span>
+                  <span>Selected Rooms</span>
                   <span className="font-semibold">{totalSelectedTents}</span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -342,6 +336,12 @@ export default function RoomSelectionDrawer({
                 </div>
               </Card>
 
+              {allRoomsSoldOut && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-semibold">
+                  All rooms are completely sold out for this date. Please select different dates.
+                </div>
+              )}
+
               {tentError && (
                 <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
                   {tentError}
@@ -352,36 +352,38 @@ export default function RoomSelectionDrawer({
               {displayRooms.map((tent) => {
                 const selectedQty = localSelected[tent.roomType] || 0;
                 const maxCapacity = getTentCapacity(tent.roomType);
+                const isSoldOut = (tent.available ?? 0) <= 0;
 
                 return (
                   <div
                     key={tent.roomType}
-                    className={`p-2 border shadow-none rounded-2xl ${
+                    className={`p-3 border shadow-none rounded-2xl transition-all ${
                       selectedQty > 0
                         ? "border-blue-500 bg-blue-50"
-                        : "border-gray-300"
+                        : isSoldOut
+                        ? "border-red-100 bg-red-50/30 opacity-75"
+                        : "border-gray-200 bg-white"
                     }`}
                   >
-                    <p className="font-semibold text-md">{tent.roomType}</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-semibold text-base text-gray-900">{tent.roomType}</p>
+                      {isSoldOut ? (
+                        <span className="bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded text-[11px] uppercase tracking-wide border border-red-200">
+                          Sold Out
+                        </span>
+                      ) : (
+                        <span className="bg-green-100 text-green-800 font-semibold px-2 py-0.5 rounded text-[11px]">
+                          Available: {tent.available} of {tent.total}
+                        </span>
+                      )}
+                    </div>
 
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 mt-1">
                       {formatRupee(tent.price.weekday)} / night (weekday)
                     </p>
                     <p className="text-xs text-gray-500">
                       Weekend: {formatRupee(tent.price.weekend)}
                     </p>
-
-                    <div className="flex gap-2 mt-2 text-xs">
-                      <span className="bg-red-100 px-2 py-1 rounded">
-                        Booked: {tent.booked}
-                      </span>
-                      <span className="bg-green-100 px-2 py-1 rounded">
-                        Available: {tent.available}
-                      </span>
-                      <span className="bg-gray-100 px-2 py-1 rounded">
-                        Total: {tent.total}
-                      </span>
-                    </div>
 
                     <div className="flex items-center justify-between mt-4">
                       <Button
@@ -411,7 +413,7 @@ export default function RoomSelectionDrawer({
                         isIconOnly
                         variant="bordered"
                         size="sm"
-                        disabled={selectedQty >= tent.available}
+                        disabled={isSoldOut || selectedQty >= tent.available}
                         onPress={() =>
                           handleTentQtyChange(
                             tent.roomType,
@@ -430,10 +432,11 @@ export default function RoomSelectionDrawer({
 
             <div className="p-4 border-t">
               <Button
-                className="w-full h-12 bg-black text-white"
+                className="w-full h-12 bg-black text-white font-bold disabled:opacity-40"
+                disabled={totalSelectedTents === 0 || allRoomsSoldOut}
                 onPress={applySelection}
               >
-                Apply Selection ({totalSelectedTents})
+                {allRoomsSoldOut ? "Sold Out" : `Apply Selection (${totalSelectedTents})`}
               </Button>
             </div>
           </>

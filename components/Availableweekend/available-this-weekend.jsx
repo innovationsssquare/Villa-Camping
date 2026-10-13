@@ -13,10 +13,6 @@ import Weekendcard from "./Weekendcard";
 import { cn } from "@/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
-import {
-  setSelectedCategory,
-  setSelectedCategoryname,
-} from "@/Redux/Slices/bookingSlice";
 import { fetchPropertiesByWeekend } from "@/Redux/Slices/propertiesSlice";
 import { PropertySkeleton } from "./Property-skeleton";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,11 +22,12 @@ export function AvailableThisWeekend() {
   const dispatch = useDispatch();
 
   const { categories, loading } = useSelector((state) => state.category);
-  const { selectedCategoryId } = useSelector((state) => state.booking);
   const { weekendData, weekendLoading } = useSelector(
     (state) => state.properties
   );
 
+  const [activeWeekendCategory, setActiveWeekendCategory] = useState(null);
+  const [activeCategoryName, setActiveCategoryName] = useState("");
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
@@ -65,22 +62,35 @@ export function AvailableThisWeekend() {
     dispatch(fetchAllCategories());
   }, [dispatch]);
 
-  // Fetch weekend properties when category changes
+  // When categories load, initially default to the Villa category
   useEffect(() => {
-    if (!selectedCategoryId || selectedCategoryId === "all") return;
+    if (!categories || categories.length === 0 || activeWeekendCategory) return;
 
+    // Initially activate the Villa category
+    const villaCategory =
+      categories.find(
+        (cat) =>
+          cat.name?.trim().toLowerCase() === "villa" ||
+          cat.slug?.trim().toLowerCase() === "villa"
+      ) || categories[0];
+
+    if (villaCategory) {
+      setActiveWeekendCategory(villaCategory._id);
+      setActiveCategoryName(villaCategory.name);
+      hasRequestedWeekend.current = true;
+      dispatch(fetchPropertiesByWeekend({ categoryId: villaCategory._id }));
+    }
+  }, [categories, activeWeekendCategory, dispatch]);
+
+  const handleSelectCategory = (categoryId, categoryName = "") => {
+    setActiveWeekendCategory(categoryId);
+    setActiveCategoryName(categoryName);
     hasRequestedWeekend.current = true;
-
     dispatch(
       fetchPropertiesByWeekend({
-        categoryId: selectedCategoryId,
+        categoryId,
       })
     );
-  }, [selectedCategoryId, dispatch]);
-
-  const handleSelectCategory = (category) => {
-    dispatch(setSelectedCategory(category._id));
-    dispatch(setSelectedCategoryname(category?.name));
   };
 
   return (
@@ -113,18 +123,23 @@ export function AvailableThisWeekend() {
         <div className="flex justify-start sm:justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 mb-4 sm:mb-6">
           {loading ? (
             <div className="flex gap-2 justify-center mx-auto">
-              {[...Array(5)].map((_, i) => (
+              {[...Array(4)].map((_, i) => (
                 <Skeleton key={i} className="h-8 w-20 sm:w-24 rounded-full" />
               ))}
             </div>
           ) : (
             categories?.map((category) => {
-              const isActive = selectedCategoryId === category._id;
+              const isVilla =
+                category.name?.trim().toLowerCase() === "villa" ||
+                category.slug?.trim().toLowerCase() === "villa";
+              const isActive = activeWeekendCategory
+                ? activeWeekendCategory === category._id
+                : isVilla;
               return (
                 <button
                   key={category._id}
                   type="button"
-                  onClick={() => handleSelectCategory(category)}
+                  onClick={() => handleSelectCategory(category._id, category.name)}
                   className={cn(
                     "whitespace-nowrap rounded-full px-3.5 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold transition-all duration-200 shrink-0 cursor-pointer",
                     isActive
@@ -192,12 +207,12 @@ export function AvailableThisWeekend() {
         {!weekendLoading &&
           hasRequestedWeekend.current &&
           weekendData.length === 0 && (
-            <div className="text-center text-neutral-500 py-10">
+            <div className="text-center text-neutral-500 py-10 px-4">
               <p className="text-base font-semibold text-neutral-800">
-                No properties available this weekend
+                Fully Booked This Weekend
               </p>
-              <p className="text-xs sm:text-sm mt-1 text-neutral-500">
-                Try selecting a different category above
+              <p className="text-xs sm:text-sm mt-1 text-neutral-500 max-w-sm mx-auto">
+                All properties {activeCategoryName ? `in ${activeCategoryName}` : ""} are currently booked for this weekend. Try selecting a different category above.
               </p>
             </div>
           )}

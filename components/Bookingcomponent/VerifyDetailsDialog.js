@@ -1,7 +1,12 @@
 "use client";
 import { useEffect } from "react";
+import Link from "next/link";
 import { useDispatch, useSelector } from "react-redux";
-import { updateCustomerField, setCustomerDetails } from "@/Redux/Slices/bookingSlice";
+import {
+  updateCustomerField,
+  setCustomerDetails,
+  setAcceptedTerms,
+} from "@/Redux/Slices/bookingSlice";
 import {
   Dialog,
   DialogContent,
@@ -12,12 +17,16 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Check, Shield } from "lucide-react";
+import { useToast } from "@/components/ui/toast-provider";
 
 const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
+  const { addToast } = useToast();
   const dispatch = useDispatch();
   const customerDetails = useSelector((state) => state.booking.customerDetails);
+  const acceptedTerms = useSelector((state) => state.booking.acceptedTerms);
 
   // Auto-populate from localStorage if available
   useEffect(() => {
@@ -94,10 +103,23 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
   };
 
   const handlePayNow = () => {
-    if (isFormValid()) {
-      onPayNow();
-      onOpenChange(false);
+    if (!isFormValid()) return;
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please check the box below to accept Terms & Conditions before confirming.",
+        variant: "destructive",
+        duration: 3500,
+      });
+      const el = document.getElementById("terms-container-dialog") || document.getElementById("verify-dialog-terms");
+      if (el) {
+        el.classList.add("ring-2", "ring-orange-500", "ring-offset-2");
+        setTimeout(() => el.classList.remove("ring-2", "ring-orange-500", "ring-offset-2"), 2500);
+      }
+      return;
     }
+    onPayNow();
+    onOpenChange(false);
   };
 
   return (
@@ -305,6 +327,45 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
                   className="w-full px-3.5 py-2 bg-neutral-50 border border-neutral-200/80 rounded-xl text-neutral-800 placeholder:text-neutral-400 focus:bg-white focus:ring-2 focus:ring-[#ff6900]/20 focus:border-[#ff6900] text-xs transition-all"
                 />
               </div>
+            </div>
+
+            {/* Terms & Conditions Checkbox */}
+            <div
+              id="terms-container-dialog"
+              className={`p-3 rounded-2xl border transition-all duration-300 flex items-start gap-2.5 ${
+                acceptedTerms
+                  ? "bg-emerald-50/50 border-emerald-300 text-neutral-900"
+                  : "bg-orange-50/60 border-orange-300 text-neutral-900 shadow-xs"
+              }`}
+            >
+              <Checkbox
+                id="verify-dialog-terms"
+                checked={Boolean(acceptedTerms)}
+                onCheckedChange={(checked) => dispatch(setAcceptedTerms(Boolean(checked)))}
+                className="mt-0.5 h-4.5 w-4.5 border-neutral-400 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
+              />
+              <label
+                htmlFor="verify-dialog-terms"
+                className="text-xs text-neutral-700 leading-relaxed cursor-pointer select-none flex-1"
+              >
+                I have read and accept the{" "}
+                <Link
+                  href="/terms-of-service"
+                  target="_blank"
+                  className="text-[#ff6900] hover:underline font-bold"
+                >
+                  Terms & Conditions
+                </Link>
+                ,{" "}
+                <Link
+                  href="/cancellation-policy"
+                  target="_blank"
+                  className="text-[#ff6900] hover:underline font-bold"
+                >
+                  Cancellation Policy
+                </Link>{" "}
+                and House Rules.
+              </label>
             </div>
 
             {/* Pay Now Button */}

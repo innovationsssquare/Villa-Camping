@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { useSelector, useDispatch } from "react-redux";
 import {
   Drawer,
@@ -11,13 +12,21 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Check, X, Shield } from "lucide-react";
-import { updateCustomerField, setCustomerDetails } from "@/Redux/Slices/bookingSlice";
+import {
+  updateCustomerField,
+  setCustomerDetails,
+  setAcceptedTerms,
+} from "@/Redux/Slices/bookingSlice";
+import { useToast } from "@/components/ui/toast-provider";
 
 export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
+  const { addToast } = useToast();
   const dispatch = useDispatch();
   const customerDetails = useSelector((state) => state.booking.customerDetails);
+  const acceptedTerms = useSelector((state) => state.booking.acceptedTerms);
 
   // Auto-populate from localStorage if available
   useEffect(() => {
@@ -75,10 +84,23 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
   };
 
   const handlePayNow = () => {
-    if (isFormValid()) {
-      if (onClose) onClose();
-      onPayNow(customerDetails);
+    if (!isFormValid()) return;
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please check the box below to accept Terms & Conditions before confirming.",
+        variant: "destructive",
+        duration: 3500,
+      });
+      const el = document.getElementById("drawer-terms-container") || document.getElementById("drawer-terms");
+      if (el) {
+        el.classList.add("ring-2", "ring-orange-500", "ring-offset-2");
+        setTimeout(() => el.classList.remove("ring-2", "ring-orange-500", "ring-offset-2"), 2500);
+      }
+      return;
     }
+    if (onClose) onClose();
+    onPayNow(customerDetails);
   };
 
   return (
@@ -247,6 +269,45 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Terms & Conditions Checkbox */}
+        <div
+          id="drawer-terms-container"
+          className={`mx-4 mt-3 mb-1 p-3 rounded-2xl border transition-all duration-300 flex items-start gap-2.5 ${
+            acceptedTerms
+              ? "bg-emerald-50/50 border-emerald-300 text-neutral-900"
+              : "bg-orange-50/60 border-orange-300 text-neutral-900 shadow-xs"
+          }`}
+        >
+          <Checkbox
+            id="drawer-terms"
+            checked={Boolean(acceptedTerms)}
+            onCheckedChange={(checked) => dispatch(setAcceptedTerms(Boolean(checked)))}
+            className="mt-0.5 h-4.5 w-4.5 border-neutral-400 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
+          />
+          <label
+            htmlFor="drawer-terms"
+            className="text-xs text-neutral-700 leading-relaxed cursor-pointer select-none flex-1"
+          >
+            I have read and accept the{" "}
+            <Link
+              href="/terms-of-service"
+              target="_blank"
+              className="text-[#ff6900] hover:underline font-bold"
+            >
+              Terms & Conditions
+            </Link>
+            ,{" "}
+            <Link
+              href="/cancellation-policy"
+              target="_blank"
+              className="text-[#ff6900] hover:underline font-bold"
+            >
+              Cancellation Policy
+            </Link>{" "}
+            and House Rules.
+          </label>
         </div>
 
         {/* Pay Now Button */}

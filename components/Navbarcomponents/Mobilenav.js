@@ -82,6 +82,8 @@ export function AppHeader() {
   const cartItemCount = 3;
   const { isVisible } = useScrollDirection();
 
+  if (pathname?.startsWith("/booking/success")) return null;
+
   const isLocationPage =
     pathname === "/" ||
     pathname === "/explore" ||

@@ -28,7 +28,7 @@ import CampBanner from "@/public/Aboutusasset/Campbanner.jpg";
 import CottageBanner from "@/public/Aboutusasset/Cottagebanner.jpg";
 import HotelBanner from "@/public/Aboutusasset/Hotelbanner.jpg";
 
-// Curated Category Metadata with Real Images matching Thevillacamp app
+// Curated Category Metadata with Fallback Images matching Thevillacamp app
 const CATEGORY_META = {
   villa: {
     name: "Villa",
@@ -37,6 +37,7 @@ const CATEGORY_META = {
     tag: "Most Popular",
     badge: "250+",
     count: "250+ Stays",
+    fallbackImage: VillaBanner,
     realImage: VillaBanner,
   },
   camp: {
@@ -46,6 +47,7 @@ const CATEGORY_META = {
     tag: "Scenic Pawna",
     badge: "Pawna",
     count: "80+ Camps",
+    fallbackImage: CampBanner,
     realImage: CampBanner,
   },
   camping: {
@@ -55,6 +57,7 @@ const CATEGORY_META = {
     tag: "Scenic Pawna",
     badge: "Pawna",
     count: "80+ Camps",
+    fallbackImage: CampBanner,
     realImage: CampBanner,
   },
   cottage: {
@@ -64,6 +67,7 @@ const CATEGORY_META = {
     tag: "Nature Vibe",
     badge: "Nature",
     count: "110+ Cottages",
+    fallbackImage: CottageBanner,
     realImage: CottageBanner,
   },
   hotel: {
@@ -73,8 +77,51 @@ const CATEGORY_META = {
     tag: "Top Rated",
     badge: "Top Pick",
     count: "60+ Resorts",
+    fallbackImage: HotelBanner,
     realImage: HotelBanner,
   },
+};
+
+const DEFAULT_CATEGORIES = [
+  { _id: "6881f134f913338ef00dc750", name: "Villa", slug: "villa" },
+  { _id: "688277b8b1e412cebf53db1b", name: "Camping", slug: "camping" },
+  { _id: "688cd5a16933bde04818ebea", name: "Cottage", slug: "cottage" },
+  { _id: "688de083f45eb5f578d74bbf", name: "Hotel", slug: "hotel" },
+];
+
+/**
+ * Robust Category Image Component
+ * Prioritizes dynamic backend image URL, falling back gracefully to static local banner
+ * if no image exists or if network load errors out.
+ */
+const CategoryImage = ({
+  src,
+  fallback,
+  alt = "Category",
+  className = "",
+  sizes,
+  fill = true,
+}) => {
+  const [imgSrc, setImgSrc] = useState(src || fallback);
+
+  useEffect(() => {
+    setImgSrc(src || fallback);
+  }, [src, fallback]);
+
+  return (
+    <Image
+      src={imgSrc || fallback}
+      alt={alt}
+      fill={fill}
+      sizes={sizes}
+      className={className}
+      onError={() => {
+        if (imgSrc !== fallback) {
+          setImgSrc(fallback);
+        }
+      }}
+    />
+  );
 };
 
 const ShopbyCategory = () => {
@@ -110,25 +157,31 @@ const ShopbyCategory = () => {
   };
 
   const getMeta = (name = "") => {
-    const key = name.toLowerCase();
-    return (
-      CATEGORY_META[key] || {
-        name,
-        displayName: name.includes(" ") ? name.replace(" ", "\n") : `${name}\nStays`,
-        subtitle: "Handpicked Stays",
-        tag: "Curated",
-        badge: "Popular",
-        count: "Verified",
-        realImage: VillaBanner,
-      }
-    );
+    const key = (name || "").toLowerCase().trim();
+    if (CATEGORY_META[key]) return CATEGORY_META[key];
+    if (key.includes("camp")) return CATEGORY_META.camping;
+    if (key.includes("cottage")) return CATEGORY_META.cottage;
+    if (key.includes("hotel") || key.includes("resort")) return CATEGORY_META.hotel;
+    if (key.includes("villa")) return CATEGORY_META.villa;
+
+    return {
+      name,
+      displayName: name.includes(" ") ? name.replace(" ", "\n") : `${name}\nStays`,
+      subtitle: "Handpicked Stays",
+      tag: "Curated",
+      badge: "Popular",
+      count: "Verified",
+      fallbackImage: VillaBanner,
+      realImage: VillaBanner,
+    };
   };
 
   const isSelected = (catName) => {
     return selectedCategoryName?.toLowerCase() === catName?.toLowerCase();
   };
 
-  const displayCategories = categories && categories.length > 0 ? categories : [];
+  const displayCategories =
+    categories && categories.length > 0 ? categories : DEFAULT_CATEGORIES;
 
   const scrollPrev = () => carouselApi?.scrollPrev();
   const scrollNext = () => carouselApi?.scrollNext();
@@ -219,8 +272,9 @@ const ShopbyCategory = () => {
                     >
                       {/* Inner Circular Image Container */}
                       <div className="w-full h-full rounded-full overflow-hidden bg-neutral-100 relative">
-                        <Image
-                          src={meta.realImage || category.image}
+                        <CategoryImage
+                          src={category.image}
+                          fallback={meta.fallbackImage}
                           alt={category.name}
                           fill
                           sizes="70px"
@@ -303,10 +357,11 @@ const ShopbyCategory = () => {
                               : "border-neutral-200/90 bg-white hover:border-[#ff6900]/50 hover:shadow-lg hover:shadow-orange-500/10"
                           }`}
                         >
-                          {/* Real Image Container */}
+                          {/* Dynamic Image Container from Backend with Fallback */}
                           <div className="relative h-36 md:h-44 lg:h-48 w-full overflow-hidden">
-                            <Image
-                              src={meta.realImage}
+                            <CategoryImage
+                              src={category.image}
+                              fallback={meta.fallbackImage}
                               alt={category.name}
                               fill
                               sizes="(max-width: 1024px) 25vw, 20vw"

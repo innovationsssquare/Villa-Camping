@@ -67,17 +67,6 @@ export default function CottageSelectionModal({
     );
   }, [id, formattedDate, isOpen, dispatch]);
 
-  // 3. Sync Redux state to local on open
-  useEffect(() => {
-    if (!isOpen) return;
-    const mapped = {};
-    Object.entries(reduxSelectedCottages || {}).forEach(([cottageType, c]) => {
-      mapped[cottageType] = c.quantity || 0;
-    });
-    setLocalSelected(mapped);
-    setCottageError("");
-  }, [isOpen, reduxSelectedCottages]);
-
   const cottagesForDay = useMemo(() => {
     return dayDetails?.data?.tents || dayDetails?.data?.cottages || dayDetails?.cottages || [];
   }, [dayDetails]);
@@ -132,50 +121,90 @@ export default function CottageSelectionModal({
 
   // 4. Availability & Price lookup
   const getAvailabilityForCottage = (cottage) => {
-    const typeKey = (cottage.cottageType || cottage.name || "").trim();
+    const typeKey = (cottage?.cottageType || cottage?.name || "").trim();
     const summary = cottagesForDay.find(
       (c) =>
         (c.cottageType || c.name || "").trim().toLowerCase() ===
         typeKey.toLowerCase()
     );
     const configuredTotal =
-      cottage.totalcottage ?? cottage.totaltents ?? cottage.totalCottages ?? 1;
+      cottage?.totalcottage ?? cottage?.totaltents ?? cottage?.totalCottages ?? 1;
 
     if (!summary) {
       return {
         total: configuredTotal,
         booked: 0,
         available: configuredTotal,
-        weekdayPrice: cottage.pricing?.weekdayPrice || 0,
+        weekdayPrice: cottage?.pricing?.weekdayPrice || 0,
         weekendPrice:
-          cottage.pricing?.weekendPrice || cottage.pricing?.weekdayPrice || 0,
+          cottage?.pricing?.weekendPrice || cottage?.pricing?.weekdayPrice || 0,
       };
     }
     const availableCount =
-      summary.available ??
-      Math.max(
-        0,
-        (summary.total ?? configuredTotal) - (summary.booked ?? 0)
-      );
+      summary.available !== undefined
+        ? Math.max(0, Number(summary.available))
+        : Math.max(
+            0,
+            (Number(summary.total) || configuredTotal) - (Number(summary.booked) || 0)
+          );
     return {
       total: summary.total ?? configuredTotal,
       booked: summary.booked ?? 0,
       available: availableCount,
       weekdayPrice:
-        summary.price?.weekday ?? cottage.pricing?.weekdayPrice ?? 0,
+        summary.price?.weekday ?? cottage?.pricing?.weekdayPrice ?? 0,
       weekendPrice:
         summary.price?.weekend ??
-        cottage.pricing?.weekendPrice ??
+        cottage?.pricing?.weekendPrice ??
         summary.price?.weekday ??
         0,
     };
   };
 
+  // 3. Sync Redux state to local on open and auto-clamp
+  useEffect(() => {
+    if (!isOpen) return;
+    const mapped = {};
+    Object.entries(reduxSelectedCottages || {}).forEach(([cottageType, c]) => {
+      const cfg = getCottageConfig(cottageType);
+      const avail = getAvailabilityForCottage(cfg || { cottageType });
+      const requestedQty = c?.quantity || 0;
+      mapped[cottageType] = Math.max(0, Math.min(requestedQty, avail.available));
+    });
+    setLocalSelected(mapped);
+    setCottageError("");
+  }, [isOpen, reduxSelectedCottages]);
+
+  // Re-clamp local selection when live cottagesForDay updates
+  useEffect(() => {
+    if (!isOpen || safeCottages.length === 0) return;
+    setLocalSelected((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      safeCottages.forEach((c) => {
+        const typeKey = c.cottageType || c.name || "";
+        const avail = getAvailabilityForCottage(c).available;
+        const currentQty = next[typeKey] || 0;
+        const clamped = Math.max(0, Math.min(currentQty, avail));
+        if (clamped !== currentQty) {
+          next[typeKey] = clamped;
+          changed = true;
+        }
+      });
+      return changed ? next : prev;
+    });
+  }, [isOpen, cottagesForDay, safeCottages]);
+
+  const allCottagesSoldOut = useMemo(() => {
+    if (safeCottages.length === 0) return false;
+    return safeCottages.every((c) => getAvailabilityForCottage(c).available <= 0);
+  }, [safeCottages, cottagesForDay]);
+
   const handleCottageQtyChange = (cottageType, qty, available) => {
-    if (qty < 0 || qty > available) return;
+    const clampedQty = Math.max(0, Math.min(qty, available));
     setLocalSelected((prev) => ({
       ...prev,
-      [cottageType]: qty,
+      [cottageType]: clampedQty,
     }));
     if (cottageError) setCottageError("");
   };
@@ -197,8 +226,23 @@ export default function CottageSelectionModal({
 
   const applySelection = () => {
     if (totalSelectedCottages === 0) {
-      setCottageError("Please select at least one cottage unit to proceed.");
+      setCottageError("Please select at least one available cottage unit to proceed.");
       return;
+    }
+
+    // Validate availability
+    for (const [cottageType, qty] of Object.entries(localSelected)) {
+      if (qty <= 0) continue;
+      const cfg = getCottageConfig(cottageType);
+      const avail = getAvailabilityForCottage(cfg || { cottageType });
+      if (avail.available <= 0) {
+        setCottageError(`${cottageType} is sold out for ${formattedDate || "this date"}. Please select another cottage.`);
+        return;
+      }
+      if (qty > avail.available) {
+        setCottageError(`Only ${avail.available} unit(s) of ${cottageType} available, but ${qty} selected.`);
+        return;
+      }
     }
 
     if (totalGuests > 0 && totalGuests > totalCapacity) {
@@ -291,6 +335,13 @@ export default function CottageSelectionModal({
             </div>
           )}
 
+          {allCottagesSoldOut && (
+            <div className="p-3 sm:p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2 font-medium">
+              <AlertCircle className="w-4 h-4 flex-shrink-0 text-red-600" />
+              <span>All cottages are completely sold out for {formattedDate || "these dates"}. Please select different dates to stay.</span>
+            </div>
+          )}
+
           {dayDetailsLoading && (
             <div className="py-2 text-center text-xs text-gray-500 animate-pulse">
               Checking real-time live availability...
@@ -315,7 +366,7 @@ export default function CottageSelectionModal({
                   currentQty > 0
                     ? "border-[#ff6900] bg-orange-50/20 shadow-sm"
                     : isSoldOut
-                    ? "border-gray-100 bg-gray-50/60 opacity-60"
+                    ? "border-red-100 bg-red-50/30 opacity-75"
                     : "border-gray-200/90 bg-white hover:border-orange-200"
                 }`}
               >
@@ -336,13 +387,13 @@ export default function CottageSelectionModal({
                           {typeKey}
                         </h4>
                         {isSoldOut ? (
-                          <Badge variant="destructive" className="text-[10px] px-1.5 py-0 h-4">
+                          <Badge variant="destructive" className="text-[10px] px-2 py-0.5 font-bold uppercase tracking-wide bg-red-100 text-red-700 border-red-200">
                             Sold Out
                           </Badge>
                         ) : (
                           <Badge
                             variant="secondary"
-                            className="text-[10px] px-2 py-0.5 h-5 bg-emerald-50 text-emerald-700 border-emerald-200"
+                            className="text-[10px] px-2 py-0.5 h-5 bg-emerald-50 text-emerald-700 border-emerald-200 font-semibold"
                           >
                             {available} of {total} left
                           </Badge>
@@ -371,7 +422,7 @@ export default function CottageSelectionModal({
                   <div className="flex items-center gap-3 self-end sm:self-center">
                     <button
                       type="button"
-                      disabled={currentQty === 0 || isSoldOut}
+                      disabled={currentQty === 0}
                       onClick={() => handleCottageQtyChange(typeKey, currentQty - 1, available)}
                       className="w-8 h-8 rounded-full border border-gray-200 bg-white hover:bg-gray-50 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all cursor-pointer text-gray-700"
                     >
@@ -382,7 +433,7 @@ export default function CottageSelectionModal({
                     </span>
                     <button
                       type="button"
-                      disabled={currentQty >= available || isSoldOut}
+                      disabled={isSoldOut || currentQty >= available}
                       onClick={() => handleCottageQtyChange(typeKey, currentQty + 1, available)}
                       className="w-8 h-8 rounded-full bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] disabled:opacity-30 disabled:pointer-events-none text-white flex items-center justify-center transition-all cursor-pointer shadow-xs"
                     >
@@ -413,7 +464,8 @@ export default function CottageSelectionModal({
             </Button>
             <Button
               onClick={applySelection}
-              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs sm:text-sm font-bold px-6 shadow-md shadow-orange-500/20 h-9 sm:h-10 flex-1 sm:flex-initial"
+              disabled={totalSelectedCottages === 0 || allCottagesSoldOut}
+              className="rounded-xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold px-6 shadow-md shadow-orange-500/20 h-9 sm:h-10 flex-1 sm:flex-initial"
             >
               Confirm Selection
             </Button>

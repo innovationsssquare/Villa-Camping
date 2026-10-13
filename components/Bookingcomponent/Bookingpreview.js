@@ -119,6 +119,8 @@ const PropertyBooking = () => {
   const [openmodel, setopenmodal] = useState(false);
   const [loadingg, setloading] = useState(false);
   const [opensucessmodal, setOpensuccesmodal] = useState(false);
+  const [createdBookingId, setCreatedBookingId] = useState(null);
+  const [createdBookingData, setCreatedBookingData] = useState(null);
 
   // Property Events state
   const [selectedEventId, setSelectedEventId] = useState(null);
@@ -355,6 +357,17 @@ const PropertyBooking = () => {
   const handleProceedToPayment = async () => {
     setShowVerifyDialog(false);
     setloading(true);
+
+    if (!acceptedTerms) {
+      addToast({
+        title: "Terms & Conditions Required",
+        description: "Please accept the terms and conditions to proceed with your booking.",
+        variant: "destructive",
+        duration: 2500,
+      });
+      setloading(false);
+      return;
+    }
 
     if (finalPayableTotal === null || finalPayableTotal === undefined || finalPayableTotal <= 0) {
       addToast({
@@ -669,6 +682,8 @@ const PropertyBooking = () => {
       if (response?.success === true) {
         const Bookingid = response?.data?.booking?._id;
         const orderData = response?.data?.order;
+        setCreatedBookingId(Bookingid);
+        setCreatedBookingData(response?.data?.booking);
 
         if (response?.data?.booking?.customerId) {
           try {
@@ -697,6 +712,7 @@ const PropertyBooking = () => {
               if (verifyResponse?.success) {
                 setloading(false);
                 setOpensuccesmodal(true);
+                router.push(`/booking/success?bookingId=${Bookingid}`);
               } else {
                 addToast({
                   title: "Payment Verification Failed",
@@ -810,8 +826,23 @@ const PropertyBooking = () => {
 
   if (opensucessmodal) {
     return (
-      <div className="flex justify-center items-center w-full min-h-[70vh] bg-neutral-50 py-12">
-        <Successmodal />
+      <div className="hidden md:block">
+        <Successmodal
+          bookingId={createdBookingId}
+          bookingData={createdBookingData}
+          property={property}
+          pricingDetails={{
+            totalAmount: finalPayableTotal,
+            subtotal: basePrice,
+            taxAmount: taxAmount,
+            discountAmount: discountAmount,
+            mealExtraCharge: mealExtraCharge,
+          }}
+          customerDetails={customerDetails}
+          checkInDate={checkin}
+          checkOutDate={checkout}
+          totalDays={nights}
+        />
       </div>
     );
   }
@@ -1475,23 +1506,30 @@ const PropertyBooking = () => {
               </div>
 
               {/* Terms Checkbox */}
-              <div className="flex items-start gap-2.5 pt-2">
+              <div
+                id="terms-container-desktop"
+                className={`p-3 rounded-2xl border transition-all duration-300 flex items-start gap-2.5 ${
+                  acceptedTerms
+                    ? "bg-emerald-50/40 border-emerald-300 text-neutral-900"
+                    : "bg-orange-50/50 border-orange-200 text-neutral-900"
+                }`}
+              >
                 <Checkbox
                   id="terms-desktop"
                   checked={acceptedTerms}
                   onCheckedChange={(checked) => dispatch(setAcceptedTerms(Boolean(checked)))}
-                  className="mt-0.5 border-neutral-300 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
+                  className="mt-0.5 h-4.5 w-4.5 border-neutral-400 data-[state=checked]:bg-[#ff6900] data-[state=checked]:border-[#ff6900]"
                 />
                 <label
                   htmlFor="terms-desktop"
-                  className="text-[11px] text-neutral-500 leading-relaxed cursor-pointer select-none"
+                  className="text-xs text-neutral-700 leading-relaxed cursor-pointer select-none flex-1"
                 >
                   I have read and accept the{" "}
-                  <Link href="/terms-of-service" target="_blank" className="text-[#ff6900] hover:underline font-semibold">
+                  <Link href="/terms-of-service" target="_blank" className="text-[#ff6900] hover:underline font-bold">
                     Terms & Conditions
                   </Link>
                   ,{" "}
-                  <Link href="/cancellation-policy" target="_blank" className="text-[#ff6900] hover:underline font-semibold">
+                  <Link href="/cancellation-policy" target="_blank" className="text-[#ff6900] hover:underline font-bold">
                     Cancellation Policy
                   </Link>{" "}
                   and House Rules.
@@ -1501,8 +1539,25 @@ const PropertyBooking = () => {
               {/* Pay Button */}
               <Button
                 type="button"
-                disabled={!acceptedTerms || loadingg}
+                disabled={loadingg}
                 onClick={() => {
+                  if (!acceptedTerms) {
+                    addToast({
+                      title: "Terms & Conditions Required",
+                      description: "Please check the box to accept the Terms & Conditions and Cancellation Policy to proceed.",
+                      variant: "destructive",
+                      duration: 3500,
+                    });
+                    const el = document.getElementById("terms-container-desktop") || document.getElementById("terms-desktop");
+                    if (el) {
+                      el.scrollIntoView({ behavior: "smooth", block: "center" });
+                      el.classList.add("ring-2", "ring-orange-500", "ring-offset-2");
+                      setTimeout(() => {
+                        el.classList.remove("ring-2", "ring-orange-500", "ring-offset-2");
+                      }, 2500);
+                    }
+                    return;
+                  }
                   if (!isGuestDetailsComplete()) {
                     setShowVerifyDialog(true);
                   } else {
