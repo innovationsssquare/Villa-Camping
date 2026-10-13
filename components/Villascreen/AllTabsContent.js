@@ -32,6 +32,8 @@ import ExperiencesTab from "./ExperiencesTab";
 import { useVilla } from "@/lib/context/VillaContext";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
+import NearbyStaysEmptyCard from "../Propertyviewcomponents/NearbyStaysEmptyCard";
+import { fetchNearbyStays } from "@/lib/nearbyStaysUtils";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
@@ -174,128 +176,39 @@ const AllTabsContent = ({ refs }) => {
   const [spacesCurrent, setSpacesCurrent] = useState(1);
   const [selectedSpaceIndex, setSelectedSpaceIndex] = useState(null);
   const [nearbyVillas, setNearbyVillas] = useState([]);
+  const [loadingNearby, setLoadingNearby] = useState(false);
 
-  // Fetch nearby villas from backend with location/city matching
+  // Fetch nearby villas from backend with location/coordinates matching
   useEffect(() => {
     let isMounted = true;
-    async function fetchNearby() {
+    async function loadNearby() {
       if (!villa) return;
+      setLoadingNearby(true);
       try {
-        const queryCity = (villa?.address?.city || "").trim().toLowerCase();
-        const villaLocationId = String(villa?.location?._id || villa?.location || "");
-
-        const res = await fetch(`${BaseUrl}/Villa/get/villas`);
-        if (res.ok) {
-          const data = await res.json();
-          const list =
-            data?.data ||
-            data?.properties ||
-            (Array.isArray(data) ? data : []);
-
-          const otherVillas = list.filter((p) => {
-            const isCurrent = String(p._id) === String(villa?._id);
-            const isApproved = p.isapproved === "approved";
-            const isLive = p.isLive !== false;
-            return !isCurrent && isApproved && isLive;
-          });
-
-          if (otherVillas.length > 0) {
-            const matched = otherVillas.filter((p) => {
-              const pCity = (p?.address?.city || "").trim().toLowerCase();
-              const pLoc = String(p?.location?._id || p?.location || "");
-              const isCityMatch =
-                queryCity &&
-                pCity &&
-                (pCity.includes(queryCity.slice(0, 4)) ||
-                  queryCity.includes(pCity.slice(0, 4)));
-              const isLocMatch =
-                villaLocationId && pLoc && pLoc === villaLocationId;
-              return isCityMatch || isLocMatch;
-            });
-
-            const candidates =
-              matched.length >= 2
-                ? matched
-                : [
-                    ...matched,
-                    ...otherVillas.filter(
-                      (ov) => !matched.some((m) => String(m._id) === String(ov._id))
-                    ),
-                  ];
-
-            const formatted = candidates.map((p) => ({
-              ...p,
-              rating: p.averageRating && p.averageRating > 0 ? p.averageRating : 4.9,
-              tags:
-                p.tags && p.tags.length > 0
-                  ? p.tags
-                  : ["Guest favourite", "Trending"],
-              category: p.category || { name: "Villa" },
-            }));
-
-            if (isMounted && formatted.length > 0) {
-              setNearbyVillas(formatted.slice(0, 6));
-              return;
-            }
-          }
+        const stays = await fetchNearbyStays({
+          currentProperty: villa,
+          propertyType: "Villa",
+          maxRadiusKm: 50,
+        });
+        if (isMounted) {
+          setNearbyVillas(stays || []);
         }
       } catch (err) {
         console.error("Error fetching nearby in mobile:", err);
-      }
-
-      // High quality fallback matching destination
-      if (isMounted) {
-        setNearbyVillas([
-          {
-            _id: "nearby-villa-1",
-            name: `Panorama @ Golden Bliss - ${villa?.address?.city || "Lonavala"}`,
-            address: { city: villa?.address?.city || "Lonavala" },
-            images: [
-              villa?.images?.[1] ||
-                "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80",
-              villa?.images?.[2] ||
-                "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-            ],
-            pricing: {
-              weekendPrice: Math.round(
-                (Number(villa?.pricing?.weekendPrice) || 16000) * 0.95
-              ),
-              weekdayPrice: Math.round(
-                (Number(villa?.pricing?.weekdayPrice) || 14000) * 0.95
-              ),
-            },
-            rating: 4.9,
-            tags: ["Guest favourite", "Trending"],
-          },
-          {
-            _id: "nearby-villa-2",
-            name: `Mist & Meadows Retreat - ${villa?.address?.city || "Lonavala"}`,
-            address: { city: villa?.address?.city || "Lonavala" },
-            images: [
-              villa?.images?.[2] ||
-                "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-              villa?.images?.[3] ||
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-            ],
-            pricing: {
-              weekendPrice: Math.round(
-                (Number(villa?.pricing?.weekendPrice) || 16000) * 1.08
-              ),
-              weekdayPrice: Math.round(
-                (Number(villa?.pricing?.weekdayPrice) || 14000) * 1.08
-              ),
-            },
-            rating: 4.85,
-            tags: ["Guest favourite", "Pool Villa"],
-          },
-        ]);
+        if (isMounted) {
+          setNearbyVillas([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingNearby(false);
+        }
       }
     }
-    fetchNearby();
+    loadNearby();
     return () => {
       isMounted = false;
     };
-  }, [villa]);
+  }, [villa?._id]);
 
   // Track active space in carousel
   useEffect(() => {
@@ -1179,23 +1092,33 @@ const AllTabsContent = ({ refs }) => {
           </div>
         )}
 
-        {/* NEARBY VILLAS: SWIPEABLE CAROUSEL WITH 2 CARDS PER VIEW */}
-        {nearbyVillas.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-neutral-200/80">
-            <div className="mb-3.5 border-l-4 border-[#ff6900] pl-2.5">
-              <h3 className="text-base font-bold text-gray-900">
-                Nearby Stays in {villa?.location?.name || villa?.address?.city || "Lonavala"}
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Swipe to explore more handpicked stays in this area
-              </p>
-            </div>
+        {/* NEARBY VILLAS: SWIPEABLE CAROUSEL OR EMPTY CARD */}
+        <div className="mt-8 pt-6 border-t border-neutral-200/80">
+          <div className="mb-3.5 border-l-4 border-[#ff6900] pl-2.5">
+            <h3 className="text-base font-bold text-gray-900">
+              Nearby Stays in {villa?.location?.name || villa?.address?.city || "Lonavala"}
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Explore more handpicked stays in this area
+            </p>
+          </div>
 
+          {loadingNearby ? (
+            <div className="flex gap-3 overflow-hidden">
+              {[1, 2].map((i) => (
+                <div key={i} className="basis-[48%] flex-shrink-0 animate-pulse space-y-2">
+                  <div className="w-full aspect-[4/3] bg-neutral-200/70 rounded-xl" />
+                  <div className="h-3.5 bg-neutral-200/70 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-200/50 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : nearbyVillas.length > 0 ? (
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2.5">
                 {nearbyVillas.map((villaItem) => (
                   <CarouselItem
-                    key={villaItem._id}
+                    key={villaItem._id || villaItem.id}
                     className="pl-2.5 basis-[48%] sm:basis-1/3"
                   >
                     <div className="w-full">
@@ -1205,8 +1128,15 @@ const AllTabsContent = ({ refs }) => {
                 ))}
               </CarouselContent>
             </Carousel>
-          </div>
-        )}
+          ) : (
+            <NearbyStaysEmptyCard
+              locationName={villa?.location?.name || villa?.address?.city || "this area"}
+              propertyType="Villa"
+              coordinates={villa?.coordinates}
+              isMobile={true}
+            />
+          )}
+        </div>
       </section>
     </div>
   );

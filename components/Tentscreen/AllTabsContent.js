@@ -29,6 +29,8 @@ import ExperiencesTab from "./ExperiencesTab";
 import { useCamping } from "@/lib/context/CampingContext";
 import { Card, CardContent } from "@/components/ui/card";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
+import NearbyStaysEmptyCard from "../Propertyviewcomponents/NearbyStaysEmptyCard";
+import { fetchNearbyStays } from "@/lib/nearbyStaysUtils";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import MobileEventsSection from "../Propertyviewcomponents/MobileEventsSection";
 import {
@@ -117,30 +119,35 @@ const AllTabsContent = ({ refs = {} }) => {
 
   const amenities = camping?.amenities || [];
 
+  const [loadingNearby, setLoadingNearby] = useState(false);
+
   // Fetch nearby campings
   useEffect(() => {
     let isMounted = true;
-    async function fetchNearby() {
+    async function loadNearby() {
       if (!camping) return;
+      setLoadingNearby(true);
       try {
-        const res = await fetch(`${BaseUrl}/Camping/get/campings`);
-        if (res.ok) {
-          const data = await res.json();
-          const others = list.filter((p) => {
-            const isCurrent = String(p._id) === String(camping?._id);
-            const isApproved = p.isapproved === "approved";
-            const isLive = p.isLive !== false;
-            return !isCurrent && isApproved && isLive;
-          });
-          if (isMounted) {
-            setNearbyCampings(others);
-          }
+        const stays = await fetchNearbyStays({
+          currentProperty: camping,
+          propertyType: "Camping",
+          maxRadiusKm: 50,
+        });
+        if (isMounted) {
+          setNearbyCampings(stays || []);
         }
       } catch (err) {
         console.warn("Failed to fetch nearby campings:", err);
+        if (isMounted) {
+          setNearbyCampings([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingNearby(false);
+        }
       }
     }
-    fetchNearby();
+    loadNearby();
     return () => {
       isMounted = false;
     };
@@ -781,23 +788,33 @@ const AllTabsContent = ({ refs = {} }) => {
           </div>
         )}
 
-        {/* 10. NEARBY CAMPINGS CAROUSEL: 2 CARDS PER VIEW ON MOBILE */}
-        {nearbyCampings.length > 0 && (
-          <div className="mt-6 pt-5 border-t border-neutral-200/80">
-            <div className="mb-3 border-l-4 border-[#ff6900] pl-2.5">
-              <h3 className="text-base font-bold text-gray-900">
-                Nearby Stays in {camping?.address?.city || "Pawana"}
-              </h3>
-              <p className="text-xs text-gray-500 mt-0.5">
-                Swipe to explore more handpicked campsites
-              </p>
-            </div>
+        {/* 10. NEARBY CAMPINGS CAROUSEL OR EMPTY CARD */}
+        <div className="mt-6 pt-5 border-t border-neutral-200/80">
+          <div className="mb-3 border-l-4 border-[#ff6900] pl-2.5">
+            <h3 className="text-base font-bold text-gray-900">
+              Nearby Stays in {camping?.address?.city || "Pawana"}
+            </h3>
+            <p className="text-xs text-gray-500 mt-0.5">
+              Explore more handpicked campsites
+            </p>
+          </div>
 
+          {loadingNearby ? (
+            <div className="flex gap-3 overflow-hidden">
+              {[1, 2].map((i) => (
+                <div key={i} className="basis-[48%] flex-shrink-0 animate-pulse space-y-2">
+                  <div className="w-full aspect-[4/3] bg-neutral-200/70 rounded-xl" />
+                  <div className="h-3.5 bg-neutral-200/70 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-200/50 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
+          ) : nearbyCampings.length > 0 ? (
             <Carousel className="w-full" opts={{ align: "start" }}>
               <CarouselContent className="-ml-2.5">
                 {nearbyCampings.map((campItem) => (
                   <CarouselItem
-                    key={campItem._id}
+                    key={campItem._id || campItem.id}
                     className="pl-2.5 basis-[48%] sm:basis-1/3"
                   >
                     <div className="w-full">
@@ -807,8 +824,15 @@ const AllTabsContent = ({ refs = {} }) => {
                 ))}
               </CarouselContent>
             </Carousel>
-          </div>
-        )}
+          ) : (
+            <NearbyStaysEmptyCard
+              locationName={camping?.address?.city || "Pawana"}
+              propertyType="Campsite"
+              coordinates={camping?.coordinates}
+              isMobile={true}
+            />
+          )}
+        </div>
       </section>
 
       {/* TENT DETAILS DRAWER */}

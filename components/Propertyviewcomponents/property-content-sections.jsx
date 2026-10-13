@@ -21,6 +21,8 @@ import { useVilla } from "@/lib/context/VillaContext";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import Image from "next/image";
 import PropertyCard from "@/components/Availableweekend/Weekendcard";
+import NearbyStaysEmptyCard from "./NearbyStaysEmptyCard";
+import { fetchNearbyStays } from "@/lib/nearbyStaysUtils";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import {
   Trees,
@@ -316,167 +318,44 @@ export default function PropertyContentSections() {
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchNearbyVillas() {
+    async function loadNearby() {
       if (!villa) return;
       setLoadingNearby(true);
       try {
-        const queryCity = (villa?.address?.city || "").trim().toLowerCase();
-        const villaLocationId = String(villa?.location?._id || villa?.location || "");
+        const propertyType = isCamping
+          ? "Camping"
+          : isCottage
+          ? "Cottage"
+          : isHotel
+          ? "Hotel"
+          : "Villa";
 
-        // 1. Fetch available properties (Campings, Cottages, Hotels, or Villas)
-        let endpoint = `${BaseUrl}/Villa/get/villas`;
-        if (isCamping) {
-          endpoint = `${BaseUrl}/Camping/get/campings`;
-        } else if (isCottage) {
-          endpoint = `${BaseUrl}/Cottage/get/cottages`;
-        } else if (isHotel) {
-          endpoint = `${BaseUrl}/Hotel/get/hotels`;
-        }
-        const res = await fetch(endpoint);
-        if (res.ok) {
-          const data = await res.json();
-          const list =
-            data?.data ||
-            data?.properties ||
-            (Array.isArray(data) ? data : []);
+        const stays = await fetchNearbyStays({
+          currentProperty: villa,
+          propertyType,
+          maxRadiusKm: 50,
+        });
 
-          // Filter out current villa and only keep verified, approved, and live stays
-          const otherVillas = list.filter((p) => {
-            const isCurrent = String(p._id) === String(villa?._id);
-            const isApproved = p.isapproved === "approved";
-            const isLive = p.isLive !== false;
-            return !isCurrent && isApproved && isLive;
-          });
-
-          if (otherVillas.length > 0) {
-            // Prioritize matching by location ObjectId or city
-            const matched = otherVillas.filter((p) => {
-              const pCity = (p?.address?.city || "").trim().toLowerCase();
-              const pLoc = String(p?.location?._id || p?.location || "");
-              const isCityMatch =
-                queryCity &&
-                pCity &&
-                (pCity.includes(queryCity.slice(0, 4)) ||
-                  queryCity.includes(pCity.slice(0, 4)));
-              const isLocMatch =
-                villaLocationId && pLoc && pLoc === villaLocationId;
-              return isCityMatch || isLocMatch;
-            });
-
-            // Use matched stays, or supplement with other villas if few
-            const candidates =
-              matched.length >= 3
-                ? matched
-                : [
-                    ...matched,
-                    ...otherVillas.filter(
-                      (ov) => !matched.some((m) => String(m._id) === String(ov._id))
-                    ),
-                  ];
-
-            const formatted = candidates.map((p) => ({
-              ...p,
-              rating: p.averageRating && p.averageRating > 0 ? p.averageRating : 4.9,
-              tags:
-                p.tags && p.tags.length > 0
-                  ? p.tags
-                  : ["Guest favourite", "Trending"],
-              category: p.category || { name: "Villa" },
-            }));
-
-            if (isMounted && formatted.length > 0) {
-              setNearbyVillas(formatted.slice(0, 6));
-              setLoadingNearby(false);
-              return;
-            }
-          }
+        if (isMounted) {
+          setNearbyVillas(stays || []);
         }
       } catch (err) {
-        console.error("Error fetching nearby villas:", err);
-      }
-
-      // High quality fallback nearby villas matching location
-      if (isMounted) {
-        setNearbyVillas([
-          {
-            _id: "nearby-villa-1",
-            name: `Panorama @ Golden Bliss - ${villa?.address?.city || "Lonavala"}`,
-            address: { city: villa?.address?.city || "Lonavala" },
-            images: [
-              villa?.images?.[1] ||
-                "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80",
-              villa?.images?.[2] ||
-                "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80",
-              villa?.images?.[0] ||
-                "https://images.unsplash.com/photo-1613490493576-7fde63acd811?w=800&q=80",
-            ],
-            pricing: {
-              weekendPrice: Math.round(
-                (Number(villa?.pricing?.weekendPrice) || 16000) * 0.95
-              ),
-              weekdayPrice: Math.round(
-                (Number(villa?.pricing?.weekdayPrice) || 14000) * 0.95
-              ),
-            },
-            rating: 4.9,
-            tags: ["Guest favourite", "Trending"],
-          },
-          {
-            _id: "nearby-villa-2",
-            name: `Mist & Meadows Estate - ${villa?.address?.city || "Lonavala"}`,
-            address: { city: villa?.address?.city || "Lonavala" },
-            images: [
-              villa?.images?.[2] ||
-                "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80",
-              villa?.images?.[3] ||
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80",
-              villa?.images?.[1] ||
-                "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80",
-            ],
-            pricing: {
-              weekendPrice: Math.round(
-                (Number(villa?.pricing?.weekendPrice) || 16000) * 1.08
-              ),
-              weekdayPrice: Math.round(
-                (Number(villa?.pricing?.weekdayPrice) || 14000) * 1.08
-              ),
-            },
-            rating: 4.85,
-            tags: ["Guest favourite", "Pool Villa"],
-          },
-          {
-            _id: "nearby-villa-3",
-            name: `The Whispering Pines - ${villa?.address?.city || "Lonavala"}`,
-            address: { city: villa?.address?.city || "Lonavala" },
-            images: [
-              villa?.images?.[3] ||
-                "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=800&q=80",
-              villa?.images?.[0] ||
-                "https://images.unsplash.com/photo-1600566753376-12c8ab7fb75b?w=800&q=80",
-              villa?.images?.[2] ||
-                "https://images.unsplash.com/photo-1600585154526-990dced4db0d?w=800&q=80",
-            ],
-            pricing: {
-              weekendPrice: Math.round(
-                (Number(villa?.pricing?.weekendPrice) || 16000) * 0.9
-              ),
-              weekdayPrice: Math.round(
-                (Number(villa?.pricing?.weekdayPrice) || 14000) * 0.9
-              ),
-            },
-            rating: 4.95,
-            tags: ["Guest favourite", "Scenic View"],
-          },
-        ]);
-        setLoadingNearby(false);
+        console.error("Error loading nearby stays:", err);
+        if (isMounted) {
+          setNearbyVillas([]);
+        }
+      } finally {
+        if (isMounted) {
+          setLoadingNearby(false);
+        }
       }
     }
 
-    fetchNearbyVillas();
+    loadNearby();
     return () => {
       isMounted = false;
     };
-  }, [villa]);
+  }, [villa?._id, isCamping, isCottage, isHotel]);
 
   const amenities = villa?.amenities || [];
   const displayedAmenities = showAllAmenities
@@ -3078,50 +2957,75 @@ export default function PropertyContentSections() {
           </div>
         )}
 
-        {/* Nearby Villas in Location (Using Airbnb card from Available Weekend Card) */}
-        {nearbyVillas.length > 0 && (
-          <div className="mt-12 pt-8 border-t border-neutral-200/80">
-            <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
-              <div>
-                <div className="flex items-center mb-1">
-                  <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-3" />
-                  <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
-                    {isCamping
-                      ? "Nearby Campsites in "
-                      : isCottage
-                      ? "Nearby Cottages in "
-                      : isHotel
-                      ? "Nearby Hotels & Stays in "
-                      : "Nearby Stays in "}
-                    {villa?.location?.name || villa?.address?.city || "Destination"}
-                  </h3>
-                </div>
-                <p className="text-xs sm:text-sm text-gray-500">
+        {/* Nearby Stays in Location */}
+        <div className="mt-12 pt-8 border-t border-neutral-200/80">
+          <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+            <div>
+              <div className="flex items-center mb-1">
+                <div className="w-1.5 h-6 bg-gradient-to-b from-[#ff6900] to-[#e05d00] rounded-full mr-3" />
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 tracking-tight">
                   {isCamping
-                    ? "Discover more handpicked camping retreats and luxury glamping sites in and around this destination."
+                    ? "Nearby Campsites in "
                     : isCottage
-                    ? "Discover more serene cottage stays and rustic retreats in and around this destination."
+                    ? "Nearby Cottages in "
                     : isHotel
-                    ? "Discover more premier hotels, resorts, and vacation stays in and around this destination."
-                    : `Discover more handpicked luxury villas and retreats in and around ${
-                        villa?.address?.area ? `${villa.address.area}, ` : ""
-                      }${villa?.location?.name || villa?.address?.city || "this destination"}.`}
-                </p>
+                    ? "Nearby Hotels & Stays in "
+                    : "Nearby Stays in "}
+                  {villa?.location?.name || villa?.address?.city || "Destination"}
+                </h3>
               </div>
+              <p className="text-xs sm:text-sm text-gray-500">
+                {isCamping
+                  ? "Discover more handpicked camping retreats and luxury glamping sites in and around this destination."
+                  : isCottage
+                  ? "Discover more serene cottage stays and rustic retreats in and around this destination."
+                  : isHotel
+                  ? "Discover more premier hotels, resorts, and vacation stays in and around this destination."
+                  : `Discover more handpicked luxury villas and retreats in and around ${
+                      villa?.address?.area ? `${villa.address.area}, ` : ""
+                    }${villa?.location?.name || villa?.address?.city || "this destination"}.`}
+              </p>
             </div>
+          </div>
 
+          {loadingNearby ? (
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="flex flex-col space-y-3 animate-pulse">
+                  <div className="w-full aspect-[4/3] bg-neutral-200/70 rounded-2xl" />
+                  <div className="h-4 bg-neutral-200/70 rounded-md w-3/4" />
+                  <div className="h-3 bg-neutral-200/50 rounded-md w-1/2" />
+                  <div className="h-4 bg-neutral-200/70 rounded-md w-1/3" />
+                </div>
+              ))}
+            </div>
+          ) : nearbyVillas.length > 0 ? (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
               {nearbyVillas.map((item) => (
                 <div
-                  key={item._id}
+                  key={item._id || item.id}
                   className="transition-transform duration-300 hover:-translate-y-1"
                 >
                   <PropertyCard property={item} />
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <NearbyStaysEmptyCard
+              locationName={villa?.location?.name || villa?.address?.city || "this area"}
+              propertyType={
+                isCamping
+                  ? "Campsite"
+                  : isCottage
+                  ? "Cottage"
+                  : isHotel
+                  ? "Hotel"
+                  : "Villa"
+              }
+              coordinates={villa?.coordinates}
+            />
+          )}
+        </div>
       </section>
 
       {/* Desktop Tent Details Modal */}
