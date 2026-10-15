@@ -1012,14 +1012,48 @@ export default function AIConciergeBot() {
   return (
     <>
       {/* =========================================================================
-          1. FLOATING MASCOT TRIGGER BUTTON (Placed on RIGHT side)
+          1. FLOATING WIDGETS CLUSTER: WHATSAPP + AI CONCIERGE (Placed on RIGHT side)
           Automatically hidden when any booking drawer or modal is active
          ========================================================================= */}
       {!isOpen && !isDrawerOpen && (
         <div
           data-ai-concierge-mascot="true"
-          className="fixed md:bottom-6 md:right-6 bottom-24 right-6 z-[9990] transition-all duration-200"
+          className="fixed md:bottom-6 md:right-6 bottom-24 right-4 sm:right-6 z-[9990] flex items-center gap-3 transition-all duration-200"
         >
+          {/* WhatsApp Floating Widget Button (Homepage Desktop Only) */}
+          {isHomePage && (
+            <a
+              href="https://wa.me/918669186483?text=Hi%20The%20Villa%20Camp%2C%20I%20am%20interested%20in%20booking%20a%20luxury%20stay!"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden md:flex relative group items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
+              aria-label="Chat with Concierge on WhatsApp"
+            >
+              {/* Subtle Static Ambient Glow Ring */}
+              <span className="absolute -inset-0.5 rounded-full bg-emerald-500/25 blur-sm group-hover:blur-md transition-all" />
+
+              {/* Circular WhatsApp Container */}
+              <div className="relative w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20ba59] border-2 border-white shadow-lg hover:shadow-xl flex items-center justify-center transition-all">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="28"
+                  height="28"
+                  fill="currentColor"
+                  className="text-white drop-shadow-xs"
+                >
+                  <path d="M20.52 3.48A11.93 11.93 0 0012.06 0C5.46 0 .09 5.37.09 11.97c0 2.11.55 4.16 1.6 5.98L0 24l6.23-1.63a11.93 11.93 0 005.83 1.51h.01c6.6 0 11.97-5.37 11.97-11.97 0-3.2-1.25-6.21-3.52-8.43zM12.06 21.88h-.01a9.92 9.92 0 01-5.06-1.39l-.36-.21-3.76.99 1-3.66-.23-.38a9.92 9.92 0 01-1.52-5.26c0-5.48 4.46-9.94 9.95-9.94 2.65 0 5.15 1.03 7.03 2.91a9.88 9.88 0 012.91 7.03c0 5.48-4.46 9.94-9.95 9.94zm5.45-7.44c-.3-.15-1.77-.87-2.04-.97-.28-.1-.48-.15-.68.15-.2.3-.78.97-.95 1.17-.18.2-.35.23-.65.08-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.18-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.18.2-.3.3-.5.1-.2.05-.38-.02-.53-.08-.15-.68-1.64-.93-2.25-.25-.6-.5-.52-.68-.53l-.58-.01c-.2 0-.53.08-.8.38-.28.3-1.05 1.03-1.05 2.51s1.08 2.91 1.23 3.11c.15.2 2.11 3.23 5.12 4.53.72.31 1.28.5 1.71.64.72.23 1.37.2 1.88.12.58-.09 1.77-.72 2.02-1.42.25-.7.25-1.3.18-1.42-.08-.12-.28-.2-.58-.35z" />
+                </svg>
+              </div>
+
+              {/* Hover Tooltip (Desktop - Anchored to Left) */}
+              <span className="hidden sm:group-hover:flex absolute right-full mr-3 px-3 py-1.5 rounded-xl bg-neutral-900 text-white text-xs font-medium whitespace-nowrap shadow-xl items-center gap-1.5 animate-in fade-in slide-in-from-right-2 duration-200">
+                <span className="w-2 h-2 rounded-full bg-[#25D366]" />
+                Chat on WhatsApp • 24/7 Support
+              </span>
+            </a>
+          )}
+
+          {/* AI Concierge Mascot Trigger Button */}
           <button
             type="button"
             onClick={(e) => {

@@ -12,13 +12,14 @@ import {
   ArrowRight,
   Mountain,
   Waves,
-  Camera,
   Footprints,
   Landmark,
   Tent,
   CheckCircle2,
   PhoneCall,
   Search,
+  Palmtree,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -29,245 +30,299 @@ const EXPERIENCES_DATA = [
     title: "Tiger Point & Lion's Point",
     category: "Scenic Viewpoint",
     categoryIcon: Mountain,
-    distance: "12 km from Lonavala",
-    bestTime: "Sunrise & Monsoon (July – Oct)",
-    duration: "2 - 3 Hours",
+    location: "Kurvande, Lonavala",
+    distance: "12 km from town center",
+    bestTime: "Sunrise & Monsoon (July – Nov)",
+    duration: "1.5 - 2.5 Hours",
     rating: "4.9",
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop&q=80",
+    image: "/experiences/tiger-point.jpg",
     description:
-      "Perched on a sheer 650-meter cliff, Tiger Point offers panoramic views of the Sahyadri valleys often enveloped in swirling clouds. Famous for hot charcoal-roasted sweet corn (bhutta) and masala chai.",
+      "Perched on a sheer 650-meter rocky precipice, Tiger Point commands unobstructed panoramas across the deep mist-shrouded Sahyadri valley, seasonal cascading waterfalls, and swirling cloud formations.",
     highlights: [
-      "Spectacular 650m vertical cliff drop",
-      "Swirling monsoon clouds & valley mist",
-      "Authentic local street snacks & chai stalls",
-      "Stunning sunrise & sunset vista points",
+      "650m sheer cliff drop overlooking deep valley gorges",
+      "Swirling monsoon clouds and scenic mountain fog",
+      "Stunning golden sunrise and sunset vista points",
+      "Scenic mountain drive with local tea stalls",
     ],
     stayLink: "/category/all?location=lonavala",
   },
   {
     id: "pawana-lake",
-    title: "Pawana Lake Sunset & Stargazing",
-    category: "Lakeside & Camp",
+    title: "Pawana Lake Kayaking & Stargazing",
+    category: "Lakeside & Camping",
     categoryIcon: Waves,
+    location: "Pawana Dam Reservoir",
     distance: "18 km from Lonavala",
     bestTime: "Oct – May (Cool evenings)",
     duration: "Half / Full Day",
     rating: "4.9",
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&auto=format&fit=crop&q=80",
+    image: "/experiences/pawana-lake.jpg",
     description:
-      "A sparkling artificial reservoir surrounded by three historic forts: Tung, Tikona, and Lohagad. Enjoy quiet evening kayaking, lakeside barbecues, and clear dark-sky stargazing by a crackling bonfire.",
+      "A serene freshwater reservoir framed by the historic silhouettes of Tung, Tikona, and Lohagad forts. Enjoy evening kayaking, waterside bonfires, and clear dark-sky stargazing away from urban lights.",
     highlights: [
-      "Calm freshwater kayaking & boating",
-      "Lakeside bonfires under unpolluted starry skies",
-      "Scenic views of Tikona & Tung fort peaks",
-      "Peaceful retreat away from city noise",
+      "Calm freshwater kayaking and paddle boating",
+      "Scenic backdrop of Tikona and Tung fort peaks",
+      "Lakeside campfire evenings under unpolluted skies",
+      "Minutes away from private Pawana lakefront villas",
     ],
     stayLink: "/category/all?location=pawana",
   },
   {
     id: "lohagad-fort",
     title: "Lohagad Fort (The Iron Citadel)",
-    category: "Historical Trek",
+    category: "Heritage & Hillforts",
     categoryIcon: Landmark,
+    location: "Malavli, Lonavala",
     distance: "11 km from Lonavala",
-    bestTime: "Monsoons & Winter (June – Feb)",
+    bestTime: "Monsoon & Winter (June – Feb)",
     duration: "3 - 4 Hours",
     rating: "4.8",
-    image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?w=800&auto=format&fit=crop&q=80",
+    image: "/experiences/lohagad-fort.jpg",
     description:
-      "A formidable hilltop fortress with over two millennia of history, Lohagad boasts grand stone gateways and the famous 'Vinchu Kata' (Scorpion's Tail) ridge protruding dramatically into the valley.",
+      "An imposing Maratha hilltop fortress featuring four grand preserved stone gateways and the dramatic 'Vinchu Kata' (Scorpion's Tail) knife-edge ridge extending high above the Pawana reservoir valley.",
     highlights: [
-      "Walk the exhilarating Vinchu Kata ridge",
-      "Well-preserved four grand entrance gates",
-      "Panoramic 360° views over Pawana reservoir",
-      "Easy-to-moderate trek suitable for families",
+      "Walk the exhilarating Vinchu Kata knife-edge ridge",
+      "Four monumental carved stone entrance gates",
+      "360° panoramic views over Pawana reservoir",
+      "Family-friendly stone staircase trail through greenery",
+    ],
+    stayLink: "/category/all?location=lonavala",
+  },
+  {
+    id: "karla-bhaja-caves",
+    title: "Karla Caves (Great Chaitya Hall)",
+    category: "Heritage & Hillforts",
+    categoryIcon: Landmark,
+    location: "Karli, Lonavala",
+    distance: "12 km on Old Pune Highway",
+    bestTime: "Year-Round (Morning Hours)",
+    duration: "2 - 3 Hours",
+    rating: "4.8",
+    image: "/experiences/karla-caves.jpg",
+    description:
+      "Carved in the 2nd century BCE, Karla features India's largest rock-cut Buddhist Chaitya hall. Marvel at 37 towering stone pillars carved with elephant capitals, 2,000-year-old teakwood arched vaulting, and ancient rock inscriptions.",
+    highlights: [
+      "India's largest ancient rock-cut Buddhist Chaitya hall",
+      "Intact 2,000-year-old curved teakwood roof rafters",
+      "Intricate elephant capital sculptures & Ashokan pillar",
+      "Panoramic views of the Indrayani river valley",
     ],
     stayLink: "/category/all?location=lonavala",
   },
   {
     id: "bhushi-dam",
     title: "Bhushi Dam Cascading Waterfalls",
-    category: "Waterfalls & Splash",
+    category: "Monsoon Waterfalls",
     categoryIcon: Waves,
-    distance: "6 km from Lonavala",
+    location: "Bhushi, Lonavala",
+    distance: "6 km from Lonavala Station",
     bestTime: "Peak Monsoon (July – Sept)",
-    duration: "2 Hours",
+    duration: "1.5 - 2 Hours",
     rating: "4.7",
-    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=800&auto=format&fit=crop&q=80",
+    image: "/experiences/bhushi-dam.jpg",
     description:
-      "When the Indrayani River overflows during the rains, Bhushi Dam transforms into a vibrant cascade of water over stepped masonry rocks. A favorite monsoon gathering spot for cool splashes.",
+      "Built over the Indrayani River, Bhushi Dam is famous for its stepped masonry terraces where seasonal overflowing waters cascade gently down stone steps amidst lush forested hills and misty mountain air.",
     highlights: [
-      "Step-style natural rock water cascade",
-      "Lush forest greenery and misty breeze",
-      "Local pakoda and hot cutting chai nearby",
-      "Direct road access with easy parking",
-    ],
-    stayLink: "/category/all?location=lonavala",
-  },
-  {
-    id: "karla-bhaja-caves",
-    title: "Karla & Bhaja Buddhist Caves",
-    category: "Heritage & History",
-    categoryIcon: Landmark,
-    distance: "12 km from Lonavala",
-    bestTime: "Year-Round (Morning Hours)",
-    duration: "2 - 3 Hours",
-    rating: "4.8",
-    image: "https://images.unsplash.com/photo-1590059390046-24e5443a6d09?w=800&auto=format&fit=crop&q=80",
-    description:
-      "Dating back to the 2nd century BCE, Karla features India's largest and most intact rock-cut Buddhist prayer hall (Chaityagriha) with 2,000-year-old teak wood beams and intricate elephant sculptures.",
-    highlights: [
-      "India's largest ancient rock-cut Chaitya hall",
-      "Original 2,000-year-old wooden arched roof",
-      "Intricate Buddhist sculptures & monastery cells",
-      "Scenic hillside steps with panoramic valley views",
+      "Step-style natural rock waterfall cascade",
+      "Lush Western Ghats hillside vegetation and cool breezes",
+      "Refreshing shallow water splash areas",
+      "Paved road access with nearby refreshments and parking",
     ],
     stayLink: "/category/all?location=lonavala",
   },
   {
     id: "dukes-nose",
-    title: "Duke's Nose (Nagphani Cliff)",
+    title: "Duke's Nose (Nagphani Cliff Walk)",
     category: "Adventure & Treks",
     categoryIcon: Footprints,
-    distance: "7 km from Lonavala",
-    bestTime: "Oct – April (Mild weather)",
-    duration: "3 - 5 Hours",
+    location: "Kurvande, Khandala",
+    distance: "7 km from Khandala",
+    bestTime: "Oct – May (Clear Weather)",
+    duration: "3 - 4 Hours",
     rating: "4.9",
-    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=800&auto=format&fit=crop&q=80",
+    image: "/experiences/dukes-nose.jpg",
     description:
-      "Named after the Duke of Wellington's distinctive profile, this monolithic cliff overhang is famous for high-thrill valley rappelling, rock climbing, slacklining, and jaw-dropping views of Khandala Ghat.",
+      "Named for its distinctive pointed profile resembling the Duke of Wellington, this monolithic rock wedge offers exhilarating trekking, valley rappelling, and unobstructed views of the winding Khandala Ghat expressway.",
     highlights: [
-      "Premier rappelling & rock climbing rock face",
-      "Unobstructed views of Mumbai-Pune expressway ghats",
-      "Mahadeva temple sanctuary at cliff summit",
-      "Invigorating forest trail through Khandala woods",
-    ],
-    stayLink: "/category/all?location=lonavala",
-  },
-  {
-    id: "rajmachi-fort",
-    title: "Rajmachi Fort & Fireflies Trail",
-    category: "Adventure & Treks",
-    categoryIcon: Tent,
-    distance: "15 km from Lonavala",
-    bestTime: "May – June (Fireflies) / July – Sept (Monsoon)",
-    duration: "Full Day",
-    rating: "4.9",
-    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=800&auto=format&fit=crop&q=80",
-    description:
-      "A legendary pair of fortified peaks — Shrivardhan and Manaranjan — rising high above deep canyons. During May-June, the surrounding forests become illuminated by millions of glowing synchronized fireflies.",
-    highlights: [
-      "Bioluminescent pre-monsoon firefly phenomenon",
-      "Twin citadel exploration with ancient water cisterns",
-      "Scenic trail passing waterfalls and tribal hamlets",
-      "Incredible viewpoint overlooking the Konkan plains",
+      "Iconic pointed cliff overhang vantage point",
+      "Unrivaled aerial view of the Mumbai-Pune expressway",
+      "Popular for rock climbing and valley rappelling",
+      "Refreshing forest trail through dense Khandala woods",
     ],
     stayLink: "/category/all?location=lonavala",
   },
   {
     id: "kune-falls",
     title: "Kune Waterfalls",
-    category: "Waterfalls & Splash",
+    category: "Monsoon Waterfalls",
     categoryIcon: Waves,
-    distance: "4 km from Lonavala",
+    location: "Khandala, Western Ghats",
+    distance: "4 km from Lonavala / Khandala",
     bestTime: "Peak Monsoon (July – Sept)",
     duration: "1 - 2 Hours",
-    rating: "4.7",
-    image: "https://images.unsplash.com/photo-1513836279014-a89f7a76ae86?w=800&auto=format&fit=crop&q=80",
+    rating: "4.8",
+    image: "/experiences/kune-falls.jpg",
     description:
-      "Ranked as the 14th highest waterfall in India with a 200-meter drop, Kune Falls is a majestic three-tiered spectacle nestled between the twin hill towns of Lonavala and Khandala.",
+      "Plunging 200 meters in three majestic tiers against a sheer emerald cliff backdrop, Kune Falls is the 14th highest natural waterfall in India, framed by the verdant mountain slopes of Khandala.",
     highlights: [
       "200-meter three-tiered waterfall cascade",
-      "Surrounded by emerald green forested hills",
-      "Spectacular photography point from Old Highway",
-      "Quiet natural pocket with refreshing mist",
+      "Emerald green cliffs and mist-covered valleys",
+      "Spectacular photography vantage point from highway ridge",
+      "Serene natural pocket away from crowded tourist centers",
     ],
     stayLink: "/category/all?location=lonavala",
+  },
+  {
+    id: "alibaug-beach",
+    title: "Alibaug Beaches & Kolaba Sea Fort",
+    category: "Coastal Getaway",
+    categoryIcon: Palmtree,
+    location: "Alibaug Coastal Belt",
+    distance: "Coastal Raigad (Ferry from Mumbai)",
+    bestTime: "Nov – May (Pleasant coastal breezes)",
+    duration: "Half / Full Day",
+    rating: "4.8",
+    image: "/experiences/alibaug-beach.jpg",
+    description:
+      "Golden sand beaches fringed by towering coconut palms along the Arabian Sea. Enjoy thrilling water sports, beachside coconut groves, and walking across to the historic 17th-century island fort of Kolaba at low tide.",
+    highlights: [
+      "Jet-skiing, banana rides & coastal water sports",
+      "Walk to historic Kolaba Sea Fort during low tide",
+      "Tranquil coconut palm groves and golden sunset walks",
+      "Short scenic catamaran ride from Gateway of India",
+    ],
+    stayLink: "/category/all?location=alibaug",
   },
 ];
 
 const CATEGORIES = [
   "All",
   "Scenic Viewpoint",
-  "Lakeside & Camp",
-  "Historical Trek",
-  "Waterfalls & Splash",
-  "Heritage & History",
+  "Lakeside & Camping",
+  "Heritage & Hillforts",
+  "Monsoon Waterfalls",
   "Adventure & Treks",
+  "Coastal Getaway",
+];
+
+const POPULAR_LOCATIONS = [
+  { name: "All Destinations", count: 8 },
+  { name: "Lonavala", count: 4 },
+  { name: "Pawana Lake", count: 1 },
+  { name: "Khandala", count: 2 },
+  { name: "Alibaug", count: 1 },
 ];
 
 export default function ExperiencesPage() {
   const [activeCategory, setActiveCategory] = useState("All");
+  const [selectedLocation, setSelectedLocation] = useState("All Destinations");
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredExperiences = EXPERIENCES_DATA.filter((item) => {
     const matchesCategory =
       activeCategory === "All" || item.category === activeCategory;
+    const matchesLocation =
+      selectedLocation === "All Destinations" ||
+      item.location.toLowerCase().includes(selectedLocation.toLowerCase()) ||
+      item.stayLink.toLowerCase().includes(selectedLocation.toLowerCase());
     const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.distance.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+      item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.category.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesLocation && matchesSearch;
   });
 
   return (
-    <main className="min-h-screen bg-neutral-50/50 pt-24 md:pt-28 pb-16">
-      <section className="relative overflow-hidden bg-neutral-950 text-white py-16 md:py-24 px-4 sm:px-6 lg:px-8 mx-3 sm:mx-6 rounded-3xl mb-12 shadow-xl">
-        {/* Subtle Ambient Glow */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-20 left-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+    <main className="min-h-screen bg-[#FDFDFD] pt-20 md:pt-24 pb-16">
+      {/* Hero Banner with Authentic Location Image & Proportional Typography */}
+      <section className="relative overflow-hidden mx-3 sm:mx-6 rounded-2xl md:rounded-3xl mb-8 md:mb-12 shadow-md">
+        {/* Authentic Background Image */}
+        <div className="absolute inset-0 w-full h-full">
+          <Image
+            src="/experiences/hero-banner.jpg"
+            alt="Lonavala and Pawana Lake Western Ghats Luxury Getaway"
+            fill
+            priority
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 95vw, 1280px"
+            className="object-cover object-center"
+          />
+          {/* Dual Vignette & Dark Gradient Overlay for Maximum Readability */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/75 to-black/40 sm:to-black/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-black/25" />
+        </div>
 
-        <div className="relative max-w-5xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-semibold text-orange-400 backdrop-blur-md">
-            <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
-            <span>Curated Lonavala & Pawana Guide</span>
+        {/* Content Container Aligned with Place and Description */}
+        <div className="relative z-10 max-w-4xl py-12 sm:py-16 md:py-20 px-5 sm:px-8 lg:px-12 space-y-4 sm:space-y-5 text-left">
+          {/* Location Badge */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[11px] sm:text-xs font-semibold text-orange-300">
+            <MapPin className="w-3.5 h-3.5 text-[#ff6900]" />
+            <span>Lonavala • Pawana Lake • Khandala • Alibaug</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-tight">
-            Iconic Experiences & Spots in{" "}
+          {/* Sleek, Balanced Heading (Proportional, Not Oversized) */}
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-white leading-tight">
+            Curated Local Experiences &{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] via-amber-400 to-orange-300">
-              Lonavala
+              Scenic Spots
             </span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-neutral-300 leading-relaxed">
-            From mist-shrouded cliff points and ancient Buddhist caves to tranquil lakeside bonfires at Pawana — explore the finest attractions around your private luxury villa.
+          {/* Authentic Destination Description */}
+          <p className="text-xs sm:text-sm md:text-[15px] text-neutral-200 leading-relaxed max-w-2xl font-normal">
+            Immerse yourself in Western India's most breathtaking hill country — from calm sunset kayaking at Pawana Lake and 2,000-year-old rock-cut Buddhist caves to panoramic cliff treks and cascading waterfalls, all within easy reach of your private luxury villa.
           </p>
 
-          {/* Quick Stats */}
-          <div className="flex flex-wrap items-center justify-center gap-6 pt-4 text-xs sm:text-sm text-neutral-300">
-            <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-[#ff6900]" />
-              <span className="font-semibold text-white">8 Famous Spots</span>
-            </div>
-            <div className="w-1 h-1 rounded-full bg-neutral-600 hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <Camera className="w-4 h-4 text-[#ff6900]" />
-              <span className="font-semibold text-white">100+ Luxury Stays Nearby</span>
-            </div>
-            <div className="w-1 h-1 rounded-full bg-neutral-600 hidden sm:block" />
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-              <span className="font-semibold text-white">Verified Local Recommendations</span>
-            </div>
+          {/* Quick Destination Filter Pills */}
+          <div className="pt-2 flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-semibold text-neutral-300 mr-1 hidden sm:inline">
+              Explore by Area:
+            </span>
+            {POPULAR_LOCATIONS.map((loc) => {
+              const isSelected = selectedLocation === loc.name;
+              return (
+                <button
+                  key={loc.name}
+                  onClick={() => setSelectedLocation(loc.name)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-[#ff6900] text-white shadow-xs"
+                      : "bg-white/10 hover:bg-white/20 text-neutral-200 border border-white/15 backdrop-blur-sm"
+                  }`}
+                >
+                  {loc.name}
+                  <span className="ml-1.5 opacity-70 text-[10px]">
+                    ({loc.count})
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Search & Category Filter Bar */}
-        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-xs mb-10 space-y-4">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-neutral-200/80 shadow-2xs mb-8 space-y-3.5">
+          <div className="flex flex-col md:flex-row gap-3 items-center justify-between">
             {/* Search input */}
             <div className="relative w-full md:max-w-md">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-400" />
               <input
                 type="text"
-                placeholder="Search Tiger Point, Pawana, Lohagad, Caves..."
+                placeholder="Search Tiger Point, Pawana Lake, Lohagad Fort, Caves..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-neutral-200 bg-neutral-50/60 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff6900]/30 focus:border-[#ff6900] transition-all"
+                className="w-full pl-10 pr-9 py-2 text-xs sm:text-sm rounded-xl border border-neutral-200 bg-neutral-50/70 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#ff6900]/30 focus:border-[#ff6900] transition-all"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
             </div>
 
             <p className="text-xs text-neutral-500 font-medium">
@@ -275,11 +330,11 @@ export default function ExperiencesPage() {
               <span className="text-neutral-900 font-bold">
                 {filteredExperiences.length}
               </span>{" "}
-              handpicked destinations
+              handpicked spots
             </p>
           </div>
 
-          {/* Category Chips */}
+          {/* Category Filter Chips */}
           <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
             {CATEGORIES.map((cat) => {
               const isActive = activeCategory === cat;
@@ -287,9 +342,9 @@ export default function ExperiencesPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
-                  className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all cursor-pointer ${
+                  className={`shrink-0 px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                     isActive
-                      ? "bg-[#ff6900] text-white shadow-xs"
+                      ? "bg-[#ff6900] text-white shadow-xs font-semibold"
                       : "bg-neutral-100 text-neutral-600 hover:bg-neutral-200/80 hover:text-neutral-900"
                   }`}
                 >
@@ -301,127 +356,152 @@ export default function ExperiencesPage() {
         </div>
 
         {/* Experience Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-          {filteredExperiences.map((spot) => {
-            const CategoryIcon = spot.categoryIcon;
-
-            return (
-              <div
-                key={spot.id}
-                className="group flex flex-col bg-white rounded-3xl border border-neutral-200/80 overflow-hidden shadow-xs hover:shadow-xl hover:border-orange-200 transition-all duration-300"
-              >
-                {/* Image Container */}
-                <div className="relative h-56 sm:h-64 w-full overflow-hidden bg-neutral-100">
-                  <img
-                    src={spot.image}
-                    alt={spot.title}
-                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-                  {/* Badges */}
-                  <div className="absolute top-3.5 left-3.5 flex flex-wrap gap-1.5">
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold bg-white/95 text-neutral-900 backdrop-blur-md shadow-xs">
-                      <CategoryIcon className="w-3 h-3 text-[#ff6900]" />
-                      {spot.category}
-                    </span>
-                  </div>
-
-                  <div className="absolute top-3.5 right-3.5">
-                    <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-neutral-950/80 text-white backdrop-blur-md">
-                      ★ {spot.rating}
-                    </span>
-                  </div>
-
-                  {/* Title overlay in image */}
-                  <div className="absolute bottom-3.5 left-3.5 right-3.5">
-                    <h2 className="text-lg font-bold text-white leading-snug drop-shadow-sm">
-                      {spot.title}
-                    </h2>
-                    <p className="text-xs text-neutral-200 flex items-center gap-1 mt-0.5">
-                      <MapPin className="w-3.5 h-3.5 text-orange-400 shrink-0" />
-                      {spot.distance}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="flex-1 p-5 flex flex-col justify-between space-y-4">
-                  <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed line-clamp-3">
-                    {spot.description}
-                  </p>
-
-                  {/* Meta Pills */}
-                  <div className="grid grid-cols-2 gap-2 text-[11px] bg-neutral-50 p-2.5 rounded-xl border border-neutral-100">
-                    <div className="flex items-center gap-1.5 text-neutral-700">
-                      <Calendar className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
-                      <span className="truncate">{spot.bestTime}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-neutral-700">
-                      <Clock className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
-                      <span className="truncate">{spot.duration}</span>
-                    </div>
-                  </div>
-
-                  {/* Highlights List */}
-                  <div className="space-y-1.5 pt-1">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
-                      Spot Highlights
-                    </p>
-                    <ul className="space-y-1">
-                      {spot.highlights.slice(0, 3).map((hl, i) => (
-                        <li
-                          key={i}
-                          className="flex items-center gap-2 text-xs text-neutral-700"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#ff6900] shrink-0" />
-                          <span className="truncate">{hl}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Action Link */}
-                  <div className="pt-2">
-                    <Link
-                      href={spot.stayLink}
-                      className="inline-flex w-full items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-[#ff6900] text-white text-xs font-semibold shadow-xs transition-colors group/btn"
-                    >
-                      <span>Find Stays Nearby</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Custom Experience Inquiry Callout */}
-        <section className="mt-16 rounded-3xl bg-gradient-to-br from-neutral-900 via-neutral-950 to-neutral-900 text-white p-8 md:p-12 relative overflow-hidden border border-neutral-800">
-          <div className="relative z-10 max-w-3xl space-y-4">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-orange-400 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Personalized Itineraries</span>
-            </div>
-            <h3 className="text-2xl md:text-3xl font-extrabold text-white">
-              Want a customized guided tour or private transport?
+        {filteredExperiences.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-2xl border border-neutral-200/80 p-8 space-y-3">
+            <Compass className="w-10 h-10 text-neutral-300 mx-auto" />
+            <h3 className="text-base font-bold text-neutral-800">
+              No matching spots found
             </h3>
-            <p className="text-sm text-neutral-300 leading-relaxed">
-              Our local Villa Concierge can organize private SUV transfers, certified trekking guides for Rajmachi and Lohagad, and sunset boating at Pawana Lake for your group.
+            <p className="text-xs text-neutral-500 max-w-sm mx-auto">
+              Try adjusting your search query or reset the location and category filters.
             </p>
-            <div className="pt-2 flex flex-wrap gap-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setSearchQuery("");
+                setActiveCategory("All");
+                setSelectedLocation("All Destinations");
+              }}
+              className="mt-2 text-xs"
+            >
+              Reset Filters
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-7">
+            {filteredExperiences.map((spot) => {
+              const CategoryIcon = spot.categoryIcon;
+
+              return (
+                <div
+                  key={spot.id}
+                  className="group flex flex-col bg-white rounded-2xl border border-neutral-200/80 overflow-hidden shadow-2xs hover:shadow-lg hover:border-orange-200 transition-all duration-300"
+                >
+                  {/* Image Container with Real Photograph */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-neutral-100">
+                    <Image
+                      src={spot.image}
+                      alt={spot.title}
+                      fill
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 400px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
+
+                    {/* Category Badge */}
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-white/95 text-neutral-900 backdrop-blur-md shadow-2xs">
+                      <CategoryIcon className="w-3 h-3 text-[#ff6900]" />
+                      <span>{spot.category}</span>
+                    </div>
+
+                    {/* Rating Pill */}
+                    <div className="absolute top-3 right-3">
+                      <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-neutral-950/80 text-white backdrop-blur-md">
+                        ★ {spot.rating}
+                      </span>
+                    </div>
+
+                    {/* Bottom Title Overlay */}
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <h2 className="text-base sm:text-lg font-bold text-white leading-snug drop-shadow-sm group-hover:text-orange-200 transition-colors">
+                        {spot.title}
+                      </h2>
+                      <p className="text-[11px] text-neutral-200 flex items-center gap-1 mt-0.5">
+                        <MapPin className="w-3 h-3 text-orange-400 shrink-0" />
+                        <span className="truncate">{spot.location}</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Card Body with Balanced Proportions */}
+                  <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between space-y-3.5">
+                    <p className="text-xs text-neutral-600 leading-relaxed line-clamp-3">
+                      {spot.description}
+                    </p>
+
+                    {/* Meta Info Grid */}
+                    <div className="grid grid-cols-2 gap-2 text-[11px] bg-neutral-50/80 p-2.5 rounded-xl border border-neutral-100">
+                      <div className="flex items-center gap-1.5 text-neutral-700">
+                        <Calendar className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                        <span className="truncate font-medium">{spot.bestTime}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-neutral-700">
+                        <Clock className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+                        <span className="truncate font-medium">{spot.duration}</span>
+                      </div>
+                    </div>
+
+                    {/* Highlights List */}
+                    <div className="space-y-1.5 pt-0.5">
+                      <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">
+                        Key Highlights
+                      </p>
+                      <ul className="space-y-1">
+                        {spot.highlights.slice(0, 3).map((hl, i) => (
+                          <li
+                            key={i}
+                            className="flex items-center gap-2 text-xs text-neutral-700"
+                          >
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#ff6900] shrink-0" />
+                            <span className="truncate">{hl}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Action Link */}
+                    <div className="pt-2">
+                      <Link
+                        href={spot.stayLink}
+                        className="inline-flex w-full items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-[#ff6900] text-white text-xs font-semibold shadow-2xs transition-colors group/btn"
+                      >
+                        <span>Find Stays Nearby</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform" />
+                      </Link>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Local Concierge Assistance Callout */}
+        <section className="mt-12 md:mt-16 rounded-2xl md:rounded-3xl bg-neutral-950 text-white p-6 sm:p-10 relative overflow-hidden border border-neutral-800 shadow-lg">
+          <div className="relative z-10 max-w-2xl space-y-3 sm:space-y-4">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 text-orange-400 text-xs font-semibold">
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Villa Concierge & Local Guides</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white tracking-tight leading-snug">
+              Need custom guided treks or private transfers?
+            </h3>
+            <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed font-normal">
+              Our local Villa Concierge team can organize certified guides for Lohagad & Rajmachi fort hikes, private SUV transfers between Mumbai or Pune, and sunset boat rentals at Pawana Lake for your stay.
+            </p>
+            <div className="pt-2 flex flex-wrap gap-3">
               <Link
                 href="/category/all"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs sm:text-sm font-semibold shadow-md transition-all"
+                className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold shadow-xs transition-all"
               >
-                Browse Available Stays
+                Browse Stays Near These Spots
               </Link>
               <Link
                 href="/account/support"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs sm:text-sm font-semibold border border-white/20 backdrop-blur-md transition-all"
+                className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 backdrop-blur-md transition-all"
               >
-                <PhoneCall className="w-4 h-4" />
+                <PhoneCall className="w-3.5 h-3.5" />
                 Contact Concierge
               </Link>
             </div>
