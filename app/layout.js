@@ -101,6 +101,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta
+          name="facebook-domain-verification"
+          content="q89x1g0ggkospch09m8qefrsq4hs37"
+        />
         {process.env.GOOGLE_SITE_VERIFICATION ? (
           <meta
             name="google-site-verification"
