@@ -68,7 +68,7 @@ export default function ConsentGTM({ gtmId, measurementId }) {
       )}
 
       {!consent && !dismissed && (
-        <div className="fixed bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:max-w-md z-50 animate-in fade-in slide-in-from-bottom-5 duration-500">
+        <div className="fixed bottom-20 left-3 right-3 sm:bottom-6 sm:left-auto sm:right-6 sm:max-w-md z-[9990] animate-in fade-in slide-in-from-bottom-5 duration-500">
           <div className="relative bg-neutral-950/95 text-white backdrop-blur-md rounded-2xl sm:rounded-3xl border border-white/15 p-4 sm:p-5 shadow-2xl space-y-3.5">
             {/* Top row with icon & close */}
             <div className="flex items-start justify-between gap-3">

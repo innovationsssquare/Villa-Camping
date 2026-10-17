@@ -209,26 +209,28 @@ function AuthFormContent({
       )}
 
       {/* Footer Legal Terms Disclaimer */}
-      <p className="text-[10.5px] text-center text-neutral-500 mt-12 leading-snug select-none">
-        By signing up, you agree to our{" "}
-        <a
-          href="/terms-of-service"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#ff6900] hover:underline font-medium"
-        >
-          Terms &amp; Conditions
-        </a>{" "}
-        and{" "}
-        <a
-          href="/privacy-policy"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-[#ff6900] hover:underline font-medium"
-        >
-          Privacy Policy
-        </a>
-      </p>
+      <div className="pt-3 pb-3 mt-4 text-center">
+        <p className="text-xs text-neutral-600 leading-normal select-none">
+          By signing up, you agree to our{" "}
+          <a
+            href="/terms-of-service"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#ff6900] hover:underline font-semibold underline-offset-2"
+          >
+            Terms &amp; Conditions
+          </a>{" "}
+          and{" "}
+          <a
+            href="/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[#ff6900] hover:underline font-semibold underline-offset-2"
+          >
+            Privacy Policy
+          </a>
+        </p>
+      </div>
     </div>
   );
 }
@@ -431,9 +433,9 @@ const ResponsiveAuthModal = ({
           backdrop="opaque"
           hideCloseButton
           classNames={{
-            base: "max-w-md mx-auto bg-white rounded-t-[28px] p-0 m-0 border-none shadow-2xl overflow-hidden",
-            backdrop: "bg-black/60 backdrop-blur-xs z-50",
-            wrapper: "z-50",
+            base: "max-w-md mx-auto bg-white rounded-t-[28px] p-0 m-0 border-none shadow-2xl overflow-hidden pb-4 sm:pb-2",
+            backdrop: "bg-black/60 backdrop-blur-xs z-[9998]",
+            wrapper: "z-[9999]",
           }}
         >
           <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] overflow-hidden p-0">
@@ -459,7 +461,10 @@ const ResponsiveAuthModal = ({
                   </h3>
                 </DrawerHeader>
 
-                <DrawerBody className="px-5 pt-1 pb-5 max-h-[90vh] overflow-y-auto no-scrollbar">
+                <DrawerBody
+                  className="px-5 pt-1 pb-10 sm:pb-6 max-h-[85vh] overflow-y-auto no-scrollbar"
+                  style={{ paddingBottom: "max(2.5rem, env(safe-area-inset-bottom, 2.5rem))" }}
+                >
                   <AuthFormContent
                     phone={phone}
                     setPhone={setPhone}
