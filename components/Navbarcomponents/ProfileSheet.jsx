@@ -164,10 +164,18 @@ export function ProfileSheet() {
               <SheetTitle className="text-lg font-bold text-neutral-900">
                 Sign in for the full luxury experience
               </SheetTitle>
-              <SheetDescription className="text-xs text-neutral-500 mt-1 mb-4">
+              <SheetDescription className="text-xs text-neutral-500 mt-1 mb-3">
                 Access your bookings, track saved wishlists, and unlock member-only stay privileges.
               </SheetDescription>
-
+              <Button
+                onClick={() => {
+                  setOpen(false);
+                  openAuthModal();
+                }}
+                className="w-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold rounded-xl py-2.5 shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer touch-manipulation"
+              >
+                <LogIn className="w-3.5 h-3.5" /> Sign In / Register
+              </Button>
             </div>
           )}
         </SheetHeader>
