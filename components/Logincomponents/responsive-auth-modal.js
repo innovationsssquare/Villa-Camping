@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import {
@@ -24,6 +24,107 @@ import {
 import { getDeviceId } from "@/lib/deviceId";
 import { BaseUrl } from "@/lib/API/Baseurl";
 import { getAuthCookieOptions } from "@/lib/authCookies";
+
+/**
+ * 6-Digit Individual OTP Input Boxes
+ * Styled with light gray border and slightly dark gray text input
+ */
+function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
+  const inputsRef = useRef([]);
+  const digits = Array.from({ length: 6 }, (_, i) => value[i] || "");
+
+  const handleDigitChange = (index, val) => {
+    const clean = val.replace(/\D/g, "");
+    if (!clean) {
+      const nextOtp = value.split("");
+      nextOtp[index] = "";
+      onChange(nextOtp.join(""));
+      return;
+    }
+
+    if (clean.length > 1) {
+      handlePastedCode(clean);
+      return;
+    }
+
+    const nextOtp = value.split("");
+    nextOtp[index] = clean;
+    const finalOtp = nextOtp.join("").slice(0, 6);
+    onChange(finalOtp);
+
+    if (index < 5) {
+      inputsRef.current[index + 1]?.focus();
+      inputsRef.current[index + 1]?.select();
+    }
+
+    if (finalOtp.length === 6) {
+      onComplete?.(finalOtp);
+    }
+  };
+
+  const handleKeyDown = (index, e) => {
+    if (e.key === "Backspace") {
+      if (!digits[index] && index > 0) {
+        inputsRef.current[index - 1]?.focus();
+        const nextOtp = value.split("");
+        nextOtp[index - 1] = "";
+        onChange(nextOtp.join(""));
+      } else {
+        const nextOtp = value.split("");
+        nextOtp[index] = "";
+        onChange(nextOtp.join(""));
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      e.preventDefault();
+      inputsRef.current[index - 1]?.focus();
+      inputsRef.current[index - 1]?.select();
+    } else if (e.key === "ArrowRight" && index < 5) {
+      e.preventDefault();
+      inputsRef.current[index + 1]?.focus();
+      inputsRef.current[index + 1]?.select();
+    }
+  };
+
+  const handlePastedCode = (pastedText) => {
+    const numbersOnly = pastedText.replace(/\D/g, "").slice(0, 6);
+    if (!numbersOnly) return;
+    onChange(numbersOnly);
+    const targetFocus = Math.min(numbersOnly.length, 5);
+    inputsRef.current[targetFocus]?.focus();
+    if (numbersOnly.length === 6) {
+      onComplete?.(numbersOnly);
+    }
+  };
+
+  const handlePaste = (e) => {
+    e.preventDefault();
+    const pasteData = e.clipboardData.getData("text");
+    handlePastedCode(pasteData);
+  };
+
+  return (
+    <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 py-1">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <input
+          key={i}
+          ref={(el) => (inputsRef.current[i] = el)}
+          type="text"
+          inputMode="numeric"
+          pattern="[0-9]*"
+          maxLength={1}
+          value={digits[i]}
+          onChange={(e) => handleDigitChange(i, e.target.value)}
+          onKeyDown={(e) => handleKeyDown(i, e)}
+          onPaste={handlePaste}
+          onFocus={(e) => e.target.select()}
+          disabled={disabled}
+          className="w-10 sm:w-12 h-11 sm:h-12 text-center text-base sm:text-[17px] font-medium text-neutral-700 bg-white border border-neutral-300 hover:border-neutral-400 focus:border-neutral-700 focus:ring-2 focus:ring-neutral-200/60 rounded-xl outline-none transition-all shadow-2xs disabled:bg-neutral-100 disabled:text-neutral-400"
+          autoFocus={i === 0}
+        />
+      ))}
+    </div>
+  );
+}
 
 // Standalone AuthFormContent to ensure input focus is never lost on re-renders
 function AuthFormContent({
@@ -86,7 +187,7 @@ function AuthFormContent({
 
           <div className="flex items-center gap-2.5">
             {/* Country Code Selector Box */}
-            <div className="flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-semibold text-neutral-800 shrink-0 select-none shadow-2xs">
+            <div className="flex items-center justify-center gap-1.5 px-3 py-3 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white text-sm font-semibold text-neutral-700 shrink-0 select-none shadow-2xs">
               <span>+91</span>
               <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
             </div>
@@ -105,7 +206,7 @@ function AuthFormContent({
                     handleSendOTP();
                   }
                 }}
-                className="w-full px-4 py-3 rounded-xl border border-neutral-300 bg-white text-sm font-medium text-neutral-900 placeholder:text-neutral-400 outline-none focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 transition-all shadow-2xs"
+                className="w-full px-4 py-3 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white text-sm font-medium text-neutral-700 placeholder:text-neutral-400 outline-none focus:border-neutral-700 focus:ring-2 focus:ring-neutral-200/60 transition-all shadow-2xs"
                 autoFocus
               />
             </div>
@@ -127,7 +228,7 @@ function AuthFormContent({
         </div>
       ) : (
         /* WhatsApp OTP Verification Step */
-        <div className="space-y-2.5">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-base font-bold text-neutral-900 tracking-tight">
@@ -149,28 +250,12 @@ function AuthFormContent({
             </button>
           </div>
 
-          {/* Monospace 6-Digit OTP Box */}
-          <input
-            type="text"
-            inputMode="numeric"
-            pattern="[0-9]*"
-            placeholder="• • • • • •"
+          {/* 6 Individual OTP Boxes */}
+          <OtpInputGroup
             value={otp}
-            onChange={(e) => {
-              const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-              setOtp(val);
-              if (val.length === 6) {
-                handleVerifyOTP(val);
-              }
-            }}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && otp.length === 6 && !otpLoading) {
-                handleVerifyOTP();
-              }
-            }}
-            className="w-full h-12 px-4 rounded-xl border-2 border-neutral-300 focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 text-center tracking-[0.45em] text-neutral-900 bg-white text-xl font-bold font-mono outline-none shadow-2xs transition-all"
-            maxLength={6}
-            autoFocus
+            onChange={setOtp}
+            onComplete={handleVerifyOTP}
+            disabled={otpLoading}
           />
 
           {/* Verify & Continue CTA */}
@@ -178,7 +263,7 @@ function AuthFormContent({
             type="button"
             onClick={() => handleVerifyOTP()}
             disabled={otpLoading || otp.length < 6}
-            className="w-full h-11 sm:h-12 mt-1 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
+            className="w-full h-11 sm:h-12 mt-2 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
           >
             {otpLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white" />
@@ -385,6 +470,16 @@ const ResponsiveAuthModal = ({
       }
       Cookies.set("token", data.token, getAuthCookieOptions());
 
+      // Immediately broadcast auth state change to all active components
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(
+          new CustomEvent("thevilla_auth_changed", {
+            detail: { user: data.user, token: data.token },
+          })
+        );
+        window.dispatchEvent(new Event("storage"));
+      }
+
       if (!isControlled) {
         setInternalOpen(false);
       }
@@ -396,13 +491,14 @@ const ResponsiveAuthModal = ({
         color: "success",
       });
 
+      // Immediately reload or navigate to returnUrl so all components display logged in UI
       setTimeout(() => {
-        if (returnUrl) {
-          router.push(returnUrl);
+        if (returnUrl && returnUrl !== window.location.pathname) {
+          window.location.href = returnUrl;
         } else {
-          router.refresh();
+          window.location.reload();
         }
-      }, 150);
+      }, 350);
     } catch (err) {
       addToast({
         title: "Verification Failed",
@@ -578,7 +674,7 @@ const ResponsiveAuthModal = ({
 
                   <div className="flex items-center gap-2.5 pt-2">
                     {/* Country Code Dropdown */}
-                    <div className="flex items-center justify-center gap-1.5 h-12 px-3.5 rounded-xl border border-[#ff6900]/70 hover:border-[#ff6900] bg-white text-sm font-semibold text-neutral-800 shrink-0 select-none shadow-2xs transition-colors">
+                    <div className="flex items-center justify-center gap-1.5 h-12 px-3.5 rounded-xl border border-neutral-300 hover:border-neutral-400 bg-white text-sm font-semibold text-neutral-700 shrink-0 select-none shadow-2xs transition-colors">
                       <span>+91</span>
                       <ChevronDown className="w-3.5 h-3.5 text-neutral-500" />
                     </div>
@@ -597,7 +693,7 @@ const ResponsiveAuthModal = ({
                             handleSendOTP();
                           }
                         }}
-                        className="w-full h-12 px-4 rounded-xl border border-[#ff6900]/70 hover:border-[#ff6900] focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 bg-white text-base font-medium text-neutral-900 placeholder:text-neutral-400 outline-none transition-all shadow-2xs"
+                        className="w-full h-12 px-4 rounded-xl border border-neutral-300 hover:border-neutral-400 focus:border-neutral-700 focus:ring-2 focus:ring-neutral-200/60 bg-white text-base font-medium text-neutral-700 placeholder:text-neutral-400 outline-none transition-all shadow-2xs"
                         autoFocus
                       />
                     </div>
@@ -644,27 +740,12 @@ const ResponsiveAuthModal = ({
                     </p>
                   </div>
 
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    pattern="[0-9]*"
-                    placeholder="• • • • • •"
+                  {/* 6 Individual OTP Boxes */}
+                  <OtpInputGroup
                     value={otp}
-                    onChange={(e) => {
-                      const val = e.target.value.replace(/\D/g, "").slice(0, 6);
-                      setOtp(val);
-                      if (val.length === 6) {
-                        handleVerifyOTP(val);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" && otp.length === 6 && !otpLoading) {
-                        handleVerifyOTP();
-                      }
-                    }}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-[#ff6900]/70 focus:border-[#ff6900] focus:ring-2 focus:ring-[#ff6900]/20 text-center tracking-[0.45em] text-neutral-900 bg-white text-xl font-bold font-mono outline-none shadow-2xs transition-all"
-                    maxLength={6}
-                    autoFocus
+                    onChange={setOtp}
+                    onComplete={handleVerifyOTP}
+                    disabled={otpLoading}
                   />
 
                   {/* Verify & Continue CTA (Theme Orange) */}

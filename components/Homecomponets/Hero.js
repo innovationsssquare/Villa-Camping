@@ -117,7 +117,7 @@ export default function Hero() {
   return (
     <section className="relative w-full pt-[70px] md:pt-[136px] overflow-hidden  ">
       {/* Background Container - Dynamic Content-Driven Height with No Clipping */}
-      <div className="relative w-full min-h-[360px] sm:min-h-[420px] md:min-h-[560px] lg:min-h-[620px] h-auto flex flex-col justify-between rounded-b-[1.75rem] sm:rounded-b-[2.5rem] md:rounded-b-[3.5rem] overflow-hidden shadow-xl ">
+      <div className="relative w-full min-h-[360px] sm:min-h-[420px] md:min-h-[560px] lg:min-h-[620px] h-auto flex flex-col justify-between  overflow-hidden shadow-xl ">
         {/* Hero Background Banner Image - Bright & Vibrant */}
         <div className="absolute inset-0">
           <Image

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useSelector, useDispatch } from "react-redux";
 import Cookies from "js-cookie";
@@ -34,7 +34,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { clearMyBookings } from "@/Redux/Slices/myBookingSlice";
+import { clearMyBookings, fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
+import { fetchWishlistIds, fetchmyWishlists, selectWishlistCount } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { NotificationSheet } from "./Notificationsheet";
 
@@ -48,27 +49,34 @@ export function ProfileSheet() {
   const dispatch = useDispatch();
 
   // Redux state
-  const wishlistIds = useSelector((state) => state?.wishlist?.ids || []);
-  const wishlistItems = useSelector((state) => state?.wishlist?.wishlists || []);
+  const wishlistCount = useSelector(selectWishlistCount);
   const bookings = useSelector((state) => state?.myBookings?.bookings || []);
-
-  const wishlistCount =
-    wishlistItems?.length ||
-    (wishlistIds ? new Set(wishlistIds.map((id) => (id.includes(":") ? id.split(":")[1] : id))).size : 0);
   const bookingsCount = bookings?.length || 0;
 
-  // Load user data on mount and whenever sheet opens
-  useEffect(() => {
+  // Real-time synchronization of auth status
+  const syncAuthState = useCallback(() => {
     try {
       const token = Cookies.get("token");
       const storedUserStr = localStorage.getItem("thevilla_user");
+      const storedUserId = localStorage.getItem("thevilla_user_id");
       if (token && storedUserStr) {
         const parsed = JSON.parse(storedUserStr);
         setCurrentUser(parsed);
         setIsLoggedIn(true);
+        const uid = parsed?._id || storedUserId;
+        if (uid) {
+          dispatch(fetchMyBookings(uid));
+          dispatch(fetchWishlistIds(uid));
+          dispatch(fetchmyWishlists(uid));
+        }
       } else if (token) {
         setIsLoggedIn(true);
         setCurrentUser({ fullName: "Valued Guest" });
+        if (storedUserId) {
+          dispatch(fetchMyBookings(storedUserId));
+          dispatch(fetchWishlistIds(storedUserId));
+          dispatch(fetchmyWishlists(storedUserId));
+        }
       } else {
         setCurrentUser(null);
         setIsLoggedIn(false);
@@ -76,7 +84,21 @@ export function ProfileSheet() {
     } catch {
       setIsLoggedIn(false);
     }
-  }, [open]);
+  }, [dispatch]);
+
+  useEffect(() => {
+    syncAuthState();
+  }, [open, syncAuthState]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.addEventListener("thevilla_auth_changed", syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+    return () => {
+      window.removeEventListener("thevilla_auth_changed", syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, [syncAuthState]);
 
   const handleNavigate = (path) => {
     setOpen(false);

@@ -106,7 +106,7 @@ export function AppHeader() {
           <UserSidebar />
           {isLocationPage ? (
             <div className="flex items-center gap-1 text-[10px]">
-              <span className="uppercase font-bold text-neutral-400">Location:</span>
+              <span className="uppercase font-bold text-neutral-400"></span>
               <UserLocationDisplay />
             </div>
           ) : pageMeta ? (

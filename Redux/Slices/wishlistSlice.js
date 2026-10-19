@@ -244,4 +244,29 @@ const wishlistSlice = createSlice({
 export const { optimisticToggle, rollbackToggle, clearWishlist } =
   wishlistSlice.actions;
 
+/**
+ * 🔢 Selector to calculate the accurate count of unique saved properties
+ * Deduplicates raw IDs from composite keys like "cottage:id" and "id"
+ */
+export const selectWishlistCount = (state) => {
+  const items = state?.wishlist?.wishlists;
+  if (Array.isArray(items) && items.length > 0) return items.length;
+  const ids = state?.wishlist?.ids;
+  if (!Array.isArray(ids) || ids.length === 0) return 0;
+  const uniqueRawIds = new Set();
+  for (const item of ids) {
+    if (!item) continue;
+    if (typeof item === "object") {
+      const raw = item.propertyId || item._id || item.id;
+      if (raw) uniqueRawIds.add(String(raw));
+    } else {
+      const str = String(item).trim();
+      if (!str) continue;
+      const raw = str.includes(":") ? str.split(":")[1] : str;
+      if (raw) uniqueRawIds.add(raw);
+    }
+  }
+  return uniqueRawIds.size;
+};
+
 export default wishlistSlice.reducer;

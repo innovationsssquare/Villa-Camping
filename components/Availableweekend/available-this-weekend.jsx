@@ -120,7 +120,7 @@ export function AvailableThisWeekend() {
         </div>
 
         {/* Category Tabs - Centered with #ff6900 Theme */}
-        <div className="flex justify-start sm:justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 mb-4 sm:mb-6">
+        <div className="flex justify-center sm:justify-center items-center gap-2 overflow-x-auto no-scrollbar py-1 px-1 mb-4 sm:mb-6">
           {loading ? (
             <div className="flex gap-2 justify-center mx-auto">
               {[...Array(4)].map((_, i) => (

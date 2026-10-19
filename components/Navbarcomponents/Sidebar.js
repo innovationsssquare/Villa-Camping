@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import Cookies from "js-cookie";
@@ -42,26 +42,41 @@ import {
   Facebook,
 } from "lucide-react";
 import { TiThMenu } from "react-icons/ti";
+import { useDispatch } from "react-redux";
+import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
+import { fetchWishlistIds } from "@/Redux/Slices/wishlistSlice";
 
 export function UserSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const dispatch = useDispatch();
   const { openAuthModal } = useAuthModal();
   const [open, setOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Read session whenever opened
-  useEffect(() => {
+  // Real-time synchronization of auth status
+  const syncAuthState = useCallback(() => {
     try {
       const token = Cookies.get("token");
       const storedUserStr = localStorage.getItem("thevilla_user");
+      const storedUserId = localStorage.getItem("thevilla_user_id");
       if (token && storedUserStr) {
-        setCurrentUser(JSON.parse(storedUserStr));
+        const parsed = JSON.parse(storedUserStr);
+        setCurrentUser(parsed);
         setIsLoggedIn(true);
+        const uid = parsed?._id || storedUserId;
+        if (uid) {
+          dispatch(fetchMyBookings(uid));
+          dispatch(fetchWishlistIds(uid));
+        }
       } else if (token) {
         setCurrentUser({ fullName: "Valued Guest" });
         setIsLoggedIn(true);
+        if (storedUserId) {
+          dispatch(fetchMyBookings(storedUserId));
+          dispatch(fetchWishlistIds(storedUserId));
+        }
       } else {
         setCurrentUser(null);
         setIsLoggedIn(false);
@@ -69,7 +84,21 @@ export function UserSidebar() {
     } catch {
       setIsLoggedIn(false);
     }
-  }, [open]);
+  }, [dispatch]);
+
+  useEffect(() => {
+    syncAuthState();
+  }, [open, syncAuthState]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.addEventListener("thevilla_auth_changed", syncAuthState);
+    window.addEventListener("storage", syncAuthState);
+    return () => {
+      window.removeEventListener("thevilla_auth_changed", syncAuthState);
+      window.removeEventListener("storage", syncAuthState);
+    };
+  }, [syncAuthState]);
 
   useEffect(() => {
     setOpen(false);

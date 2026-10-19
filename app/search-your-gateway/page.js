@@ -305,11 +305,10 @@ const Mappropertyview = () => {
 
         {/* Mobile Bottom Peek Bar (Smoothly hides when a property card is selected on the map) */}
         <div
-          className={`fixed bottom-0 left-0 right-0 z-20 transition-all duration-300 ${
-            activePropertyId
-              ? "translate-y-full opacity-0 pointer-events-none"
-              : "translate-y-0 opacity-100"
-          }`}
+          className={`fixed bottom-0 left-0 right-0 z-20 transition-all duration-300 ${activePropertyId
+            ? "translate-y-full opacity-0 pointer-events-none"
+            : "translate-y-0 opacity-100"
+            }`}
         >
           <PropertyCountHeader
             count={filteredAndSortedProperties.length || 0}
@@ -339,7 +338,7 @@ const Mappropertyview = () => {
         <Navbar />
 
         {/* 2. MAIN DESKTOP BODY (Offset below fixed Navbar ~136px) */}
-        <div className="flex flex-col flex-1 h-full pt-[136px] overflow-hidden bg-white">
+        <div className="flex flex-col flex-1 h-full pt-[70px] overflow-hidden bg-white">
           {/* FILTER STRIP (Location, Filters, Price, Type of Place, Sort) */}
           <div className="border-b border-neutral-200/90 bg-white px-8 py-3 flex items-center justify-between shrink-0 gap-4 z-20">
             {/* Left: Filter Buttons */}
@@ -377,11 +376,10 @@ const Mappropertyview = () => {
               <button
                 type="button"
                 onClick={() => setIsFilterDrawerOpen(true)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                  customFilters
-                    ? "border-[#ff6900] bg-orange-50 text-[#ff6900] font-bold shadow-xs"
-                    : "border-neutral-300 hover:border-neutral-900 text-neutral-800 bg-white"
-                }`}
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full border text-xs font-semibold transition-all cursor-pointer active:scale-95 ${customFilters
+                  ? "border-[#ff6900] bg-orange-50 text-[#ff6900] font-bold shadow-xs"
+                  : "border-neutral-300 hover:border-neutral-900 text-neutral-800 bg-white"
+                  }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 <span>Filters</span>
@@ -400,11 +398,10 @@ const Mappropertyview = () => {
                 <PopoverTrigger asChild>
                   <button
                     type="button"
-                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold transition-all cursor-pointer active:scale-95 ${
-                      customFilters?.priceRange
-                        ? "border-[#ff6900] bg-orange-50 text-[#ff6900] font-bold"
-                        : "border-neutral-300 hover:border-neutral-900 text-neutral-800 bg-white"
-                    }`}
+                    className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full border text-xs font-semibold transition-all cursor-pointer active:scale-95 ${customFilters?.priceRange
+                      ? "border-[#ff6900] bg-orange-50 text-[#ff6900] font-bold"
+                      : "border-neutral-300 hover:border-neutral-900 text-neutral-800 bg-white"
+                      }`}
                   >
                     <span>
                       {customFilters?.priceRange

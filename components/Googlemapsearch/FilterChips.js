@@ -10,7 +10,10 @@ import {
   Sparkles,
 } from "lucide-react";
 import { fetchAllCategories } from "@/Redux/Slices/categorySlice";
-import { setSelectedCategory } from "@/Redux/Slices/bookingSlice";
+import {
+  setSelectedCategory,
+  setSelectedCategoryname,
+} from "@/Redux/Slices/bookingSlice";
 
 const getCategoryIcon = (slug, isActive) => {
   const iconClass = `h-3.5 w-3.5 transition-colors ${isActive ? "text-white" : "text-[#ff6900]"
