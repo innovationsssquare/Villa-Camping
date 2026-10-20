@@ -15,12 +15,21 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Users, Bed, Eye } from "lucide-react";
-import GoogleMap from "../google-map";
+import dynamic from "next/dynamic";
 import { useHotel } from "@/lib/context/HotelContext";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import HotelDetailsDrawer from "@/components/Hotelscreen/HotelDetailsDrawer";
 import { calculateBasePriceForRange } from "@/lib/datePricing";
 import Image from "next/image";
+
+const GoogleMap = dynamic(() => import("../google-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[320px] rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse flex items-center justify-center text-neutral-400 text-sm">
+      Loading location map...
+    </div>
+  ),
+});
 
 export default function PropertyContentSections() {
   const hotel = useHotel();

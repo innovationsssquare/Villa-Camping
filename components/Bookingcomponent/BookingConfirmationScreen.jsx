@@ -146,8 +146,9 @@ export default function BookingConfirmationScreen({
   })();
 
   const bookingCode =
+    bookingData?.bookingReference ||
     bookingData?.payoutId?.bookingReference ||
-    (bookingId ? `VL-${bookingId.slice(-6).toUpperCase()}` : "VL-928401");
+    (bookingId ? `BK-${bookingId.slice(-5).toUpperCase()}` : "BK-46473");
 
   const displayPropertyName =
     prop?.name ||

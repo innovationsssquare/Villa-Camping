@@ -17,7 +17,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import GoogleMap from "../google-map";
+import dynamic from "next/dynamic";
 import { useCamping } from "@/lib/context/CampingContext";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import TentDetailsDrawer from "@/components/Tentscreen/TentDetailsDrawer";
@@ -79,6 +79,15 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 
 dayjs.extend(relativeTime);
+
+const GoogleMap = dynamic(() => import("../google-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[320px] rounded-xl bg-neutral-100 dark:bg-neutral-800 animate-pulse flex items-center justify-center text-neutral-400 text-sm">
+      Loading location map...
+    </div>
+  ),
+});
 
 // Signature experience cards matching desktop
 const defaultSignatureExperiences = [

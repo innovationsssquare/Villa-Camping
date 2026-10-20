@@ -7,6 +7,9 @@ import { notFound } from "next/navigation";
 
 const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
 
+// Incremental Static Regeneration: revalidate background cache once every 60 seconds
+export const revalidate = 60;
+
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
