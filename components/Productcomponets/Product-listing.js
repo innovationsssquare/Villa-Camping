@@ -458,7 +458,7 @@ export default function PropertyFilterListing({ categorySlug }) {
       {/* ========================================================================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Mobile Quick Search Bar */}
-        <div className="md:hidden relative w-full mb-3 mt-1">
+        <div className="md:hidden relative w-full mb-4 mt-2">
           <input
             type="text"
             placeholder="Search stays by name or area..."

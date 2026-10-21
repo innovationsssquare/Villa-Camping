@@ -156,11 +156,11 @@ export function AvailableThisWeekend() {
 
         {/* Loading Skeleton (Horizontal Carousel Layout for both Mobile and Desktop) */}
         {weekendLoading && (
-          <div className="flex gap-2.5 sm:gap-3.5 overflow-hidden w-full py-2">
+          <div className="flex gap-3 sm:gap-3.5 overflow-hidden w-full py-2">
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="basis-[48%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5 xl:basis-1/6 shrink-0"
+                className="basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
               >
                 <PropertySkeleton />
               </div>
@@ -168,7 +168,7 @@ export function AvailableThisWeekend() {
           </div>
         )}
 
-        {/* Properties Carousel (Airbnb Multi-Card Layout) */}
+        {/* Properties Carousel (Airbnb Multi-Card Layout matching Destination card size) */}
         {!weekendLoading && weekendData.length > 0 && (
           <div className="relative py-2">
             <Carousel
@@ -178,11 +178,11 @@ export function AvailableThisWeekend() {
               className="w-full"
               opts={{ align: "start", dragFree: true }}
             >
-              <CarouselContent className="-ml-2.5 sm:-ml-3.5">
+              <CarouselContent className="-ml-3 sm:-ml-3.5">
                 {weekendData.map((property) => (
                   <CarouselItem
                     key={property._id}
-                    className="pl-2.5 sm:pl-3.5 basis-[48%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
+                    className="pl-3 sm:pl-3.5 basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
                   >
                     <Weekendcard property={property} />
                   </CarouselItem>

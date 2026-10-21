@@ -174,57 +174,55 @@ export default function BecomeHostPage() {
   };
 
   return (
-    <div className="w-full min-h-screen bg-neutral-950 text-neutral-100 selection:bg-[#ff6900] selection:text-white">
+    <div className="w-full min-h-screen bg-white text-neutral-900 selection:bg-[#ff6900] selection:text-white">
       {/* =====================================================================
           1. CINEMATIC LUXURY HERO SECTION
           ===================================================================== */}
-      <section className="relative w-full min-h-[92vh] flex items-center justify-center overflow-hidden pt-20 pb-16 px-4 sm:px-6 lg:px-8">
-        {/* Villa Background Banner with Vignette Overlays */}
+      <section className="relative w-full flex items-center justify-center overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
+        {/* Villa Background Banner with Soft Light Overlays */}
         <div className="absolute inset-0 z-0">
           <Image
             src="/Aboutusasset/Villabanner.jpg"
             alt="The Villa Camp Luxury Estate Background"
             fill
             priority
-            className="object-cover object-center brightness-[0.38] scale-105 transition-transform duration-1000"
+            className="object-cover object-center opacity-25 scale-105"
           />
-          {/* Gradients to blend smoothly with dark background */}
-          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/70 to-neutral-950/90" />
-          <div className="absolute inset-0 bg-radial from-transparent via-neutral-950/50 to-neutral-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white" />
         </div>
 
-        {/* Ambient Amber Glow Balls */}
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ff6900]/20 rounded-full blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-10 -right-20 w-96 h-96 bg-amber-500/15 rounded-full blur-[140px] pointer-events-none" />
+        {/* Ambient Warm Glow Balls */}
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ff6900]/10 rounded-full blur-[140px] pointer-events-none" />
+        <div className="absolute bottom-10 -right-20 w-96 h-96 bg-amber-300/20 rounded-full blur-[160px] pointer-events-none" />
 
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
           {/* Glowing Partner Pill */}
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-xs font-semibold text-orange-400 mb-6 shadow-lg shadow-black/40">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[11px] sm:text-xs font-semibold text-[#ff6900] mb-4 shadow-2xs">
             <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
             <span className="tracking-wide">The Villa Camp • Luxury Host Partnership</span>
           </div>
 
           {/* Main Title */}
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-white tracking-tight leading-[1.12] max-w-4xl">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold text-neutral-950 tracking-tight leading-tight max-w-3xl">
             Turn Your Luxury Villa Into a{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] via-amber-400 to-[#ff8c33]">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] via-amber-500 to-[#ea580c]">
               High-Yield Asset
             </span>
           </h1>
 
           {/* Subtitle */}
-          <p className="text-sm sm:text-base md:text-lg text-neutral-300 max-w-2xl mt-5 leading-relaxed font-normal">
+          <p className="text-xs sm:text-sm md:text-[15px] text-neutral-600 max-w-2xl mt-3.5 leading-relaxed font-normal">
             Join Western India&apos;s premier luxury hospitality network across Lonavala,
             Alibaug, and Pawana Lake. Zero upfront fees, guaranteed guest vetting, and automated
             24-hour payouts.
           </p>
 
           {/* Hero CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3.5 mt-8 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-3 mt-6 w-full sm:w-auto">
             <Button
               onClick={() => scrollToSection("inquiry-form-section")}
-              className="w-full sm:w-auto h-12 px-8 rounded-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-sm font-bold shadow-xl shadow-[#ff6900]/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#ff6900]/20 transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>List Your Property</span>
               <ArrowUpRight className="w-4 h-4" />
@@ -233,39 +231,39 @@ export default function BecomeHostPage() {
             <Button
               variant="outline"
               onClick={() => scrollToSection("yield-estimator")}
-              className="w-full sm:w-auto h-12 px-7 rounded-full bg-white/5 hover:bg-white/10 text-neutral-200 border-white/20 text-sm font-semibold backdrop-blur-sm transition-all cursor-pointer flex items-center justify-center gap-2"
+              className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300 text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2"
             >
               <span>Estimate Your Earnings</span>
-              <TrendingUp className="w-4 h-4 text-orange-400" />
+              <TrendingUp className="w-4 h-4 text-[#ff6900]" />
             </Button>
           </div>
 
           {/* Proof Strip / Metric Pills */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 mt-12 sm:mt-16 w-full max-w-4xl">
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800 backdrop-blur-md text-center">
-              <span className="block text-lg sm:text-2xl font-black text-white">₹4.5L - ₹8.5L</span>
-              <span className="text-[11px] sm:text-xs text-neutral-400 mt-0.5 block">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 mt-8 sm:mt-10 w-full max-w-4xl">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
+              <span className="block text-base sm:text-xl font-extrabold text-neutral-900">₹4.5L - ₹8.5L</span>
+              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
                 Avg. Monthly Gross Yield
               </span>
             </div>
 
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800 backdrop-blur-md text-center">
-              <span className="block text-lg sm:text-2xl font-black text-emerald-400">100%</span>
-              <span className="text-[11px] sm:text-xs text-neutral-400 mt-0.5 block">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
+              <span className="block text-base sm:text-xl font-extrabold text-emerald-600">100%</span>
+              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
                 Govt ID Verified Guests
               </span>
             </div>
 
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800 backdrop-blur-md text-center">
-              <span className="block text-lg sm:text-2xl font-black text-white">₹0</span>
-              <span className="text-[11px] sm:text-xs text-neutral-400 mt-0.5 block">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
+              <span className="block text-base sm:text-xl font-extrabold text-neutral-900">₹0</span>
+              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
                 Zero Upfront Listing Fee
               </span>
             </div>
 
-            <div className="p-3.5 sm:p-4 rounded-2xl bg-neutral-900/80 border border-neutral-800 backdrop-blur-md text-center">
-              <span className="block text-lg sm:text-2xl font-black text-[#ff6900]">48 Hours</span>
-              <span className="text-[11px] sm:text-xs text-neutral-400 mt-0.5 block">
+            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
+              <span className="block text-base sm:text-xl font-extrabold text-[#ff6900]">48 Hours</span>
+              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
                 Inspection to Live Booking
               </span>
             </div>
@@ -278,7 +276,7 @@ export default function BecomeHostPage() {
           ===================================================================== */}
       <section
         id="yield-estimator"
-        className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-neutral-900/90 border-y border-neutral-800 relative overflow-hidden"
+        className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] border-y border-neutral-200 relative overflow-hidden"
       >
         <div className="max-w-6xl mx-auto">
           {/* Section Header */}
@@ -286,21 +284,21 @@ export default function BecomeHostPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-[#ff6900] block mb-2">
               Transparent Profitability
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
               Estimate Your Villa&apos;s Monthly Revenue
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-400 mt-2">
+            <p className="text-xs sm:text-sm text-neutral-500 mt-2">
               Realized metrics based on historical occupancy data across our active Maharashtra
               portfolio.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-neutral-950/70 border border-neutral-800 rounded-3xl p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white border border-neutral-200 rounded-3xl p-6 sm:p-8 md:p-10 shadow-xl shadow-neutral-900/5">
             {/* Left Controls (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
               {/* Location Selectors */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-2.5">
                   1. Select Destination Area
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -315,7 +313,7 @@ export default function BecomeHostPage() {
                       className={`px-3 py-2.5 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer ${
                         selectedLocation === loc
                           ? "bg-[#ff6900] text-white border-[#ff6900] shadow-md shadow-[#ff6900]/20"
-                          : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white"
+                          : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-100"
                       }`}
                     >
                       {loc}
@@ -326,7 +324,7 @@ export default function BecomeHostPage() {
 
               {/* BHK Configuration */}
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-400 mb-2.5">
+                <label className="block text-xs font-semibold uppercase tracking-wider text-neutral-600 mb-2.5">
                   2. Select Property Configuration
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
@@ -340,8 +338,8 @@ export default function BecomeHostPage() {
                       }}
                       className={`px-3 py-2.5 rounded-xl text-xs font-semibold border transition-all text-center cursor-pointer ${
                         selectedBhk === bhk
-                          ? "bg-white text-neutral-950 border-white shadow-md"
-                          : "bg-neutral-900 border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white"
+                          ? "bg-neutral-900 text-white border-neutral-900 shadow-md"
+                          : "bg-neutral-50 border-neutral-200 text-neutral-700 hover:border-neutral-300 hover:bg-neutral-100"
                       }`}
                     >
                       {bhk}
@@ -351,7 +349,7 @@ export default function BecomeHostPage() {
               </div>
 
               {/* Highlights Note */}
-              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-neutral-900/90 border border-neutral-800/80 text-xs text-neutral-400">
+              <div className="flex items-center gap-3 p-3.5 rounded-2xl bg-orange-50/70 border border-orange-200/70 text-xs text-neutral-700">
                 <ShieldCheck className="w-4 h-4 text-[#ff6900] shrink-0" />
                 <span>
                   Includes professional housekeeping supervision, dynamic pricing algorithms, and 24/7 guest concierge.
@@ -360,7 +358,7 @@ export default function BecomeHostPage() {
             </div>
 
             {/* Right Result Card (5 cols) */}
-            <div className="lg:col-span-5 p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-neutral-900 to-neutral-900/60 border border-neutral-800 shadow-xl relative overflow-hidden flex flex-col justify-between h-full">
+            <div className="lg:col-span-5 p-6 sm:p-7 rounded-2xl bg-gradient-to-br from-neutral-950 via-neutral-900 to-neutral-950 text-white border border-neutral-800 shadow-xl relative overflow-hidden flex flex-col justify-between h-full">
               <div className="space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-neutral-800">
                   <span className="text-xs text-neutral-400 font-medium">
@@ -381,13 +379,13 @@ export default function BecomeHostPage() {
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 pt-2">
-                  <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-800/70">
+                  <div className="p-3 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
                     <span className="text-[11px] text-neutral-400 block">Avg. Weekend ADR</span>
                     <span className="text-sm font-bold text-white mt-0.5 block">
                       {currentEstimate.weekendAdr}
                     </span>
                   </div>
-                  <div className="p-3 rounded-xl bg-neutral-950/60 border border-neutral-800/70">
+                  <div className="p-3 rounded-xl bg-neutral-900/90 border border-neutral-800/80">
                     <span className="text-[11px] text-neutral-400 block">Target Occupancy</span>
                     <span className="text-sm font-bold text-emerald-400 mt-0.5 block">
                       {currentEstimate.occupancy}
@@ -413,88 +411,88 @@ export default function BecomeHostPage() {
       {/* =====================================================================
           3. THE 4 CORE PILLARS OF HOST PARTNERSHIP
           ===================================================================== */}
-      <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950 relative">
+      <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white relative">
         <div className="max-w-6xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-[#ff6900] block mb-2">
               Total Owner Protection
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
               Why Premier Estate Owners Partner With Us
             </h2>
-            <p className="text-xs sm:text-sm text-neutral-400 mt-2">
+            <p className="text-xs sm:text-sm text-neutral-500 mt-2">
               We handle every operational headache so you enjoy purely passive hospitality income.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {/* Card 1 */}
-            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-900/5 transition-all group flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <ShieldCheck className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">100% Guest KYC Audits</h3>
-                <p className="text-xs text-neutral-400 leading-relaxed">
+                <h3 className="text-base font-bold text-neutral-900 mb-2">100% Guest KYC Audits</h3>
+                <p className="text-xs text-neutral-600 leading-relaxed">
                   Every booking undergoes mandatory government photo ID checks and screening against
                   unauthorized parties.
                 </p>
               </div>
-              <div className="pt-4 mt-4 border-t border-neutral-800/60 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
+              <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600">
                 <Check className="w-3.5 h-3.5" />
                 <span>Zero Party Policy</span>
               </div>
             </div>
 
             {/* Card 2 */}
-            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-900/5 transition-all group flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <Camera className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Free HDR & Drone Shoot</h3>
-                <p className="text-xs text-neutral-400 leading-relaxed">
+                <h3 className="text-base font-bold text-neutral-900 mb-2">Free HDR & Drone Shoot</h3>
+                <p className="text-xs text-neutral-600 leading-relaxed">
                   Complimentary architectural photography and 4K aerial drone coverage worth
                   ₹25,000 at zero cost to you.
                 </p>
               </div>
-              <div className="pt-4 mt-4 border-t border-neutral-800/60 flex items-center gap-1.5 text-[11px] font-semibold text-blue-400">
+              <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-1.5 text-[11px] font-semibold text-blue-600">
                 <Check className="w-3.5 h-3.5" />
                 <span>Zero Cost Setup</span>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-900/5 transition-all group flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-[#ff6900]/10 border border-[#ff6900]/20 text-[#ff6900] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-orange-50 border border-orange-100 text-[#ff6900] flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <Banknote className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">24h Automated Payouts</h3>
-                <p className="text-xs text-neutral-400 leading-relaxed">
+                <h3 className="text-base font-bold text-neutral-900 mb-2">24h Automated Payouts</h3>
+                <p className="text-xs text-neutral-600 leading-relaxed">
                   Direct bank settlements via RazorpayX within 24 hours of guest check-in. Never
                   chase payment balances.
                 </p>
               </div>
-              <div className="pt-4 mt-4 border-t border-neutral-800/60 flex items-center gap-1.5 text-[11px] font-semibold text-[#ff6900]">
+              <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-1.5 text-[11px] font-semibold text-[#ff6900]">
                 <Check className="w-3.5 h-3.5" />
                 <span>Instant Bank Credit</span>
               </div>
             </div>
 
             {/* Card 4 */}
-            <div className="p-6 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 hover:border-neutral-700 transition-all group flex flex-col justify-between">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 hover:border-neutral-300 hover:shadow-xl hover:shadow-neutral-900/5 transition-all group flex flex-col justify-between">
               <div>
-                <div className="w-12 h-12 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
+                <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
                   <Users className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Regional Field Managers</h3>
-                <p className="text-xs text-neutral-400 leading-relaxed">
+                <h3 className="text-base font-bold text-neutral-900 mb-2">Regional Field Managers</h3>
+                <p className="text-xs text-neutral-600 leading-relaxed">
                   Dedicated on-ground villa supervisors in Lonavala and Alibaug inspecting upkeep and
                   assisting caretaking staff.
                 </p>
               </div>
-              <div className="pt-4 mt-4 border-t border-neutral-800/60 flex items-center gap-1.5 text-[11px] font-semibold text-purple-400">
+              <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center gap-1.5 text-[11px] font-semibold text-purple-600">
                 <Check className="w-3.5 h-3.5" />
                 <span>On-Ground Supervision</span>
               </div>
@@ -506,40 +504,40 @@ export default function BecomeHostPage() {
       {/* =====================================================================
           4. 3-STEP SIMPLE ONBOARDING ROADMAP
           ===================================================================== */}
-      <section className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-neutral-900/60 border-y border-neutral-800">
+      <section className="w-full py-16 sm:py-20 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] border-y border-neutral-200">
         <div className="max-w-5xl mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-14">
             <span className="text-xs font-bold uppercase tracking-wider text-[#ff6900] block mb-2">
               Swift 48-Hour Turnaround
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
               From Inquiry to First Booking in 3 Steps
             </h2>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-            <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/90 relative">
-              <span className="text-3xl font-black text-neutral-700 block mb-3">01</span>
-              <h4 className="text-base font-bold text-white mb-1.5">Submit Property Details</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow relative">
+              <span className="text-3xl font-black text-neutral-300 block mb-3">01</span>
+              <h4 className="text-base font-bold text-neutral-900 mb-1.5">Submit Property Details</h4>
+              <p className="text-xs text-neutral-600 leading-relaxed">
                 Fill out our simple 2-minute inquiry form below. Tell us your villa location,
                 amenities, and room layout.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/90 relative">
-              <span className="text-3xl font-black text-neutral-700 block mb-3">02</span>
-              <h4 className="text-base font-bold text-white mb-1.5">Site Audit & Free Shoot</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow relative">
+              <span className="text-3xl font-black text-neutral-300 block mb-3">02</span>
+              <h4 className="text-base font-bold text-neutral-900 mb-1.5">Site Audit & Free Shoot</h4>
+              <p className="text-xs text-neutral-600 leading-relaxed">
                 Our regional manager visits for a rapid quality audit and conducts our complimentary
                 drone & HDR photoshoot.
               </p>
             </div>
 
-            <div className="p-6 rounded-2xl bg-neutral-950 border border-neutral-800/90 relative">
+            <div className="p-6 rounded-2xl bg-white border border-neutral-200 shadow-sm hover:shadow-md transition-shadow relative">
               <span className="text-3xl font-black text-[#ff6900] block mb-3">03</span>
-              <h4 className="text-base font-bold text-white mb-1.5">Go Live & Earn</h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
+              <h4 className="text-base font-bold text-neutral-900 mb-1.5">Go Live & Earn</h4>
+              <p className="text-xs text-neutral-600 leading-relaxed">
                 Your luxury property is launched across high-intent travelers. Track bookings and
                 automated payouts on your Owner App.
               </p>
@@ -553,28 +551,28 @@ export default function BecomeHostPage() {
           ===================================================================== */}
       <section
         id="download-app"
-        className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950 relative overflow-hidden"
+        className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white relative overflow-hidden"
       >
         {/* Background mesh glow */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#ff6900]/10 rounded-full blur-[160px] pointer-events-none" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-[#ff6900]/5 rounded-full blur-[160px] pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Description (6 cols) */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold text-orange-400">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-bold text-[#ff6900]">
                 <Smartphone className="w-3.5 h-3.5 text-[#ff6900]" />
                 <span>The Villa Camp • Owner App</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-neutral-900 tracking-tight leading-tight">
                 Your Complete Villa Empire{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-amber-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-amber-500">
                   in the Palm of Your Hand
                 </span>
               </h2>
 
-              <p className="text-xs sm:text-sm md:text-base text-neutral-300 leading-relaxed">
+              <p className="text-xs sm:text-sm md:text-base text-neutral-600 leading-relaxed">
                 Whether relaxing in Mumbai or traveling abroad, the Thevillacamp Owner App gives you
                 instant, real-time oversight over your estate. Monitor bookings, block personal dates,
                 and receive automated daily earnings alerts.
@@ -583,31 +581,31 @@ export default function BecomeHostPage() {
               {/* Checklist */}
               <div className="space-y-3 pt-2">
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3" />
                   </div>
-                  <div className="text-xs text-neutral-300">
-                    <strong className="text-white">Instant Reservation Alerts:</strong> Push
+                  <div className="text-xs text-neutral-700">
+                    <strong className="text-neutral-900">Instant Reservation Alerts:</strong> Push
                     notifications the second a confirmed guest pays.
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3" />
                   </div>
-                  <div className="text-xs text-neutral-300">
-                    <strong className="text-white">1-Tap Personal Stay Block:</strong> Reserve your
+                  <div className="text-xs text-neutral-700">
+                    <strong className="text-neutral-900">1-Tap Personal Stay Block:</strong> Reserve your
                     villa for family weekends instantly.
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
                     <Check className="w-3 h-3" />
                   </div>
-                  <div className="text-xs text-neutral-300">
-                    <strong className="text-white">Live RazorpayX Settlement:</strong> Transparent
+                  <div className="text-xs text-neutral-700">
+                    <strong className="text-neutral-900">Live RazorpayX Settlement:</strong> Transparent
                     breakdown of rent, taxes, and bank transfers.
                   </div>
                 </div>
@@ -616,7 +614,7 @@ export default function BecomeHostPage() {
               {/* Badges & QR Code */}
               <div className="pt-4 flex flex-wrap items-center gap-4">
                 {/* App Store Badge */}
-                <div className="px-4 py-2.5 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 flex items-center gap-3 transition-colors cursor-pointer">
+                <div className="px-4 py-2.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center gap-3 transition-colors cursor-pointer shadow-md">
                   <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
                     <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.61-.75 1.04-1.8 0.92-2.85-.92.04-2.02.62-2.66 1.37-.56.65-.87 1.7-.74 2.72 1.03.08 2.07-.49 2.48-1.24z" />
                   </svg>
@@ -629,7 +627,7 @@ export default function BecomeHostPage() {
                 </div>
 
                 {/* Google Play Badge */}
-                <div className="px-4 py-2.5 rounded-2xl bg-neutral-900 border border-neutral-800 hover:border-neutral-700 flex items-center gap-3 transition-colors cursor-pointer">
+                <div className="px-4 py-2.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center gap-3 transition-colors cursor-pointer shadow-md">
                   <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
                     <path d="M3.609 1.814L13.793 12 3.61 22.186c-.28-.27-.44-.657-.44-1.096V2.91c0-.44.16-.827.439-1.096zm11.238 11.239l2.096-2.096-10.45-6.033 8.354 8.129zm2.096-4.108l2.25 1.3c.75.433.75 1.134 0 1.567l-2.25 1.3-2.096-2.096 2.096-2.071zm-4.192-2.071L4.397 21.314l10.45-6.033-2.096-2.096z" />
                   </svg>
@@ -642,7 +640,7 @@ export default function BecomeHostPage() {
                 </div>
 
                 {/* Direct APK / Host Login */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-xs text-neutral-300">
+                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-100 border border-neutral-200 text-xs text-neutral-700">
                   <QrCode className="w-4 h-4 text-[#ff6900]" />
                   <span>Scan QR code for instant install</span>
                 </div>
@@ -651,7 +649,7 @@ export default function BecomeHostPage() {
 
             {/* Right Mockup: Realistic Mobile Phone Screen (6 cols) */}
             <div className="lg:col-span-6 flex justify-center lg:justify-end">
-              <div className="relative w-[300px] sm:w-[330px] h-[610px] sm:h-[640px] rounded-[48px] bg-neutral-900 border-[10px] border-neutral-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col justify-between">
+              <div className="relative w-[300px] sm:w-[330px] h-[610px] sm:h-[640px] rounded-[48px] bg-neutral-900 border-[10px] border-neutral-800 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.5)] overflow-hidden flex flex-col justify-between">
                 {/* iPhone Titanium Dynamic Island & Speaker Notch */}
                 <div className="absolute top-2.5 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-full z-40 flex items-center justify-between px-2">
                   <div className="w-2.5 h-2.5 rounded-full bg-neutral-900/80 border border-neutral-700" />
@@ -782,29 +780,29 @@ export default function BecomeHostPage() {
           ===================================================================== */}
       <section
         id="inquiry-form-section"
-        className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-900 text-white relative overflow-hidden"
+        className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-[#F8FAFC] border-t border-neutral-200 text-neutral-900 relative overflow-hidden"
       >
         {/* Ambient Glow */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#ff6900]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-10 w-80 h-80 bg-amber-300/15 rounded-full blur-3xl pointer-events-none" />
 
         <div className="max-w-6xl mx-auto relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             {/* Left Content Column (6 cols) */}
             <div className="lg:col-span-6 space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-xs font-bold text-orange-400">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-xs font-bold text-[#ff6900]">
                 <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
                 <span>Partner with ThevillaCamp</span>
               </div>
 
-              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white leading-tight">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-neutral-900 leading-tight">
                 List your property with{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-amber-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] to-amber-500">
                   complete peace of mind
                 </span>
               </h2>
 
-              <p className="text-sm sm:text-base text-neutral-300 leading-relaxed">
+              <p className="text-sm sm:text-base text-neutral-600 leading-relaxed">
                 Join top villa and campsite owners earning steady rental yield. Our hospitality
                 specialists handle marketing, professional photoshoots, and guest vetting while you
                 track income on the Owner App.
@@ -812,24 +810,24 @@ export default function BecomeHostPage() {
 
               <div className="space-y-4 pt-2">
                 <div className="flex items-start gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 mt-0.5">
                     <Users className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">Strict Guest Verification</h4>
-                    <p className="text-xs text-neutral-400 mt-0.5">
+                    <h4 className="text-sm font-bold text-neutral-900">Strict Guest Verification</h4>
+                    <p className="text-xs text-neutral-600 mt-0.5">
                       Government ID audits, party policy enforcement, and group profiling before every check-in.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3.5">
-                  <div className="w-9 h-9 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0 mt-0.5">
+                  <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0 mt-0.5">
                     <Camera className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-white">Free Professional Photoshoot &amp; Setup</h4>
-                    <p className="text-xs text-neutral-400 mt-0.5">
+                    <h4 className="text-sm font-bold text-neutral-900">Free Professional Photoshoot &amp; Setup</h4>
+                    <p className="text-xs text-neutral-600 mt-0.5">
                       High-definition architectural photography and HDR drone shots included at zero upfront cost.
                     </p>
                   </div>
@@ -837,10 +835,10 @@ export default function BecomeHostPage() {
               </div>
 
               {/* Direct Hotline with Call & WhatsApp Links */}
-              <div className="pt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-300">
+              <div className="pt-4 flex flex-wrap items-center gap-4 text-xs text-neutral-700">
                 <a
                   href="tel:+918669186483"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-800 hover:bg-neutral-700 transition-colors text-white font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-50 border border-neutral-300 text-neutral-900 font-semibold shadow-xs transition-colors cursor-pointer"
                 >
                   <Phone className="w-4 h-4 text-[#ff6900]" />
                   <span>Call Hotline: +91 86691 86483</span>
@@ -850,16 +848,16 @@ export default function BecomeHostPage() {
                   href="https://wa.me/918669186483?text=Hi%2C%20I%20am%20interested%20in%20listing%20my%20property%20with%20The%20Villa%20Camp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-950/60 border border-emerald-800 hover:bg-emerald-900/60 transition-colors text-emerald-300 font-medium"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 transition-colors text-emerald-800 font-semibold shadow-xs cursor-pointer"
                 >
-                  <MessageSquare className="w-4 h-4 text-emerald-400" />
+                  <MessageSquare className="w-4 h-4 text-emerald-600" />
                   <span>WhatsApp Concierge</span>
                 </a>
               </div>
             </div>
 
             {/* Right Column: Lead Capture Card (6 cols) */}
-            <div className="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 text-neutral-900 shadow-2xl border border-neutral-200">
+            <div className="lg:col-span-6 bg-white rounded-3xl p-6 sm:p-8 text-neutral-900 shadow-xl border border-neutral-200">
               <div className="mb-6">
                 <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#ff6900] block mb-1">
                   48-Hour Onboarding
@@ -1019,7 +1017,7 @@ export default function BecomeHostPage() {
                     )}
                   </Button>
 
-                  <p className="text-[10px] text-center text-neutral-400 pt-1">
+                  <p className="text-[10px] text-center text-neutral-500 pt-1">
                     Zero listing fees. We only earn a performance commission when your property generates paid bookings.
                   </p>
                 </form>
@@ -1032,13 +1030,13 @@ export default function BecomeHostPage() {
       {/* =====================================================================
           7. FAQ ACCORDION SECTION
           ===================================================================== */}
-      <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-neutral-950 border-t border-neutral-800">
+      <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 bg-white border-t border-neutral-200">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <span className="text-xs font-bold uppercase tracking-wider text-[#ff6900] block mb-2">
               Got Questions?
             </span>
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-neutral-900 tracking-tight">
               Frequently Asked Questions
             </h2>
           </div>
@@ -1049,14 +1047,14 @@ export default function BecomeHostPage() {
               return (
                 <div
                   key={idx}
-                  className="rounded-2xl bg-neutral-900 border border-neutral-800 overflow-hidden transition-colors"
+                  className="rounded-2xl bg-neutral-50 border border-neutral-200/80 overflow-hidden transition-colors hover:border-neutral-300"
                 >
                   <button
                     type="button"
                     onClick={() => setOpenFaq(isOpen ? -1 : idx)}
                     className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-4 cursor-pointer"
                   >
-                    <span className="font-bold text-sm sm:text-base text-white">{faq.q}</span>
+                    <span className="font-bold text-sm sm:text-base text-neutral-900">{faq.q}</span>
                     <ChevronDown
                       className={`w-4 h-4 text-neutral-400 shrink-0 transition-transform duration-200 ${
                         isOpen ? "rotate-180 text-[#ff6900]" : ""
@@ -1065,7 +1063,7 @@ export default function BecomeHostPage() {
                   </button>
 
                   {isOpen && (
-                    <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-neutral-400 leading-relaxed border-t border-neutral-800/60 pt-3">
+                    <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-neutral-600 leading-relaxed border-t border-neutral-200/60 pt-3">
                       {faq.a}
                     </div>
                   )}

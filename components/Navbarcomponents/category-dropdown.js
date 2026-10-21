@@ -20,6 +20,7 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
       description: "Private pools & luxury estates",
       icon: Home,
       image: "/Productasset/Villaimg.png",
+      fallbackImage: "/Aboutusasset/Villabanner.jpg",
     },
     {
       id: KNOWN_CATEGORY_IDS.CAMPING,
@@ -27,20 +28,23 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
       description: "Lakeside tents & bonfire nights",
       icon: Tent,
       image: "/Productasset/Campimg.png",
+      fallbackImage: "/Aboutusasset/Campbanner.jpg",
     },
     {
       id: KNOWN_CATEGORY_IDS.COTTAGE,
       name: "Cottages",
       description: "Cozy nature & hill retreats",
       icon: Trees,
-      image: "/Productasset/Villaimg.png",
+      image: "/Productasset/Cottageimg.png",
+      fallbackImage: "/Aboutusasset/Cottagebanner.jpg",
     },
     {
       id: KNOWN_CATEGORY_IDS.HOTEL,
       name: "Hotels",
       description: "Resorts & boutique suites",
       icon: Hotel,
-      image: "/Productasset/Campimg.png",
+      image: "/Productasset/Hotelimg.png",
+      fallbackImage: "/Aboutusasset/Hotelbanner.jpg",
     },
   ];
 
@@ -95,16 +99,24 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
               const matchedBackend = matchCategory(item.name, categories);
               const targetId = matchedBackend ? matchedBackend._id : item.id;
               const targetName = matchedBackend ? matchedBackend.name : item.name;
+              const targetImage =
+                matchedBackend?.image || item.fallbackImage || item.image;
 
               return (
                 <button
                   key={item.id}
                   type="button"
                   onClick={() => handleSelect(targetId, targetName)}
-                  className="flex items-center gap-3 p-3 rounded-2xl border border-neutral-200/90 hover:border-black hover:shadow-sm transition-all duration-200 text-left cursor-pointer group bg-neutral-50/40 hover:bg-white"
+                  className="flex items-center gap-3 p-2.5 sm:p-3 rounded-2xl border border-neutral-200/90 hover:border-black hover:shadow-xs transition-all duration-200 text-left cursor-pointer group bg-neutral-50/40 hover:bg-white"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-neutral-100 flex items-center justify-center text-neutral-700 group-hover:bg-black group-hover:text-white transition-colors shrink-0">
-                    <item.icon className="w-5 h-5" />
+                  <div className="w-11 h-11 rounded-xl overflow-hidden bg-neutral-100 border border-neutral-200/80 relative shrink-0 shadow-2xs group-hover:border-neutral-400 transition-colors">
+                    <Image
+                      src={targetImage}
+                      alt={item.name}
+                      fill
+                      sizes="44px"
+                      className="object-cover group-hover:scale-105 transition-transform duration-200"
+                    />
                   </div>
                   <div className="min-w-0">
                     <div className="text-xs md:text-sm font-bold text-neutral-900 line-clamp-1">
@@ -120,22 +132,43 @@ export function CategorySearch({ onCategorySelect, isMobile = false }) {
           </div>
         ) : (
           <div className="flex flex-col gap-1.5 max-h-60 overflow-y-auto">
-            {filtered.map((cat) => (
-              <button
-                key={cat._id}
-                type="button"
-                onClick={() => handleSelect(cat._id, cat.name)}
-                className="flex items-center justify-between p-3 rounded-xl hover:bg-neutral-100 transition-colors text-left cursor-pointer"
-              >
-                <div className="flex items-center gap-3">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span className="text-sm font-semibold text-neutral-900">
-                    {cat.name}
-                  </span>
-                </div>
-                <span className="text-xs text-neutral-400">Select →</span>
-              </button>
-            ))}
+            {filtered.map((cat) => {
+              const catKey = (cat.name || "").toLowerCase();
+              const catImg =
+                cat.image ||
+                (catKey.includes("camp")
+                  ? "/Aboutusasset/Campbanner.jpg"
+                  : catKey.includes("cottage")
+                  ? "/Aboutusasset/Cottagebanner.jpg"
+                  : catKey.includes("hotel")
+                  ? "/Aboutusasset/Hotelbanner.jpg"
+                  : "/Aboutusasset/Villabanner.jpg");
+
+              return (
+                <button
+                  key={cat._id}
+                  type="button"
+                  onClick={() => handleSelect(cat._id, cat.name)}
+                  className="flex items-center justify-between p-2.5 rounded-xl hover:bg-neutral-100 transition-colors text-left cursor-pointer group"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-lg overflow-hidden bg-neutral-100 relative shrink-0 border border-neutral-200/80">
+                      <Image
+                        src={catImg}
+                        alt={cat.name}
+                        fill
+                        sizes="32px"
+                        className="object-cover group-hover:scale-105 transition-transform duration-200"
+                      />
+                    </div>
+                    <span className="text-sm font-semibold text-neutral-900">
+                      {cat.name}
+                    </span>
+                  </div>
+                  <span className="text-xs text-neutral-400">Select →</span>
+                </button>
+              );
+            })}
             {filtered.length === 0 && (
               <div className="text-center py-6 text-xs text-neutral-500">
                 No matching stay types found

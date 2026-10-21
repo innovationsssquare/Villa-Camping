@@ -22,7 +22,7 @@ export function SearchInputCard({
       )}
       {...props}
     >
-      <div className="w-10 h-10 rounded-xl bg-neutral-100/80 text-neutral-700 flex items-center justify-center shrink-0">
+      <div className="w-11 h-11 rounded-full bg-neutral-100/80 text-neutral-700 flex items-center justify-center shrink-0 overflow-hidden">
         {icon}
       </div>
       <div className="flex-1 min-w-0">

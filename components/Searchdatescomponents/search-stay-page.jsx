@@ -57,9 +57,27 @@ export default function SearchStayPage() {
   useEffect(() => {
     if (categories && categories.length > 0 && !selectedCategoryId && !selectedCategoryName) {
       const firstCategory = categories[0];
+      const key = firstCategory?.name?.toLowerCase() || "";
+      const defaultImg =
+        key.includes("camp")
+          ? "/Aboutusasset/Campbanner.jpg"
+          : key.includes("cottage")
+            ? "/Aboutusasset/Cottagebanner.jpg"
+            : key.includes("hotel")
+              ? "/Aboutusasset/Hotelbanner.jpg"
+              : "/Aboutusasset/Villabanner.jpg";
+
+      const validImg =
+        firstCategory?.image &&
+        !firstCategory.image.includes("Productasset") &&
+        !firstCategory.image.includes("Villaimg") &&
+        !firstCategory.image.includes("Campimg")
+          ? firstCategory.image
+          : defaultImg;
+
       dispatch(setSelectedCategory(firstCategory?._id));
       dispatch(setSelectedCategoryname(firstCategory?.name));
-      dispatch(setSelectedCategoryImage(firstCategory?.image));
+      dispatch(setSelectedCategoryImage(validImg));
     }
   }, [categories, selectedCategoryId, selectedCategoryName, dispatch]);
 
@@ -249,13 +267,17 @@ export default function SearchStayPage() {
         <SearchInputCard
           icon={
             selectedCategoryImage ? (
-              <Image
-                src={selectedCategoryImage}
-                height={40}
-                width={40}
-                alt={selectedCategoryName || "Category"}
-                className="h-6 w-6 object-contain rounded-md"
-              />
+              <div className="w-10 h-10 rounded-full p-[1.5px] bg-white border-2 border-[#ff6900]/70 overflow-hidden relative shadow-2xs shrink-0 flex items-center justify-center">
+                <div className="w-full h-full rounded-full overflow-hidden relative">
+                  <Image
+                    src={selectedCategoryImage}
+                    fill
+                    sizes="40px"
+                    alt={selectedCategoryName || "Category"}
+                    className="object-cover"
+                  />
+                </div>
+              </div>
             ) : (
               <FaHome className="w-5 h-5 text-[#ff6900]" />
             )

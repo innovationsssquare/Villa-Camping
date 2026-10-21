@@ -129,26 +129,26 @@ export default function ServicesPage() {
   };
 
   return (
-    <main className="min-h-screen bg-neutral-50/50 pt-24 md:pt-28 pb-16">
-      <section className="relative overflow-hidden bg-neutral-950 text-white py-16 md:py-24 px-4 sm:px-6 lg:px-8 mx-3 sm:mx-6 rounded-3xl mb-12 shadow-xl">
+    <main className="min-h-screen bg-neutral-50/50 pt-20 md:pt-24 pb-16">
+      <section className="relative overflow-hidden bg-neutral-950 text-white py-12 sm:py-16 md:py-20 px-4 sm:px-6 lg:px-8 mx-3 sm:mx-6 rounded-2xl md:rounded-3xl mb-8 md:mb-12 shadow-xl">
         {/* Ambient Glow */}
         <div className="absolute top-0 left-1/3 w-96 h-96 bg-[#ff6900]/20 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute -bottom-10 right-10 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative max-w-4xl mx-auto text-center space-y-6">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 text-xs font-bold text-orange-400 backdrop-blur-md">
-            <Sparkles className="w-4 h-4 text-[#ff6900]" />
+        <div className="relative max-w-4xl mx-auto text-center space-y-4 sm:space-y-5">
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-[11px] sm:text-xs font-semibold text-orange-400 backdrop-blur-md">
+            <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
             <span>Coming Soon • Villa Concierge & On-Demand Services</span>
           </div>
 
-          <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold tracking-tight text-white leading-tight">
             Elevate Your Getaway with{" "}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] via-amber-400 to-orange-300">
               Bespoke Experiences
             </span>
           </h1>
 
-          <p className="max-w-2xl mx-auto text-sm sm:text-base text-neutral-300 leading-relaxed">
+          <p className="max-w-2xl mx-auto text-xs sm:text-sm md:text-[15px] text-neutral-200 leading-relaxed font-normal">
             We are putting the finishing touches on our signature in-villa services. From private culinary chefs and starlit acoustic bonfires to celebration decor and luxury chauffeur transfers — extraordinary memories are just around the corner.
           </p>
 

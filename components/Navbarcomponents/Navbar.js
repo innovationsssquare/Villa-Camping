@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -77,6 +77,12 @@ export default function AirbnbNavbar() {
       dispatch(setSelectedCategoryname(categories[0].name));
     }
   }, [dispatch, selectedCategoryId, categories]);
+
+  // Close dropdown whenever route changes
+  useEffect(() => {
+    setActiveDropdown(null);
+    setHoveredSegment(null);
+  }, [pathname]);
 
   const scrolledRef = useRef(false);
 
@@ -247,8 +253,8 @@ export default function AirbnbNavbar() {
 
   const showExpandedSearch = isSearchPage && (!isScrolled || isExpanded);
 
-  // Condition to check if any dropdown is open
-  const isAnyDropdownOpen = activeDropdown !== null;
+  // Condition to check if any dropdown is open (only when search bar is visible)
+  const isAnyDropdownOpen = Boolean(activeDropdown) && showExpandedSearch;
 
   return (
     <>
@@ -265,7 +271,10 @@ export default function AirbnbNavbar() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <div
-              onClick={() => router.push("/")}
+              onClick={() => {
+                setActiveDropdown(null);
+                router.push("/");
+              }}
               className="flex items-center cursor-pointer transition-transform hover:scale-[1.02] shrink-0"
             >
               <Image
@@ -332,7 +341,10 @@ export default function AirbnbNavbar() {
                   {/* Stays Tab */}
                   <button
                     type="button"
-                    onClick={() => router.push("/")}
+                    onClick={() => {
+                      setActiveDropdown(null);
+                      router.push("/");
+                    }}
                     className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname === "/"
                       ? "text-neutral-950 font-bold"
                       : "text-neutral-500 hover:text-neutral-900"
@@ -355,7 +367,10 @@ export default function AirbnbNavbar() {
                   {/* Experiences Tab */}
                   <button
                     type="button"
-                    onClick={() => router.push("/experiences")}
+                    onClick={() => {
+                      setActiveDropdown(null);
+                      router.push("/experiences");
+                    }}
                     className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/experiences")
                       ? "text-neutral-950 font-bold"
                       : "text-neutral-500 hover:text-neutral-900"
@@ -383,7 +398,10 @@ export default function AirbnbNavbar() {
                   {/* Services Tab */}
                   <button
                     type="button"
-                    onClick={() => router.push("/services")}
+                    onClick={() => {
+                      setActiveDropdown(null);
+                      router.push("/services");
+                    }}
                     className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/services")
                       ? "text-neutral-950 font-bold"
                       : "text-neutral-500 hover:text-neutral-900"
@@ -415,7 +433,10 @@ export default function AirbnbNavbar() {
             <div className="flex items-center gap-2.5 shrink-0">
               <button
                 type="button"
-                onClick={() => router.push("/become-host")}
+                onClick={() => {
+                  setActiveDropdown(null);
+                  router.push("/become-host");
+                }}
                 className="hidden bg-orange-300  lg:block text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-orange-200 text-neutral-800 transition-colors cursor-pointer"
               >
                 Become a host

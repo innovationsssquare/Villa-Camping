@@ -25,7 +25,6 @@ import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { FaBell } from "react-icons/fa6";
 import { useNotifications } from "@/hooks/useNotifications";
-import Link from "next/link";
 
 // Helper function to format the timestamp
 function formatTimestamp(dateInput) {
@@ -282,15 +281,7 @@ export function NotificationSheet({ trigger, open: controlledOpen, onOpenChange 
             )}
           </div>
 
-          <div className="p-3 border-t border-gray-200 bg-gray-50 flex items-center justify-between gap-2">
-            <Link
-              href="/notifications"
-              onClick={() => handleOpenChange(false)}
-              className="text-xs font-bold text-[#ff6900] hover:underline"
-            >
-              Open Full Notifications Page
-            </Link>
-
+          <div className="p-3 border-t border-gray-200 bg-gray-50 flex items-center justify-end gap-2">
             <Button
               variant="outline"
               size="sm"

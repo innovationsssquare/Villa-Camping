@@ -31,32 +31,94 @@ import { getAuthCookieOptions } from "@/lib/authCookies";
  */
 function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
   const inputsRef = useRef([]);
+  const prevValueRef = useRef(value);
   const digits = Array.from({ length: 6 }, (_, i) => value[i] || "");
 
-  const handleDigitChange = (index, val) => {
-    const clean = val.replace(/\D/g, "");
-    if (!clean) {
-      const nextOtp = value.split("");
-      nextOtp[index] = "";
-      onChange(nextOtp.join(""));
-      return;
+  useEffect(() => {
+    // When OTP value is reset to empty (e.g. after Resend OTP or incorrect OTP), focus first box
+    if (prevValueRef.current && !value) {
+      inputsRef.current[0]?.focus();
+    }
+    prevValueRef.current = value;
+  }, [value]);
+
+  const handlePastedCode = (pastedText, startIndex = 0) => {
+    const numbersOnly = pastedText.replace(/\D/g, "").slice(0, 6);
+    if (!numbersOnly) return;
+
+    const nextDigits = [...digits];
+    // If a full 6-digit code was pasted or pasted at the first box, fill from index 0
+    const start = numbersOnly.length === 6 ? 0 : startIndex;
+
+    for (let i = 0; i < numbersOnly.length && start + i < 6; i++) {
+      nextDigits[start + i] = numbersOnly[i];
     }
 
-    if (clean.length > 1) {
-      handlePastedCode(clean);
-      return;
-    }
-
-    const nextOtp = value.split("");
-    nextOtp[index] = clean;
-    const finalOtp = nextOtp.join("").slice(0, 6);
+    const finalOtp = nextDigits.join("").trim();
     onChange(finalOtp);
 
+    // Focus the next empty slot or the last slot
+    const nextEmptyIndex = nextDigits.findIndex((d) => !d);
+    const targetFocus = nextEmptyIndex !== -1 ? nextEmptyIndex : 5;
+    inputsRef.current[targetFocus]?.focus();
+    inputsRef.current[targetFocus]?.select();
+
+    if (finalOtp.length === 6) {
+      onComplete?.(finalOtp);
+    }
+  };
+
+  const handleDigitChange = (index, rawVal) => {
+    const clean = rawVal.replace(/\D/g, "");
+
+    // Case 1: Empty (User backspaced or deleted the digit)
+    if (!clean) {
+      const nextDigits = [...digits];
+      nextDigits[index] = "";
+      onChange(nextDigits.join("").trim());
+      return;
+    }
+
+    // Case 2: Pasted or autofilled multiple characters (e.g. WhatsApp SMS copy code "123456")
+    if (clean.length > 1) {
+      // If user typed into an already-filled box (e.g. had "5", typed "8", clean is "58" or "85")
+      if (clean.length === 2 && digits[index]) {
+        const currentDigit = digits[index];
+        const newDigit = clean[0] === currentDigit ? clean[1] : clean[0];
+        const nextDigits = [...digits];
+        nextDigits[index] = newDigit;
+        const finalOtp = nextDigits.join("").trim();
+        onChange(finalOtp);
+
+        if (index < 5) {
+          inputsRef.current[index + 1]?.focus();
+          inputsRef.current[index + 1]?.select();
+        }
+
+        if (finalOtp.length === 6) {
+          onComplete?.(finalOtp);
+        }
+        return;
+      }
+
+      // Pasted code with multiple digits
+      handlePastedCode(clean, index);
+      return;
+    }
+
+    // Case 3: Exactly 1 digit entered
+    const nextDigits = [...digits];
+    nextDigits[index] = clean;
+    const finalOtp = nextDigits.join("").trim();
+    onChange(finalOtp);
+
+    // Automatically focus and activate the next input box
     if (index < 5) {
       inputsRef.current[index + 1]?.focus();
       inputsRef.current[index + 1]?.select();
     }
 
+    // If all 6 digits are filled, automatically trigger onComplete
     if (finalOtp.length === 6) {
       onComplete?.(finalOtp);
     }
@@ -65,14 +127,17 @@ function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
   const handleKeyDown = (index, e) => {
     if (e.key === "Backspace") {
       if (!digits[index] && index > 0) {
+        // If current box is empty, jump to previous box, clear it, and focus
+        e.preventDefault();
+        const nextDigits = [...digits];
+        nextDigits[index - 1] = "";
+        onChange(nextDigits.join("").trim());
         inputsRef.current[index - 1]?.focus();
-        const nextOtp = value.split("");
-        nextOtp[index - 1] = "";
-        onChange(nextOtp.join(""));
       } else {
-        const nextOtp = value.split("");
-        nextOtp[index] = "";
-        onChange(nextOtp.join(""));
+        // Clear current box
+        const nextDigits = [...digits];
+        nextDigits[index] = "";
+        onChange(nextDigits.join("").trim());
       }
     } else if (e.key === "ArrowLeft" && index > 0) {
       e.preventDefault();
@@ -85,21 +150,10 @@ function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
     }
   };
 
-  const handlePastedCode = (pastedText) => {
-    const numbersOnly = pastedText.replace(/\D/g, "").slice(0, 6);
-    if (!numbersOnly) return;
-    onChange(numbersOnly);
-    const targetFocus = Math.min(numbersOnly.length, 5);
-    inputsRef.current[targetFocus]?.focus();
-    if (numbersOnly.length === 6) {
-      onComplete?.(numbersOnly);
-    }
-  };
-
   const handlePaste = (e) => {
     e.preventDefault();
-    const pasteData = e.clipboardData.getData("text");
-    handlePastedCode(pasteData);
+    const pasteData = e.clipboardData?.getData("text") || "";
+    handlePastedCode(pasteData, 0);
   };
 
   return (
@@ -110,8 +164,9 @@ function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
           ref={(el) => (inputsRef.current[i] = el)}
           type="text"
           inputMode="numeric"
+          autoComplete={i === 0 ? "one-time-code" : "off"}
           pattern="[0-9]*"
-          maxLength={1}
+          maxLength={6}
           value={digits[i]}
           onChange={(e) => handleDigitChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
@@ -385,6 +440,8 @@ const ResponsiveAuthModal = ({
       return;
     }
 
+    // Always clear existing OTP digits on send/resend so input boxes are empty
+    setOtp("");
     setOtpLoading(true);
     try {
       const res = await fetch(`${BaseUrl}/auth/whatsapp/send-otp`, {
@@ -406,6 +463,7 @@ const ResponsiveAuthModal = ({
           color: "primary",
         });
       } else {
+        setOtp(""); // Ensure all input boxes are empty on live resend
         addToast({
           title: "WhatsApp OTP Sent!",
           description: `Verification code sent to WhatsApp on +91 ${rawNumber}`,
@@ -500,6 +558,8 @@ const ResponsiveAuthModal = ({
         }
       }, 350);
     } catch (err) {
+      // Clear OTP digits on failed verification so inputs are empty for fresh entry or resend
+      setOtp("");
       addToast({
         title: "Verification Failed",
         description: err.message || "Incorrect verification code. Please try again.",

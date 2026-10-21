@@ -22,23 +22,38 @@ import {
 const DEFAULT_METADATA = {
   villa: {
     icon: Home,
+    displayName: "Villas & Homestays",
     description: "Private pools & luxury estates",
-    defaultImg: "/Productasset/Villaimg.png",
+    badge: "250+",
+    defaultImg: "/Aboutusasset/Villabanner.jpg",
   },
   camping: {
     icon: Tent,
+    displayName: "Lakeside Camping",
     description: "Lakeside tents & bonfire nights",
-    defaultImg: "/Productasset/Campimg.png",
+    badge: "Pawna",
+    defaultImg: "/Aboutusasset/Campbanner.jpg",
+  },
+  camp: {
+    icon: Tent,
+    displayName: "Lakeside Camping",
+    description: "Lakeside tents & bonfire nights",
+    badge: "Pawna",
+    defaultImg: "/Aboutusasset/Campbanner.jpg",
   },
   cottage: {
     icon: Trees,
+    displayName: "Wooden Cottages",
     description: "Cozy nature & hill retreats",
-    defaultImg: "/Productasset/Villaimg.png",
+    badge: "Nature",
+    defaultImg: "/Aboutusasset/Cottagebanner.jpg",
   },
   hotel: {
     icon: Hotel,
+    displayName: "Luxury Resorts",
     description: "Resorts & boutique suites",
-    defaultImg: "/Productasset/Campimg.png",
+    badge: "Top Pick",
+    defaultImg: "/Aboutusasset/Hotelbanner.jpg",
   },
 };
 
@@ -55,30 +70,57 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
 
     if (categories && categories.length > 0) {
       categories.forEach((cat) => {
-        const key = cat.name?.toLowerCase();
-        const meta = DEFAULT_METADATA[key] || {
-          icon: Home,
-          description: "Curated stays & weekend getaways",
-          defaultImg: "/Productasset/Villaimg.png",
-        };
+        const key = cat.name?.toLowerCase() || "";
+        const meta =
+          DEFAULT_METADATA[key] ||
+          (key.includes("villa")
+            ? DEFAULT_METADATA.villa
+            : key.includes("camp")
+              ? DEFAULT_METADATA.camping
+              : key.includes("cottage")
+                ? DEFAULT_METADATA.cottage
+                : key.includes("hotel") || key.includes("resort")
+                  ? DEFAULT_METADATA.hotel
+                  : {
+                      icon: Home,
+                      displayName: cat.name,
+                      description: "Curated stays & weekend getaways",
+                      badge: null,
+                      defaultImg: "/Aboutusasset/Villabanner.jpg",
+                    });
+
+        const rawImg = cat.image;
+        const isLowResPlaceholder =
+          !rawImg ||
+          (typeof rawImg === "string" &&
+            (rawImg.includes("Productasset") ||
+              rawImg.includes("Villaimg") ||
+              rawImg.includes("Campimg")));
+
+        const finalImage = isLowResPlaceholder ? meta.defaultImg : rawImg;
 
         list.push({
           _id: cat._id,
           name: cat.name,
+          displayName: meta.displayName || cat.name,
           description: meta.description,
           icon: meta.icon,
-          image: cat.image || meta.defaultImg,
+          badge: meta.badge,
+          image: finalImage,
         });
       });
     } else {
       // Fallbacks if API is loading or empty
       Object.keys(DEFAULT_METADATA).forEach((key) => {
+        if (key === "camp") return;
         const meta = DEFAULT_METADATA[key];
         list.push({
           _id: key,
           name: key.charAt(0).toUpperCase() + key.slice(1),
+          displayName: meta.displayName,
           description: meta.description,
           icon: meta.icon,
+          badge: meta.badge,
           image: meta.defaultImg,
         });
       });
@@ -136,34 +178,57 @@ export function CategorySelectionDrawer({ isOpen, onClose }) {
                 key={category._id}
                 type="button"
                 onClick={() => handleSelect(category)}
-                className={`w-full flex items-center gap-3.5 p-3.5 rounded-2xl border transition-all duration-150 select-none cursor-pointer text-left ${
+                className={`w-full group flex items-center gap-3.5 sm:gap-4 p-3 rounded-2xl border transition-all duration-150 select-none cursor-pointer text-left ${
                   selected
                     ? "border-[#ff6900] bg-orange-50/50 shadow-xs ring-2 ring-[#ff6900]/20"
                     : "border-neutral-200/90 bg-white hover:border-neutral-300 active:bg-neutral-50"
                 }`}
               >
-                {/* Category Thumbnail / Icon */}
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0 overflow-hidden relative bg-neutral-100/80 border border-neutral-200/60">
-                  {category.image ? (
-                    <Image
-                      src={category.image}
-                      alt={category.name}
-                      width={44}
-                      height={44}
-                      className="w-full h-full object-contain p-1"
-                    />
-                  ) : (
-                    <IconComponent
-                      className={`w-5 h-5 ${
-                        selected ? "text-[#ff6900]" : "text-neutral-700"
+                {/* Big Rounded Category Image (Matching Homepage Mobile View) */}
+                <div
+                  className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full p-[2.5px] bg-white border-2 shrink-0 transition-all flex items-center justify-center relative shadow-xs ${
+                    selected
+                      ? "border-[#ff6900] ring-2 ring-[#ff6900]/25 bg-orange-50/20"
+                      : "border-[rgba(255,122,26,0.40)] group-hover:border-[#ff6900]"
+                  }`}
+                >
+                  <div className="w-full h-full rounded-full overflow-hidden bg-neutral-100 relative">
+                    {category.image ? (
+                      <Image
+                        src={category.image}
+                        alt={category.name}
+                        fill
+                        sizes="64px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <IconComponent
+                          className={`w-6 h-6 ${
+                            selected ? "text-[#ff6900]" : "text-neutral-700"
+                          }`}
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Mini Badge matching homepage mobile category */}
+                  {category.badge && (
+                    <span
+                      className={`absolute -bottom-1 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded-full text-[8px] font-bold border shadow-2xs whitespace-nowrap transition-colors ${
+                        selected
+                          ? "bg-[#ff6900] text-white border-[#ff6900]"
+                          : "bg-white text-neutral-600 border-neutral-200"
                       }`}
-                    />
+                    >
+                      {category.badge}
+                    </span>
                   )}
                 </div>
 
                 {/* Text Details */}
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold text-sm text-neutral-900 leading-snug">
+                  <div className="font-extrabold text-sm sm:text-base text-neutral-900 leading-snug">
                     {category.name}
                   </div>
                   <div className="text-xs text-neutral-500 truncate mt-0.5">

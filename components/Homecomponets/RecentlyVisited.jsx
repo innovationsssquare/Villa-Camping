@@ -115,11 +115,11 @@ export default function RecentlyVisited() {
             className="w-full"
             opts={{ align: "start", dragFree: true }}
           >
-            <CarouselContent className="-ml-2.5 sm:-ml-3.5">
+            <CarouselContent className="-ml-3 sm:-ml-3.5">
               {visitedProperties.map((property) => (
                 <CarouselItem
                   key={property._id || property.id}
-                  className="pl-2.5 sm:pl-3.5 basis-[48%] sm:basis-[30%] md:basis-1/4 lg:basis-1/5 xl:basis-1/6"
+                  className="pl-3 sm:pl-3.5 basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
                 >
                   <Weekendcard property={property} />
                 </CarouselItem>

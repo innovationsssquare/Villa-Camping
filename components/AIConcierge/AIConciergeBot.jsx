@@ -621,15 +621,17 @@ export default function AIConciergeBot() {
   const pathname = usePathname() || "";
   const cleanPath = (pathname || "").toLowerCase().trim();
 
-  // 1. Only allow chatbot on Homepage ("/" or "") and Property View Pages
+  // 1. Chatbot visibility:
+  // - Show on Homepage ("/" or "")
+  // - Completely hide on individual property view pages (/view-Villa, /view-Camping, /view-Cottage, /view-Hotel)
   const isHomePage = cleanPath === "" || cleanPath === "/";
   const isVillaPage = cleanPath.startsWith("/view-villa") || cleanPath.startsWith("/view-villas");
   const isCampingPage = cleanPath.startsWith("/view-camping");
   const isCottagePage = cleanPath.startsWith("/view-cottage");
   const isHotelPage = cleanPath.startsWith("/view-hotel");
-  const isPropertyPage = isVillaPage || isCampingPage || isCottagePage || isHotelPage;
+  const isPropertyPage = isVillaPage || isCampingPage || isCottagePage || isHotelPage || cleanPath.startsWith("/properties");
 
-  const shouldShowBot = isHomePage || isPropertyPage;
+  const shouldShowBot = isHomePage && !isPropertyPage;
 
   const propertyCategory = isVillaPage
     ? "Villa"
@@ -1004,8 +1006,8 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
-  // Only show chatbot on Homepage ("/") and Property View pages (/view-Villa, /view-Camping, etc.)
-  if (!shouldShowBot) {
+  // Only show chatbot on Homepage ("/") and completely hide on property view pages
+  if (!shouldShowBot || isPropertyPage) {
     return null;
   }
 
