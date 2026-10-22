@@ -141,7 +141,7 @@ export function PropertyCard({ property }) {
     >
       {/* 1. Airbnb Square Rounded Image Container */}
       <div
-        className="relative aspect-square w-full rounded-2xl overflow-hidden bg-neutral-100 shadow-2xs"
+        className="relative aspect-square w-full rounded-[20px] sm:rounded-[24px] overflow-hidden bg-neutral-100 shadow-2xs"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -151,7 +151,7 @@ export function PropertyCard({ property }) {
           alt={property.name || "Stay"}
           fill
           unoptimized
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 18vw"
+          sizes="(max-width: 640px) 45vw, (max-width: 1024px) 210px, 230px"
           className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
@@ -160,20 +160,20 @@ export function PropertyCard({ property }) {
           {isPromoted ? (
             <div className="bg-gradient-to-r from-[#ff6900] to-[#ea580c] text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
               <Sparkles className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-white fill-white" />
-              <span className="text-[9px] sm:text-xs font-bold tracking-tight">
+              <span className="text-[9.5px] sm:text-xs font-bold tracking-tight">
                 {promoBadge}
               </span>
             </div>
           ) : isMostBooked ? (
             <div className="bg-gradient-to-r from-red-600 to-amber-600 text-white px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-md flex items-center gap-1 border border-white/20">
               <Flame className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-200 fill-amber-200" />
-              <span className="text-[9px] sm:text-xs font-bold tracking-tight">
+              <span className="text-[9.5px] sm:text-xs font-bold tracking-tight">
                 Most Booked
               </span>
             </div>
           ) : isGuestFavourite ? (
             <div className="bg-white/95 backdrop-blur-md px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm flex items-center border border-black/5">
-              <span className="text-[9px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
+              <span className="text-[9.5px] sm:text-xs font-semibold text-neutral-900 tracking-tight">
                 Guest favourite
               </span>
             </div>
@@ -247,11 +247,11 @@ export function PropertyCard({ property }) {
         )}
       </div>
 
-      {/* 2. Text Details below image - Exactly as in the user's Airbnb screenshot */}
-      <div className="mt-1.5 sm:mt-2 px-0.5">
+      {/* 2. Text Details below image - Consistent with DestinationCard typography */}
+      <div className="mt-2 sm:mt-2.5 px-0.5">
         {/* Line 1: Property Name / Stay in Location */}
         <h3
-          className="font-semibold text-[11px] sm:text-xs md:text-sm text-neutral-900 truncate leading-tight group-hover:text-[#ff6900] transition-colors"
+          className="font-semibold text-[13px] sm:text-[14px] md:text-base text-neutral-900 truncate leading-snug group-hover:text-[#ff6900] transition-colors"
           title={property.name}
         >
           {property.name ||
@@ -261,12 +261,12 @@ export function PropertyCard({ property }) {
         </h3>
 
         {/* Line 2: Price per night · Star Rating */}
-        <div className="text-[10px] sm:text-[11px] md:text-xs text-neutral-600 mt-0.5 flex items-center justify-between gap-1 leading-tight">
+        <div className="text-[11px] sm:text-xs md:text-sm text-neutral-600 mt-0.5 flex items-center justify-between gap-1 leading-tight">
           <div className="flex items-baseline gap-1 truncate">
             <span className="font-semibold text-neutral-900">
               {formatRupee(nightPrice)}
             </span>
-            <span className="text-neutral-500 font-normal text-[9px] sm:text-[10px]">
+            <span className="text-neutral-500 font-normal text-[10px] sm:text-[11px]">
               night
             </span>
           </div>

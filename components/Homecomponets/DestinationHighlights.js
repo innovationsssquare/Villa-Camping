@@ -177,9 +177,22 @@ function DestinationCard({ destination, defaultImage, priority = false }) {
 
   const imageSrc = destination?.coverImage || defaultImage;
   const subtitle = getSubtitle(destination);
-  const targetUrl = `/search-your-gateway?location=${encodeURIComponent(
-    destination?.name || ""
-  )}`;
+  const targetUrl =
+    destination?._id && !destination._id.startsWith("dest-")
+      ? `/search-your-gateway?location=${encodeURIComponent(
+          destination?.name || ""
+        )}&locationId=${destination._id}`
+      : `/search-your-gateway?location=${encodeURIComponent(
+          destination?.name || ""
+        )}`;
+
+  const propertyCount = Number(destination?.properties ?? 0);
+  const badgeText =
+    propertyCount > 0
+      ? `${propertyCount} ${propertyCount === 1 ? "Stay" : "Stays"}`
+      : destination?.isPopular
+      ? "Popular"
+      : "Explore";
 
   return (
     <Link
@@ -200,7 +213,7 @@ function DestinationCard({ destination, defaultImage, priority = false }) {
         {imageSrc && <meta itemProp="image" content={imageSrc} />}
 
         {/* 1:1 Aspect Ratio Squircle Image Container */}
-        <div className="relative aspect-square w-full rounded-[22px] sm:rounded-[26px] overflow-hidden bg-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+        <div className="relative aspect-square w-full rounded-[20px] sm:rounded-[24px] overflow-hidden bg-neutral-100 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
           <Image
             src={imageSrc}
             alt={`Luxury villas, homestays, and camping retreats in ${destination?.name || "Maharashtra"} - ${subtitle}`}
@@ -208,22 +221,34 @@ function DestinationCard({ destination, defaultImage, priority = false }) {
             fill
             unoptimized
             priority={priority}
-            sizes="(max-width: 640px) 145px, (max-width: 1024px) 195px, 220px"
+            sizes="(max-width: 640px) 45vw, (max-width: 1024px) 210px, 230px"
             className="object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
           />
+
+          {/* Floating Frosted-Glass Property Count Badge */}
+          <div className="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 z-10 pointer-events-none">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:py-1 rounded-full bg-black/45 backdrop-blur-md border border-white/20 text-white text-[10px] sm:text-[11px] font-semibold tracking-wide shadow-xs transition-transform duration-300 group-hover:scale-105">
+              {propertyCount > 0 ? (
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              ) : (
+                <Sparkles className="w-2.5 h-2.5 text-orange-300" />
+              )}
+              <span>{badgeText}</span>
+            </span>
+          </div>
         </div>
 
         {/* Typography Block Below Image */}
         <div className="mt-2 sm:mt-2.5 px-0.5">
           <h3
             itemProp="name"
-            className="font-semibold text-neutral-900 text-[14px] sm:text-[15px] md:text-base leading-snug truncate group-hover:text-[#ff6900] transition-colors"
+            className="font-semibold text-neutral-900 text-[13px] sm:text-[14px] md:text-base leading-snug truncate group-hover:text-[#ff6900] transition-colors"
           >
             {destination?.name}
           </h3>
           <p
             itemProp="description"
-            className="text-[12px] sm:text-[13px] md:text-sm text-[#717171] leading-tight truncate mt-0.5"
+            className="text-[11px] sm:text-xs md:text-sm text-[#717171] leading-tight truncate mt-0.5"
           >
             {subtitle}
           </p>
@@ -236,7 +261,7 @@ function DestinationCard({ destination, defaultImage, priority = false }) {
 function DestinationSkeleton() {
   return (
     <div className="flex flex-col w-full">
-      <Skeleton className="w-full aspect-square rounded-[22px] sm:rounded-[26px]" />
+      <Skeleton className="w-full aspect-square rounded-[20px] sm:rounded-[24px]" />
       <div className="mt-2 sm:mt-2.5 px-0.5 space-y-1">
         <Skeleton className="h-4 w-3/4 rounded-md" />
         <Skeleton className="h-3.5 w-1/2 rounded-md" />
@@ -361,7 +386,7 @@ export function DestinationHighlights() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
+                className="basis-[42%] sm:basis-[185px] md:basis-[205px] lg:basis-[225px] shrink-0"
               >
                 <DestinationSkeleton />
               </div>
@@ -386,7 +411,7 @@ export function DestinationHighlights() {
                   return (
                     <CarouselItem
                       key={destination._id || `dest-${index}`}
-                      className="pl-3 sm:pl-3.5 basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
+                      className="pl-3 sm:pl-3.5 basis-[42%] sm:basis-[185px] md:basis-[205px] lg:basis-[225px] shrink-0"
                     >
                       <DestinationCard
                         destination={destination}

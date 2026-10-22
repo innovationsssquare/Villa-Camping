@@ -10,6 +10,7 @@ const MapView = ({
   googleMapsApiKey,
   onPropertySelect,
   selectedLocation,
+  centerCoordinates,
   properties,
   loading,
   activePropertyId,
@@ -44,8 +45,13 @@ const MapView = ({
   useEffect(() => {
     if (!mapContainer.current || !isScriptLoaded || !window.google) return;
 
+    const initialCenter =
+      centerCoordinates && centerCoordinates.length >= 2
+        ? { lat: centerCoordinates[0], lng: centerCoordinates[1] }
+        : { lat: 18.7537, lng: 73.4062 };
+
     map.current = new window.google.maps.Map(mapContainer.current, {
-      center: { lat: 18.7537, lng: 73.4062 },
+      center: initialCenter,
       zoom: 11,
       mapTypeControl: false,
       streetViewControl: false,
@@ -73,13 +79,20 @@ const MapView = ({
     onPropertySelect?.(null);
   }, [selectedLocation]);
 
-  // Clear popup card if 0 properties are found
+  // Clear popup card if 0 properties are found and pan to centerCoordinates
   useEffect(() => {
     if (!properties || properties.length === 0) {
       setInternalSelectedProperty(null);
       onPropertySelect?.(null);
+      if (map.current && centerCoordinates && centerCoordinates.length >= 2) {
+        map.current.panTo({
+          lat: centerCoordinates[0],
+          lng: centerCoordinates[1],
+        });
+        map.current.setZoom(12);
+      }
     }
-  }, [properties]);
+  }, [properties, centerCoordinates]);
 
   // 3. Sync activePropertyId from parent (card click, marker click, or filter reset)
   useEffect(() => {

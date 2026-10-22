@@ -10,7 +10,7 @@ import {
 import { Button } from "@heroui/react";
 import { Card } from "@/components/ui/card";
 import { FaArrowRight, FaArrowLeft } from "react-icons/fa";
-import { MinusIcon, PlaneIcon, PlusIcon, X } from "lucide-react";
+import { MinusIcon, PlaneIcon, PlusIcon, X, AlertCircle } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCampingDayDetailsThunk } from "@/Redux/Slices/campingSlice";
 import { setSelectedRooms, setSelectedTents } from "@/Redux/Slices/bookingSlice";
@@ -342,12 +342,6 @@ export default function RoomSelectionDrawer({
                 </div>
               )}
 
-              {tentError && (
-                <div className="p-2 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-                  {tentError}
-                </div>
-              )}
-
               {/* ROOMS LIST */}
               {displayRooms.map((tent) => {
                 const selectedQty = localSelected[tent.roomType] || 0;
@@ -429,6 +423,22 @@ export default function RoomSelectionDrawer({
                 );
               })}
             </div>
+
+            {tentError && (
+              <div className="mx-4 mb-2 p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between gap-2 text-xs text-red-600">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className="w-3.5 h-3.5 text-red-500 shrink-0" />
+                  <span>{tentError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTentError("")}
+                  className="p-1 text-red-400 hover:text-red-600 shrink-0"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            )}
 
             <div className="p-4 border-t">
               <Button

@@ -1727,13 +1727,16 @@ export default function BookingScreen() {
 
       {/* 6. Modals */}
       {/* Reservation Pass Modal */}
-      <ReservationPassModal
-        isOpen={Boolean(passBooking)}
-        booking={passBooking}
-        onClose={() => setPassBooking(null)}
-        onPayNow={(b) => handleRetryPayment(b)}
-        onRefresh={loadData}
-      />
+      {passBooking && (
+        <ReservationPassModal
+          key={passBooking._id || "pass-modal"}
+          isOpen={Boolean(passBooking)}
+          booking={passBooking}
+          onClose={() => setPassBooking(null)}
+          onPayNow={(b) => handleRetryPayment(b)}
+          onRefresh={loadData}
+        />
+      )}
 
       {/* Review Drawer */}
       <ReviewDrawer

@@ -29,6 +29,7 @@ import {
   Home,
   Bed,
   Check,
+  X,
 } from "lucide-react";
 import { useIndianHolidays } from "@/hooks/useIndianHolidays";
 import CouponsDrawer from "./coupons-drawer";
@@ -758,6 +759,7 @@ export default function BookingDialog({
 
   // Date selection click handler
   const handleDateClick = (cellDate) => {
+    if (tentError) setTentError("");
     const isoString = cellDate.toISOString();
 
     if (dateStep === "checkin") {
@@ -2202,18 +2204,30 @@ export default function BookingDialog({
                 )}
               </div>
 
-              {/* Error Message Banner if any */}
-              {tentError && (
-                <div className="p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center gap-2 text-xs text-red-700 font-medium">
-                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
-                  <span>{tentError}</span>
-                </div>
-              )}
             </div>
           </ScrollArea>
 
-          {/* Sticky Bottom Action Bar */}
-          <div className="p-3 sm:p-3.5 bg-white/95 backdrop-blur-md border-t border-neutral-200 flex items-center justify-between gap-3 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] shrink-0">
+          {/* Sticky Bottom Action Bar with Fixed Error Banner */}
+          <div className="bg-white/95 backdrop-blur-md border-t border-neutral-200 shadow-[0_-4px_16px_rgba(0,0,0,0.06)] shrink-0 z-20">
+            {/* Fixed Error Notification Banner */}
+            {tentError && (
+              <div className="mx-3 sm:mx-3.5 mt-2.5 px-3 py-2 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between gap-2 text-xs text-red-700 font-medium animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="flex items-center gap-2 min-w-0">
+                  <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                  <span className="leading-snug">{tentError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTentError("")}
+                  className="p-1 text-red-400 hover:text-red-700 rounded-lg shrink-0 cursor-pointer transition-colors"
+                  aria-label="Dismiss error"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            )}
+
+            <div className="p-3 sm:p-3.5 flex items-center justify-between gap-3">
             <div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-lg font-black text-neutral-900 tracking-tight">
@@ -2275,7 +2289,8 @@ export default function BookingDialog({
               )}
             </button>
           </div>
-        </DrawerContent>
+        </div>
+      </DrawerContent>
       </Drawer>
 
       {/* Available Coupons Drawer */}

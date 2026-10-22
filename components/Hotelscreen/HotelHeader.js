@@ -1,13 +1,65 @@
 "use client";
-import React from "react";
-import { ArrowLeft, Share, Bell, User } from "lucide-react";
-import { Button } from "@heroui/react";
+import React, { useState } from "react";
+import { ArrowLeft, Share, Bell, User, Check } from "lucide-react";
+import { Button, addToast } from "@heroui/react";
 import { useRouter } from "next/navigation";
 import { useHotel } from "@/lib/context/HotelContext";
 
 const HotelHeader = () => {
   const hotel = useHotel();
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof window === "undefined") return;
+    const shareUrl = window.location.href;
+    const propName = hotel?.name || "Hotel Stay";
+    const cityName = hotel?.address?.city || "Destination";
+    const shareData = {
+      title: `${propName} | ThevillaCamp`,
+      text: `Check out ${propName} in ${cityName} on ThevillaCamp!`,
+      url: shareUrl,
+    };
+
+    if (typeof navigator !== "undefined" && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.warn("Share failed:", err);
+        }
+      }
+    } else {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = shareUrl;
+          textArea.style.position = "fixed";
+          textArea.style.opacity = "0";
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        addToast({
+          title: "Link Copied!",
+          description: "Property link copied to clipboard",
+          color: "success",
+        });
+      } catch (err) {
+        console.error("Clipboard copy failed:", err);
+        addToast({
+          title: "Copy Failed",
+          description: "Could not copy link to clipboard",
+          color: "danger",
+        });
+      }
+    }
+  };
 
   return (
     <header className="flex items-center justify-between px-3 h-12 bg-white border-b border-gray-100 sticky top-0 z-50 w-full shadow-2xs">
@@ -32,8 +84,14 @@ const HotelHeader = () => {
       </div>
 
       <div className="flex items-center space-x-1">
-        <Button isIconOnly variant="light" className="p-1.5 text-gray-600 hover:text-[#ff6900] rounded-full">
-          <Share className="w-4 h-4" />
+        <Button
+          isIconOnly
+          variant="light"
+          onPress={handleShare}
+          aria-label="Share property"
+          className="p-1.5 text-gray-600 hover:text-[#ff6900] rounded-full transition-colors"
+        >
+          {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Share className="w-4 h-4" />}
         </Button>
         <Button
           onPress={() => router.push("/notifications")}

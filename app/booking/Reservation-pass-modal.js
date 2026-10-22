@@ -49,6 +49,20 @@ export function ReservationPassModal({
 }) {
   const isMobile = useIsMobile();
   const [copiedId, setCopiedId] = useState(false);
+  const [localStatus, setLocalStatus] = useState(booking?.status || "confirmed");
+  const [localCancellation, setLocalCancellation] = useState(booking?.cancellation || {});
+  const [showCancelForm, setShowCancelForm] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
+
+  useEffect(() => {
+    if (booking) {
+      setLocalStatus(booking.status || "confirmed");
+      setLocalCancellation(booking.cancellation || {});
+      setShowCancelForm(false);
+      setCancelReason("");
+    }
+  }, [booking]);
 
   if (!booking) return null;
 
@@ -77,21 +91,6 @@ export function ReservationPassModal({
 
   const bookingCode =
     booking._id?.slice(-8).toUpperCase() || "DE1F59B8";
-
-  const [localStatus, setLocalStatus] = useState(booking?.status || "confirmed");
-  const [localCancellation, setLocalCancellation] = useState(booking?.cancellation || {});
-  const [showCancelForm, setShowCancelForm] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
-  const [isSubmittingCancel, setIsSubmittingCancel] = useState(false);
-
-  useEffect(() => {
-    if (booking) {
-      setLocalStatus(booking.status || "confirmed");
-      setLocalCancellation(booking.cancellation || {});
-      setShowCancelForm(false);
-      setCancelReason("");
-    }
-  }, [booking]);
 
   const activeStatusStr = (localStatus || booking.status || booking.bookingStatus || "confirmed").toLowerCase();
   const isCancellationRequested =

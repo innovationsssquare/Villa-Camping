@@ -36,13 +36,18 @@ import {
   ChevronDown,
   Tag,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { PropertyCard } from "@/components/Googlemapsearch/PropertyCard";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import PropertyCardSkeletonnew from "@/components/Availableweekend/PropertyCardSkeleton";
 
 const Mappropertyview = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const locationParam = searchParams?.get("location");
+  const locationIdParam = searchParams?.get("locationId");
+  const typeParam = searchParams?.get("type");
+
   const dispatch = useDispatch();
 
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
@@ -57,7 +62,7 @@ const Mappropertyview = () => {
 
   // Sorting & Filtering states
   const [sortBy, setSortBy] = useState("price-low");
-  const [selectedType, setSelectedType] = useState("all");
+  const [selectedType, setSelectedType] = useState(typeParam?.toLowerCase() || "all");
   const [customFilters, setCustomFilters] = useState(null);
   const [isDesktop, setIsDesktop] = useState(false);
 
@@ -67,7 +72,8 @@ const Mappropertyview = () => {
     locationData,
     selectedLocationId,
   } = useSelector((state) => state.properties);
-  const { selectedCategoryId } = useSelector((state) => state.booking);
+
+  const initialSyncRef = React.useRef(false);
 
   // Monitor screen size for responsiveness
   useEffect(() => {
@@ -79,64 +85,106 @@ const Mappropertyview = () => {
     return () => mediaQuery.removeEventListener("change", listener);
   }, []);
 
-  // Fetch locations & map properties initially
+  // 1. Initial mount: Fetch available locations list
   useEffect(() => {
     dispatch(fetchPropertylocation());
-    // Immediately fetch map properties on mount (backend returns all destinations if no locationId)
-    dispatch(
-      fetchPropertiesBymap({
-        locationId: selectedLocationId || "",
-        categoryId: selectedCategoryId,
-      })
-    );
   }, [dispatch]);
 
-  // Set default location if none selected
+  // 2. Initial synchronization: Resolve starting location once locationData is available
   useEffect(() => {
     if (!locationData?.length) return;
-    if (selectedLocationId) return;
+    if (initialSyncRef.current) return;
 
-    const defaultLocation =
-      locationData.find((loc) => loc.isPopular) || locationData[0];
+    initialSyncRef.current = true;
 
-    if (defaultLocation?._id) {
-      const locationId = defaultLocation._id;
-      dispatch(setselectedLocationId(locationId));
+    let targetLoc = null;
+    if (locationIdParam) {
+      targetLoc = locationData.find((loc) => loc._id === locationIdParam);
+    }
+    if (!targetLoc && locationParam) {
+      targetLoc = locationData.find(
+        (loc) => loc.name?.toLowerCase() === locationParam.toLowerCase()
+      );
+    }
+    if (!targetLoc && selectedLocationId) {
+      targetLoc = locationData.find((loc) => loc._id === selectedLocationId);
+    }
+    if (!targetLoc) {
+      targetLoc =
+        locationData.find((loc) => loc.isPopular) || locationData[0];
+    }
 
+    if (targetLoc?._id) {
+      dispatch(setselectedLocationId(targetLoc._id));
       dispatch(
         fetchPropertiesBymap({
-          locationId: locationId,
-          categoryId: selectedCategoryId,
+          locationId: targetLoc._id,
+          categoryId: null,
+        })
+      );
+    } else {
+      dispatch(
+        fetchPropertiesBymap({
+          locationId: locationIdParam || locationParam || "",
+          categoryId: null,
         })
       );
     }
-  }, [locationData, selectedLocationId, selectedCategoryId, dispatch]);
+
+    if (typeParam) {
+      setSelectedType(typeParam.toLowerCase());
+    }
+  }, [locationData, locationIdParam, locationParam, dispatch]);
+
+  // 3. Handle external URL back/forward changes after initialization
+  useEffect(() => {
+    if (!initialSyncRef.current || !locationData?.length) return;
+    if (locationIdParam && locationIdParam !== selectedLocationId) {
+      dispatch(setselectedLocationId(locationIdParam));
+      dispatch(
+        fetchPropertiesBymap({
+          locationId: locationIdParam,
+          categoryId: null,
+        })
+      );
+    }
+  }, [locationIdParam, locationData]);
 
   // Dismiss any open popup card / active card whenever location, filters, or loading changes
   useEffect(() => {
     setActivePropertyId(null);
   }, [selectedLocationId, selectedType, customFilters, sortBy, mapLoading]);
 
+  // 4. Handle user selecting a location from desktop dropdown or mobile search bar
   const handleLocationSelect = (locationId) => {
+    if (!locationId) return;
     setActivePropertyId(null);
     dispatch(setselectedLocationId(locationId));
+
+    const selectedLoc = locationData?.find((loc) => loc._id === locationId);
+    if (selectedLoc) {
+      // Seamlessly update browser URL with the newly selected location
+      router.replace(
+        `/search-your-gateway?location=${encodeURIComponent(selectedLoc.name)}&locationId=${selectedLoc._id}`,
+        { scroll: false }
+      );
+    }
+
     dispatch(
       fetchPropertiesBymap({
         locationId: locationId,
-        categoryId: selectedCategoryId,
+        categoryId: null,
       })
     );
   };
 
-  const handleCategorySelect = (categoryId) => {
+  const handleCategorySelect = (categoryId, category) => {
     setActivePropertyId(null);
-    dispatch(setSelectedCategory(categoryId));
-    dispatch(
-      fetchPropertiesBymap({
-        locationId: selectedLocationId || "",
-        categoryId: categoryId,
-      })
-    );
+    if (!category) {
+      setSelectedType("all");
+    } else {
+      setSelectedType((category.slug || category.name).toLowerCase());
+    }
   };
 
   const handleApplyDrawerFilters = (filters) => {
@@ -190,13 +238,31 @@ const Mappropertyview = () => {
       );
     }
 
-    // 2. Filter by drawer/popover filters (price range, rooms)
+    // 2. Filter by drawer/popover filters (price range, rooms, types, amenities)
     if (customFilters) {
       if (customFilters.priceRange?.length === 2) {
         const [minPrice, maxPrice] = customFilters.priceRange;
         list = list.filter((p) => {
           const price = getEffectivePrice(p);
           return price >= minPrice && price <= maxPrice;
+        });
+      }
+
+      if (customFilters.selectedTypes?.length > 0) {
+        list = list.filter((p) => {
+          const pType = (p.type || p.category || "").toLowerCase();
+          return customFilters.selectedTypes.some((t) => t.toLowerCase() === pType);
+        });
+      }
+
+      if (customFilters.selectedAmenities?.length > 0) {
+        list = list.filter((p) => {
+          const pAmenities = (p.topamenities || []).map((a) =>
+            typeof a === "string" ? a.toLowerCase() : a.name?.toLowerCase() || ""
+          );
+          return customFilters.selectedAmenities.every((amenity) =>
+            pAmenities.some((pa) => pa.includes(amenity.toLowerCase()))
+          );
         });
       }
 
@@ -235,10 +301,27 @@ const Mappropertyview = () => {
     }));
   }, [mapData, selectedType, customFilters, sortBy]);
 
+  const currentLocation = useMemo(() => {
+    if (selectedLocationId && locationData?.length) {
+      const match = locationData.find((l) => l._id === selectedLocationId);
+      if (match) return match;
+    }
+    if (locationParam && locationData?.length) {
+      const match = locationData.find(
+        (l) => l.name?.toLowerCase() === locationParam.toLowerCase()
+      );
+      if (match) return match;
+    }
+    return null;
+  }, [selectedLocationId, locationData, locationParam]);
+
   const currentLocationName =
-    locationData?.find((loc) => loc._id === selectedLocationId)?.name ||
+    currentLocation?.name ||
+    (locationParam ? decodeURIComponent(locationParam) : null) ||
     mapData?.[0]?.location ||
     "Destination";
+
+  const currentLocationCoordinates = currentLocation?.coordinates || [18.7537, 73.4062];
 
   // Automatically clear active property ID when 0 properties are found
   useEffect(() => {
@@ -285,6 +368,8 @@ const Mappropertyview = () => {
 
           <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-md border border-neutral-200/90 px-2 py-0.5">
             <FilterChips
+              selectedType={selectedType}
+              onTypeSelect={setSelectedType}
               onFilterSelect={handleCategorySelect}
               className="px-1 py-1"
             />
@@ -296,6 +381,7 @@ const Mappropertyview = () => {
           <MapView
             googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
             selectedLocation={currentLocationName}
+            centerCoordinates={currentLocationCoordinates}
             properties={filteredAndSortedProperties}
             loading={mapLoading}
             activePropertyId={activePropertyId}
@@ -355,17 +441,17 @@ const Mappropertyview = () => {
                       {currentLocationName}
                     </SelectValue>
                   </SelectTrigger>
-                  <SelectContent className="rounded-2xl shadow-xl border border-neutral-200 max-h-72 bg-white">
+                  <SelectContent className="rounded-2xl shadow-xl border border-neutral-200 max-h-72 bg-white z-50">
                     {locationData?.map((loc) => (
                       <SelectItem
                         key={loc._id}
                         value={loc._id}
                         className="font-semibold text-xs py-2 cursor-pointer"
                       >
-                        <div className="flex items-center gap-2">
-                          <MapPin className="w-3.5 h-3.5 text-[#ff6900]" />
+                        <span className="flex items-center gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
                           <span>{loc.name}</span>
-                        </div>
+                        </span>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -613,6 +699,7 @@ const Mappropertyview = () => {
               <MapView
                 googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
                 selectedLocation={currentLocationName}
+                centerCoordinates={currentLocationCoordinates}
                 properties={filteredAndSortedProperties}
                 loading={mapLoading}
                 activePropertyId={activePropertyId}
@@ -634,4 +721,16 @@ const Mappropertyview = () => {
   );
 };
 
-export default Mappropertyview;
+export default function SearchGatewayPage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className="fixed inset-0 bg-white flex items-center justify-center">
+          <div className="w-8 h-8 rounded-full border-2 border-[#ff6900] border-t-transparent animate-spin" />
+        </div>
+      }
+    >
+      <Mappropertyview />
+    </React.Suspense>
+  );
+}

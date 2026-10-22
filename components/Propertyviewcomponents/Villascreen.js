@@ -21,6 +21,7 @@ import {
   ArrowLeft,
   Heart,
   Share,
+  Check,
   User,
   Star,
   Users,
@@ -85,6 +86,7 @@ import Image from "next/image";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
+import { addToast } from "@heroui/react";
 
 const amenityIcons = {
   WiFi: Wifi,
@@ -112,6 +114,58 @@ export default function Villascreen() {
   const { id } = params;
   const { villa, loading, error } = useSelector((state) => state.villa);
   const router = useRouter();
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = async () => {
+    if (typeof window === "undefined") return;
+    const shareUrl = window.location.href;
+    const propName = villa?.name || "Luxury Villa";
+    const cityName = villa?.address?.city || "Destination";
+    const shareData = {
+      title: `${propName} | ThevillaCamp`,
+      text: `Check out ${propName} in ${cityName} on ThevillaCamp!`,
+      url: shareUrl,
+    };
+
+    if (typeof navigator !== "undefined" && navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if (err.name !== "AbortError") {
+          console.warn("Share failed:", err);
+        }
+      }
+    } else {
+      try {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          await navigator.clipboard.writeText(shareUrl);
+        } else {
+          const textArea = document.createElement("textarea");
+          textArea.value = shareUrl;
+          textArea.style.position = "fixed";
+          textArea.style.opacity = "0";
+          document.body.appendChild(textArea);
+          textArea.select();
+          document.execCommand("copy");
+          document.body.removeChild(textArea);
+        }
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+        addToast({
+          title: "Link Copied!",
+          description: "Property link copied to clipboard",
+          color: "success",
+        });
+      } catch (err) {
+        console.error("Clipboard copy failed:", err);
+        addToast({
+          title: "Copy Failed",
+          description: "Could not copy link to clipboard",
+          color: "danger",
+        });
+      }
+    }
+  };
 
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const isLiked = useMemo(() => {
@@ -218,10 +272,21 @@ export default function Villascreen() {
         </Button>
         <h1 className="font-semibold text-lg">{villa?.name}</h1>
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" className="rounded-full">
-            <Share className="h-5 w-5" />
+          <Button
+            onClick={handleShare}
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+            aria-label="Share property"
+          >
+            {copied ? <Check className="h-5 w-5 text-emerald-600" /> : <Share className="h-5 w-5" />}
           </Button>
-          <Button variant="ghost" size="icon" className="rounded-full">
+          <Button
+            onClick={() => router.push("/account")}
+            variant="ghost"
+            size="icon"
+            className="rounded-full"
+          >
             <User className="h-5 w-5" />
           </Button>
         </div>

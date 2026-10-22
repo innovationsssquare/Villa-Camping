@@ -160,7 +160,7 @@ export function AvailableThisWeekend() {
             {[...Array(6)].map((_, i) => (
               <div
                 key={i}
-                className="basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
+                className="basis-[42%] sm:basis-[185px] md:basis-[205px] lg:basis-[225px] shrink-0"
               >
                 <PropertySkeleton />
               </div>
@@ -168,7 +168,7 @@ export function AvailableThisWeekend() {
           </div>
         )}
 
-        {/* Properties Carousel (Airbnb Multi-Card Layout matching Destination card size) */}
+        {/* Properties Carousel (Shows 2 full cards + 3rd card horizontal scroll indicator on mobile) */}
         {!weekendLoading && weekendData.length > 0 && (
           <div className="relative py-2">
             <Carousel
@@ -182,7 +182,7 @@ export function AvailableThisWeekend() {
                 {weekendData.map((property) => (
                   <CarouselItem
                     key={property._id}
-                    className="pl-3 sm:pl-3.5 basis-[140px] sm:basis-[175px] md:basis-[195px] lg:basis-[215px] shrink-0"
+                    className="pl-3 sm:pl-3.5 basis-[42%] sm:basis-[185px] md:basis-[205px] lg:basis-[225px] shrink-0"
                   >
                     <Weekendcard property={property} />
                   </CarouselItem>

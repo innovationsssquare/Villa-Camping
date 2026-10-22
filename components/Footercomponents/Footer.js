@@ -25,12 +25,9 @@ import {
   ArrowRight,
   Compass,
   Smartphone,
-  QrCode,
   Star,
   Zap,
   Tag,
-  Copy,
-  Check,
   MessageCircle,
 } from "lucide-react";
 import Footerlogo from "@/public/Productasset/Logoicon.png";
@@ -39,8 +36,6 @@ export default function Footer() {
   const dispatch = useDispatch();
   const router = useRouter();
   const { destinationData } = useSelector((state) => state.properties);
-
-  const [copiedLink, setCopiedLink] = useState(false);
 
   useEffect(() => {
     if (!destinationData || destinationData.length === 0) {
@@ -56,20 +51,6 @@ export default function Footer() {
       dispatch(setselectedLocationId(matched._id));
     }
     router.push("/search-your-gateway");
-  };
-
-  const handleCopyAppLink = () => {
-    try {
-      const url = typeof window !== "undefined" ? window.location.origin : "https://thevillacamp.com";
-      if (navigator?.clipboard) {
-        navigator.clipboard.writeText(url);
-        setCopiedLink(true);
-        setTimeout(() => setCopiedLink(false), 2500);
-      }
-    } catch {
-      setCopiedLink(true);
-      setTimeout(() => setCopiedLink(false), 2500);
-    }
   };
 
   return (
@@ -121,138 +102,52 @@ export default function Footer() {
               </div>
             </div>
 
-            {/* Right Column: QR Code & Download Buttons */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-5 lg:shrink-0">
-              {/* QR Code Container */}
-              <div className="flex items-center gap-3.5 bg-neutral-900/90 border border-neutral-800 p-3 sm:p-3.5 rounded-2xl shadow-lg w-full sm:w-auto">
-                {/* Authentic Scalable SVG QR Code */}
-                <div className="relative p-2 bg-white rounded-xl shadow-inner flex flex-col items-center justify-center shrink-0">
-                  <svg className="w-20 h-20 sm:w-22 sm:h-22" viewBox="0 0 100 100">
-                    {/* Finder 1 (Top Left) */}
-                    <rect x="4" y="4" width="28" height="28" rx="4" fill="#0f172a" />
-                    <rect x="8" y="8" width="20" height="20" rx="2" fill="white" />
-                    <rect x="12" y="12" width="12" height="12" rx="2" fill="#ff6900" />
-
-                    {/* Finder 2 (Top Right) */}
-                    <rect x="68" y="4" width="28" height="28" rx="4" fill="#0f172a" />
-                    <rect x="72" y="8" width="20" height="20" rx="2" fill="white" />
-                    <rect x="76" y="12" width="12" height="12" rx="2" fill="#ff6900" />
-
-                    {/* Finder 3 (Bottom Left) */}
-                    <rect x="4" y="68" width="28" height="28" rx="4" fill="#0f172a" />
-                    <rect x="8" y="72" width="20" height="20" rx="2" fill="white" />
-                    <rect x="12" y="76" width="12" height="12" rx="2" fill="#ff6900" />
-
-                    {/* Timing & Data Grid Modules */}
-                    <rect x="36" y="8" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="48" y="8" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="36" y="20" width="6" height="6" rx="1.5" fill="#ff6900" />
-                    <rect x="48" y="20" width="6" height="6" rx="1.5" fill="#0f172a" />
-
-                    <rect x="8" y="36" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="20" y="36" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="8" y="48" width="6" height="6" rx="1.5" fill="#ff6900" />
-                    <rect x="20" y="48" width="6" height="6" rx="1.5" fill="#0f172a" />
-
-                    {/* Center Accent Block */}
-                    <rect x="36" y="36" width="28" height="28" rx="4" fill="#ff6900" fillOpacity="0.1" />
-                    <rect x="44" y="44" width="12" height="12" rx="2.5" fill="#ff6900" />
-                    <rect x="36" y="52" width="5" height="5" rx="1" fill="#0f172a" />
-                    <rect x="59" y="44" width="5" height="5" rx="1" fill="#0f172a" />
-
-                    {/* Bottom Right Modules */}
-                    <rect x="36" y="68" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="48" y="68" width="6" height="6" rx="1.5" fill="#ff6900" />
-                    <rect x="36" y="80" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="48" y="80" width="6" height="6" rx="1.5" fill="#0f172a" />
-
-                    <rect x="68" y="36" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="80" y="36" width="6" height="6" rx="1.5" fill="#ff6900" />
-                    <rect x="68" y="48" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="80" y="48" width="6" height="6" rx="1.5" fill="#0f172a" />
-
-                    <rect x="68" y="68" width="6" height="6" rx="1.5" fill="#ff6900" />
-                    <rect x="80" y="68" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="68" y="80" width="6" height="6" rx="1.5" fill="#0f172a" />
-                    <rect x="80" y="80" width="6" height="6" rx="1.5" fill="#ff6900" />
-                  </svg>
+            {/* Right Column: Download Buttons & Rating */}
+            <div className="flex flex-col gap-2.5 w-full sm:w-auto min-w-[190px] lg:shrink-0">
+              {/* Apple App Store */}
+              <a
+                href="https://apps.apple.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 hover:border-[#ff6900]/50 transition-all shadow-md cursor-pointer active:scale-95"
+              >
+                <svg className="w-6 h-6 fill-white group-hover:text-[#ff6900] transition-colors shrink-0" viewBox="0 0 24 24">
+                  <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.58.66-1.09 1.73-.95 2.75 1 .08 2.06-.5 2.68-1.25z"/>
+                </svg>
+                <div className="text-left">
+                  <span className="block text-[9px] text-neutral-400 uppercase tracking-wider leading-none">Download on the</span>
+                  <span className="block text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5 group-hover:text-[#ff6900] transition-colors">
+                    App Store
+                  </span>
                 </div>
+              </a>
 
-                <div className="flex flex-col justify-center pr-2">
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-white tracking-wide uppercase">
-                    <QrCode className="w-3.5 h-3.5 text-[#ff6900]" />
-                    <span>Scan with Phone</span>
-                  </div>
-                  <p className="text-[10px] text-neutral-400 mt-0.5 leading-snug">
-                    Point camera to open app on iOS or Android.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={handleCopyAppLink}
-                    className="mt-2 inline-flex items-center gap-1.5 text-[10px] text-[#ff6900] hover:text-[#ff8533] font-semibold transition-colors cursor-pointer"
-                  >
-                    {copiedLink ? (
-                      <>
-                        <Check className="w-3 h-3 text-emerald-400" />
-                        <span className="text-emerald-400">Link Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-3 h-3" />
-                        <span>Copy App Link</span>
-                      </>
-                    )}
-                  </button>
+              {/* Google Play Store */}
+              <a
+                href="https://play.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 hover:border-[#ff6900]/50 transition-all shadow-md cursor-pointer active:scale-95"
+              >
+                <svg className="w-5 h-5 fill-white group-hover:text-[#ff6900] transition-colors shrink-0 ml-0.5" viewBox="0 0 24 24">
+                  <path d="M3.609 1.814L13.793 12 3.61 22.186a2.38 2.38 0 0 1-.61-.958V2.772c.162-.358.376-.684.61-.958zm11.242 11.244l2.508-2.508L4.85 3.398l9.999 9.66zm0 1.884L4.85 24.602l12.509-7.152-2.508-2.508zm1.53-1.53l3.522 2.013c1.07.612 1.07 1.609 0 2.221l-3.522 2.013 2.13-2.13-2.13-2.117z"/>
+                </svg>
+                <div className="text-left ml-0.5">
+                  <span className="block text-[9px] text-neutral-400 uppercase tracking-wider leading-none">GET IT ON</span>
+                  <span className="block text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5 group-hover:text-[#ff6900] transition-colors">
+                    Google Play
+                  </span>
                 </div>
-              </div>
+              </a>
 
-              {/* Store Download Buttons & Rating */}
-              <div className="flex flex-col gap-2.5 w-full sm:w-auto min-w-[180px]">
-                {/* Apple App Store */}
-                <a
-                  href="https://apps.apple.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 hover:border-[#ff6900]/50 transition-all shadow-md cursor-pointer active:scale-95"
-                >
-                  <svg className="w-6 h-6 fill-white group-hover:text-[#ff6900] transition-colors shrink-0" viewBox="0 0 24 24">
-                    <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.38c.62-.75 1.04-1.8 0.92-2.85-.9.04-2 .6-2.65 1.35-.58.66-1.09 1.73-.95 2.75 1 .08 2.06-.5 2.68-1.25z"/>
-                  </svg>
-                  <div className="text-left">
-                    <span className="block text-[9px] text-neutral-400 uppercase tracking-wider leading-none">Download on the</span>
-                    <span className="block text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5 group-hover:text-[#ff6900] transition-colors">
-                      App Store
-                    </span>
-                  </div>
-                </a>
-
-                {/* Google Play Store */}
-                <a
-                  href="https://play.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-3 px-4 py-2.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 border border-neutral-700/80 hover:border-[#ff6900]/50 transition-all shadow-md cursor-pointer active:scale-95"
-                >
-                  <svg className="w-5 h-5 fill-white group-hover:text-[#ff6900] transition-colors shrink-0 ml-0.5" viewBox="0 0 24 24">
-                    <path d="M3.609 1.814L13.793 12 3.61 22.186a2.38 2.38 0 0 1-.61-.958V2.772c.162-.358.376-.684.61-.958zm11.242 11.244l2.508-2.508L4.85 3.398l9.999 9.66zm0 1.884L4.85 24.602l12.509-7.152-2.508-2.508zm1.53-1.53l3.522 2.013c1.07.612 1.07 1.609 0 2.221l-3.522 2.013 2.13-2.13-2.13-2.117z"/>
-                  </svg>
-                  <div className="text-left ml-0.5">
-                    <span className="block text-[9px] text-neutral-400 uppercase tracking-wider leading-none">GET IT ON</span>
-                    <span className="block text-xs sm:text-sm font-bold text-white tracking-tight mt-0.5 group-hover:text-[#ff6900] transition-colors">
-                      Google Play
-                    </span>
-                  </div>
-                </a>
-
-                {/* Social Proof Subtext */}
-                <div className="flex items-center justify-between px-1 text-[10px] text-neutral-400">
-                  <div className="flex items-center gap-1 text-amber-400 font-semibold">
-                    <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                    <span>4.9 Rating</span>
-                  </div>
-                  <span className="text-neutral-600">•</span>
-                  <span className="text-neutral-400">50K+ Installs</span>
+              {/* Social Proof Subtext */}
+              <div className="flex items-center justify-between px-1 text-[10px] text-neutral-400">
+                <div className="flex items-center gap-1 text-amber-400 font-semibold">
+                  <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
+                  <span>4.9 Rating</span>
                 </div>
+                <span className="text-neutral-600">•</span>
+                <span className="text-neutral-400">50K+ Installs</span>
               </div>
             </div>
           </div>

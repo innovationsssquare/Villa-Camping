@@ -34,6 +34,8 @@ const getCategoryIcon = (slug, isActive) => {
 };
 
 export const FilterChips = ({
+  selectedType,
+  onTypeSelect,
   onFilterSelect,
   className = "px-2 py-2",
 }) => {
@@ -53,26 +55,67 @@ export const FilterChips = ({
     }
   }, [dispatch]);
 
+  const handleAllClick = () => {
+    dispatch(setSelectedCategory(null));
+    dispatch(setSelectedCategoryname(null));
+    onTypeSelect?.("all");
+    onFilterSelect?.(null);
+  };
+
   const handleCategoryClick = (category) => {
-    const isCurrent = selectedCategoryId === category._id;
-    const nextId = isCurrent ? null : category._id;
-    const nextName = isCurrent ? null : category.name;
+    const typeKey = (category.slug || category.name).toLowerCase();
+    const isCurrentActive =
+      selectedType !== undefined
+        ? selectedType === typeKey
+        : selectedCategoryId === category._id;
+
+    const nextType = isCurrentActive ? "all" : typeKey;
+    const nextId = isCurrentActive ? null : category._id;
+    const nextName = isCurrentActive ? null : category.name;
+
     dispatch(setSelectedCategory(nextId));
     dispatch(setSelectedCategoryname(nextName));
-    onFilterSelect?.(nextId);
+
+    if (onTypeSelect) {
+      onTypeSelect(nextType);
+    }
+    if (onFilterSelect) {
+      onFilterSelect(nextId, category);
+    }
   };
 
   if (loading || !categories.length) return null;
 
+  const isAllActive =
+    selectedType !== undefined
+      ? selectedType === "all"
+      : !selectedCategoryId && !selectedCategoryName;
+
   return (
     <div className={className}>
       <div className="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth py-1">
+        {/* All Stays Pill */}
+        <button
+          type="button"
+          onClick={handleAllClick}
+          className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${isAllActive
+            ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-[1.02]"
+            : "bg-white text-neutral-700 border border-neutral-200/90 hover:border-[#ff6900]/40 hover:bg-neutral-50 shadow-xs"
+            }`}
+        >
+          <Sparkles className={`h-3.5 w-3.5 ${isAllActive ? "text-white" : "text-[#ff6900]"}`} />
+          <span>All Stays</span>
+        </button>
+
         {/* Dynamic Category Pills */}
         {categories.map((category) => {
+          const typeKey = (category.slug || category.name).toLowerCase();
           const isActive =
-            selectedCategoryId === category._id ||
-            (selectedCategoryName &&
-              selectedCategoryName.toLowerCase().startsWith(category.name.toLowerCase().slice(0, 4)));
+            selectedType !== undefined
+              ? selectedType === typeKey
+              : selectedCategoryId === category._id ||
+              (selectedCategoryName &&
+                selectedCategoryName.toLowerCase().startsWith(category.name.toLowerCase().slice(0, 4)));
 
           return (
             <button
@@ -80,8 +123,8 @@ export const FilterChips = ({
               type="button"
               onClick={() => handleCategoryClick(category)}
               className={`shrink-0 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer ${isActive
-                  ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-[1.02]"
-                  : "bg-white text-neutral-700 border border-neutral-200/90 hover:border-[#ff6900]/40 hover:bg-neutral-50 shadow-xs"
+                ? "bg-gradient-to-r from-[#ff6900] to-[#e05d00] text-white shadow-xs scale-[1.02]"
+                : "bg-white text-neutral-700 border border-neutral-200/90 hover:border-[#ff6900]/40 hover:bg-neutral-50 shadow-xs"
                 }`}
             >
               {getCategoryIcon(category.slug || category.name, isActive)}
