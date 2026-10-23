@@ -19,6 +19,7 @@ import {
   Users,
   Search,
   ChevronRight,
+  Loader2,
 } from "lucide-react";
 import Banner1 from "@/public/Loginasset/villa_banner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
@@ -92,6 +93,7 @@ export default function Hero() {
   const [slides, setSlides] = useState(DEFAULT_SLIDES);
   const [activeSlide, setActiveSlide] = useState(0);
   const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Set SHOW_HERO_VIDEO to true to re-enable the desktop background video
   const SHOW_HERO_VIDEO = false;
@@ -203,6 +205,7 @@ export default function Hero() {
 
   // Mobile "Search Now" button click handler
   const handleSearchNow = () => {
+    setIsSearching(true);
     const params = new URLSearchParams();
     if (checkin) params.set("checkin", checkin);
     if (checkout) params.set("checkout", checkout);
@@ -213,6 +216,9 @@ export default function Hero() {
     const queryStr = params.toString();
 
     router.push(`/category/all${queryStr ? `?${queryStr}` : ""}`);
+    setTimeout(() => {
+      setIsSearching(false);
+    }, 2000);
   };
 
   const currentSlide = slides[activeSlide] || DEFAULT_SLIDES[0];
@@ -228,13 +234,13 @@ export default function Hero() {
         {/* Banner with Centered Typography & Smooth Auto-Slide */}
         <div className="relative w-full h-[380px] sm:h-[420px] overflow-hidden flex flex-col justify-between">
           {/* Background Image / Slide (Seamless Crossfade Transition) */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false}>
             <motion.div
-              key={activeSlide}
+              key={typeof currentSlide?.image === "string" ? currentSlide.image : "static-banner"}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: "easeInOut" }}
+              transition={{ duration: 1.0, ease: "easeInOut" }}
               className="absolute inset-0"
             >
               {typeof currentSlide?.image === "string" ? (
@@ -286,7 +292,7 @@ export default function Hero() {
 
         {/* Floating Search Card */}
         <div className="relative z-30 px-3.5 -mt-16 sm:-mt-20 pb-3">
-          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_14px_36px_rgba(0,0,0,0.12)] border border-neutral-100">
+          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-neutral-200/80">
             {/* Row 1: Destination */}
             <div
               onClick={() => router.push("/search-stay")}
@@ -340,10 +346,20 @@ export default function Hero() {
             <button
               type="button"
               onClick={handleSearchNow}
-              className="mt-3.5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6900] via-[#ff7a1a] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] active:scale-[0.98] text-white font-bold text-sm shadow-[0_8px_24px_rgba(255,105,0,0.36)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+              disabled={isSearching}
+              className="mt-3.5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6900] via-[#ff7a1a] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] active:scale-[0.98] text-white font-bold text-sm shadow-[0_8px_24px_rgba(255,105,0,0.36)] flex items-center justify-center gap-2 cursor-pointer transition-all disabled:opacity-85"
             >
-              <Search className="w-4 h-4 stroke-[2.5]" />
-              <span>Search Now</span>
+              {isSearching ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin text-white" />
+                  <span>Searching Stays...</span>
+                </>
+              ) : (
+                <>
+                  <Search className="w-4 h-4 stroke-[2.5]" />
+                  <span>Search Now</span>
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -364,13 +380,13 @@ export default function Hero() {
         {/* Background Container - Full bleed behind transparent top navbar */}
         <div className="relative w-full min-h-[600px] lg:min-h-[660px] h-auto flex flex-col justify-between overflow-hidden shadow-xl">
           {/* Hero Background Banner Image (Seamless Crossfade Transition) */}
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false}>
             <motion.div
-              key={activeSlide}
+              key={typeof currentSlide?.image === "string" ? currentSlide.image : "static-banner"}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.9, ease: "easeInOut" }}
+              transition={{ duration: 1.1, ease: "easeInOut" }}
               className="absolute inset-0"
             >
               {typeof currentSlide?.image === "string" ? (
