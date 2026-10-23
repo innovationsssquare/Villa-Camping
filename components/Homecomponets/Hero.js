@@ -25,19 +25,8 @@ import Banner1 from "@/public/Loginasset/villa_banner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
 import { GuestSelectionDrawer } from "@/components/Searchdatescomponents/guest-selection-drawer";
 
-// High-aesthetic festive defaults (matches StayVista reference)
+// High-aesthetic defaults (matches StayVista reference)
 const DEFAULT_SLIDES = [
-  {
-    tag: "Festive Escape",
-    title: "Script Your Diwali Getaway",
-    description:
-      "Celebrate the festival of lights in exclusive private pool villas, scenic lakeside camps and hillside chalets.",
-    categorySlug: "villa",
-    categoryName: "Villa",
-    highlight: "Diwali Villas",
-    image: Banner1,
-    badgeText: "Diwali Special",
-  },
   {
     tag: "Luxury Private Stays",
     title: "Private Pool Villas in Lonavala",
@@ -117,11 +106,11 @@ export default function Hero() {
             data.data.length > 0
           ) {
             const mapped = data.data.map((b) => ({
-              tag: b.tagline || "Festive Escape",
-              title: b.title || "Script Your Diwali Getaway",
+              tag: b.tagline || "Luxury Private Stays",
+              title: b.title || "Private Pool Villas in Lonavala",
               description:
                 b.description ||
-                "Celebrate the festive season in secluded luxury pool villas & private estates.",
+                "Indulge in secluded luxury with panoramic valley views, private pools, and bespoke concierge service.",
               categorySlug: b.categorySlug || "villa",
               categoryName: b.categorySlug ? b.categorySlug.toUpperCase() : "Villa",
               highlight: b.badgeText || "Festive Escape",
@@ -277,7 +266,7 @@ export default function Hero() {
                 className="flex flex-col items-center max-w-sm"
               >
                 <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.22] drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]">
-                  {currentSlide?.title || "Script Your Diwali Getaway"}
+                  {currentSlide?.title || "Private Pool Villas in Lonavala"}
                 </h1>
 
                 {currentSlide?.tag && (
@@ -446,7 +435,7 @@ export default function Hero() {
                 className="inline-flex items-center self-start gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white text-xs font-semibold mb-4 shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#ff6900] animate-pulse shrink-0" />
-                <span>{currentSlide?.tag || "Festive Escape"}</span>
+                <span>{currentSlide?.tag || "Luxury Private Stays"}</span>
                 <span className="w-1 h-1 rounded-full bg-white/60 mx-0.5" />
                 <span className="text-white/80 font-normal">Lonavala & Maharashtra</span>
               </motion.div>
@@ -462,11 +451,11 @@ export default function Hero() {
                     transition={{ duration: 0.35, ease: "easeOut" }}
                   >
                     <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.14] drop-shadow-lg">
-                      {currentSlide?.title || "Script Your Diwali Getaway"}
+                      {currentSlide?.title || "Private Pool Villas in Lonavala"}
                     </h1>
                     <p className="text-white/90 text-sm md:text-base max-w-xl mt-4 font-normal leading-relaxed line-clamp-2 drop-shadow-md">
                       {currentSlide?.description ||
-                        "Celebrate the festive season in secluded luxury pool villas & private estates."}
+                        "Indulge in secluded luxury with panoramic valley views, private pools, and bespoke concierge service."}
                     </p>
                   </motion.div>
                 </AnimatePresence>
