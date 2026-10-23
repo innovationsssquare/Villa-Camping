@@ -24,6 +24,7 @@ import PropertyCard from "@/components/Availableweekend/Weekendcard";
 import NearbyStaysEmptyCard from "./NearbyStaysEmptyCard";
 import { fetchNearbyStays } from "@/lib/nearbyStaysUtils";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { getPropertyRating } from "@/lib/ratingUtils";
 import {
   Trees,
   Bed,
@@ -186,6 +187,7 @@ const REVIEW_SORT_OPTIONS = ["Most Popular", "Most Recent"];
 
 export default function PropertyContentSections() {
   const villa = useVilla();
+  const { rating, reviewCount } = getPropertyRating(villa);
 
   // State for Highlights
   const [expandedDescription, setExpandedDescription] = useState(false);
@@ -2042,7 +2044,7 @@ export default function PropertyContentSections() {
             <div className="flex items-center gap-1 text-amber-500">
               <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
               <span className="font-extrabold text-lg text-gray-900">
-                {villa?.averageRating || "4.8"}
+                {rating}
               </span>
               <span className="text-gray-400 text-xs font-semibold">/5</span>
             </div>
@@ -2058,7 +2060,7 @@ export default function PropertyContentSections() {
           <div className="flex items-center gap-5">
             <div className="w-20 h-20 rounded-2xl bg-white border border-orange-200 flex flex-col items-center justify-center shadow-xs">
               <span className="text-3xl font-extrabold text-gray-900 leading-none">
-                {villa?.averageRating || "4.8"}
+                {rating}
               </span>
               <span className="text-[11px] font-bold text-gray-400 mt-1">
                 OUT OF 5
@@ -2077,7 +2079,7 @@ export default function PropertyContentSections() {
                 Exceptional Guest Hospitality
               </h4>
               <p className="text-xs text-gray-500 mt-0.5">
-                Based on {villa?.totalReviews || rawReviews.length} genuine guest stays
+                Based on {rawReviews.length > 0 ? rawReviews.length : reviewCount} genuine guest stays
               </p>
             </div>
           </div>
@@ -2247,7 +2249,7 @@ export default function PropertyContentSections() {
               <DialogTitle className="text-xl font-bold text-gray-900 flex items-center justify-between">
                 <span>All Reviews ({rawReviews.length})</span>
                 <span className="text-sm font-semibold text-[#ff6900] bg-orange-50 px-3 py-1 rounded-full border border-orange-200">
-                  ★ {villa?.averageRating || "4.8"} / 5
+                  ★ {rating} / 5
                 </span>
               </DialogTitle>
             </DialogHeader>

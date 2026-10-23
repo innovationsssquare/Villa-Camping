@@ -80,6 +80,7 @@ import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
 import { Getcottageavability } from "@/lib/API/category/Cottage/Cottage";
 import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { getPropertyRating } from "@/lib/ratingUtils";
 import { AlertCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -91,6 +92,7 @@ export default function StickyBookingWidget() {
   const [availabilityChecking, setAvailabilityChecking] = useState(false);
   const [availabilityError, setAvailabilityError] = useState("");
   const villa = useVilla();
+  const { rating } = getPropertyRating(villa);
   const router = useRouter();
   const dispatch = useDispatch();
   const { openAuthModal } = useAuthModal();
@@ -840,7 +842,7 @@ export default function StickyBookingWidget() {
             </span>
             <div className="flex items-center space-x-1 text-xs bg-neutral-50 px-2 py-0.5 rounded-full border border-neutral-200/80">
               <Star className="w-3.5 h-3.5 fill-current text-amber-400" />
-              <span className="font-bold text-xs text-gray-900">{villa?.averageRating || "4.8"}</span>
+              <span className="font-bold text-xs text-gray-900">{rating}</span>
               <span className="text-gray-400 text-[10px]">/5</span>
             </div>
           </div>

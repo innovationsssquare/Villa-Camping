@@ -75,6 +75,7 @@ import { addToast } from "@heroui/react";
 import { getCategoryRouteName, buildPropertyViewUrl } from "@/lib/categoryUtils";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export default function PropertyCardnew({ property }) {
   const dispatch = useDispatch();
@@ -251,10 +252,8 @@ export default function PropertyCardnew({ property }) {
   const weekdayPrice = property?.pricing?.weekdayPrice || 0;
   const weekendPrice = property?.pricing?.weekendPrice || 0;
 
-  // Rating calculations
-  const rating = property?.averageRating || property?.rating || "4.9";
-  const formattedRating = Number(rating).toFixed(1);
-  const reviewCount = property?.reviewCount || 24;
+  // Dynamic Rating calculations (no identical static 4.9 across cards)
+  const { rating: formattedRating, reviewCount } = getPropertyRating(property);
 
   // Amenity icon mapping
   const amenitiesIcons = {

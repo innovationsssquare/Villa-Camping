@@ -2,6 +2,7 @@ import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Users, Bed, Bath, Star } from "lucide-react";
 import { getDisplayPrice } from "./getDisplayPrice";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export const PropertyHoverCard = ({ property, position }) => {
   const displayPrice = getDisplayPrice(property.price);
@@ -49,7 +50,7 @@ export const PropertyHoverCard = ({ property, position }) => {
             <div className="absolute top-2.5 right-2.5 z-10 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-full border border-black/5 shadow-xs flex items-center gap-1">
               <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
               <span className="text-[10px] font-bold text-neutral-900">
-                {property.rating?.average || "4.8"}
+                {getPropertyRating(property).rating}
               </span>
             </div>
           </div>

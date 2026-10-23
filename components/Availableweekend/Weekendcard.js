@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { saveRecentlyVisited } from "@/lib/recentlyVisited";
 import { useWishlist } from "@/hooks/useWishlist";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export function PropertyCard({ property }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -115,9 +116,7 @@ export function PropertyCard({ property }) {
       property.basePricePerNight ||
       0
   );
-  const rating = property.rating
-    ? Number(property.rating).toFixed(property.rating % 1 === 0 ? 1 : 2)
-    : "5.0";
+  const { rating } = getPropertyRating(property);
 
   // Promotional & dynamic ranking badge calculations
   const isPromoted = Boolean(property.isCurrentlyPromoted || property.isPromoted);

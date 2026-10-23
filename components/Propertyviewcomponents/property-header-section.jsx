@@ -14,10 +14,12 @@ import { useVilla } from "@/lib/context/VillaContext";
 import { Tent, Home, Hotel, Heart } from "lucide-react";
 import CustomAmenityIcon from "@/components/ui/CustomAmenityIcon";
 import { useWishlist } from "@/hooks/useWishlist";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export default function PropertyHeaderSection() {
   const [showAllAmenities, setShowAllAmenities] = useState(false);
   const villa = useVilla();
+  const { rating, reviewCount } = getPropertyRating(villa);
   const { isLiked, handleWishlist } = useWishlist({
     property: villa,
     propertyType: "villa",
@@ -59,7 +61,7 @@ export default function PropertyHeaderSection() {
             <div className="flex items-center gap-1.5 bg-neutral-50 px-3 py-1 rounded-full border border-neutral-200/80">
               <FaStar className="w-4 h-4 text-amber-400" />
               <span className="font-bold text-base text-gray-900">
-                {villa?.averageRating || "4.8"}
+                {rating}
               </span>
               <span className="text-gray-400 text-xs">/5</span>
             </div>
@@ -67,7 +69,7 @@ export default function PropertyHeaderSection() {
               variant="link"
               className="text-gray-700 hover:text-[#ff6900] p-0 h-auto font-medium text-sm transition-colors underline-offset-4 hover:underline"
             >
-              {villa?.totalReviews || 0} Verified Reviews
+              {reviewCount} Verified Reviews
             </Button>
           </div>
         </div>

@@ -5,8 +5,7 @@ import { Heart, Star, Users, Bed, Bath, MapPin, Trash2 } from "lucide-react"
 import { Button } from "@heroui/react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-
-
+import { getPropertyRating } from "@/lib/ratingUtils"
 
 export function PropertyCardHorizontal({ property, onRemove }) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
@@ -81,7 +80,7 @@ export function PropertyCardHorizontal({ property, onRemove }) {
           {/* Rating */}
           <div className="absolute top-3 right-3 bg-white/90 rounded-full px-2 py-1 flex items-center gap-1">
             <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-medium text-gray-900">{property.rating}</span>
+            <span className="text-xs font-medium text-gray-900">{getPropertyRating(property).rating}</span>
           </div>
         </div>
 

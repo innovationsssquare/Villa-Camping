@@ -83,6 +83,7 @@ import { Getcottageavability } from "@/lib/API/category/Cottage/Cottage";
 import { Gethotelavability } from "@/lib/API/category/Hotel/Hotel";
 import { useToast } from "@/components/ui/toast-provider";
 import { getDeviceId } from "@/lib/deviceId";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 const PropertyBooking = () => {
   const router = useRouter();
@@ -104,6 +105,7 @@ const PropertyBooking = () => {
   } = useSelector((state) => state.booking);
 
   const { property, loading, error } = useSelector((state) => state.properties);
+  const { rating: propertyRating } = getPropertyRating(property);
   const appliedCoupon = useSelector((state) => state.booking.appliedCoupon);
 
   const reduxSelectedTents = useSelector((state) => state.booking.selectedTents || {});
@@ -963,7 +965,7 @@ const PropertyBooking = () => {
                     </span>
                     <div className="flex items-center gap-1 text-xs bg-amber-50 text-amber-800 px-2 py-0.5 rounded-full border border-amber-200/60 font-semibold">
                       <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-                      <span>{property?.averageRating || "4.9"}</span>
+                      <span>{propertyRating}</span>
                       <span className="text-amber-600 text-[10px] font-normal">/5</span>
                     </div>
                   </div>

@@ -19,6 +19,7 @@ import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { buildPropertyViewUrl, getCleanPropertyType } from "@/lib/categoryUtils";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export const PropertyCard = ({
   property,
@@ -43,6 +44,7 @@ export const PropertyCard = ({
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property.id || property._id;
   const propertyType = getCleanPropertyType(property, categories, selectedCategoryName);
+  const dynamicRating = getPropertyRating(property);
 
   const isLiked = useMemo(() => {
     if (!wishlistIds || !Array.isArray(wishlistIds) || !propertyId) return false;
@@ -168,7 +170,7 @@ export const PropertyCard = ({
               </h4>
               <div className="flex items-center gap-0.5 shrink-0 text-neutral-900 font-semibold text-xs">
                 <Star className="w-3 h-3 fill-black text-black" />
-                <span>{property.rating?.average || "4.92"}</span>
+                <span>{dynamicRating.rating}</span>
               </div>
             </div>
 
@@ -293,11 +295,7 @@ export const PropertyCard = ({
             {/* Row 4: Star Rating */}
             <div className="flex items-center gap-1 text-[11px] font-bold text-neutral-900 mb-0.5">
               <Star className="w-3 h-3 fill-black text-black" />
-              <span>
-                {property.rating?.average
-                  ? `${property.rating.average} (${property.rating.count || 12})`
-                  : "New"}
-              </span>
+              <span>{dynamicRating.formattedText}</span>
             </div>
 
             {/* Row 5: Price */}
@@ -514,11 +512,7 @@ export const PropertyCard = ({
           </span>
           <div className="flex items-center gap-1 shrink-0 text-neutral-900 font-semibold text-xs">
             <Star className="w-3.5 h-3.5 fill-black text-black" />
-            <span>
-              {property.rating?.average
-                ? `${property.rating.average} (${property.rating.count || 52})`
-                : "4.92 (52)"}
-            </span>
+            <span>{dynamicRating.formattedText}</span>
           </div>
         </div>
 

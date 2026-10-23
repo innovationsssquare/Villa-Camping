@@ -19,9 +19,11 @@ import {
 import { useCamping } from "@/lib/context/CampingContext";
 import { Button } from "@heroui/react";
 import Link from "next/link";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 const TentDetails = () => {
   const camping = useCamping();
+  const { rating, reviewCount } = getPropertyRating(camping);
 
   const greatForIcons = {
     "Mountain View": <Mountain className="w-4 h-4 text-gray-600" />,
@@ -73,7 +75,7 @@ const TentDetails = () => {
         </div>
         <div className="flex items-center space-x-1">
           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-          <span className="font-bold text-sm text-gray-900">{camping?.averageRating || "4.8"}</span>
+          <span className="font-bold text-sm text-gray-900">{rating}</span>
           <span className="text-gray-400 text-xs">/ 5</span>
         </div>
         <Link
@@ -81,7 +83,7 @@ const TentDetails = () => {
           scroll={true}
           className="text-[#ff6900] text-xs font-semibold underline underline-offset-2"
         >
-          {camping?.totalReviews || 0} Reviews
+          {reviewCount} Reviews
         </Link>
       </div>
 

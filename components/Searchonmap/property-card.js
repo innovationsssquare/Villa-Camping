@@ -22,6 +22,7 @@ import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
 import { getCleanPropertyType } from "@/lib/categoryUtils";
+import { getPropertyRating } from "@/lib/ratingUtils";
 
 export function PropertyCard({
   property,
@@ -36,6 +37,7 @@ export function PropertyCard({
   const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
   const propertyId = property?.id || property?._id;
   const propertyType = getCleanPropertyType(property);
+  const { rating, reviewCount } = getPropertyRating(property);
 
   const isFavorited = Array.isArray(wishlistIds) && propertyId
     ? wishlistIds.includes(String(propertyId)) ||
@@ -119,7 +121,7 @@ export function PropertyCard({
               <div className="flex items-center justify-between mt-2">
                 <div className="flex items-center gap-1">
                   <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                  <span className="text-xs font-medium">{property.rating}</span>
+                  <span className="text-xs font-medium">{rating}</span>
                 </div>
                 <div className="text-sm font-bold text-primary">
                   ₹{(property.price / 1000).toFixed(0)}K
@@ -234,9 +236,9 @@ export function PropertyCard({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-              <span className="text-sm font-medium">{property.rating}</span>
+              <span className="text-sm font-medium">{rating}</span>
               <span className="text-sm text-muted-foreground">
-                ({property.reviews} reviews)
+                ({reviewCount} reviews)
               </span>
             </div>
             <div className="text-right">
