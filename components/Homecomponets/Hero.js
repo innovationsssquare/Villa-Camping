@@ -165,15 +165,15 @@ export default function Hero() {
   };
 
   return (
-    <section className="relative w-full overflow-hidden">
+    <section className="relative w-full">
       {/* ============================================================== */}
       {/* 📱 MOBILE VIEW ONLY (md:hidden): Native App Experience        */}
-      {/* Scenic Villa Banner Photo + Porcelain #FFFCF4 Floating Card   */}
-      {/* Half-popup overlapping seamlessly with ShopbyCategory drawer  */}
+      {/* Scenic Villa Banner Photo + Clean Floating Search Box with     */}
+      {/* Website Orange Theme, seamlessly leading to ShopbyCategory    */}
       {/* ============================================================== */}
       <div className="block md:hidden pt-[74px] bg-white relative">
         {/* Hero Background Banner Container with real villa banner image */}
-        <div className="relative w-full h-[190px] sm:h-[210px] overflow-hidden">
+        <div className="relative w-full h-[185px] sm:h-[205px] overflow-hidden">
           {/* Hero Banner Background Image */}
           <Image
             src={Banner1}
@@ -185,17 +185,17 @@ export default function Hero() {
           />
 
           {/* Subtle Ambient Vignette Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-black/60 pointer-events-none z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60 pointer-events-none z-[1]" />
           <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-[#ff6900]/20 rounded-full blur-3xl pointer-events-none z-[1]" />
         </div>
 
-        {/* Floating Search Card in Porcelain #FFFCF4 - Half-popup overlapping into ShopbyCategory */}
-        <div className="relative z-30 px-3.5 -mt-20 sm:-mt-24 -mb-12 sm:-mb-14">
-          <div className="bg-[#FFFCF4] rounded-[24px] p-3.5 sm:p-4 shadow-[0_18px_42px_rgba(0,0,0,0.13)] border border-[#EFE8D8]">
+        {/* Floating Search Card (Unclipped, perfectly centered across banner & white canvas) */}
+        <div className="relative z-30 px-3.5 -mt-20 sm:-mt-24 pb-3">
+          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_14px_36px_rgba(0,0,0,0.1)] border border-neutral-100">
             {/* Row 1: Destination ("Where are you going?") */}
             <div
               onClick={() => router.push("/search-stay")}
-              className="w-full bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] shadow-2xs"
+              className="w-full bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] shadow-2xs"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <MapPin className="w-5 h-5 text-[#ff6900] shrink-0" />
@@ -213,7 +213,7 @@ export default function Hero() {
               {/* Left Pill: Dates */}
               <div
                 onClick={() => router.push("/search-stay?focus=dates")}
-                className="bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
+                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <Calendar className="w-3.5 h-3.5" />
@@ -228,7 +228,7 @@ export default function Hero() {
               {/* Right Pill: Guests */}
               <div
                 onClick={() => router.push("/search-stay?focus=guests")}
-                className="bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
+                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <BedDouble className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Row 3: "Search Now" Vibrant Button in Website Orange Theme */}
+            {/* Row 3: "Search Now" Vibrant Button in Website Orange Theme (Fully Visible & Unclipped) */}
             <button
               type="button"
               onClick={handleSearchNow}
