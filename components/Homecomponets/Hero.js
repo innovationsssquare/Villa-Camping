@@ -73,71 +73,7 @@ const POPULAR_DESTINATIONS = [
   { name: "Hotels", emoji: "🏨", slug: "hotel" },
 ];
 
-// App-style Nearby Destinations for Mobile View (Reference Image 3)
-const NEARBY_LOCATIONS = [
-  {
-    name: "Lonavala",
-    tag: "Pool Villas",
-    distance: "1.5h drive",
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875530/villas/1bbfc3f9-181b-4015-858c-4f650f6b453f_qd0fep.jpg",
-    slug: "villa",
-    location: "Lonavala",
-  },
-  {
-    name: "Pawna Lake",
-    tag: "Camping",
-    distance: "2h drive",
-    image:
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-    slug: "camp",
-    location: "Pawna Lake",
-  },
-  {
-    name: "Alibaug",
-    tag: "Beach Stays",
-    distance: "2.5h drive",
-    image:
-      "https://res.cloudinary.com/db60uwvhk/image/upload/v1753875525/villas/e4ab61e9-ac3c-4c5f-a7fc-c2f5211014ad_c3y9cj.jpg",
-    slug: "villa",
-    location: "Alibaug",
-  },
-  {
-    name: "Karjat",
-    tag: "Cottages",
-    distance: "1h drive",
-    image:
-      "https://images.unsplash.com/photo-1587061949409-02df41d5e562?w=800&q=80",
-    slug: "cottage",
-    location: "Karjat",
-  },
-  {
-    name: "Igatpuri",
-    tag: "Waterfalls",
-    distance: "2.5h drive",
-    image:
-      "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&q=80",
-    slug: "villa",
-    location: "Igatpuri",
-  },
-  {
-    name: "Mahabaleshwar",
-    tag: "Hill Escapes",
-    distance: "3.5h drive",
-    image:
-      "https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80",
-    slug: "villa",
-    location: "Mahabaleshwar",
-  },
-];
 
-// Quick Category Filters for Mobile View
-const QUICK_CATEGORIES = [
-  { name: "Pool Villas", emoji: "🏊", slug: "villa" },
-  { name: "Lakeside Camp", emoji: "⛺", slug: "camp" },
-  { name: "Cozy Cottages", emoji: "🏡", slug: "cottage" },
-  { name: "Hotels & Resorts", emoji: "🏨", slug: "hotel" },
-];
 
 export default function Hero() {
   const router = useRouter();
@@ -156,7 +92,7 @@ export default function Hero() {
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef(null);
 
-  // Synchronize authenticated user for personalized greeting ("Hi, Saksham!" / "Hi, Suzuki!")
+  // Synchronize authenticated user for personalized greeting
   useEffect(() => {
     try {
       const user = getStoredUser();
@@ -204,7 +140,7 @@ export default function Hero() {
     return "18 - 19 May 2026";
   };
 
-  // Format guest count for mobile pill display (e.g., "2 Guest, 1 Room")
+  // Format guest count for mobile pill display (e.g., "2 Guests, 1 Room")
   const totalGuests =
     (selectedGuest?.adults || 2) + (selectedGuest?.childrenn || 0);
   const roomsCount = Math.max(1, Math.ceil(totalGuests / 4));
@@ -253,45 +189,42 @@ export default function Hero() {
     router.push(`/category/all${queryStr ? `?${queryStr}` : ""}`);
   };
 
-  // Handle Nearby Location click
-  const handleNearbyLocationClick = (loc) => {
-    const params = new URLSearchParams();
-    if (checkin) params.set("checkin", checkin);
-    if (checkout) params.set("checkout", checkout);
-    if (selectedGuest?.adults)
-      params.set("adults", selectedGuest.adults.toString());
-    params.set("location", loc.location);
-    const queryStr = params.toString();
-
-    router.push(`/search-your-gateway?${queryStr}`);
-  };
-
   return (
     <section className="relative w-full overflow-hidden">
       {/* ============================================================== */}
       {/* 📱 MOBILE VIEW ONLY (md:hidden): Native App Experience        */}
-      {/* Designed based on user reference: Greeting + Floating Search   */}
-      {/* Card + Nearby Locations Carousel + Quick Stay Category Chips  */}
+      {/* Real Hero Banner Image Background + Floating Search Box with   */}
+      {/* Website Orange Theme, overlapping with ShopbyCategory below   */}
       {/* ============================================================== */}
-      <div className="block md:hidden pt-[92px] pb-5 bg-gradient-to-b from-[#fcfcfd] via-white to-white">
-        {/* Curved App Header Hero Background */}
-        <div className="relative mx-3 rounded-[28px] overflow-hidden bg-gradient-to-br from-[#0f4bb8] via-[#1a64ea] to-[#2575fc] shadow-[0_12px_36px_rgba(26,100,234,0.22)] pt-5 pb-6 px-4">
-          {/* Subtle Ambient Decorative Circles */}
-          <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-16 w-48 h-48 rounded-full bg-[#ff6900]/25 blur-3xl pointer-events-none" />
+      <div className="block md:hidden pt-[74px] relative">
+        {/* Hero Background Banner Container with real villa banner image */}
+        <div className="relative w-full h-[225px] sm:h-[245px] overflow-hidden px-4 pt-4">
+          {/* Hero Banner Background Image */}
+          <Image
+            src={Banner1}
+            alt="TheVillaCamp Luxury Stays"
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover object-center brightness-[0.88] contrast-[1.05]"
+          />
 
-          {/* Top Greeting Row: Avatar + "Hi, Suzuki!" / "Ready for your next trip?" + Bell */}
-          <div className="relative z-10 flex items-center justify-between mb-4">
+          {/* Luxury Ambient Dark & Warm Gradient Overlays */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/40 to-black/80 pointer-events-none z-[1]" />
+          <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-[#ff6900]/25 rounded-full blur-3xl pointer-events-none z-[1]" />
+
+          {/* Top Greeting Row: Avatar + "Hi, {userName || 'Explorer'}!" + Bell */}
+          <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              {/* User Avatar / App Mascot Illustration */}
-              <div className="w-11 h-11 rounded-full p-0.5 bg-white/30 backdrop-blur-md shadow-sm shrink-0">
+              {/* User Avatar */}
+              <div className="w-10 h-10 rounded-full p-0.5 bg-white/30 backdrop-blur-md shadow-sm shrink-0">
                 <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
                   {userAvatar ? (
                     <Image
                       src={userAvatar}
                       alt={userName || "User"}
-                      width={44}
-                      height={44}
+                      width={40}
+                      height={40}
                       className="w-full h-full object-cover"
                     />
                   ) : userName ? (
@@ -299,7 +232,7 @@ export default function Hero() {
                       {userName.charAt(0).toUpperCase()}
                     </div>
                   ) : (
-                    /* High-definition 3D Traveler Avatar Mascot (matching reference design) */
+                    /* High-definition 3D Traveler Avatar Mascot (Website Orange Theme) */
                     <svg
                       viewBox="0 0 100 100"
                       className="w-full h-full"
@@ -309,30 +242,25 @@ export default function Hero() {
                       <circle cx="50" cy="50" r="50" fill="#FFE5D9" />
                       <circle cx="50" cy="42" r="24" fill="#FFB703" />
                       <circle cx="50" cy="45" r="20" fill="#FFDDD2" />
-                      {/* Hair */}
                       <path
                         d="M28 38C28 26 38 18 50 18C62 18 72 26 72 38C72 40 68 34 50 34C32 34 28 40 28 38Z"
                         fill="#D9480F"
                       />
-                      {/* Eyes */}
                       <circle cx="43" cy="45" r="2.5" fill="#212529" />
                       <circle cx="57" cy="45" r="2.5" fill="#212529" />
                       <circle cx="44" cy="44" r="0.8" fill="white" />
                       <circle cx="58" cy="44" r="0.8" fill="white" />
-                      {/* Smile */}
                       <path
                         d="M45 52C47 55 53 55 55 52"
                         stroke="#D9480F"
                         strokeWidth="2"
                         strokeLinecap="round"
                       />
-                      {/* Cheeks */}
                       <circle cx="39" cy="49" r="2.5" fill="#FF8787" opacity="0.6" />
                       <circle cx="61" cy="49" r="2.5" fill="#FF8787" opacity="0.6" />
-                      {/* Collar / Clothes */}
                       <path
                         d="M30 84C30 70 38 68 50 68C62 68 70 70 70 84H30Z"
-                        fill="#1A64EA"
+                        fill="#FF6900"
                       />
                     </svg>
                   )}
@@ -341,10 +269,10 @@ export default function Hero() {
 
               {/* Greeting Text */}
               <div className="flex flex-col">
-                <span className="text-white text-base font-extrabold tracking-tight leading-tight">
+                <span className="text-white text-base font-extrabold tracking-tight leading-tight drop-shadow-sm">
                   Hi, {userName || "Explorer"}!
                 </span>
-                <span className="text-white/85 text-xs font-normal mt-0.5">
+                <span className="text-white/90 text-xs font-normal mt-0.5 drop-shadow-xs">
                   Ready for your next trip?
                 </span>
               </div>
@@ -354,23 +282,25 @@ export default function Hero() {
             <button
               type="button"
               onClick={() => router.push("/notifications")}
-              className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
+              className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
               aria-label="View notifications"
             >
               <Bell className="w-4 h-4 fill-white/20" />
             </button>
           </div>
+        </div>
 
-          {/* Floating Search Card (Exact Match to Reference Image 1) */}
-          <div className="relative z-10 bg-white rounded-[22px] p-3.5 sm:p-4 shadow-[0_16px_36px_rgba(0,0,0,0.12)] border border-neutral-100">
+        {/* Floating Search Card - Sits half on the hero banner & half overlapping onto ShopbyCategory drawer */}
+        <div className="relative z-30 px-3.5 -mt-24 sm:-mt-28">
+          <div className="bg-white rounded-[22px] p-3.5 sm:p-4 shadow-[0_16px_40px_rgba(0,0,0,0.16)] border border-neutral-100">
             {/* Row 1: Destination ("Where are you going?") */}
             <div
               onClick={() => router.push("/search-stay")}
-              className="w-full bg-[#f4f6fa] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99]"
+              className="w-full bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99]"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <MapPin className="w-5 h-5 text-neutral-400 shrink-0" />
-                <span className="text-xs sm:text-sm font-medium text-neutral-600 truncate">
+                <MapPin className="w-5 h-5 text-[#ff6900] shrink-0" />
+                <span className="text-xs sm:text-sm font-medium text-neutral-700 truncate">
                   {selectedCategoryName
                     ? `${selectedCategoryName} in Lonavala & nearby`
                     : "Where are you going?"}
@@ -384,9 +314,9 @@ export default function Hero() {
               {/* Left Pill: Dates */}
               <div
                 onClick={() => router.push("/search-stay?focus=dates")}
-                className="bg-[#f4f6fa] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
+                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
               >
-                <div className="w-6 h-6 rounded-full bg-blue-100/70 flex items-center justify-center text-[#1a64ea] shrink-0">
+                <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <Calendar className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -399,9 +329,9 @@ export default function Hero() {
               {/* Right Pill: Guests */}
               <div
                 onClick={() => router.push("/search-stay?focus=guests")}
-                className="bg-[#f4f6fa] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
+                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
               >
-                <div className="w-6 h-6 rounded-full bg-blue-100/70 flex items-center justify-center text-[#1a64ea] shrink-0">
+                <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <BedDouble className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex flex-col min-w-0">
@@ -412,11 +342,11 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Row 3: "Search Now" Vibrant Pill Button */}
+            {/* Row 3: "Search Now" Vibrant Button in Website Orange Theme */}
             <button
               type="button"
               onClick={handleSearchNow}
-              className="mt-3.5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#1a64ea] via-[#2575fc] to-[#1a64ea] hover:brightness-105 active:scale-[0.98] text-white font-bold text-sm shadow-[0_8px_24px_rgba(26,100,234,0.38)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+              className="mt-3.5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6900] via-[#ff7a1a] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] active:scale-[0.98] text-white font-bold text-sm shadow-[0_8px_24px_rgba(255,105,0,0.36)] flex items-center justify-center gap-2 cursor-pointer transition-all"
             >
               <Search className="w-4 h-4 stroke-[2.5]" />
               <span>Search Now</span>
@@ -424,85 +354,8 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Quick Category Chips Strip */}
-        <div className="mt-4 px-3 flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          {QUICK_CATEGORIES.map((cat) => (
-            <button
-              key={cat.slug}
-              type="button"
-              onClick={() => handleExplore(cat.slug)}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full bg-white border border-neutral-200/80 shadow-2xs hover:border-[#1a64ea] hover:text-[#1a64ea] text-neutral-700 text-xs font-semibold shrink-0 cursor-pointer active:scale-95 transition-all"
-            >
-              <span>{cat.emoji}</span>
-              <span>{cat.name}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* "Nearby Locations" Section (Exact Recreation of Reference Image 3: OYO style) */}
-        <div className="mt-5 px-3">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-1.5">
-              <Compass className="w-4 h-4 text-[#1a64ea]" />
-              <h2 className="text-xs sm:text-sm font-bold text-neutral-900 tracking-tight">
-                Nearby Locations
-              </h2>
-            </div>
-            <button
-              type="button"
-              onClick={() => router.push("/search-your-gateway")}
-              className="text-[11px] font-semibold text-[#1a64ea] hover:underline cursor-pointer"
-            >
-              View all
-            </button>
-          </div>
-
-          {/* Horizontal Snap Scroll Cards */}
-          <div className="flex items-center gap-2.5 overflow-x-auto pb-2 scrollbar-none snap-x snap-mandatory -mx-3 px-3">
-            {NEARBY_LOCATIONS.map((loc) => (
-              <div
-                key={loc.name}
-                onClick={() => handleNearbyLocationClick(loc)}
-                className="flex flex-col items-center gap-1 shrink-0 snap-start cursor-pointer group w-[74px]"
-              >
-                {/* 1:1 Rounded Image Thumbnail */}
-                <div className="w-[70px] h-[70px] rounded-2xl overflow-hidden relative border border-neutral-200/80 shadow-xs group-hover:scale-105 group-active:scale-95 transition-transform bg-neutral-100">
-                  <Image
-                    src={loc.image}
-                    alt={loc.name}
-                    fill
-                    sizes="70px"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
-                </div>
-                {/* Destination Name */}
-                <span className="text-[11px] font-bold text-neutral-800 text-center truncate w-full mt-0.5">
-                  {loc.name}
-                </span>
-                {/* Subtitle / Distance */}
-                <span className="text-[9px] text-neutral-500 font-medium truncate w-full text-center -mt-0.5">
-                  {loc.tag}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* App Trust & Social Proof Strip */}
-        <div className="mt-3.5 mx-3 py-2 px-3.5 rounded-full bg-neutral-100/80 border border-neutral-200/50 flex items-center justify-between text-[10px] text-neutral-600 font-medium">
-          <div className="flex items-center gap-1">
-            <Star className="w-3 h-3 fill-amber-400 text-amber-400" />
-            <span className="font-bold text-neutral-800">4.9★ Rated</span>
-          </div>
-          <span className="text-neutral-300">•</span>
-          <span>500+ Stays</span>
-          <span className="text-neutral-300">•</span>
-          <div className="flex items-center gap-1 text-emerald-600 font-semibold">
-            <ShieldCheck className="w-3 h-3" />
-            <span>100% Verified</span>
-          </div>
-        </div>
+        {/* Space bridge allowing ShopbyCategory drawer to slide right underneath */}
+        <div className="h-6" />
       </div>
 
       {/* ============================================================== */}
