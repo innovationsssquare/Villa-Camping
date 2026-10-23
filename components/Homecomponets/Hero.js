@@ -17,13 +17,11 @@ import {
   MapPin,
   Calendar,
   BedDouble,
-  Bell,
   Search,
   ChevronRight,
 } from "lucide-react";
 import Banner1 from "@/public/Loginasset/villa_banner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
-import { getStoredUser } from "@/lib/auth";
 
 const HERO_SLIDES = [
   {
@@ -84,34 +82,11 @@ export default function Hero() {
   );
 
   const [activeSlide, setActiveSlide] = useState(0);
-  const [userName, setUserName] = useState("");
-  const [userAvatar, setUserAvatar] = useState(null);
 
   // Set SHOW_HERO_VIDEO to true to re-enable the desktop background video
   const SHOW_HERO_VIDEO = false;
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef(null);
-
-  // Synchronize authenticated user for personalized greeting
-  useEffect(() => {
-    try {
-      const user = getStoredUser();
-      if (user) {
-        const name =
-          user.fullName ||
-          user.name ||
-          (user.email ? user.email.split("@")[0] : "");
-        if (name) {
-          setUserName(name.split(" ")[0]);
-        }
-        if (user.avatar || user.profilePicture) {
-          setUserAvatar(user.avatar || user.profilePicture);
-        }
-      }
-    } catch {
-      // ignore
-    }
-  }, []);
 
   // Auto-advance desktop slides smoothly every 5.5 seconds
   useEffect(() => {
@@ -193,12 +168,12 @@ export default function Hero() {
     <section className="relative w-full overflow-hidden">
       {/* ============================================================== */}
       {/* 📱 MOBILE VIEW ONLY (md:hidden): Native App Experience        */}
-      {/* Real Hero Banner Image Background + Floating Search Box with   */}
-      {/* Website Orange Theme, overlapping with ShopbyCategory below   */}
+      {/* Scenic Villa Banner Photo + Porcelain #FFFCF4 Floating Card   */}
+      {/* Half-popup overlapping seamlessly with ShopbyCategory drawer  */}
       {/* ============================================================== */}
-      <div className="block md:hidden pt-[74px] relative">
+      <div className="block md:hidden pt-[74px] bg-white relative">
         {/* Hero Background Banner Container with real villa banner image */}
-        <div className="relative w-full h-[225px] sm:h-[245px] overflow-hidden px-4 pt-4">
+        <div className="relative w-full h-[190px] sm:h-[210px] overflow-hidden">
           {/* Hero Banner Background Image */}
           <Image
             src={Banner1}
@@ -206,101 +181,25 @@ export default function Hero() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center brightness-[0.88] contrast-[1.05]"
+            className="object-cover object-center brightness-[0.94] contrast-[1.03]"
           />
 
-          {/* Luxury Ambient Dark & Warm Gradient Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/65 via-black/40 to-black/80 pointer-events-none z-[1]" />
-          <div className="absolute -bottom-16 -left-16 w-52 h-52 bg-[#ff6900]/25 rounded-full blur-3xl pointer-events-none z-[1]" />
-
-          {/* Top Greeting Row: Avatar + "Hi, {userName || 'Explorer'}!" + Bell */}
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              {/* User Avatar */}
-              <div className="w-10 h-10 rounded-full p-0.5 bg-white/30 backdrop-blur-md shadow-sm shrink-0">
-                <div className="w-full h-full rounded-full overflow-hidden bg-white flex items-center justify-center">
-                  {userAvatar ? (
-                    <Image
-                      src={userAvatar}
-                      alt={userName || "User"}
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : userName ? (
-                    <div className="w-full h-full bg-gradient-to-tr from-[#ff6900] to-[#ea580c] text-white font-bold text-sm flex items-center justify-center">
-                      {userName.charAt(0).toUpperCase()}
-                    </div>
-                  ) : (
-                    /* High-definition 3D Traveler Avatar Mascot (Website Orange Theme) */
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="w-full h-full"
-                      fill="none"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <circle cx="50" cy="50" r="50" fill="#FFE5D9" />
-                      <circle cx="50" cy="42" r="24" fill="#FFB703" />
-                      <circle cx="50" cy="45" r="20" fill="#FFDDD2" />
-                      <path
-                        d="M28 38C28 26 38 18 50 18C62 18 72 26 72 38C72 40 68 34 50 34C32 34 28 40 28 38Z"
-                        fill="#D9480F"
-                      />
-                      <circle cx="43" cy="45" r="2.5" fill="#212529" />
-                      <circle cx="57" cy="45" r="2.5" fill="#212529" />
-                      <circle cx="44" cy="44" r="0.8" fill="white" />
-                      <circle cx="58" cy="44" r="0.8" fill="white" />
-                      <path
-                        d="M45 52C47 55 53 55 55 52"
-                        stroke="#D9480F"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                      />
-                      <circle cx="39" cy="49" r="2.5" fill="#FF8787" opacity="0.6" />
-                      <circle cx="61" cy="49" r="2.5" fill="#FF8787" opacity="0.6" />
-                      <path
-                        d="M30 84C30 70 38 68 50 68C62 68 70 70 70 84H30Z"
-                        fill="#FF6900"
-                      />
-                    </svg>
-                  )}
-                </div>
-              </div>
-
-              {/* Greeting Text */}
-              <div className="flex flex-col">
-                <span className="text-white text-base font-extrabold tracking-tight leading-tight drop-shadow-sm">
-                  Hi, {userName || "Explorer"}!
-                </span>
-                <span className="text-white/90 text-xs font-normal mt-0.5 drop-shadow-xs">
-                  Ready for your next trip?
-                </span>
-              </div>
-            </div>
-
-            {/* Notification Bell Button */}
-            <button
-              type="button"
-              onClick={() => router.push("/notifications")}
-              className="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 flex items-center justify-center text-white cursor-pointer active:scale-95 transition-all shadow-xs"
-              aria-label="View notifications"
-            >
-              <Bell className="w-4 h-4 fill-white/20" />
-            </button>
-          </div>
+          {/* Subtle Ambient Vignette Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-black/60 pointer-events-none z-[1]" />
+          <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-[#ff6900]/20 rounded-full blur-3xl pointer-events-none z-[1]" />
         </div>
 
-        {/* Floating Search Card - Sits half on the hero banner & half overlapping onto ShopbyCategory drawer */}
-        <div className="relative z-30 px-3.5 -mt-24 sm:-mt-28">
-          <div className="bg-white rounded-[22px] p-3.5 sm:p-4 shadow-[0_16px_40px_rgba(0,0,0,0.16)] border border-neutral-100">
+        {/* Floating Search Card in Porcelain #FFFCF4 - Half-popup overlapping into ShopbyCategory */}
+        <div className="relative z-30 px-3.5 -mt-20 sm:-mt-24 -mb-12 sm:-mb-14">
+          <div className="bg-[#FFFCF4] rounded-[24px] p-3.5 sm:p-4 shadow-[0_18px_42px_rgba(0,0,0,0.13)] border border-[#EFE8D8]">
             {/* Row 1: Destination ("Where are you going?") */}
             <div
               onClick={() => router.push("/search-stay")}
-              className="w-full bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99]"
+              className="w-full bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] shadow-2xs"
             >
               <div className="flex items-center gap-3 min-w-0">
                 <MapPin className="w-5 h-5 text-[#ff6900] shrink-0" />
-                <span className="text-xs sm:text-sm font-medium text-neutral-700 truncate">
+                <span className="text-xs sm:text-sm font-semibold text-neutral-800 truncate">
                   {selectedCategoryName
                     ? `${selectedCategoryName} in Lonavala & nearby`
                     : "Where are you going?"}
@@ -314,7 +213,7 @@ export default function Hero() {
               {/* Left Pill: Dates */}
               <div
                 onClick={() => router.push("/search-stay?focus=dates")}
-                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
+                className="bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <Calendar className="w-3.5 h-3.5" />
@@ -329,7 +228,7 @@ export default function Hero() {
               {/* Right Pill: Guests */}
               <div
                 onClick={() => router.push("/search-stay?focus=guests")}
-                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0"
+                className="bg-white hover:bg-[#FAF6EC] border border-[#EBE4D5] rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
                   <BedDouble className="w-3.5 h-3.5" />
@@ -353,9 +252,6 @@ export default function Hero() {
             </button>
           </div>
         </div>
-
-        {/* Space bridge allowing ShopbyCategory drawer to slide right underneath */}
-        <div className="h-6" />
       </div>
 
       {/* ============================================================== */}
