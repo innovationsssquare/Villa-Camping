@@ -38,8 +38,9 @@ import { clearMyBookings, fetchMyBookings } from "@/Redux/Slices/myBookingSlice"
 import { fetchWishlistIds, fetchmyWishlists, selectWishlistCount } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
 import { NotificationSheet } from "./Notificationsheet";
+import { cn } from "@/lib/utils";
 
-export function ProfileSheet() {
+export function ProfileSheet({ isTransparent = false }) {
   const [open, setOpen] = useState(false);
   const { openAuthModal } = useAuthModal();
   const [notificationSheetOpen, setNotificationSheetOpen] = useState(false);
@@ -134,9 +135,14 @@ export function ProfileSheet() {
       <SheetTrigger asChild>
         <Button
           variant="outline"
-          className="flex items-center gap-2.5 rounded-full border-neutral-200 bg-white px-3.5 py-5 shadow-xs hover:border-neutral-300 hover:shadow-sm transition-all"
+          className={cn(
+            "flex items-center gap-2.5 rounded-full px-3.5 py-5 transition-all cursor-pointer",
+            isTransparent
+              ? "border-white/35 bg-black/25 text-white backdrop-blur-md hover:bg-black/40 hover:border-white/60"
+              : "border-neutral-200 bg-white shadow-xs hover:border-neutral-300 hover:shadow-sm"
+          )}
         >
-          <Menu className="h-4 w-4 text-neutral-700" />
+          <Menu className={cn("h-4 w-4", isTransparent ? "text-white" : "text-neutral-700")} />
           <Avatar className="h-7 w-7 border border-neutral-200">
             {currentUser?.profilePic ? (
               <AvatarImage src={currentUser.profilePic} alt={currentUser.fullName} />

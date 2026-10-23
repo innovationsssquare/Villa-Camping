@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useScrollDirection } from "@/hooks/use-scroll-direction";
 import { cn } from "@/lib/utils";
 import { usePathname, useRouter } from "next/navigation";
+import Image from "next/image";
+import Logo from "@/public/Productasset/mainlogo_clean.png";
 import { UserSidebar } from "./Sidebar";
 import { NotificationSheet } from "./Notificationsheet";
-
 import { BookingSearchBox } from "./booking-search-box";
 import UserLocationDisplay from "../Homecomponets/user-location-display";
 
@@ -26,6 +27,7 @@ import {
   LifeBuoy,
   Bell,
   Share2,
+  Phone,
 } from "lucide-react";
 
 const PAGE_META = {
@@ -74,16 +76,29 @@ function resolvePageMeta(pathname) {
 export function AppHeader() {
   const pathname = usePathname();
   const router = useRouter();
-  const [open, setOpen] = useState({
-    menu: false,
-    notifications: false,
-  });
-
-  const cartItemCount = 3;
   const { isVisible } = useScrollDirection();
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    let ticking = false;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setIsScrolled(window.scrollY > 40);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   if (pathname?.startsWith("/booking/success")) return null;
 
+  const isHome = pathname === "/";
   const isLocationPage =
     pathname === "/" ||
     pathname === "/explore" ||
@@ -91,22 +106,42 @@ export function AppHeader() {
     pathname.startsWith("/category/");
 
   const pageMeta = !isLocationPage ? resolvePageMeta(pathname) : null;
+  const isTransparent = isHome && !isScrolled;
 
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 w-full rounded-b-xl px-3 pt-1 pb-1.5 z-50 transition-transform  duration-300 ease-in-out md:hidden shadow-xs",
-        isVisible
-          ? "translate-y-0 bg-white/95 backdrop-blur-md"
-          : "-translate-y-8 bg-white"
+        "fixed top-0 left-0 right-0 w-full px-3 pt-2 pb-2 z-50 transition-all duration-300 ease-out md:hidden",
+        isVisible ? "translate-y-0" : "-translate-y-full",
+        isTransparent
+          ? "bg-transparent shadow-none border-b border-transparent text-white"
+          : "bg-white/95 backdrop-blur-md shadow-xs border-b border-neutral-200/80 text-neutral-900 rounded-b-xl"
       )}
     >
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1.5">
-          <UserSidebar />
-          {isLocationPage ? (
+        {/* Left Side: Brand Logo / Sidebar Trigger */}
+        <div className="flex items-center gap-2">
+          <UserSidebar isTransparent={isTransparent} />
+
+          {isHome ? (
+            <div
+              onClick={() => router.push("/")}
+              className="flex items-center cursor-pointer transition-opacity"
+            >
+              <Image
+                src={Logo}
+                alt="TheVillaCamp"
+                width={100}
+                height={26}
+                priority
+                className={cn(
+                  "h-6 w-auto object-contain transition-all duration-300",
+                  isTransparent ? "brightness-0 invert" : ""
+                )}
+              />
+            </div>
+          ) : isLocationPage ? (
             <div className="flex items-center gap-1 text-[10px]">
-              <span className="uppercase font-bold text-neutral-400"></span>
               <UserLocationDisplay />
             </div>
           ) : pageMeta ? (
@@ -121,13 +156,42 @@ export function AppHeader() {
           ) : null}
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <NotificationSheet />
+        {/* Right Side: StayVista Style [Call Us] Button & Notifications */}
+        <div className="flex items-center gap-2">
+          <a
+            href="tel:+918669186483"
+            className={cn(
+              "flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold transition-all active:scale-95 shadow-2xs",
+              isTransparent
+                ? "border border-white/50 bg-black/25 backdrop-blur-md text-white hover:bg-black/35"
+                : "border border-neutral-200 bg-neutral-100 hover:bg-neutral-200 text-neutral-800"
+            )}
+          >
+            <Phone className="w-3 h-3 text-[#ff6900]" />
+            <span>Call Us</span>
+          </a>
+
+          <NotificationSheet
+            trigger={
+              <button
+                type="button"
+                className={cn(
+                  "relative rounded-full h-8 w-8 p-0 flex items-center justify-center transition-all cursor-pointer shadow-2xs",
+                  isTransparent
+                    ? "border border-white/40 bg-black/25 backdrop-blur-md text-white hover:bg-black/35"
+                    : "border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700"
+                )}
+              >
+                <Bell className="h-3.5 w-3.5" />
+              </button>
+            }
+          />
         </div>
       </div>
 
-      {(pathname === "/" || pathname.startsWith("/category/")) && (
-        <div className="mt-1 flex w-full justify-between items-center">
+      {/* Scrolled Compact Search Bar on Category / Home */}
+      {(pathname.startsWith("/category/") || (isHome && isScrolled)) && (
+        <div className="mt-2 flex w-full justify-between items-center animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="w-full">
             <BookingSearchBox />
           </div>

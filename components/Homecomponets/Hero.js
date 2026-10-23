@@ -16,14 +16,27 @@ import {
   Compass,
   MapPin,
   Calendar,
-  BedDouble,
+  Users,
   Search,
   ChevronRight,
 } from "lucide-react";
 import Banner1 from "@/public/Loginasset/villa_banner.jpg";
 import { setSelectedCategory, setSelectedCategoryname } from "@/Redux/Slices/bookingSlice";
+import { GuestSelectionDrawer } from "@/components/Searchdatescomponents/guest-selection-drawer";
 
-const HERO_SLIDES = [
+// High-aesthetic festive defaults (matches StayVista reference)
+const DEFAULT_SLIDES = [
+  {
+    tag: "Festive Escape",
+    title: "Script Your Diwali Getaway",
+    description:
+      "Celebrate the festival of lights in exclusive private pool villas, scenic lakeside camps and hillside chalets.",
+    categorySlug: "villa",
+    categoryName: "Villa",
+    highlight: "Diwali Villas",
+    image: Banner1,
+    badgeText: "Diwali Special",
+  },
   {
     tag: "Luxury Private Stays",
     title: "Private Pool Villas in Lonavala",
@@ -32,6 +45,8 @@ const HERO_SLIDES = [
     categorySlug: "villa",
     categoryName: "Villa",
     highlight: "Villas with Pool",
+    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=2000&q=80",
+    badgeText: "Private Pool",
   },
   {
     tag: "Lakeside Adventures",
@@ -41,6 +56,8 @@ const HERO_SLIDES = [
     categorySlug: "camp",
     categoryName: "Camp",
     highlight: "Lakeside Glamping",
+    image: "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?auto=format&fit=crop&w=2000&q=80",
+    badgeText: "Lakeside Pawna",
   },
   {
     tag: "Nature Retreats",
@@ -50,15 +67,8 @@ const HERO_SLIDES = [
     categorySlug: "cottage",
     categoryName: "Cottage",
     highlight: "Cozy Cottages",
-  },
-  {
-    tag: "Weekend Celebrations",
-    title: "Unforgettable Getaways with Loved Ones",
-    description:
-      "Handpicked 3 to 7 BHK estates perfect for family reunions, celebrations, and friend trips.",
-    categorySlug: "villa",
-    categoryName: "Villas",
-    highlight: "Group Estates",
+    image: "https://images.unsplash.com/photo-1587061949409-02df41d5e562?auto=format&fit=crop&w=2000&q=80",
+    badgeText: "Hill Chalets",
   },
 ];
 
@@ -71,8 +81,6 @@ const POPULAR_DESTINATIONS = [
   { name: "Hotels", emoji: "🏨", slug: "hotel" },
 ];
 
-
-
 export default function Hero() {
   const router = useRouter();
   const dispatch = useDispatch();
@@ -81,47 +89,90 @@ export default function Hero() {
     (state) => state.booking
   );
 
+  const [slides, setSlides] = useState(DEFAULT_SLIDES);
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isGuestDrawerOpen, setIsGuestDrawerOpen] = useState(false);
 
   // Set SHOW_HERO_VIDEO to true to re-enable the desktop background video
   const SHOW_HERO_VIDEO = false;
   const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef(null);
 
-  // Auto-advance desktop slides smoothly every 5.5 seconds
+  // Dynamic backend hero banners fetch
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 5500);
-    return () => clearInterval(timer);
+    let isMounted = true;
+    const fetchBanners = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8086";
+        const res = await fetch(`${apiUrl}/api/v1/hero-banner/active`);
+        if (res.ok) {
+          const data = await res.json();
+          if (
+            isMounted &&
+            data &&
+            data.success &&
+            Array.isArray(data.data) &&
+            data.data.length > 0
+          ) {
+            const mapped = data.data.map((b) => ({
+              tag: b.tagline || "Festive Escape",
+              title: b.title || "Script Your Diwali Getaway",
+              description:
+                b.description ||
+                "Celebrate the festive season in secluded luxury pool villas & private estates.",
+              categorySlug: b.categorySlug || "villa",
+              categoryName: b.categorySlug ? b.categorySlug.toUpperCase() : "Villa",
+              highlight: b.badgeText || "Festive Escape",
+              image: b.bannerImage,
+              ctaText: b.ctaText || "Explore Festive Stays",
+              ctaLink: b.ctaLink || "/category/all",
+            }));
+            setSlides(mapped);
+          }
+        }
+      } catch {
+        // Silently use DEFAULT_SLIDES
+      }
+    };
+    fetchBanners();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  // Format date range for mobile pill display (e.g., "18 - 19 May 2026")
+  // Auto-advance slides smoothly every 5.5 seconds
+  useEffect(() => {
+    if (!slides || slides.length <= 1) return;
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % slides.length);
+    }, 5500);
+    return () => clearInterval(timer);
+  }, [slides.length]);
+
+  // Format date range for mobile pill display (e.g., "18 - 19 May")
   const formatDateRange = () => {
     if (checkin && checkout) {
       try {
         const d1 = new Date(checkin);
         const d2 = new Date(checkout);
         const opts = { month: "short", day: "numeric" };
-        const yearStr = d2.getFullYear();
-        return `${d1.toLocaleDateString("en-US", opts)} - ${d2.toLocaleDateString(
+        return `${d1.toLocaleDateString("en-US", opts)} – ${d2.toLocaleDateString(
           "en-US",
           opts
-        )} ${yearStr}`;
+        )}`;
       } catch {
-        return "18 - 19 May 2026";
+        return "18 – 19 May";
       }
     }
-    return "18 - 19 May 2026";
+    return "18 – 19 May";
   };
 
-  // Format guest count for mobile pill display (e.g., "2 Guests, 1 Room")
+  // Format guest count for mobile pill display (WITHOUT ROOMS)
   const totalGuests =
     (selectedGuest?.adults || 2) + (selectedGuest?.childrenn || 0);
-  const roomsCount = Math.max(1, Math.ceil(totalGuests / 4));
   const formattedGuests = `${totalGuests} ${
     totalGuests === 1 ? "Guest" : "Guests"
-  }, ${roomsCount} ${roomsCount === 1 ? "Room" : "Rooms"}`;
+  }${selectedGuest?.pets ? `, ${selectedGuest.pets} Pet${selectedGuest.pets > 1 ? "s" : ""}` : ""}`;
 
   // Quick navigation handler
   const handleExplore = (slug = "all") => {
@@ -164,35 +215,79 @@ export default function Hero() {
     router.push(`/category/all${queryStr ? `?${queryStr}` : ""}`);
   };
 
+  const currentSlide = slides[activeSlide] || DEFAULT_SLIDES[0];
+
   return (
     <section className="relative w-full">
       {/* ============================================================== */}
-      {/* 📱 MOBILE VIEW ONLY (md:hidden): Native App Experience        */}
-      {/* Scenic Villa Banner Photo + Clean Floating Search Box with     */}
-      {/* Website Orange Theme, seamlessly leading to ShopbyCategory    */}
+      {/* 📱 MOBILE VIEW ONLY (md:hidden): StayVista Festive Hero Theme */}
+      {/* Transparent header sits above, bold white centered headline   */}
+      {/* in the middle, with floating search card over background       */}
       {/* ============================================================== */}
-      <div className="block md:hidden pt-[74px] bg-white relative">
-        {/* Hero Background Banner Container with real villa banner image */}
-        <div className="relative w-full h-[185px] sm:h-[205px] overflow-hidden">
-          {/* Hero Banner Background Image */}
-          <Image
-            src={Banner1}
-            alt="TheVillaCamp Luxury Stays"
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover object-center brightness-[0.94] contrast-[1.03]"
-          />
+      <div className="block md:hidden bg-white relative">
+        {/* Banner with Centered Typography & Smooth Auto-Slide */}
+        <div className="relative w-full h-[380px] sm:h-[420px] overflow-hidden flex flex-col justify-between">
+          {/* Background Image / Slide (Seamless Crossfade Transition) */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              {typeof currentSlide?.image === "string" ? (
+                <img
+                  src={currentSlide.image}
+                  alt={currentSlide.title || "TheVillaCamp"}
+                  className="w-full h-full object-cover object-center brightness-[0.88] contrast-[1.03]"
+                />
+              ) : (
+                <Image
+                  src={currentSlide?.image || Banner1}
+                  alt={currentSlide?.title || "TheVillaCamp"}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover object-center brightness-[0.88] contrast-[1.03]"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
 
-          {/* Subtle Ambient Vignette Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-black/20 to-black/60 pointer-events-none z-[1]" />
-          <div className="absolute -bottom-12 -left-12 w-44 h-44 bg-[#ff6900]/20 rounded-full blur-3xl pointer-events-none z-[1]" />
+          {/* Vignette Gradients for Text Contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/70 pointer-events-none z-[1]" />
+
+          {/* Center: StayVista Bold White Headline & Festive Tag */}
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-14 pb-14">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeSlide}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.35, ease: "easeOut" }}
+                className="flex flex-col items-center max-w-sm"
+              >
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.22] drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]">
+                  {currentSlide?.title || "Script Your Diwali Getaway"}
+                </h1>
+
+                {currentSlide?.tag && (
+                  <div className="mt-3.5 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/70 bg-black/30 backdrop-blur-md text-white text-xs font-semibold tracking-wide shadow-sm">
+                    <span>{currentSlide.tag}</span>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
 
-        {/* Floating Search Card (Unclipped, perfectly centered across banner & white canvas) */}
-        <div className="relative z-30 px-3.5 -mt-20 sm:-mt-24 pb-3">
-          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_14px_36px_rgba(0,0,0,0.1)] border border-neutral-100">
-            {/* Row 1: Destination ("Where are you going?") */}
+        {/* Floating Search Card */}
+        <div className="relative z-30 px-3.5 -mt-16 sm:-mt-20 pb-3">
+          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_14px_36px_rgba(0,0,0,0.12)] border border-neutral-100">
+            {/* Row 1: Destination */}
             <div
               onClick={() => router.push("/search-stay")}
               className="w-full bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] shadow-2xs"
@@ -210,9 +305,9 @@ export default function Hero() {
 
             {/* Row 2: Dates & Guests Side-by-Side Pills */}
             <div className="grid grid-cols-2 gap-2.5 mt-2.5">
-              {/* Left Pill: Dates */}
+              {/* Left Pill: Dates (Clickable -> Opens /date-selection) */}
               <div
-                onClick={() => router.push("/search-stay?focus=dates")}
+                onClick={() => router.push("/date-selection")}
                 className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
@@ -225,13 +320,13 @@ export default function Hero() {
                 </div>
               </div>
 
-              {/* Right Pill: Guests */}
+              {/* Right Pill: Guests (Clickable -> Opens GuestSelectionDrawer with NO Rooms) */}
               <div
-                onClick={() => router.push("/search-stay?focus=guests")}
+                onClick={() => setIsGuestDrawerOpen(true)}
                 className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs"
               >
                 <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
-                  <BedDouble className="w-3.5 h-3.5" />
+                  <Users className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex flex-col min-w-0">
                   <span className="text-[11px] font-bold text-neutral-900 truncate">
@@ -241,7 +336,7 @@ export default function Hero() {
               </div>
             </div>
 
-            {/* Row 3: "Search Now" Vibrant Button in Website Orange Theme (Fully Visible & Unclipped) */}
+            {/* Row 3: "Search Now" Vibrant Button */}
             <button
               type="button"
               onClick={handleSearchNow}
@@ -252,26 +347,50 @@ export default function Hero() {
             </button>
           </div>
         </div>
+
+        {/* Interactive Guest Selection Drawer */}
+        <GuestSelectionDrawer
+          isOpen={isGuestDrawerOpen}
+          onClose={() => setIsGuestDrawerOpen(false)}
+        />
       </div>
 
       {/* ============================================================== */}
-      {/* 💻 DESKTOP VIEW ONLY (hidden md:block): Preserved Rich Banner   */}
-      {/* Maintains all existing animations, typography, and controls    */}
+      {/* 💻 DESKTOP VIEW ONLY (hidden md:block): StayVista Hero Banner  */}
+      {/* Transparent header sits above photo, bold white center text,   */}
+      {/* dynamic festival campaigns, action buttons & trust badges       */}
       {/* ============================================================== */}
-      <div className="hidden md:block pt-[136px]">
-        {/* Background Container - Dynamic Content-Driven Height with No Clipping */}
-        <div className="relative w-full min-h-[560px] lg:min-h-[620px] h-auto flex flex-col justify-between overflow-hidden shadow-xl">
-          {/* Hero Background Banner Image - Bright & Vibrant */}
-          <div className="absolute inset-0">
-            <Image
-              src={Banner1}
-              alt="TheVillaCamp Luxury Stays"
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover object-center brightness-105 contrast-[1.02]"
-            />
-          </div>
+      <div className="hidden md:block">
+        {/* Background Container - Full bleed behind transparent top navbar */}
+        <div className="relative w-full min-h-[600px] lg:min-h-[660px] h-auto flex flex-col justify-between overflow-hidden shadow-xl">
+          {/* Hero Background Banner Image (Seamless Crossfade Transition) */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.9, ease: "easeInOut" }}
+              className="absolute inset-0"
+            >
+              {typeof currentSlide?.image === "string" ? (
+                <img
+                  src={currentSlide.image}
+                  alt={currentSlide?.title || "TheVillaCamp"}
+                  className="w-full h-full object-cover object-center brightness-[0.92] contrast-[1.03]"
+                />
+              ) : (
+                <Image
+                  src={currentSlide?.image || Banner1}
+                  alt={currentSlide?.title || "TheVillaCamp"}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover object-center brightness-[0.92] contrast-[1.03]"
+                />
+              )}
+            </motion.div>
+          </AnimatePresence>
 
           {/* HTML5 Video: Set SHOW_HERO_VIDEO to true to re-enable video later */}
           {SHOW_HERO_VIDEO && (
@@ -294,27 +413,26 @@ export default function Hero() {
             </video>
           )}
 
-          {/* Lighter Gradient Overlays - Keeps Banner Image Bright while ensuring text contrast */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-transparent pointer-events-none z-[1]" />
+          {/* Subtle Overlays for Contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/65 pointer-events-none z-[1]" />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent pointer-events-none z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none z-[1]" />
           <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none z-[1]" />
 
-          {/* Hero Content Overlay */}
-          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-12 pb-16 flex flex-col justify-between flex-1">
+          {/* Hero Content Overlay (pt-32 accounts for transparent header) */}
+          <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-14 flex flex-col justify-between flex-1">
             {/* Main Messaging & Action Area */}
             <div className="max-w-3xl flex flex-col">
-              {/* Eyebrow Badge */}
+              {/* Eyebrow Badge (Festive Tag) */}
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
-                className="inline-flex items-center self-start gap-2 px-3.5 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/25 text-white text-xs font-medium mb-5 shadow-sm"
+                className="inline-flex items-center self-start gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white text-xs font-semibold mb-4 shadow-sm"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#ff6900] animate-pulse shrink-0" />
-                <span>{HERO_SLIDES[activeSlide].tag}</span>
+                <span>{currentSlide?.tag || "Festive Escape"}</span>
                 <span className="w-1 h-1 rounded-full bg-white/60 mx-0.5" />
-                <span className="text-white/80 font-normal">Lonavala</span>
+                <span className="text-white/80 font-normal">Lonavala & Maharashtra</span>
               </motion.div>
 
               {/* Dynamic Animated Headline & Subtitle */}
@@ -327,15 +445,12 @@ export default function Hero() {
                     exit={{ opacity: 0, y: -8 }}
                     transition={{ duration: 0.35, ease: "easeOut" }}
                   >
-                    <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold text-white tracking-tight leading-[1.18] drop-shadow-md">
-                      Escape to Extraordinary.
-                      <br />
-                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-orange-100 to-[#ff7a1a]">
-                        {HERO_SLIDES[activeSlide].title}
-                      </span>
+                    <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.14] drop-shadow-lg">
+                      {currentSlide?.title || "Script Your Diwali Getaway"}
                     </h1>
-                    <p className="text-white/90 text-sm md:text-base max-w-xl mt-3.5 font-normal leading-relaxed line-clamp-2 drop-shadow-sm">
-                      {HERO_SLIDES[activeSlide].description}
+                    <p className="text-white/90 text-sm md:text-base max-w-xl mt-4 font-normal leading-relaxed line-clamp-2 drop-shadow-md">
+                      {currentSlide?.description ||
+                        "Celebrate the festive season in secluded luxury pool villas & private estates."}
                     </p>
                   </motion.div>
                 </AnimatePresence>
@@ -346,11 +461,11 @@ export default function Hero() {
                 <button
                   type="button"
                   onClick={() =>
-                    handleExplore(HERO_SLIDES[activeSlide].categorySlug)
+                    handleExplore(currentSlide?.categorySlug || "villa")
                   }
                   className="group inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#ff6900] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] text-white font-semibold text-sm shadow-[0_6px_20px_rgba(255,105,0,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
-                  <span>Book {HERO_SLIDES[activeSlide].highlight}</span>
+                  <span>Book {currentSlide?.highlight || "Stays"}</span>
                   <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
                 </button>
 
@@ -360,7 +475,7 @@ export default function Hero() {
                   className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white font-medium text-sm shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
                 >
                   <Flame className="w-3.5 h-3.5 text-[#ff6900]" />
-                  <span>Explore All</span>
+                  <span>Explore All Stays</span>
                 </button>
               </div>
 
@@ -385,7 +500,7 @@ export default function Hero() {
             </div>
 
             {/* Bottom Area: Social Proof Trust Badges & Slide Dots */}
-            <div className="mt-10 pt-5 border-t border-white/15 flex items-center justify-between gap-4">
+            <div className="mt-8 pt-5 border-t border-white/15 flex items-center justify-between gap-4">
               {/* Trust Badges Strip */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                 <div className="flex items-center gap-2">
@@ -442,23 +557,6 @@ export default function Hero() {
                   </div>
                 </div>
               </div>
-
-              {/* Slide Navigation Dots */}
-              <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md px-2.5 py-1.5 rounded-full border border-white/10 shrink-0 ml-auto">
-                {HERO_SLIDES.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setActiveSlide(idx)}
-                    className={`transition-all duration-300 rounded-full h-1 cursor-pointer ${
-                      activeSlide === idx
-                        ? "w-4 bg-[#ff6900]"
-                        : "w-1.5 bg-white/40 hover:bg-white/70"
-                    }`}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  />
-                ))}
-              </div>
             </div>
           </div>
         </div>
@@ -466,4 +564,3 @@ export default function Hero() {
     </section>
   );
 }
-

@@ -46,7 +46,7 @@ import { useDispatch } from "react-redux";
 import { fetchMyBookings } from "@/Redux/Slices/myBookingSlice";
 import { fetchWishlistIds } from "@/Redux/Slices/wishlistSlice";
 
-export function UserSidebar() {
+export function UserSidebar({ isTransparent = false }) {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useDispatch();
@@ -145,7 +145,12 @@ export function UserSidebar() {
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8 rounded-full p-0 flex items-center justify-center hover:bg-neutral-100 text-neutral-800"
+          className={cn(
+            "h-8 w-8 rounded-full p-0 flex items-center justify-center transition-colors cursor-pointer",
+            isTransparent
+              ? "hover:bg-white/20 text-white"
+              : "hover:bg-neutral-100 text-neutral-800"
+          )}
         >
           <TiThMenu size={18} />
           <span className="sr-only">Toggle navigation menu</span>

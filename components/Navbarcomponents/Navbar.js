@@ -18,7 +18,9 @@ import {
   ConciergeBell,
 } from "lucide-react";
 import { FaHome, FaCalendarCheck } from "react-icons/fa";
+import { FaBell } from "react-icons/fa6";
 import { MdPeopleAlt } from "react-icons/md";
+import { cn } from "@/lib/utils";
 
 import { DualDatePicker } from "./dual-date-picker";
 import { GuestSelector } from "./guest-selector";
@@ -251,7 +253,10 @@ export default function AirbnbNavbar() {
     pathname.startsWith("/category") ||
     pathname.startsWith("/products");
 
-  const showExpandedSearch = isSearchPage && (!isScrolled || isExpanded);
+  const isHome = pathname === "/";
+  const isTransparent = isHome && !isScrolled;
+
+  const showExpandedSearch = !isTransparent && isSearchPage && (!isScrolled || isExpanded);
 
   // Condition to check if any dropdown is open (only when search bar is visible)
   const isAnyDropdownOpen = Boolean(activeDropdown) && showExpandedSearch;
@@ -260,15 +265,21 @@ export default function AirbnbNavbar() {
     <>
       <header
         ref={navbarRef}
-        className={`fixed top-0 hidden md:block left-0 right-0 z-50 bg-white transition-[height,box-shadow,border-color] duration-200 ease-out ${
-          showExpandedSearch
-            ? "border-b border-neutral-200/60 h-[136px]"
-            : "shadow-xs border-b border-neutral-200/80 h-16"
-        }`}
+        className={cn(
+          "fixed top-0 hidden md:block left-0 right-0 z-50 transition-all duration-300 ease-out",
+          isTransparent
+            ? "bg-transparent border-transparent shadow-none text-white h-20"
+            : cn(
+                "bg-white transition-[height,box-shadow,border-color] duration-200 ease-out",
+                showExpandedSearch
+                  ? "border-b border-neutral-200/60 h-[136px]"
+                  : "shadow-xs border-b border-neutral-200/80 h-16"
+              )
+        )}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Top Bar: Logo, Navigation Tabs, Host/Profile */}
-          <div className="flex items-center justify-between h-16">
+          <div className="flex items-center justify-between h-16 sm:h-20 md:h-16">
             {/* Logo */}
             <div
               onClick={() => {
@@ -283,7 +294,10 @@ export default function AirbnbNavbar() {
                 width={100}
                 height={6}
                 priority
-                className="h-8 sm:h-10 md:h-8 object-cover w-auto "
+                className={cn(
+                  "h-8 sm:h-10 md:h-8 object-cover w-auto transition-all duration-300",
+                  isTransparent ? "brightness-0 invert" : ""
+                )}
               />
             </div>
 
@@ -345,14 +359,24 @@ export default function AirbnbNavbar() {
                       setActiveDropdown(null);
                       router.push("/");
                     }}
-                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname === "/"
-                      ? "text-neutral-950 font-bold"
-                      : "text-neutral-500 hover:text-neutral-900"
-                      }`}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${
+                      pathname === "/"
+                        ? isTransparent
+                          ? "text-white font-bold"
+                          : "text-neutral-950 font-bold"
+                        : isTransparent
+                        ? "text-white/80 hover:text-white"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                   >
                     <Home
-                      className={`w-4.5 h-4.5 transition-colors ${pathname === "/" ? "text-[#ff6900]" : "text-neutral-400 group-hover:text-neutral-700"
-                        }`}
+                      className={`w-4.5 h-4.5 transition-colors ${
+                        pathname === "/"
+                          ? "text-[#ff6900]"
+                          : isTransparent
+                          ? "text-white/70 group-hover:text-white"
+                          : "text-neutral-400 group-hover:text-neutral-700"
+                      }`}
                     />
                     <span>Stays</span> 
                     {pathname === "/" && (
@@ -371,16 +395,24 @@ export default function AirbnbNavbar() {
                       setActiveDropdown(null);
                       router.push("/experiences");
                     }}
-                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/experiences")
-                      ? "text-neutral-950 font-bold"
-                      : "text-neutral-500 hover:text-neutral-900"
-                      }`}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${
+                      pathname.startsWith("/experiences")
+                        ? isTransparent
+                          ? "text-white font-bold"
+                          : "text-neutral-950 font-bold"
+                        : isTransparent
+                        ? "text-white/80 hover:text-white"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                   >
                     <Compass
-                      className={`w-4.5 h-4.5 transition-colors ${pathname.startsWith("/experiences")
-                        ? "text-[#ff6900]"
-                        : "text-neutral-400 group-hover:text-neutral-700"
-                        }`}
+                      className={`w-4.5 h-4.5 transition-colors ${
+                        pathname.startsWith("/experiences")
+                          ? "text-[#ff6900]"
+                          : isTransparent
+                          ? "text-white/70 group-hover:text-white"
+                          : "text-neutral-400 group-hover:text-neutral-700"
+                      }`}
                     />
                     <span>Experiences</span>
                     <span className="text-[10px] font-bold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full">
@@ -402,16 +434,24 @@ export default function AirbnbNavbar() {
                       setActiveDropdown(null);
                       router.push("/services");
                     }}
-                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${pathname.startsWith("/services")
-                      ? "text-neutral-950 font-bold"
-                      : "text-neutral-500 hover:text-neutral-900"
-                      }`}
+                    className={`group relative flex items-center gap-2 py-2 px-2 transition-colors cursor-pointer ${
+                      pathname.startsWith("/services")
+                        ? isTransparent
+                          ? "text-white font-bold"
+                          : "text-neutral-950 font-bold"
+                        : isTransparent
+                        ? "text-white/80 hover:text-white"
+                        : "text-neutral-500 hover:text-neutral-900"
+                    }`}
                   >
                     <ConciergeBell
-                      className={`w-4.5 h-4.5 transition-colors ${pathname.startsWith("/services")
-                        ? "text-[#ff6900]"
-                        : "text-neutral-400 group-hover:text-neutral-700"
-                        }`}
+                      className={`w-4.5 h-4.5 transition-colors ${
+                        pathname.startsWith("/services")
+                          ? "text-[#ff6900]"
+                          : isTransparent
+                          ? "text-white/70 group-hover:text-white"
+                          : "text-neutral-400 group-hover:text-neutral-700"
+                      }`}
                     />
                     <span>Services</span>
                     <span className="text-[10px] font-bold bg-neutral-150 text-neutral-700 px-1.5 py-0.5 rounded-full">
@@ -437,14 +477,30 @@ export default function AirbnbNavbar() {
                   setActiveDropdown(null);
                   router.push("/become-host");
                 }}
-                className="hidden bg-orange-300  lg:block text-xs font-semibold px-4 py-2.5 rounded-full hover:bg-orange-200 text-neutral-800 transition-colors cursor-pointer"
+                className={cn(
+                  "hidden lg:block text-xs font-semibold px-4 py-2.5 rounded-full transition-all cursor-pointer",
+                  isTransparent
+                    ? "bg-white/15 hover:bg-white/25 text-white border border-white/30 backdrop-blur-md shadow-xs"
+                    : "bg-orange-300 hover:bg-orange-200 text-neutral-800"
+                )}
               >
                 Become a host
               </button>
 
-              <NotificationSheet />
+              <NotificationSheet
+                trigger={
+                  isTransparent ? (
+                    <button
+                      type="button"
+                      className="relative rounded-full border border-white/35 bg-white/15 backdrop-blur-md h-8 w-8 p-0 flex items-center justify-center text-white hover:bg-white/25 transition-all cursor-pointer shadow-2xs"
+                    >
+                      <FaBell className="h-3.5 w-3.5 text-white" />
+                    </button>
+                  ) : undefined
+                }
+              />
 
-              <ProfileSheet />
+              <ProfileSheet isTransparent={isTransparent} />
             </div>
           </div>
 
