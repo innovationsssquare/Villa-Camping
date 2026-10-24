@@ -399,8 +399,8 @@ function PropertySpacesCarousel({ spaces, amenities = [], propertyCategory = "Vi
           type="button"
           onClick={() => setActiveTab("spaces")}
           className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeTab === "spaces"
-              ? "bg-neutral-900 text-white shadow-2xs"
-              : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
+            ? "bg-neutral-900 text-white shadow-2xs"
+            : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
             }`}
         >
           The spaces
@@ -409,8 +409,8 @@ function PropertySpacesCarousel({ spaces, amenities = [], propertyCategory = "Vi
           type="button"
           onClick={() => setActiveTab("amenities")}
           className={`text-xs font-bold px-3.5 py-1.5 rounded-full transition-all cursor-pointer ${activeTab === "amenities"
-              ? "bg-neutral-900 text-white shadow-2xs"
-              : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
+            ? "bg-neutral-900 text-white shadow-2xs"
+            : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300 hover:bg-neutral-50"
             }`}
         >
           What this {propertyCategory.toLowerCase()} offers
@@ -823,18 +823,57 @@ export default function AIConciergeBot() {
   }, []);
 
   const toggleVoiceInput = () => {
-    if (!recognitionRef.current) {
-      alert("Voice input is not supported in this browser. Please type your query!");
+    if (typeof window === "undefined") return;
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert("Voice speech recognition is not supported in this browser. Please use Chrome, Edge, or Safari!");
       return;
     }
+
     if (isListening) {
-      recognitionRef.current.stop();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {}
+      }
       setIsListening(false);
     } else {
       try {
-        recognitionRef.current.start();
-        setIsListening(true);
-      } catch {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = selectedLang === "हिन्दी" ? "hi-IN" : "en-IN";
+
+        recognition.onstart = () => {
+          setIsListening(true);
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map((res) => res[0].transcript)
+            .join("");
+          setInputValue(transcript);
+          if (event.results[0].isFinal) {
+            setIsListening(false);
+            handleSendMessage(transcript);
+          }
+        };
+
+        recognition.onerror = (e) => {
+          console.warn("Speech recognition error:", e);
+          setIsListening(false);
+        };
+
+        recognition.onend = () => {
+          setIsListening(false);
+        };
+
+        recognition.start();
+        recognitionRef.current = recognition;
+      } catch (err) {
+        console.warn("Could not start speech recognition:", err);
         setIsListening(false);
       }
     }
@@ -1214,8 +1253,8 @@ export default function AIConciergeBot() {
                             setIsLangOpen(false);
                           }}
                           className={`px-2 py-1.5 rounded-xl text-[11px] font-medium transition-all ${selectedLang === lang.name
-                              ? "bg-neutral-900 text-white"
-                              : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100 border border-neutral-100"
+                            ? "bg-neutral-900 text-white"
+                            : "bg-neutral-50 text-neutral-700 hover:bg-neutral-100 border border-neutral-100"
                             }`}
                         >
                           {lang.name}
@@ -1236,8 +1275,8 @@ export default function AIConciergeBot() {
                           key={cat.id}
                           onClick={() => setSelectedCategory(cat.id)}
                           className={`py-2 px-1.5 rounded-xl flex flex-col items-center justify-center gap-1 transition-all ${isSelected
-                              ? "bg-white text-neutral-900 shadow-xs font-bold"
-                              : "text-neutral-600 hover:text-neutral-900 font-medium"
+                            ? "bg-white text-neutral-900 shadow-xs font-bold"
+                            : "text-neutral-600 hover:text-neutral-900 font-medium"
                             }`}
                         >
                           <Icon className={`w-3.5 h-3.5 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
@@ -1311,8 +1350,8 @@ export default function AIConciergeBot() {
                           type="button"
                           onClick={() => setSelectedCategory(cat.id)}
                           className={`p-2 rounded-xl border flex items-center gap-2 transition-all ${isSelected
-                              ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
-                              : "bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300"
+                            ? "bg-neutral-900 text-white border-neutral-900 shadow-xs"
+                            : "bg-white text-neutral-700 border-neutral-200 hover:border-neutral-300"
                             }`}
                         >
                           <Icon className={`w-4 h-4 shrink-0 ${isSelected ? "text-[#ff6900]" : "text-neutral-500"}`} />
@@ -1349,8 +1388,8 @@ export default function AIConciergeBot() {
                           type="button"
                           onClick={() => setDestination(loc)}
                           className={`text-[10px] px-2.5 py-0.5 rounded-full border transition-colors shrink-0 ${destination === loc
-                              ? "bg-neutral-900 text-white border-neutral-900"
-                              : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"
+                            ? "bg-neutral-900 text-white border-neutral-900"
+                            : "bg-white text-neutral-600 border-neutral-200 hover:bg-neutral-50"
                             }`}
                         >
                           {loc}
@@ -1409,8 +1448,8 @@ export default function AIConciergeBot() {
                       type="button"
                       onClick={() => setIsCalendarOpen((prev) => !prev)}
                       className={`p-2.5 rounded-xl border text-left transition-all ${isCalendarOpen
-                          ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
-                          : "border-neutral-200 bg-white hover:bg-neutral-50"
+                        ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
+                        : "border-neutral-200 bg-white hover:bg-neutral-50"
                         }`}
                     >
                       <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
@@ -1427,8 +1466,8 @@ export default function AIConciergeBot() {
                       type="button"
                       onClick={() => setIsCalendarOpen((prev) => !prev)}
                       className={`p-2.5 rounded-xl border text-left transition-all ${isCalendarOpen
-                          ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
-                          : "border-neutral-200 bg-white hover:bg-neutral-50"
+                        ? "border-neutral-900 bg-white ring-1 ring-neutral-900"
+                        : "border-neutral-200 bg-white hover:bg-neutral-50"
                         }`}
                     >
                       <span className="block text-[9px] font-bold uppercase tracking-wider text-neutral-400">
@@ -1715,8 +1754,8 @@ export default function AIConciergeBot() {
                           });
                         }}
                         className={`text-[10px] font-bold px-2.5 py-1 rounded-full whitespace-nowrap transition-all ${selectedCategory === cat.id
-                            ? "bg-neutral-900 text-white shadow-2xs"
-                            : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
+                          ? "bg-neutral-900 text-white shadow-2xs"
+                          : "bg-white border border-neutral-200 text-neutral-600 hover:border-neutral-300"
                           }`}
                       >
                         {cat.name}
@@ -1844,11 +1883,13 @@ export default function AIConciergeBot() {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder={
-                    isPropertyPage
-                      ? `Ask about this ${propertyCategory.toLowerCase()}...`
-                      : activeScreen === "chat"
-                        ? "Where would you like to go next?"
-                        : "Find your escape..."
+                    isListening
+                      ? "🎙️ Listening... Speak your query now"
+                      : isPropertyPage
+                        ? `Ask about this ${propertyCategory.toLowerCase()}...`
+                        : activeScreen === "chat"
+                          ? "Where would you like to go next?"
+                          : "Find your escape..."
                   }
                   className="flex-1 text-xs sm:text-sm text-neutral-800 placeholder:text-neutral-400 bg-transparent focus:outline-none"
                 />
@@ -1858,8 +1899,8 @@ export default function AIConciergeBot() {
                   type="button"
                   onClick={toggleVoiceInput}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-all ${isListening
-                      ? "bg-red-500 text-white animate-pulse"
-                      : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
+                    ? "bg-red-500 text-white animate-pulse"
+                    : "text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"
                     }`}
                   title={isListening ? "Listening... click to stop" : "Voice search"}
                 >
