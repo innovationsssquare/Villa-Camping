@@ -617,11 +617,6 @@ function PropertyMealsView({ meals = null }) {
 }
 
 export default function AIConciergeBot() {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const isVillaPage = false;
   const isCampingPage = false;
@@ -985,10 +980,7 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
-  // Only render on client mount
-  if (!mounted) {
-    return null;
-  }
+
 
   return (
     <>
