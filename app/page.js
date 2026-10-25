@@ -18,7 +18,7 @@ const AnnouncementModal = dynamic(() => import("@/components/Homecomponets/annou
 const TrendingVideos = dynamic(() => import("@/components/Homecomponets/Trendingvideos"));
 const PropertyReviews = dynamic(() => import("@/components/Homecomponets/property-reviews"));
 const RecentlyVisited = dynamic(() => import("@/components/Homecomponets/RecentlyVisited"));
-const AIConciergeBot = dynamic(() => import("@/components/AIConcierge/AIConciergeBot"), { ssr: false });
+const AIConciergeBot = dynamic(() => import("@/components/AIConcierge/AIConciergeBot"));
 
 // Incremental Static Regeneration: revalidate home page every 60 seconds
 export const revalidate = 60;
