@@ -628,14 +628,18 @@ export default function AIConciergeBot() {
   // 1. Strict Chatbot visibility:
   // - Show ONLY on the Homepage ("/" or "") for both mobile and desktop view
   // - Completely hide on all other pages (property view pages, checkout pages, etc.)
-  const cleanPath = (
+  const rawPath = (
     pathname ||
     (typeof window !== "undefined" ? window.location.pathname : "") ||
     ""
-  )
-    .toLowerCase()
-    .trim();
-  const isHomePage = cleanPath === "" || cleanPath === "/";
+  );
+  // Strip query strings, hashes, and trailing slashes for robust homepage detection
+  const cleanPath = rawPath.split("?")[0].split("#")[0].trim().toLowerCase();
+  const isHomePage =
+    cleanPath === "" ||
+    cleanPath === "/" ||
+    cleanPath === "/index" ||
+    cleanPath.replace(/\/+$/, "") === "";
 
   const isVillaPage = false;
   const isCampingPage = false;
