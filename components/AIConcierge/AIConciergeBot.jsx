@@ -618,79 +618,33 @@ function PropertyMealsView({ meals = null }) {
 }
 
 export default function AIConciergeBot() {
-  const pathname = usePathname() || "";
-  const cleanPath = (pathname || "").toLowerCase().trim();
-
-  // 1. Chatbot visibility:
-  // - Show on Homepage ("/" or "")
-  // - Completely hide on individual property view pages (/view-Villa, /view-Camping, /view-Cottage, /view-Hotel)
-  const isHomePage = cleanPath === "" || cleanPath === "/";
-  const isVillaPage = cleanPath.startsWith("/view-villa") || cleanPath.startsWith("/view-villas");
-  const isCampingPage = cleanPath.startsWith("/view-camping");
-  const isCottagePage = cleanPath.startsWith("/view-cottage");
-  const isHotelPage = cleanPath.startsWith("/view-hotel");
-  const isPropertyPage = isVillaPage || isCampingPage || isCottagePage || isHotelPage || cleanPath.startsWith("/properties");
-
-  const shouldShowBot = isHomePage && !isPropertyPage;
-
-  const propertyCategory = isVillaPage
-    ? "Villa"
-    : isCampingPage
-      ? "Camping"
-      : isCottagePage
-        ? "Cottage"
-        : isHotelPage
-          ? "Hotel"
-          : "Stay";
-
-  const propertyId = isPropertyPage ? pathname.split("/").filter(Boolean)[1] : null;
-
-  // Reactive detection of whether any booking drawer or external modal is currently open in the DOM
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const checkDrawer = () => {
-      const hasDrawer =
-        document.body.hasAttribute("data-drawer-open") ||
-        !!document.querySelector('[data-slot="drawer-content"]') ||
-        !!document.querySelector('[data-slot="drawer-overlay"]') ||
-        !!document.querySelector('[data-vaul-drawer]') ||
-        !!document.querySelector('[role="dialog"]:not([data-ai-concierge="true"])') ||
-        !!document.querySelector('.heroui-modal-backdrop') ||
-        !!document.querySelector('[data-modal-open="true"]');
-      setIsDrawerOpen(hasDrawer);
-    };
-
-    checkDrawer();
-
-    const observer = new MutationObserver(checkDrawer);
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["data-drawer-open", "data-state", "class", "style"],
-    });
-
-    return () => observer.disconnect();
+    setMounted(true);
   }, []);
 
-  // Retrieve active property from Redux store
-  const villaData = useSelector((state) => state.villa?.villa);
-  const campingData = useSelector((state) => state.camping?.camping);
-  const cottageData = useSelector((state) => state.cottage?.cottage);
-  const hotelData = useSelector((state) => state.hotel?.hotel);
+  // 1. Strict Chatbot visibility:
+  // - Show ONLY on the Homepage ("/" or "") for both mobile and desktop view
+  // - Completely hide on all other pages (property view pages, checkout pages, etc.)
+  const cleanPath = (
+    pathname ||
+    (typeof window !== "undefined" ? window.location.pathname : "") ||
+    ""
+  )
+    .toLowerCase()
+    .trim();
+  const isHomePage = cleanPath === "" || cleanPath === "/";
 
-  const activeProperty = isVillaPage
-    ? villaData
-    : isCampingPage
-      ? campingData
-      : isCottagePage
-        ? cottageData
-        : isHotelPage
-          ? hotelData
-          : null;
+  const isVillaPage = false;
+  const isCampingPage = false;
+  const isCottagePage = false;
+  const isHotelPage = false;
+  const isPropertyPage = false;
+  const propertyCategory = "Stay";
+  const activeProperty = null;
+  const propertyId = null;
 
   const propertyQuickPills = [
     { id: "spaces", label: "The spaces", query: `What are the spaces in this ${propertyCategory.toLowerCase()}?` },
@@ -1045,8 +999,8 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
-  // Only show chatbot on Homepage ("/") and completely hide on property view pages
-  if (!shouldShowBot || isPropertyPage) {
+  // Only show chatbot on Homepage ("/" or "") and completely hide on all other pages (property pages, checkout, etc.)
+  if (!mounted || !isHomePage) {
     return null;
   }
 
@@ -1054,12 +1008,12 @@ export default function AIConciergeBot() {
     <>
       {/* =========================================================================
           1. FLOATING WIDGETS CLUSTER: WHATSAPP + AI CONCIERGE (Placed on RIGHT side)
-          Automatically hidden when any booking drawer or modal is active
+          Shown on Homepage for both mobile and desktop view
          ========================================================================= */}
-      {!isOpen && !isDrawerOpen && (
+      {!isOpen && (
         <div
           data-ai-concierge-mascot="true"
-          className="fixed md:bottom-6 md:right-6 bottom-24 right-4 sm:right-6 z-[9990] flex items-center gap-3 transition-all duration-200"
+          className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-[9990] flex items-center gap-3 transition-all duration-200"
         >
           {/* WhatsApp Floating Widget Button (Homepage Desktop Only) */}
           {isHomePage && (
@@ -1136,7 +1090,7 @@ export default function AIConciergeBot() {
       {/* =========================================================================
           2. MAIN AI CONCIERGE MODAL / DRAWER (Anchored on RIGHT side)
          ========================================================================= */}
-      {isOpen && !isDrawerOpen && (
+      {isOpen && (
         <>
           {/* Subtle click-outside backdrop */}
           <div
