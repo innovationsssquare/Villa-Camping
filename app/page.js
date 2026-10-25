@@ -18,6 +18,7 @@ const AnnouncementModal = dynamic(() => import("@/components/Homecomponets/annou
 const TrendingVideos = dynamic(() => import("@/components/Homecomponets/Trendingvideos"));
 const PropertyReviews = dynamic(() => import("@/components/Homecomponets/property-reviews"));
 const RecentlyVisited = dynamic(() => import("@/components/Homecomponets/RecentlyVisited"));
+const AIConciergeBot = dynamic(() => import("@/components/AIConcierge/AIConciergeBot"), { ssr: false });
 
 // Incremental Static Regeneration: revalidate home page every 60 seconds
 export const revalidate = 60;
@@ -44,6 +45,9 @@ export default function Home() {
 
       {/* Recently Visited Properties (Browsing History with Property Type Tabs) */}
       <RecentlyVisited />
+
+      {/* AI Stay Concierge Floating Mascot & WhatsApp Launcher */}
+      <AIConciergeBot />
     </main>
   );
 }

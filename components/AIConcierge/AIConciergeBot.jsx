@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
 import {
   Sparkles,
@@ -619,27 +618,10 @@ function PropertyMealsView({ meals = null }) {
 
 export default function AIConciergeBot() {
   const [mounted, setMounted] = useState(false);
-  const pathname = usePathname();
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // 1. Strict Chatbot visibility:
-  // - Show ONLY on the Homepage ("/" or "") for both mobile and desktop view
-  // - Completely hide on all other pages (property view pages, checkout pages, etc.)
-  const rawPath = (
-    pathname ||
-    (typeof window !== "undefined" ? window.location.pathname : "") ||
-    ""
-  );
-  // Strip query strings, hashes, and trailing slashes for robust homepage detection
-  const cleanPath = rawPath.split("?")[0].split("#")[0].trim().toLowerCase();
-  const isHomePage =
-    cleanPath === "" ||
-    cleanPath === "/" ||
-    cleanPath === "/index" ||
-    cleanPath.replace(/\/+$/, "") === "";
 
   const isVillaPage = false;
   const isCampingPage = false;
@@ -1003,8 +985,8 @@ export default function AIConciergeBot() {
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
   const startingDayIndex = getDay(monthStart); // 0 = Sunday
 
-  // Only show chatbot on Homepage ("/" or "") and completely hide on all other pages (property pages, checkout, etc.)
-  if (!mounted || !isHomePage) {
+  // Only render on client mount
+  if (!mounted) {
     return null;
   }
 
@@ -1019,10 +1001,9 @@ export default function AIConciergeBot() {
           data-ai-concierge-mascot="true"
           className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-[9990] flex items-center gap-3 transition-all duration-200"
         >
-          {/* WhatsApp Floating Widget Button (Homepage Desktop Only) */}
-          {isHomePage && (
-            <a
-              href="https://wa.me/918669186483?text=Hi%20The%20Villa%20Camp%2C%20I%20am%20interested%20in%20booking%20a%20luxury%20stay!"
+          {/* WhatsApp Floating Widget Button (Desktop Only) */}
+          <a
+            href="https://wa.me/918669186483?text=Hi%20The%20Villa%20Camp%2C%20I%20am%20interested%20in%20booking%20a%20luxury%20stay!"
               target="_blank"
               rel="noopener noreferrer"
               className="hidden md:flex relative group items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 focus:outline-none cursor-pointer"
@@ -1050,7 +1031,6 @@ export default function AIConciergeBot() {
                 Chat on WhatsApp • 24/7 Support
               </span>
             </a>
-          )}
 
           {/* AI Concierge Mascot Trigger Button */}
           <button
