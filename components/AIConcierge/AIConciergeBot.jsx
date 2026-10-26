@@ -616,7 +616,11 @@ function PropertyMealsView({ meals = null }) {
   );
 }
 
-export default function AIConciergeBot() {
+export default function AIConciergeBot({
+  isOpen: propIsOpen,
+  onClose: propOnClose,
+  showLauncher = true,
+} = {}) {
 
   const isVillaPage = false;
   const isCampingPage = false;
@@ -636,7 +640,15 @@ export default function AIConciergeBot() {
   ];
 
   // Modal & Navigation States
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = propIsOpen !== undefined ? propIsOpen : internalIsOpen;
+  const setIsOpen = (val) => {
+    if (propOnClose && !val) {
+      propOnClose();
+    } else {
+      setInternalIsOpen(val);
+    }
+  };
   const [activeScreen, setActiveScreen] = useState("welcome"); // "welcome" | "filter" | "chat"
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [selectedLang, setSelectedLang] = useState("English");
@@ -988,7 +1000,7 @@ export default function AIConciergeBot() {
           1. FLOATING WIDGETS CLUSTER: WHATSAPP + AI CONCIERGE (Placed on RIGHT side)
           Shown on Homepage for both mobile and desktop view
          ========================================================================= */}
-      {!isOpen && (
+      {!isOpen && showLauncher && (
         <div
           data-ai-concierge-mascot="true"
           className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-[9990] flex items-center gap-3 transition-all duration-200"

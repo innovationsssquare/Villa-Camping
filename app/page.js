@@ -18,36 +18,38 @@ const AnnouncementModal = dynamic(() => import("@/components/Homecomponets/annou
 const TrendingVideos = dynamic(() => import("@/components/Homecomponets/Trendingvideos"));
 const PropertyReviews = dynamic(() => import("@/components/Homecomponets/property-reviews"));
 const RecentlyVisited = dynamic(() => import("@/components/Homecomponets/RecentlyVisited"));
-import AIConciergeBot from "@/components/AIConcierge/AIConciergeBot";
+import AIConciergeLauncher from "@/components/AIConcierge/AIConciergeLauncher";
 
 // Incremental Static Regeneration: revalidate home page every 60 seconds
 export const revalidate = 60;
 
 export default function Home() {
   return (
-    <main className="overflow-hidden w-full">
-      {/* Active Promotional / Event Visitor Popup */}
-      <AnnouncementModal />
+    <>
+      <main className="overflow-hidden w-full">
+        {/* Active Promotional / Event Visitor Popup */}
+        <AnnouncementModal />
 
-      <Hero />
-      <ShopbyCategory />
+        <Hero />
+        <ShopbyCategory />
 
-      <AvailableThisWeekend />
-      <DestinationHighlights/>
-      {/* <WeekendGetaway/> */}
-      {/* <DiscoverOffBeat/> */}
-      <TrendingVideos/>
-      <PropertyReviews/>
-      <WhyChooseUs/>
-      <ListYourProperty />
-      {/* <Experiences/>
-      <Testimonials/> */}
+        <AvailableThisWeekend />
+        <DestinationHighlights/>
+        {/* <WeekendGetaway/> */}
+        {/* <DiscoverOffBeat/> */}
+        <TrendingVideos/>
+        <PropertyReviews/>
+        <WhyChooseUs/>
+        <ListYourProperty />
+        {/* <Experiences/>
+        <Testimonials/> */}
 
-      {/* Recently Visited Properties (Browsing History with Property Type Tabs) */}
-      <RecentlyVisited />
+        {/* Recently Visited Properties (Browsing History with Property Type Tabs) */}
+        <RecentlyVisited />
+      </main>
 
-      {/* AI Stay Concierge Floating Mascot & WhatsApp Launcher */}
-      <AIConciergeBot />
-    </main>
+      {/* AI Stay Concierge Floating Mascot & WhatsApp Launcher (Homepage Only) */}
+      <AIConciergeLauncher />
+    </>
   );
 }

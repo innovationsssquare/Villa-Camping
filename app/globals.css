@@ -33,14 +33,6 @@ body::-webkit-scrollbar {
     scrollbar-width: none !important;
   }
 
-  /* Automatically hide AI chatbot when any drawer or modal is open */
-  body[data-drawer-open="true"] [data-ai-concierge-mascot="true"],
-  body[data-modal-open="true"] [data-ai-concierge-mascot="true"] {
-    display: none !important;
-    opacity: 0 !important;
-    pointer-events: none !important;
-    visibility: hidden !important;
-  }
 
   .custom-radio {
     position: relative;
