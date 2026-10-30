@@ -92,6 +92,18 @@ export function ProfileSheet({ isTransparent = false }) {
   }, [open, syncAuthState]);
 
   useEffect(() => {
+    if (typeof document === "undefined") return;
+    if (open) {
+      document.body.setAttribute("data-sheet-open", "true");
+    } else {
+      document.body.removeAttribute("data-sheet-open");
+    }
+    return () => {
+      document.body.removeAttribute("data-sheet-open");
+    };
+  }, [open]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     window.addEventListener("thevilla_auth_changed", syncAuthState);
     window.addEventListener("storage", syncAuthState);
@@ -154,7 +166,7 @@ export function ProfileSheet({ isTransparent = false }) {
         </Button>
       </SheetTrigger>
 
-      <SheetContent side="right" className="w-full p-0 sm:max-w-md bg-white flex flex-col h-full border-l border-neutral-200">
+      <SheetContent side="right" className="w-full p-0 sm:max-w-md bg-white flex flex-col h-full border-l border-neutral-200 z-[70]">
         {/* Header with User Info or Guest Welcome */}
         <SheetHeader className="border-b border-neutral-100 p-6 bg-gradient-to-b from-neutral-50/80 to-white">
           {isLoggedIn ? (
@@ -427,9 +439,9 @@ export function ProfileSheet({ isTransparent = false }) {
           </div>
         </ScrollArea>
 
-        {/* Footer with Logout / Login action */}
-        <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 mt-auto">
-          {isLoggedIn ? (
+        {/* Footer with Logout for logged-in members, or 24/7 support assistance for guests */}
+        {isLoggedIn ? (
+          <div className="p-4 border-t border-neutral-100 bg-neutral-50/50 mt-auto">
             <Button
               variant="ghost"
               onClick={handleLogout}
@@ -438,19 +450,19 @@ export function ProfileSheet({ isTransparent = false }) {
               <LogOut className="h-4 w-4" />
               Log Out
             </Button>
-          ) : (
-            <Button
-              onClick={() => {
-                setOpen(false);
-                openAuthModal();
-              }}
-              className="w-full justify-center text-sm font-semibold bg-[#ff6900] hover:bg-[#e05d00] text-white rounded-xl transition-all gap-2 shadow-xs cursor-pointer"
+          </div>
+        ) : (
+          <div className="px-6 py-3.5 border-t border-neutral-100 bg-neutral-50/40 mt-auto flex items-center justify-between text-xs text-neutral-500">
+            <span>24/7 Guest Assistance</span>
+            <button
+              type="button"
+              onClick={() => handleNavigate("/account/support")}
+              className="text-[#ff6900] font-semibold hover:underline cursor-pointer"
             >
-              <LogIn className="h-4 w-4" />
-              Sign In / Register
-            </Button>
-          )}
-        </div>
+              Help & Support
+            </button>
+          </div>
+        )}
       </SheetContent>
       <NotificationSheet
         open={notificationSheetOpen}
