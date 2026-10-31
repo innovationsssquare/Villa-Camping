@@ -55,7 +55,7 @@ export function PropertyCard({ property }) {
   const handleWishlist = (e) => {
     e?.stopPropagation?.();
     const currentUser = getStoredUser();
-    if (!currentUser?._id) {
+    if (!currentUser?._id || !currentUser?.token) {
       openAuthModal();
       return;
     }

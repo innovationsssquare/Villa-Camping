@@ -1003,7 +1003,7 @@ export default function AIConciergeBot({
       {!isOpen && showLauncher && (
         <div
           data-ai-concierge-mascot="true"
-          className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-[9990] flex items-center gap-3 transition-all duration-200"
+          className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-40 flex items-center gap-3 transition-all duration-200"
         >
           {/* WhatsApp Floating Widget Button (Desktop Only) */}
           <a

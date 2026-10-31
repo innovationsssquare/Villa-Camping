@@ -129,7 +129,7 @@ export default function BookingScreen() {
   // Load user from localStorage / cookies
   useEffect(() => {
     const user = getStoredUser();
-    if (user && (user._id || user.token)) {
+    if (user && user._id && user.token) {
       setCurrentUser(user);
       setIsAuthenticated(true);
     } else {

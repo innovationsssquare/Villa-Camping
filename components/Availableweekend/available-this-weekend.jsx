@@ -21,7 +21,7 @@ import { CarouselIndicator } from "./carousel-indicators";
 export function AvailableThisWeekend() {
   const dispatch = useDispatch();
 
-  const { categories, loading } = useSelector((state) => state.category);
+  const { categories, loading, isLoaded } = useSelector((state) => state.category);
   const { weekendData, weekendLoading } = useSelector(
     (state) => state.properties
   );
@@ -59,8 +59,10 @@ export function AvailableThisWeekend() {
 
   // Fetch categories once
   useEffect(() => {
-    dispatch(fetchAllCategories());
-  }, [dispatch]);
+    if (!isLoaded && !loading) {
+      dispatch(fetchAllCategories());
+    }
+  }, [isLoaded, loading, dispatch]);
 
   // When categories load, initially default to the Villa category
   useEffect(() => {

@@ -41,7 +41,7 @@ export const FilterChips = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { categories = [], loading } = useSelector(
+  const { categories = [], loading, isLoaded } = useSelector(
     (state) => state.category
   );
 
@@ -50,10 +50,10 @@ export const FilterChips = ({
   );
 
   useEffect(() => {
-    if (!categories.length) {
+    if (!isLoaded && !loading) {
       dispatch(fetchAllCategories());
     }
-  }, [dispatch]);
+  }, [isLoaded, loading, dispatch]);
 
   const handleAllClick = () => {
     dispatch(setSelectedCategory(null));

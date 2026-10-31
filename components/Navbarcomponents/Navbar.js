@@ -59,7 +59,7 @@ export default function AirbnbNavbar() {
 
   const navbarRef = useRef(null);
 
-  const { categories } = useSelector((state) => state.category);
+  const { categories, isLoaded: categoriesLoaded, loading: categoriesLoading } = useSelector((state) => state.category);
   const {
     selectedCategoryId,
     checkin,
@@ -70,8 +70,10 @@ export default function AirbnbNavbar() {
   } = useSelector((state) => state.booking);
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
-  }, [dispatch]);
+    if (!categoriesLoaded && !categoriesLoading) {
+      dispatch(fetchAllCategories());
+    }
+  }, [categoriesLoaded, categoriesLoading, dispatch]);
 
   useEffect(() => {
     if (categories?.length > 0 && !selectedCategoryId) {

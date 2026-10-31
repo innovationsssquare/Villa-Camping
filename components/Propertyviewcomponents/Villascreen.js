@@ -183,7 +183,7 @@ export default function Villascreen() {
     e?.stopPropagation?.();
     e?.preventDefault?.();
     const currentUser = getStoredUser();
-    if (!currentUser?._id) {
+    if (!currentUser?._id || !currentUser?.token) {
       openAuthModal();
       return;
     }

@@ -3,10 +3,23 @@ import { GetAllcategories } from "@/lib/API/category/Category";
 
 export const fetchAllCategories = createAsyncThunk(
   "master/fetchAllCategories",
-  async () => {
-    const response = await GetAllcategories();
-    console.log(response)
-    return response.data;
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await GetAllcategories();
+      if (
+        !response ||
+        response.success === false ||
+        response.status === false ||
+        typeof response === "string"
+      ) {
+        return rejectWithValue(
+          response?.message || "Failed to fetch categories"
+        );
+      }
+      return Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      return rejectWithValue(err.message);
+    }
   }
 );
 
@@ -42,7 +55,7 @@ const categorySlice = createSlice({
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.loading = false;
         state.isLoaded = true;
-        state.error = action.error.message;
+        state.error = action.payload || action.error?.message;
       });
 
     // Subcategories

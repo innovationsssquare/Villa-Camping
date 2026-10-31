@@ -35,7 +35,7 @@ export default function SearchStayPage() {
   const router = useRouter();
   const dispatch = useDispatch();
 
-  const { categories } = useSelector((state) => state.category);
+  const { categories, isLoaded, loading } = useSelector((state) => state.category);
   const {
     selectedCategoryId,
     selectedCategoryName,
@@ -50,8 +50,10 @@ export default function SearchStayPage() {
   const { longWeekends, allHolidays } = useIndianHolidays(currentYear);
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
-  }, [dispatch]);
+    if (!isLoaded && !loading) {
+      dispatch(fetchAllCategories());
+    }
+  }, [isLoaded, loading, dispatch]);
 
   // Default to first category only if nothing is selected yet
   useEffect(() => {

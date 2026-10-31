@@ -104,7 +104,7 @@ export default function VillaReel({ villas = [] }) {
       if (!currentVilla) return;
 
       const currentUser = getStoredUser();
-      if (!currentUser?._id) {
+      if (!currentUser?._id || !currentUser?.token) {
         openAuthModal();
         return;
       }

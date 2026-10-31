@@ -272,7 +272,7 @@ function DestinationSkeleton() {
 
 export function DestinationHighlights() {
   const dispatch = useDispatch();
-  const { destinationLoading, destinationData } = useSelector(
+  const { destinationLoading, destinationData, destinationFetched } = useSelector(
     (state) => state.properties
   );
 
@@ -281,10 +281,10 @@ export function DestinationHighlights() {
   const [count, setCount] = useState(0);
 
   useEffect(() => {
-    if (!destinationData || destinationData.length === 0) {
+    if (!destinationFetched && !destinationLoading) {
       dispatch(fetchdestination());
     }
-  }, [dispatch, destinationData]);
+  }, [dispatch, destinationFetched, destinationLoading]);
 
   useEffect(() => {
     if (!api) return;

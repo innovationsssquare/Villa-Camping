@@ -198,7 +198,7 @@ function AuthFormContent({
   return (
     <div className="w-full">
       {/* StayVista-Inspired Luxury Villa Pool Promo Banner */}
-      <div className="relative w-full h-40 sm:h-40 rounded-2xl overflow-hidden shadow-sm my-4 select-none bg-neutral-900">
+      <div className="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden shadow-sm my-3 select-none bg-neutral-900 shrink-0">
         <Image
           src="/Loginasset/villa_banner.jpg"
           alt="Enjoy A Villa Getaway"
@@ -235,8 +235,8 @@ function AuthFormContent({
       {/* Form Area */}
       {!otpSent ? (
         /* Phone Number Entry Step */
-        <div className="space-y-3.5">
-          <h4 className="text-base font-bold text-neutral-900 tracking-tight">
+        <div className="space-y-3 pt-1">
+          <h4 className="text-sm sm:text-base font-bold text-neutral-900 tracking-tight">
             Login/Signup
           </h4>
 
@@ -272,7 +272,7 @@ function AuthFormContent({
             type="button"
             onClick={handleSendOTP}
             disabled={otpLoading || cleanPhoneNumber(phone).length !== 10}
-            className="w-full h-11 sm:h-12 mt-4 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
+            className="w-full h-11 sm:h-12 mt-3.5 bg-[#ff6900] hover:bg-[#e05d00] active:scale-[0.99] text-white font-semibold text-sm rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed shadow-md shadow-orange-500/20 cursor-pointer"
           >
             {otpLoading ? (
               <Loader2 className="h-4 w-4 animate-spin text-white" />
@@ -283,7 +283,7 @@ function AuthFormContent({
         </div>
       ) : (
         /* WhatsApp OTP Verification Step */
-        <div className="space-y-3">
+        <div className="space-y-3 pt-1">
           <div className="flex items-center justify-between">
             <div>
               <h4 className="text-base font-bold text-neutral-900 tracking-tight">
@@ -348,15 +348,15 @@ function AuthFormContent({
         </div>
       )}
 
-      {/* Footer Legal Terms Disclaimer */}
-      <div className="pt-3 pb-3 mt-4 text-center">
-        <p className="text-xs text-neutral-600 leading-normal select-none">
+      {/* Distinct Legal Terms & Conditions Footer Section with clean separation */}
+      <div className="mt-6 pt-4 pb-2 border-t border-neutral-200/80 text-center">
+        <p className="text-[11px] sm:text-xs text-neutral-500 leading-normal select-none max-w-xs mx-auto">
           By signing up, you agree to our{" "}
           <a
             href="/terms-of-service"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#ff6900] hover:underline font-semibold underline-offset-2"
+            className="text-neutral-800 hover:text-[#ff6900] font-semibold underline underline-offset-2 transition-colors"
           >
             Terms &amp; Conditions
           </a>{" "}
@@ -365,7 +365,7 @@ function AuthFormContent({
             href="/privacy-policy"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#ff6900] hover:underline font-semibold underline-offset-2"
+            className="text-neutral-800 hover:text-[#ff6900] font-semibold underline underline-offset-2 transition-colors"
           >
             Privacy Policy
           </a>
@@ -589,12 +589,12 @@ const ResponsiveAuthModal = ({
           backdrop="opaque"
           hideCloseButton
           classNames={{
-            base: "max-w-md mx-auto bg-white rounded-t-[28px] p-0 m-0 border-none shadow-2xl overflow-hidden pb-4 sm:pb-2",
+            base: "max-w-md mx-auto bg-white rounded-t-[32px] p-0 m-0 border-none shadow-2xl overflow-hidden max-h-[90vh] pb-2",
             backdrop: "bg-black/60 backdrop-blur-xs z-[9998]",
             wrapper: "z-[9999]",
           }}
         >
-          <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[28px] overflow-hidden p-0">
+          <DrawerContent className="max-w-md mx-auto bg-white border-none rounded-t-[32px] overflow-hidden p-0">
             {() => (
               <>
                 {/* Pull handle indicator */}
@@ -611,15 +611,15 @@ const ResponsiveAuthModal = ({
                 </button>
 
                 {/* Title Header with lateral padding to prevent text collision with close button */}
-                <DrawerHeader className="relative flex flex-col items-center justify-center text-center pt-0.5 pb-0.5 px-10">
+                <DrawerHeader className="relative flex flex-col items-center justify-center text-center pt-0.5 pb-0.5 px-10 shrink-0">
                   <h3 className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight leading-snug">
                     Welcome to ThevillaCamp
                   </h3>
                 </DrawerHeader>
 
                 <DrawerBody
-                  className="px-5 pt-1 pb-10 sm:pb-6 max-h-[85vh] overflow-y-auto no-scrollbar"
-                  style={{ paddingBottom: "max(2.5rem, env(safe-area-inset-bottom, 2.5rem))" }}
+                  className="px-5 pt-1 pb-4 max-h-[85vh] overflow-y-auto no-scrollbar"
+                  style={{ paddingBottom: "max(1.5rem, env(safe-area-inset-bottom, 1.5rem))" }}
                 >
                   <AuthFormContent
                     phone={phone}

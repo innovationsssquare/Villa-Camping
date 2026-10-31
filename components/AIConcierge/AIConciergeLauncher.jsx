@@ -21,9 +21,39 @@ const AIConciergeModal = dynamic(() => import("./AIConciergeBot"), {
 export default function AIConciergeLauncher() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+    if (typeof document === "undefined") return;
+
+    const checkModalState = () => {
+      // 1. Check if body overflow is locked by any modal/drawer
+      const isOverflowLocked =
+        document.body.style.overflow === "hidden" ||
+        document.body.hasAttribute("data-scroll-locked");
+
+      // 2. Check if any HeroUI Drawer, Radix Dialog, or VideoModal is active in the DOM
+      const hasActiveModal = Boolean(
+        document.querySelector(
+          '[role="dialog"], [data-slot="backdrop"], [data-slot="drawer-wrapper"], [data-modal-open="true"], [data-state="open"]'
+        )
+      );
+
+      setIsModalOpen(isOverflowLocked || hasActiveModal);
+    };
+
+    checkModalState();
+
+    const observer = new MutationObserver(checkModalState);
+    observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ["style", "class", "data-scroll-locked"],
+      childList: true,
+      subtree: true,
+    });
+
+    return () => observer.disconnect();
   }, []);
 
   return (
@@ -35,12 +65,13 @@ export default function AIConciergeLauncher() {
         - Mobile: bottom-[86px] right-3 (floats smoothly above the 70px mobilenav bar)
         - Tablet: sm:bottom-24 sm:right-6
         - Desktop: md:bottom-8 md:right-8
+        - Automatically hides when any modal/drawer/video player is open (z-40 safe stacking)
         =========================================================================
       */}
-      {!isOpen && (
+      {!isOpen && !isModalOpen && (
         <div
           data-ai-concierge-mascot="true"
-          className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-[99999] flex items-center gap-3 transition-all duration-200 pointer-events-auto"
+          className="fixed bottom-[86px] right-3 sm:bottom-24 sm:right-6 md:bottom-8 md:right-8 z-40 flex items-center gap-3 transition-all duration-300 pointer-events-auto"
         >
           {/* WhatsApp Floating Widget Button (Desktop Only) */}
           <a

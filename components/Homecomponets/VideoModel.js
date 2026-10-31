@@ -52,7 +52,10 @@ export default function VideoModal({
   const modal =
     isOpen && typeof document !== "undefined"
       ? createPortal(
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200">
+          <div
+            data-modal-open="true"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+          >
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"

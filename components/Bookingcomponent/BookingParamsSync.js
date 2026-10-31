@@ -17,14 +17,14 @@ export default function BookingParamsSync() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const dispatch = useDispatch();
-  const { categories } = useSelector((state) => state.category);
+  const { categories, isLoaded, loading } = useSelector((state) => state.category);
 
-  // 1. Ensure categories are available globally
+  // 1. Ensure categories are available globally (fetch once only)
   useEffect(() => {
-    if (!categories || categories.length === 0) {
+    if (!isLoaded && !loading) {
       dispatch(fetchAllCategories());
     }
-  }, [categories, dispatch]);
+  }, [isLoaded, loading, dispatch]);
 
   // 2. Synchronize dates & guest parameters from URL into Redux
   useEffect(() => {

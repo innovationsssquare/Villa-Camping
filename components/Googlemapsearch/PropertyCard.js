@@ -62,7 +62,7 @@ export const PropertyCard = ({
     e.preventDefault();
 
     const currentUser = getStoredUser();
-    if (!currentUser?._id) {
+    if (!currentUser?._id || !currentUser?.token) {
       openAuthModal();
       return;
     }

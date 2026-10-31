@@ -173,8 +173,10 @@ export default function PropertyCardnew({ property }) {
     e.preventDefault();
 
     const currentUser = getStoredUser();
-    if (!currentUser?._id) {
-      openAuthModal();
+    if (!currentUser?._id || !currentUser?.token) {
+      if (typeof openAuthModal === "function") {
+        openAuthModal();
+      }
       return;
     }
 
@@ -190,7 +192,20 @@ export default function PropertyCardnew({ property }) {
         propertyType,
         userId: currentUser._id,
       })
-    );
+    ).then((res) => {
+      if (toggleWishlist.rejected.match(res)) {
+        const errMsg = String(res.payload?.message || res.error?.message || "");
+        if (
+          errMsg.toLowerCase().includes("unauthorized") ||
+          errMsg.toLowerCase().includes("token") ||
+          errMsg.toLowerCase().includes("auth")
+        ) {
+          if (typeof openAuthModal === "function") {
+            openAuthModal();
+          }
+        }
+      }
+    });
   };
 
   const handleShare = async (e) => {

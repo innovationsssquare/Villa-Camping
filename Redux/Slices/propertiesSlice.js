@@ -148,9 +148,14 @@ export const fetchdestination = createAsyncThunk(
     try {
       const response = await GetDestinations();
 
-      if (response?.success === false) {
+      if (
+        !response ||
+        response?.success === false ||
+        response?.status === false ||
+        typeof response === "string"
+      ) {
         return rejectWithValue(
-          response.message || "Failed to fetch weekend properties"
+          response?.message || "Failed to fetch destinations"
         );
       }
 
@@ -252,6 +257,7 @@ const propertiesSlice = createSlice({
     destinationLoading: false,
     destinationData: [],
     destinationError: null,
+    destinationFetched: false,
 
     // Shared error
     error: null,
@@ -366,10 +372,12 @@ const propertiesSlice = createSlice({
       })
       .addCase(fetchdestination.fulfilled, (state, action) => {
         state.destinationLoading = false;
+        state.destinationFetched = true;
         state.destinationData = action.payload?.data || [];
       })
       .addCase(fetchdestination.rejected, (state, action) => {
         state.destinationLoading = false;
+        state.destinationFetched = true;
         state.destinationError =
           action.payload || "Failed to load weekend properties";
       })

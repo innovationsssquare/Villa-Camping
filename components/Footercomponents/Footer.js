@@ -29,19 +29,29 @@ import {
   Zap,
   Tag,
   MessageCircle,
+  ChevronDown,
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { cn } from "@/lib/utils";
 import Footerlogo from "@/public/Productasset/Logoicon.png";
 
 export default function Footer() {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { destinationData } = useSelector((state) => state.properties);
+  const [openSection, setOpenSection] = useState(null);
+
+  const toggleSection = (id) => {
+    setOpenSection((prev) => (prev === id ? null : id));
+  };
+  const { destinationData, destinationLoading, destinationFetched } = useSelector(
+    (state) => state.properties
+  );
 
   useEffect(() => {
-    if (!destinationData || destinationData.length === 0) {
+    if (!destinationFetched && !destinationLoading) {
       dispatch(fetchdestination());
     }
-  }, [dispatch, destinationData]);
+  }, [dispatch, destinationFetched, destinationLoading]);
 
   const handleDestinationClick = (namePrefix) => {
     const matched = destinationData?.find((dest) =>
@@ -54,11 +64,392 @@ export default function Footer() {
   };
 
   return (
-    <footer className="relative w-full bg-neutral-950 text-white overflow-hidden pt-10 sm:pt-14 md:pt-16 pb-24 sm:pb-12 md:pb-8 border-t border-neutral-800/80">
+    <footer className="relative w-full bg-neutral-950 text-white overflow-hidden pt-8 sm:pt-14 md:pt-16 pb-28 sm:pb-16 md:pb-8 border-t border-neutral-800/80">
       {/* Background Ambient Radial Glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] sm:w-[900px] h-[350px] bg-gradient-to-b from-orange-500/10 via-amber-500/5 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* =========================================================================
+            MOBILE VIEW (< md): Minimal, Clean Luxury Footer
+           ========================================================================= */}
+        <div className="block md:hidden">
+          {/* 1. Brand Header & Verified Status */}
+          <div className="flex items-center justify-between pb-5 border-b border-neutral-800/80">
+            <Link href="/" className="flex items-center gap-2.5">
+              <div className="relative w-9 h-9 rounded-xl overflow-hidden bg-neutral-900 border border-neutral-800 p-1 flex items-center justify-center">
+                <Image
+                  src={Footerlogo}
+                  alt="The Villa Camp"
+                  width={36}
+                  height={36}
+                  className="object-contain"
+                />
+              </div>
+              <div>
+                <span className="text-base font-extrabold text-white tracking-tight">
+                  The Villa <span className="text-[#ff6900]">Camp</span>
+                </span>
+                <span className="block text-[10px] text-neutral-400 font-medium tracking-wider uppercase -mt-0.5">
+                  Curated Luxury Stays
+                </span>
+              </div>
+            </Link>
+            <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-semibold">
+              <ShieldCheck className="w-3 h-3" />
+              <span>Verified</span>
+            </div>
+          </div>
+
+          {/* 2. One-Tap Instant Concierge & Caretaker Actions */}
+          <div className="grid grid-cols-3 gap-2 py-3.5 border-b border-neutral-800/80">
+            <a
+              href="tel:+918669186483"
+              className="flex flex-col items-center justify-center gap-1.5 py-2.5 px-2 rounded-2xl bg-neutral-900/90 border border-neutral-800/80 hover:border-neutral-700 active:scale-95 transition-all text-neutral-300 hover:text-white"
+            >
+              <Phone className="w-4 h-4 text-[#ff6900]" />
+              <span className="text-[11px] font-semibold">Direct Call</span>
+            </a>
+            <a
+              href="https://wa.me/918669186483"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex flex-col items-center justify-center gap-1.5 py-2.5 px-2 rounded-2xl bg-neutral-900/90 border border-neutral-800/80 hover:border-neutral-700 active:scale-95 transition-all text-neutral-300 hover:text-white"
+            >
+              <MessageCircle className="w-4 h-4 text-emerald-400" />
+              <span className="text-[11px] font-semibold">WhatsApp</span>
+            </a>
+            <a
+              href="mailto:info@thevillacamp.com"
+              className="flex flex-col items-center justify-center gap-1.5 py-2.5 px-2 rounded-2xl bg-neutral-900/90 border border-neutral-800/80 hover:border-neutral-700 active:scale-95 transition-all text-neutral-300 hover:text-white"
+            >
+              <Mail className="w-4 h-4 text-amber-400" />
+              <span className="text-[11px] font-semibold">Support</span>
+            </a>
+          </div>
+
+          {/* 3. Minimal Accordions */}
+          <div className="divide-y divide-neutral-800/70 border-b border-neutral-800/80">
+            {/* Accordion 1: Destinations */}
+            <div className="py-1">
+              <button
+                type="button"
+                onClick={() => toggleSection("destinations")}
+                className="w-full py-3 flex items-center justify-between text-left text-xs font-semibold text-neutral-200 hover:text-white transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5 text-[#ff6900]" />
+                  <span>Top Getaways & Locations</span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 text-neutral-400 transition-transform duration-200",
+                    openSection === "destinations" && "rotate-180 text-[#ff6900]"
+                  )}
+                />
+              </button>
+              <AnimatePresence initial={false}>
+                {openSection === "destinations" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <ul className="pb-3 pt-1 pl-5 space-y-2 text-xs text-neutral-400">
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => handleDestinationClick("Lonavala")}
+                          className="hover:text-white transition-colors text-left"
+                        >
+                          Lonavala Luxury Villas
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => handleDestinationClick("Pawna")}
+                          className="hover:text-white transition-colors text-left"
+                        >
+                          Pawna Lake Camps & Glamping
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => handleDestinationClick("Kamshet")}
+                          className="hover:text-white transition-colors text-left"
+                        >
+                          Kamshet Nature Cottages
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          type="button"
+                          onClick={() => handleDestinationClick("Malavli")}
+                          className="hover:text-white transition-colors text-left"
+                        >
+                          Malavli Mountain Retreats
+                        </button>
+                      </li>
+                      <li>
+                        <Link
+                          href="/search-your-gateway"
+                          className="inline-flex items-center gap-1.5 text-[#ff6900] font-medium pt-1"
+                        >
+                          <Compass className="w-3.5 h-3.5" />
+                          <span>Explore All on Map</span>
+                        </Link>
+                      </li>
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Accordion 2: Stay Collections */}
+            <div className="py-1">
+              <button
+                type="button"
+                onClick={() => toggleSection("categories")}
+                className="w-full py-3 flex items-center justify-between text-left text-xs font-semibold text-neutral-200 hover:text-white transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+                  <span>Stay Collections</span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 text-neutral-400 transition-transform duration-200",
+                    openSection === "categories" && "rotate-180 text-[#ff6900]"
+                  )}
+                />
+              </button>
+              <AnimatePresence initial={false}>
+                {openSection === "categories" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <ul className="pb-3 pt-1 pl-5 space-y-2 text-xs text-neutral-400">
+                      <li>
+                        <Link href="/category/Villa" className="hover:text-white transition-colors">
+                          Private Pool Villas & Estates
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/category/Camping" className="hover:text-white transition-colors">
+                          Lakeside Camping & Glamping
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/category/Cottage" className="hover:text-white transition-colors">
+                          Wooden & Scenic Cottages
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/category/Hotel" className="hover:text-white transition-colors">
+                          Boutique Resorts & Hotels
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/shorts" className="inline-flex items-center gap-1 text-amber-400 font-medium pt-1">
+                          <span>📹 Trending Video Shorts</span>
+                        </Link>
+                      </li>
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
+            {/* Accordion 3: Support, Company & Policies */}
+            <div className="py-1">
+              <button
+                type="button"
+                onClick={() => toggleSection("support")}
+                className="w-full py-3 flex items-center justify-between text-left text-xs font-semibold text-neutral-200 hover:text-white transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-[#ff6900]" />
+                  <span>Support & Trust Policies</span>
+                </div>
+                <ChevronDown
+                  className={cn(
+                    "w-4 h-4 text-neutral-400 transition-transform duration-200",
+                    openSection === "support" && "rotate-180 text-[#ff6900]"
+                  )}
+                />
+              </button>
+              <AnimatePresence initial={false}>
+                {openSection === "support" && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden"
+                  >
+                    <ul className="pb-3 pt-1 pl-5 space-y-2 text-xs text-neutral-400">
+                      <li>
+                        <Link href="/about" className="hover:text-white transition-colors">
+                          About The Villa Camp
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/contact" className="hover:text-white transition-colors">
+                          24/7 Guest Support
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/become-host" className="inline-flex items-center gap-1 text-[#ff6900] font-medium">
+                          <span>List Your Property (Free)</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/cancellation-policy" className="hover:text-white transition-colors">
+                          Cancellation & Refund Policy
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                          Privacy Policy
+                        </Link>
+                      </li>
+                      <li>
+                        <Link href="/terms-of-service" className="hover:text-white transition-colors">
+                          Terms of Service
+                        </Link>
+                      </li>
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* 4. Compact App Download Bar */}
+          <div className="my-4 p-3 rounded-2xl bg-neutral-900/70 border border-neutral-800/80 flex items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-orange-500/10 border border-orange-500/20 flex items-center justify-center text-[#ff6900] shrink-0">
+                <Smartphone className="w-4 h-4" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs font-bold text-white truncate">The Villa Camp App</p>
+                <p className="text-[10px] text-neutral-400 truncate">Exclusive deals & instant check-in</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <a
+                href="https://apps.apple.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="App Store"
+                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-semibold border border-neutral-700/80 active:scale-95 transition-all"
+              >
+                iOS
+              </a>
+              <a
+                href="https://play.google.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Google Play"
+                className="px-2.5 py-1.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-[10px] font-semibold border border-neutral-700/80 active:scale-95 transition-all"
+              >
+                Android
+              </a>
+            </div>
+          </div>
+
+          {/* 5. Minimal Trust Strip */}
+          <div className="grid grid-cols-2 gap-2 py-3 border-t border-b border-neutral-800/70 text-[10px] text-neutral-400">
+            <div className="flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+              <span>100% Verified Stays</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CreditCard className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Secure 256-Bit Pay</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <HeartHandshake className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+              <span>Best Rate Direct</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-[#ff6900] shrink-0" />
+              <span>24/7 Care</span>
+            </div>
+          </div>
+
+          {/* 6. Social Media, Copyright & Legal */}
+          <div className="pt-4 flex flex-col items-center gap-3 text-center">
+            <div className="flex items-center gap-2">
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all"
+              >
+                <Instagram className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://facebook.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all"
+              >
+                <Facebook className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://twitter.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Twitter"
+                className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all"
+              >
+                <Twitter className="w-3.5 h-3.5" />
+              </a>
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all"
+              >
+                <Youtube className="w-3.5 h-3.5" />
+              </a>
+            </div>
+
+            <div className="flex items-center gap-3 text-[11px] text-neutral-400">
+              <Link href="/privacy-policy" className="hover:text-white transition-colors">
+                Privacy
+              </Link>
+              <span className="text-neutral-700">•</span>
+              <Link href="/terms-of-service" className="hover:text-white transition-colors">
+                Terms
+              </Link>
+              <span className="text-neutral-700">•</span>
+              <Link href="/cancellation-policy" className="hover:text-white transition-colors">
+                Cancellations
+              </Link>
+            </div>
+
+            <p className="text-[10px] text-neutral-500 pb-4">
+              © {new Date().getFullYear()} The Villa Camp. Handcrafted luxury getaways.
+            </p>
+          </div>
+        </div>
+
+        {/* =========================================================================
+            DESKTOP VIEW (>= md): Full Editorial 6-Column Authority Layout
+           ========================================================================= */}
+        <div className="hidden md:block">
         {/* =========================================================================
             Top Mobile App Promotion Banner (Option 3)
            ========================================================================= */}
@@ -511,6 +902,7 @@ export default function Footer() {
               Cancellations
             </Link>
           </div>
+        </div>
         </div>
       </div>
     </footer>

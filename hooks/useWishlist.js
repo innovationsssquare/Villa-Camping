@@ -51,7 +51,7 @@ export function useWishlist({
   // Fetch user's wishlist IDs on mount if logged in and not yet cached
   useEffect(() => {
     const currentUser = getStoredUser();
-    if (currentUser?._id && (!wishlistIds || wishlistIds.length === 0)) {
+    if (currentUser?._id && currentUser?.token && (!wishlistIds || wishlistIds.length === 0)) {
       dispatch(fetchWishlistIds(currentUser._id));
     }
   }, [dispatch, wishlistIds]);
@@ -89,7 +89,7 @@ export function useWishlist({
       e?.preventDefault?.();
 
       const currentUser = getStoredUser();
-      if (!currentUser?._id) {
+      if (!currentUser?._id || !currentUser?.token) {
         if (typeof openAuthModal === "function") {
           openAuthModal();
         }
@@ -116,20 +116,33 @@ export function useWishlist({
           propertyType,
           userId: currentUser._id,
         })
-      );
+      ).then((res) => {
+        if (toggleWishlist.fulfilled.match(res)) {
+          // 3. User feedback toast only after confirmed fulfillment
+          try {
+            addToast({
+              title: nextWished ? "Saved to Wishlist" : "Removed from Wishlist",
+              description: nextWished
+                ? `${propertyName} has been added to your wishlist.`
+                : `${propertyName} has been removed from your wishlist.`,
+              color: nextWished ? "success" : "default",
+            });
+          } catch (toastErr) {
+            // Fallback if toast context is not mounted
+          }
+        } else if (toggleWishlist.rejected.match(res)) {
+          const errMsg = String(res.payload?.message || res.error?.message || "");
+          const isAuthError =
+            errMsg.toLowerCase().includes("unauthorized") ||
+            errMsg.toLowerCase().includes("token") ||
+            errMsg.toLowerCase().includes("auth") ||
+            errMsg.toLowerCase().includes("jwt");
 
-      // 3. User feedback toast
-      try {
-        addToast({
-          title: nextWished ? "Saved to Wishlist" : "Removed from Wishlist",
-          description: nextWished
-            ? `${propertyName} has been added to your wishlist.`
-            : `${propertyName} has been removed from your wishlist.`,
-          color: nextWished ? "success" : "default",
-        });
-      } catch (toastErr) {
-        // Fallback if toast context is not mounted
-      }
+          if (isAuthError && typeof openAuthModal === "function") {
+            openAuthModal();
+          }
+        }
+      });
     },
     [dispatch, propertyId, propertyType, propertyName, isLiked, openAuthModal]
   );

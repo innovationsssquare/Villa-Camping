@@ -129,7 +129,7 @@ const ShopbyCategory = () => {
   const dispatch = useDispatch();
   const [carouselApi, setCarouselApi] = useState(null);
 
-  const { categories, loading } = useSelector((state) => state.category);
+  const { categories, loading, isLoaded } = useSelector((state) => state.category);
   const {
     selectedCategoryName,
     checkin,
@@ -138,8 +138,10 @@ const ShopbyCategory = () => {
   } = useSelector((state) => state.booking);
 
   useEffect(() => {
-    dispatch(fetchAllCategories());
-  }, [dispatch]);
+    if (!isLoaded && !loading) {
+      dispatch(fetchAllCategories());
+    }
+  }, [isLoaded, loading, dispatch]);
 
   const handleSelectCategory = (id, name) => {
     dispatch(setSelectedCategory(id));

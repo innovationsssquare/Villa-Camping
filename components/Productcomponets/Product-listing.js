@@ -132,7 +132,7 @@ export default function PropertyFilterListing({ categorySlug }) {
   const paramAdults = searchParams?.get("adults");
   const paramChildren = searchParams?.get("children");
 
-  const { categories, isLoaded: categoriesLoaded } = useSelector((state) => state.category);
+  const { categories, isLoaded: categoriesLoaded, loading: categoriesLoading } = useSelector((state) => state.category);
   const { selectedCategoryId, selectedCategoryName, checkin, checkout } =
     useSelector((state) => state.booking);
   const { dataloading, data, pagination } = useSelector(
@@ -141,10 +141,10 @@ export default function PropertyFilterListing({ categorySlug }) {
 
   // 1. Ensure categories are loaded once
   useEffect(() => {
-    if (!categoriesLoaded) {
+    if (!categoriesLoaded && !categoriesLoading) {
       dispatch(fetchAllCategories());
     }
-  }, [categoriesLoaded, dispatch]);
+  }, [categoriesLoaded, categoriesLoading, dispatch]);
 
   // 2. Sync URL search params (dates and guests) into Redux
   useEffect(() => {
