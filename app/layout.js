@@ -42,6 +42,8 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
+    site: "@Thevillacamp",
+    creator: "@Thevillacamp",
     title: "ThevillaCamp — stays",
     description:
       "Find and book curated stays — cottages, villas, hotels and camping experiences near Lonavala and Pawna.",
@@ -127,6 +129,12 @@ export default function RootLayout({ children }) {
                   "name": "ThevillaCamp",
                   "url": "https://thevillacamp.com",
                   "logo": "https://thevillacamp.com/og-default.jpg",
+                  "sameAs": [
+                    "https://www.instagram.com/thevillacamp/",
+                    "https://www.youtube.com/@Thevillacamp",
+                    "https://www.facebook.com/profile.php?id=61594403481188",
+                    "https://x.com/Thevillacamp"
+                  ],
                   "contactPoint": {
                     "@type": "ContactPoint",
                     "telephone": "+91-8669186483",

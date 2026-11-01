@@ -14,6 +14,10 @@ import {
   MessageCircle,
   ShieldCheck,
   RotateCcw,
+  Instagram,
+  Facebook,
+  Youtube,
+  Twitter,
 } from "lucide-react";
 import Link from "next/link";
 import { BaseUrl } from "@/lib/API/Baseurl";
@@ -250,6 +254,54 @@ export default function ContactForm() {
                 <span className="text-[11px] text-neutral-400 mt-1 block">
                   Operational across Lonavala, Pawna Lake, Kamshet &amp; Alibaug
                 </span>
+              </div>
+            </div>
+
+            {/* Official Social Media Channels */}
+            <div className="p-4 rounded-2xl bg-white border border-neutral-200 shadow-2xs">
+              <p className="text-xs font-bold text-neutral-900 uppercase tracking-wider mb-1">
+                Official Channels
+              </p>
+              <p className="text-xs text-neutral-500 mb-3">
+                Follow TheVillaCamp on social media for updates, deals &amp; guest stories.
+              </p>
+              <div className="flex items-center gap-2">
+                <a
+                  href="https://www.instagram.com/thevillacamp/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-pink-600 hover:border-pink-200 hover:bg-pink-50 flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.facebook.com/profile.php?id=61594403481188"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                >
+                  <Facebook className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://x.com/Thevillacamp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (formerly Twitter)"
+                  className="w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-black hover:border-neutral-400 hover:bg-neutral-100 flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                >
+                  <Twitter className="w-4 h-4" />
+                </a>
+                <a
+                  href="https://www.youtube.com/@Thevillacamp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="w-9 h-9 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-700 hover:text-red-600 hover:border-red-200 hover:bg-red-50 flex items-center justify-center transition-all shadow-2xs hover:scale-105"
+                >
+                  <Youtube className="w-4 h-4" />
+                </a>
               </div>
             </div>
           </div>

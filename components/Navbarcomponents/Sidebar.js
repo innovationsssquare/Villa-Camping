@@ -40,6 +40,7 @@ import {
   Twitter,
   Linkedin,
   Facebook,
+  Youtube,
 } from "lucide-react";
 import { TiThMenu } from "react-icons/ti";
 import { useDispatch } from "react-redux";
@@ -435,40 +436,44 @@ export function UserSidebar({ isTransparent = false }) {
             {/* Social Icons */}
             <div className="pt-1">
               <p className="text-[9px] font-bold uppercase tracking-wider text-neutral-400 px-1 mb-1.5">
-                Connect
+                Connect With Us
               </p>
               <div className="flex items-center gap-1.5 px-1">
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/thevillacamp/"
                   target="_blank"
-                  rel="noreferrer"
-                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-pink-600 transition-colors"
+                  rel="noopener noreferrer"
+                  aria-label="Instagram"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-pink-600 hover:bg-pink-50 transition-colors"
                 >
                   <Instagram className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="https://twitter.com"
+                  href="https://www.facebook.com/profile.php?id=61594403481188"
                   target="_blank"
-                  rel="noreferrer"
-                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-500 transition-colors"
+                  rel="noopener noreferrer"
+                  aria-label="Facebook"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                >
+                  <Facebook className="w-3.5 h-3.5" />
+                </a>
+                <a
+                  href="https://x.com/Thevillacamp"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="X (formerly Twitter)"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-black hover:bg-neutral-200 transition-colors"
                 >
                   <Twitter className="w-3.5 h-3.5" />
                 </a>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.youtube.com/@Thevillacamp"
                   target="_blank"
-                  rel="noreferrer"
-                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-700 transition-colors"
+                  rel="noopener noreferrer"
+                  aria-label="YouTube"
+                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-red-600 hover:bg-red-50 transition-colors"
                 >
-                  <Linkedin className="w-3.5 h-3.5" />
-                </a>
-                <a
-                  href="https://facebook.com"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="w-7 h-7 rounded-lg bg-neutral-100 flex items-center justify-center text-neutral-700 hover:text-blue-600 transition-colors"
-                >
-                  <Facebook className="w-3.5 h-3.5" />
+                  <Youtube className="w-3.5 h-3.5" />
                 </a>
               </div>
             </div>

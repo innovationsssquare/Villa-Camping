@@ -389,7 +389,7 @@ export default function Footer() {
           <div className="pt-4 flex flex-col items-center gap-3 text-center">
             <div className="flex items-center gap-2">
               <a
-                href="https://instagram.com"
+                href="https://www.instagram.com/thevillacamp/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
@@ -398,7 +398,7 @@ export default function Footer() {
                 <Instagram className="w-3.5 h-3.5" />
               </a>
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61594403481188"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Facebook"
@@ -407,16 +407,16 @@ export default function Footer() {
                 <Facebook className="w-3.5 h-3.5" />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/Thevillacamp"
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Twitter"
+                aria-label="X (formerly Twitter)"
                 className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all"
               >
                 <Twitter className="w-3.5 h-3.5" />
               </a>
               <a
-                href="https://youtube.com"
+                href="https://www.youtube.com/@Thevillacamp"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="YouTube"
@@ -611,7 +611,7 @@ export default function Footer() {
               </span>
               <div className="flex items-center gap-2">
                 <a
-                  href="https://instagram.com"
+                  href="https://www.instagram.com/thevillacamp/"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Instagram"
@@ -620,7 +620,7 @@ export default function Footer() {
                   <Instagram className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://facebook.com"
+                  href="https://www.facebook.com/profile.php?id=61594403481188"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="Facebook"
@@ -629,16 +629,16 @@ export default function Footer() {
                   <Facebook className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://twitter.com"
+                  href="https://x.com/Thevillacamp"
                   target="_blank"
                   rel="noopener noreferrer"
-                  aria-label="Twitter"
+                  aria-label="X (formerly Twitter)"
                   className="w-8 h-8 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-neutral-400 hover:text-white hover:bg-[#ff6900] hover:border-[#ff6900] transition-all hover:scale-105"
                 >
                   <Twitter className="w-4 h-4" />
                 </a>
                 <a
-                  href="https://youtube.com"
+                  href="https://www.youtube.com/@Thevillacamp"
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label="YouTube"
