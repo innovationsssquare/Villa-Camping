@@ -31,9 +31,19 @@ import {
   Check,
   QrCode,
   Smartphone,
+  MapPin,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { cn } from "@/lib/utils";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
 
 // =============================================================================
 // DATA: YIELD ESTIMATOR MATRIX
@@ -107,6 +117,8 @@ export default function BecomeHostPage() {
   // Yield Estimator State
   const [selectedLocation, setSelectedLocation] = useState("Lonavala");
   const [selectedBhk, setSelectedBhk] = useState("3 BHK");
+  const [isLocationDrawerOpen, setIsLocationDrawerOpen] = useState(false);
+  const [isBhkDrawerOpen, setIsBhkDrawerOpen] = useState(false);
 
   // Host Inquiry Form State (Strictly preserved)
   const [formData, setFormData] = useState({
@@ -176,96 +188,299 @@ export default function BecomeHostPage() {
   return (
     <div className="w-full min-h-screen bg-white text-neutral-900 selection:bg-[#ff6900] selection:text-white">
       {/* =====================================================================
-          1. CINEMATIC LUXURY HERO SECTION
+          1. 📱 MOBILE VIEW ONLY (block md:hidden): Matches Homepage Hero
           ===================================================================== */}
-      <section className="relative w-full flex items-center justify-center overflow-hidden pt-12 sm:pt-16 md:pt-20 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
-        {/* Villa Background Banner with Soft Light Overlays */}
-        <div className="absolute inset-0 z-0">
+      <div className="block md:hidden bg-white relative mb-2">
+        {/* Banner with Centered Typography */}
+        <div className="relative w-full h-[380px] sm:h-[420px] overflow-hidden flex flex-col justify-between">
+          <div className="absolute inset-0">
+            <Image
+              src="/Aboutusasset/Villabanner.jpg"
+              alt="Turn Your Villa Into High Yield"
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover object-center brightness-[0.88] contrast-[1.03]"
+            />
+          </div>
+
+          {/* Vignette Gradients for Text Contrast */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/70 pointer-events-none z-[1]" />
+
+          {/* Center: Bold White Headline & Translucent Tag */}
+          <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-6 pt-14 pb-14">
+            <div className="flex flex-col items-center max-w-sm">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-[1.22] drop-shadow-[0_4px_16px_rgba(0,0,0,0.7)]">
+                Turn Your Villa Into High Yield
+              </h1>
+
+              <div className="mt-3.5 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-white/70 bg-black/30 backdrop-blur-md text-white text-xs font-semibold tracking-wide shadow-sm">
+                <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
+                <span>Host Partnership • 24h Payouts</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Floating Yield Estimator & List Card Overlapping Hero Banner */}
+        <div className="relative z-30 px-3.5 -mt-16 sm:-mt-20 pb-3">
+          <div className="bg-white rounded-[24px] p-3.5 sm:p-4 shadow-[0_4px_20px_rgba(0,0,0,0.06)] border border-neutral-200/80">
+            {/* Box 1: Location Picker Drawer Trigger */}
+            <button
+              type="button"
+              onClick={() => setIsLocationDrawerOpen(true)}
+              className="w-full bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3.5 py-3 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] shadow-2xs text-left"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <MapPin className="w-5 h-5 text-[#ff6900] shrink-0" />
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] text-neutral-500 font-medium">Villa Location</span>
+                  <span className="text-xs sm:text-sm font-bold text-neutral-800 truncate">
+                    {selectedLocation}
+                  </span>
+                </div>
+              </div>
+              <ChevronDown className="w-4 h-4 text-neutral-400 shrink-0" />
+            </button>
+
+            {/* Box 2: BHK Picker & Dynamic Estimated Yield Side-by-Side */}
+            <div className="grid grid-cols-2 gap-2.5 mt-2.5">
+              {/* BHK Picker */}
+              <button
+                type="button"
+                onClick={() => setIsBhkDrawerOpen(true)}
+                className="bg-[#f8f9fc] hover:bg-[#ebf0f7] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center justify-between cursor-pointer transition-all active:scale-[0.99] min-w-0 shadow-2xs text-left"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-6 h-6 rounded-full bg-orange-100/80 flex items-center justify-center text-[#ff6900] shrink-0">
+                    <Building2 className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-[10px] text-neutral-500 font-medium">Bedrooms</span>
+                    <span className="text-[11px] font-bold text-neutral-900 truncate">
+                      {selectedBhk}
+                    </span>
+                  </div>
+                </div>
+                <ChevronDown className="w-3.5 h-3.5 text-neutral-400 shrink-0" />
+              </button>
+
+              {/* Live Estimated Yield Preview */}
+              <div className="bg-[#f8f9fc] border border-neutral-200/60 rounded-2xl px-3 py-2.5 flex items-center gap-2 shadow-2xs min-w-0">
+                <div className="w-6 h-6 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 shrink-0">
+                  <Banknote className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col min-w-0">
+                  <span className="text-[10px] text-neutral-500 font-medium">Est. Monthly</span>
+                  <span className="text-[11px] font-bold text-emerald-600 truncate">
+                    {currentEstimate.monthly.split(" - ")[0]}...
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Box 3: Orange CTA Button */}
+            <button
+              type="button"
+              onClick={() => scrollToSection("inquiry-form-section")}
+              className="mt-3.5 w-full py-3.5 rounded-2xl bg-gradient-to-r from-[#ff6900] via-[#ff7a1a] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] active:scale-[0.98] text-white font-bold text-sm shadow-[0_8px_24px_rgba(255,105,0,0.36)] flex items-center justify-center gap-2 cursor-pointer transition-all"
+            >
+              <Sparkles className="w-4 h-4 stroke-[2.5]" />
+              <span>List Your Property</span>
+            </button>
+
+            <p className="text-[10px] text-neutral-400 text-center mt-2.5 font-normal">
+              Zero upfront fees • Free professional photography • 24h Payouts
+            </p>
+          </div>
+        </div>
+
+        {/* Location Selection Drawer */}
+        <Drawer open={isLocationDrawerOpen} onOpenChange={setIsLocationDrawerOpen}>
+          <DrawerContent className="max-h-[85vh] rounded-t-3xl border-none bg-white p-0 overflow-hidden">
+            <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mt-3 mb-1" />
+            <DrawerHeader className="text-left px-5 pt-2 pb-3 border-b border-neutral-150">
+              <div className="flex items-center justify-between">
+                <div>
+                  <DrawerTitle className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                    <MapPin className="w-5 h-5 text-[#ff6900]" />
+                    <span>Select Villa Destination</span>
+                  </DrawerTitle>
+                  <div className="text-xs text-neutral-500 font-medium mt-0.5">
+                    Choose your property&apos;s regional market
+                  </div>
+                </div>
+                <DrawerClose asChild>
+                  <button type="button" className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-neutral-100 text-neutral-500">
+                    <X className="h-4 w-4" />
+                  </button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+            <div className="px-5 py-3 divide-y divide-neutral-100 max-h-[55vh] overflow-y-auto no-scrollbar">
+              {Object.keys(LOCATION_RATES).map((loc) => {
+                const isSelected = selectedLocation === loc;
+                return (
+                  <button
+                    key={loc}
+                    type="button"
+                    onClick={() => {
+                      setSelectedLocation(loc);
+                      setIsLocationDrawerOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between py-3.5 text-left transition-colors hover:text-[#ff6900]"
+                  >
+                    <span className={cn("text-sm", isSelected ? "font-bold text-[#ff6900]" : "font-medium text-neutral-800")}>
+                      {loc}
+                    </span>
+                    {isSelected && <Check className="w-4 h-4 text-[#ff6900]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </DrawerContent>
+        </Drawer>
+
+        {/* BHK Selection Drawer */}
+        <Drawer open={isBhkDrawerOpen} onOpenChange={setIsBhkDrawerOpen}>
+          <DrawerContent className="max-h-[85vh] rounded-t-3xl border-none bg-white p-0 overflow-hidden">
+            <div className="w-12 h-1.5 bg-neutral-300 rounded-full mx-auto mt-3 mb-1" />
+            <DrawerHeader className="text-left px-5 pt-2 pb-3 border-b border-neutral-150">
+              <div className="flex items-center justify-between">
+                <div>
+                  <DrawerTitle className="text-lg font-bold text-neutral-900 flex items-center gap-2">
+                    <Building2 className="w-5 h-5 text-[#ff6900]" />
+                    <span>Select Villa Configuration</span>
+                  </DrawerTitle>
+                  <div className="text-xs text-neutral-500 font-medium mt-0.5">
+                    Choose the bedroom count of your property
+                  </div>
+                </div>
+                <DrawerClose asChild>
+                  <button type="button" className="rounded-full w-8 h-8 flex items-center justify-center hover:bg-neutral-100 text-neutral-500">
+                    <X className="h-4 w-4" />
+                  </button>
+                </DrawerClose>
+              </div>
+            </DrawerHeader>
+            <div className="px-5 py-3 divide-y divide-neutral-100 max-h-[55vh] overflow-y-auto no-scrollbar">
+              {["2 BHK", "3 BHK", "4 BHK", "5+ BHK"].map((bhk) => {
+                const isSelected = selectedBhk === bhk;
+                return (
+                  <button
+                    key={bhk}
+                    type="button"
+                    onClick={() => {
+                      setSelectedBhk(bhk);
+                      setIsBhkDrawerOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between py-3.5 text-left transition-colors hover:text-[#ff6900]"
+                  >
+                    <span className={cn("text-sm", isSelected ? "font-bold text-[#ff6900]" : "font-medium text-neutral-800")}>
+                      {bhk}
+                    </span>
+                    {isSelected && <Check className="w-4 h-4 text-[#ff6900]" />}
+                  </button>
+                );
+              })}
+            </div>
+          </DrawerContent>
+        </Drawer>
+      </div>
+
+      {/* =====================================================================
+          1. 💻 DESKTOP VIEW ONLY (hidden md:flex): Matches Homepage Hero
+          ===================================================================== */}
+      <section className="hidden md:flex relative w-full min-h-[600px] lg:min-h-[660px] flex-col justify-between overflow-hidden shadow-xl mb-12 sm:mb-16">
+        {/* Authentic Background Image */}
+        <div className="absolute inset-0 w-full h-full">
           <Image
             src="/Aboutusasset/Villabanner.jpg"
             alt="The Villa Camp Luxury Estate Background"
             fill
             priority
-            className="object-cover object-center opacity-25 scale-105"
+            sizes="100vw"
+            className="object-cover object-center brightness-[0.88] contrast-[1.03]"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-white/90 via-white/80 to-white" />
+          {/* Dual Vignette & Dark Gradient Overlay for Maximum Readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/75 pointer-events-none z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]" />
+          <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none z-[1]" />
         </div>
 
-        {/* Ambient Warm Glow Balls */}
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ff6900]/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-10 -right-20 w-96 h-96 bg-amber-300/20 rounded-full blur-[160px] pointer-events-none" />
+        {/* Hero Content Container (pt-28 md:pt-32 accounts for transparent header) */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-32 pb-10 flex flex-col justify-between flex-1">
+          <div className="max-w-3xl flex flex-col">
+            {/* Transparent Blur Badge */}
+            <div className="inline-flex items-center self-start gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white text-xs font-semibold mb-4 shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-[#ff6900] animate-pulse shrink-0" />
+              <span>The Villa Camp Host Partnership</span>
+              <span className="w-1 h-1 rounded-full bg-white/60 mx-0.5" />
+              <span className="text-white/80 font-normal">Western India&apos;s Luxury Network</span>
+            </div>
 
-        {/* Hero Content Container */}
-        <div className="relative z-10 max-w-5xl mx-auto text-center flex flex-col items-center">
-          {/* Glowing Partner Pill */}
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-[11px] sm:text-xs font-semibold text-[#ff6900] mb-4 shadow-2xs">
-            <Sparkles className="w-3.5 h-3.5 text-[#ff6900]" />
-            <span className="tracking-wide">The Villa Camp • Luxury Host Partnership</span>
+            {/* Main Headline: Bold White Text with Editorial Proportions */}
+            <h1 className="text-2xl md:text-4xl lg:text-[44px] font-black text-white tracking-tight leading-[1.18] drop-shadow-lg">
+              Turn Your Luxury Villa Into a High-Yield Asset
+            </h1>
+
+            {/* Shortened Subtitle */}
+            <p className="text-white/90 text-sm md:text-base max-w-2xl mt-3.5 font-normal leading-relaxed drop-shadow-md">
+              Join Western India&apos;s premier luxury hospitality network with zero upfront fees, verified guests, and automated 24-hour payouts.
+            </p>
+
+            {/* Hero CTAs */}
+            <div className="flex flex-wrap items-center gap-3.5 mt-7">
+              <button
+                type="button"
+                onClick={() => scrollToSection("inquiry-form-section")}
+                className="group inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#ff6900] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] text-white font-semibold text-sm shadow-[0_6px_20px_rgba(255,105,0,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <span>List Your Property</span>
+                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => scrollToSection("yield-estimator")}
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white font-medium text-sm shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+              >
+                <TrendingUp className="w-4 h-4 text-[#ff6900]" />
+                <span>Estimate Your Earnings</span>
+              </button>
+            </div>
           </div>
 
-          {/* Main Title */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-[42px] font-extrabold text-neutral-950 tracking-tight leading-tight max-w-3xl">
-            Turn Your Luxury Villa Into a{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#ff6900] via-amber-500 to-[#ea580c]">
-              High-Yield Asset
-            </span>
-          </h1>
+          {/* Proof Strip / Metric Pills (Frosted Glass on Hero) */}
+          <div className="mt-10 pt-5 border-t border-white/15 flex items-center justify-between gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
+                <span className="block text-lg sm:text-2xl font-black text-white">₹4.5L - ₹8.5L</span>
+                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
+                  Avg. Monthly Gross Yield
+                </span>
+              </div>
 
-          {/* Subtitle */}
-          <p className="text-xs sm:text-sm md:text-[15px] text-neutral-600 max-w-2xl mt-3.5 leading-relaxed font-normal">
-            Join Western India&apos;s premier luxury hospitality network across Lonavala,
-            Alibaug, and Pawana Lake. Zero upfront fees, guaranteed guest vetting, and automated
-            24-hour payouts.
-          </p>
+              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
+                <span className="block text-lg sm:text-2xl font-black text-emerald-400">100%</span>
+                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
+                  Govt ID Verified Guests
+                </span>
+              </div>
 
-          {/* Hero CTAs */}
-          <div className="flex flex-col sm:flex-row items-center gap-3 mt-6 w-full sm:w-auto">
-            <Button
-              onClick={() => scrollToSection("inquiry-form-section")}
-              className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-full bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs sm:text-sm font-bold shadow-lg shadow-[#ff6900]/20 transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>List Your Property</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </Button>
+              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
+                <span className="block text-lg sm:text-2xl font-black text-white">₹0</span>
+                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
+                  Zero Upfront Listing Fee
+                </span>
+              </div>
 
-            <Button
-              variant="outline"
-              onClick={() => scrollToSection("yield-estimator")}
-              className="w-full sm:w-auto h-10 sm:h-11 px-6 rounded-full bg-white hover:bg-neutral-50 text-neutral-800 border-neutral-300 text-xs sm:text-sm font-semibold shadow-2xs transition-all cursor-pointer flex items-center justify-center gap-2"
-            >
-              <span>Estimate Your Earnings</span>
-              <TrendingUp className="w-4 h-4 text-[#ff6900]" />
-            </Button>
-          </div>
-
-          {/* Proof Strip / Metric Pills */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-3.5 mt-8 sm:mt-10 w-full max-w-4xl">
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
-              <span className="block text-base sm:text-xl font-extrabold text-neutral-900">₹4.5L - ₹8.5L</span>
-              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
-                Avg. Monthly Gross Yield
-              </span>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
-              <span className="block text-base sm:text-xl font-extrabold text-emerald-600">100%</span>
-              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
-                Govt ID Verified Guests
-              </span>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
-              <span className="block text-base sm:text-xl font-extrabold text-neutral-900">₹0</span>
-              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
-                Zero Upfront Listing Fee
-              </span>
-            </div>
-
-            <div className="p-3 sm:p-3.5 rounded-2xl bg-white/95 border border-neutral-200/90 shadow-2xs backdrop-blur-md text-center">
-              <span className="block text-base sm:text-xl font-extrabold text-[#ff6900]">48 Hours</span>
-              <span className="text-[10px] sm:text-[11px] text-neutral-500 mt-0.5 block">
-                Inspection to Live Booking
-              </span>
+              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
+                <span className="block text-lg sm:text-2xl font-black text-[#ff6900]">48 Hours</span>
+                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
+                  Inspection to Live Booking
+                </span>
+              </div>
             </div>
           </div>
         </div>

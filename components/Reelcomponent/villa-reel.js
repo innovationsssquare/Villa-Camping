@@ -21,7 +21,6 @@ import {
   Check,
   Compass,
   Flame,
-  RefreshCcw,
 } from "lucide-react";
 import { toggleWishlist, optimisticToggle } from "@/Redux/Slices/wishlistSlice";
 import { useAuthModal } from "@/context/AuthModalContext";
@@ -50,7 +49,7 @@ export default function VillaReel({ villas = [] }) {
   const isScrolling = useRef(false);
   const lastTapRef = useRef(0);
 
-  const currentVilla = currentIndex < villas.length ? villas[currentIndex] : null;
+  const currentVilla = villas[currentIndex] || null;
 
   // Stop all video instances cleanly
   const stopAllVideos = useCallback(() => {
@@ -137,9 +136,9 @@ export default function VillaReel({ villas = [] }) {
     return `₹${new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 }).format(num)}`;
   };
 
-  // Slide navigation handlers (can advance up to villas.length for the End Slide)
+  // Slide navigation handlers
   const goToNext = useCallback(() => {
-    if (currentIndex < villas.length) {
+    if (currentIndex < villas.length - 1) {
       setCurrentIndex((prev) => prev + 1);
       setIsPlaying(true);
       setProgress(0);
@@ -207,18 +206,6 @@ export default function VillaReel({ villas = [] }) {
 
   // 3. Video playback management across indexes
   useEffect(() => {
-    if (currentIndex >= villas.length) {
-      // Reached the End of Reels screen: ensure all videos are halted
-      videoRefs.current.forEach((video) => {
-        if (video) {
-          try {
-            video.pause();
-          } catch (e) {}
-        }
-      });
-      return;
-    }
-
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       if (index === currentIndex) {
@@ -552,91 +539,7 @@ export default function VillaReel({ villas = [] }) {
             );
           })}
 
-          {/* End of Reels Screen (Smoothly slides in after the last reel) */}
-          {(() => {
-            const endOffset = villas.length - currentIndex;
-            if (Math.abs(endOffset) > 1) return null;
-            const isEndActive = endOffset === 0;
 
-            return (
-              <div
-                className={`absolute inset-0 w-full h-full transition-transform duration-500 ease-out will-change-transform flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-neutral-900/98 via-black to-neutral-950 ${
-                  isEndActive ? "z-20 pointer-events-auto" : "z-0 pointer-events-none"
-                }`}
-                style={{
-                  transform: `translateY(${endOffset * 100}%)`,
-                }}
-              >
-                {/* Ambient glow decoration */}
-                <div className="absolute w-60 h-60 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none" />
-
-                <div className="relative z-10 flex flex-col items-center max-w-xs">
-                  {/* Glowing icon badge */}
-                  <div className="relative mb-5">
-                    <div className="w-20 h-20 rounded-3xl bg-neutral-900/90 border border-white/15 backdrop-blur-xl flex items-center justify-center shadow-2xl">
-                      <Sparkles className="w-9 h-9 text-[#ff6900] animate-pulse" />
-                    </div>
-                    <div className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 border-2 border-black flex items-center justify-center shadow-md">
-                      <Check className="w-4 h-4 text-white stroke-[3]" />
-                    </div>
-                  </div>
-
-                  <span className="text-[11px] font-extrabold tracking-widest text-[#ff6900] uppercase mb-1.5">
-                    You're All Caught Up
-                  </span>
-
-                  <h3 className="text-2xl font-black text-white mb-2.5 tracking-tight">
-                    No More Reels
-                  </h3>
-
-                  <p className="text-xs text-neutral-300/80 leading-relaxed mb-6 font-normal">
-                    You've explored all the latest villa shorts! More exclusive stays are being curated daily.
-                  </p>
-
-                  <div className="flex flex-col w-full gap-3">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setCurrentIndex(0);
-                        setIsPlaying(true);
-                      }}
-                      className="w-full py-3.5 px-5 rounded-2xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white text-xs font-bold shadow-lg shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <RefreshCcw className="w-4 h-4" />
-                      <span>Watch Again From Start</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      className="w-full py-3 px-5 rounded-2xl bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs font-bold backdrop-blur-md transition-all active:scale-95 cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <ArrowLeft className="w-4 h-4" />
-                      <span>Explore All Stays</span>
-                    </button>
-                  </div>
-
-                  {/* Revisit hint */}
-                  <button
-                    type="button"
-                    onClick={goToPrev}
-                    className="mt-6 inline-flex items-center gap-1.5 text-[11px] font-semibold text-white/50 hover:text-white/80 transition-colors cursor-pointer"
-                  >
-                    <ChevronUp className="w-3.5 h-3.5 animate-bounce" />
-                    <span>Swipe down to revisit reels</span>
-                  </button>
-                </div>
-              </div>
-            );
-          })()}
-
-          {/* Last reel hint indicator */}
-          {currentIndex === villas.length - 1 && (
-            <div className="absolute top-14 left-1/2 -translate-x-1/2 z-30 bg-black/60 backdrop-blur-md px-3 py-1 rounded-full border border-white/10 text-[11px] font-medium text-white/85 shadow-lg pointer-events-none flex items-center gap-1.5 animate-in fade-in duration-300">
-              <Sparkles className="w-3 h-3 text-[#ff6900]" />
-              <span>Last reel · Swipe up to finish</span>
-            </div>
-          )}
 
           {/* Center Heart Burst Animation on Double Tap */}
           {showHeartBurst && (
@@ -861,7 +764,7 @@ export default function VillaReel({ villas = [] }) {
             <button
               type="button"
               onClick={goToNext}
-              disabled={currentIndex >= villas.length}
+              disabled={currentIndex >= villas.length - 1}
               className="w-10 h-10 rounded-full bg-white/15 hover:bg-white/30 backdrop-blur-md text-white border border-white/15 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all cursor-pointer shadow-md active:scale-95"
               aria-label="Next Reel"
             >

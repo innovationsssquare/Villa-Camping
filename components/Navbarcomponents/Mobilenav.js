@@ -99,6 +99,11 @@ export function AppHeader() {
   if (pathname?.startsWith("/booking/success")) return null;
 
   const isHome = pathname === "/";
+  const isLandingPage =
+    pathname === "/" ||
+    pathname === "/experiences" ||
+    pathname === "/services" ||
+    pathname === "/become-host";
   const isLocationPage =
     pathname === "/" ||
     pathname === "/explore" ||
@@ -106,7 +111,7 @@ export function AppHeader() {
     pathname.startsWith("/category/");
 
   const pageMeta = !isLocationPage ? resolvePageMeta(pathname) : null;
-  const isTransparent = isHome && !isScrolled;
+  const isTransparent = isLandingPage && !isScrolled;
 
   return (
     <header
@@ -123,7 +128,7 @@ export function AppHeader() {
         <div className="flex items-center gap-2">
           <UserSidebar isTransparent={isTransparent} />
 
-          {isHome ? (
+          {isLandingPage ? (
             <div
               onClick={() => router.push("/")}
               className="flex items-center cursor-pointer transition-opacity"

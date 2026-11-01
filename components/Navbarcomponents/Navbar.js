@@ -255,8 +255,12 @@ export default function AirbnbNavbar() {
     pathname.startsWith("/category") ||
     pathname.startsWith("/products");
 
-  const isHome = pathname === "/";
-  const isTransparent = isHome && !isScrolled;
+  const isLandingPage =
+    pathname === "/" ||
+    pathname === "/experiences" ||
+    pathname === "/services" ||
+    pathname === "/become-host";
+  const isTransparent = isLandingPage && !isScrolled;
 
   const showExpandedSearch = !isTransparent && isSearchPage && (!isScrolled || isExpanded);
 
