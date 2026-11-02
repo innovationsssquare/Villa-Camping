@@ -285,6 +285,11 @@ export default function CampingDetailHeader() {
                       dispatch(updateGuestCount({ type, value }));
                     }}
                     onClose={() => setGuestPopoverOpen(false)}
+                    onSearch={() => {
+                      setGuestPopoverOpen(false);
+                      handleSearchClick();
+                    }}
+                    submitLabel="Apply & Search"
                     isMobile={false}
                   />
                 </PopoverContent>

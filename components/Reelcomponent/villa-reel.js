@@ -27,9 +27,32 @@ import { useAuthModal } from "@/context/AuthModalContext";
 import { getStoredUser } from "@/lib/auth";
 import { getCategoryRouteName, getCleanPropertyType } from "@/lib/categoryUtils";
 
-export default function VillaReel({ villas = [] }) {
+export default function VillaReel({ villas: rawVillas = [] }) {
   const router = useRouter();
   const dispatch = useDispatch();
+
+  // Redux Wishlist integration
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
+
+  // Airbnb & Booking.com style personalization: prioritize user's saved stays
+  const villas = useMemo(() => {
+    if (!rawVillas || !Array.isArray(rawVillas) || rawVillas.length === 0) return [];
+    if (!wishlistIds || wishlistIds.length === 0) return rawVillas;
+
+    const wishlistSet = new Set(
+      wishlistIds.map((item) => String(item?.propertyId || item).toLowerCase())
+    );
+
+    return [...rawVillas].sort((a, b) => {
+      const aId = String(a.id || a._id || "").toLowerCase();
+      const bId = String(b.id || b._id || "").toLowerCase();
+      const aWish = wishlistSet.has(aId);
+      const bWish = wishlistSet.has(bId);
+      if (aWish && !bWish) return -1;
+      if (!aWish && bWish) return 1;
+      return (b.effectiveScore || 0) - (a.effectiveScore || 0);
+    });
+  }, [rawVillas, wishlistIds]);
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -40,9 +63,6 @@ export default function VillaReel({ villas = [] }) {
   const [showHeartBurst, setShowHeartBurst] = useState(false);
   const [copiedToast, setCopiedToast] = useState(false);
   const { openAuthModal } = useAuthModal();
-
-  // Redux Wishlist integration
-  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
 
   const containerRef = useRef(null);
   const videoRefs = useRef([]);
@@ -614,8 +634,15 @@ export default function VillaReel({ villas = [] }) {
               className="absolute bottom-0 left-0 right-0 z-20 p-4 sm:p-5 flex flex-col gap-2 pointer-events-none"
               style={{ paddingBottom: "max(3rem, calc(env(safe-area-inset-bottom) + 2.5rem))" }}
             >
-              {/* Location Tag & Rating */}
+              {/* Location Tag, Rating & Yield Promotion Badge */}
               <div className="flex items-center gap-2 flex-wrap">
+                {(currentVilla.badge || currentVilla.reelBadge || currentVilla.customBadge) && (
+                  <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-gradient-to-r from-amber-500 to-[#ff6900] text-white text-xs font-black shadow-xs border border-white/20 uppercase tracking-wider">
+                    <Sparkles className="w-3 h-3 fill-white text-white" />
+                    <span>{currentVilla.badge || currentVilla.reelBadge || currentVilla.customBadge}</span>
+                  </span>
+                )}
+
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/10">
                   <MapPin className="w-3 h-3 text-[#ff6900]" />
                   <span>{currentVilla.location || "Maharashtra"}</span>

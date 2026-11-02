@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Minus, Plus } from "lucide-react";
+import { Minus, Plus, Search } from "lucide-react";
 
 export function GuestSelector({
   adults = 1,
@@ -10,8 +10,20 @@ export function GuestSelector({
   pets = 0,
   onGuestChange,
   onClose,
+  onSearch,
+  submitLabel,
   isMobile = false,
 }) {
+  const totalGuests = (adults || 1) + (childrenn || 0);
+
+  const handleAction = () => {
+    if (onSearch) {
+      onSearch({ adults, childrenn, infants, pets });
+    } else if (onClose) {
+      onClose();
+    }
+  };
+
   const GuestRow = ({ title, description, count, type, min = 0, max = 16 }) => (
     <div className="flex items-center justify-between py-4">
       <div className="flex-1 pr-4">
@@ -90,17 +102,25 @@ export function GuestSelector({
         />
       </div>
 
-      {onClose && (
-        <div className="pt-3 mt-2 border-t border-neutral-150 flex items-center justify-between">
-          <span className="text-[11px] text-neutral-400">Customized for your stay</span>
+      {(onClose || onSearch) && (
+        <div className="pt-3.5 mt-2 border-t border-neutral-150 flex items-center justify-between gap-3">
+          <div className="flex flex-col min-w-0">
+            <span className="text-xs font-bold text-neutral-800 truncate">
+              {totalGuests} {totalGuests === 1 ? "Guest" : "Guests"}
+              {pets > 0 ? `, ${pets} ${pets === 1 ? "Pet" : "Pets"}` : ""}
+            </span>
+            <span className="text-[11px] text-neutral-400 leading-tight">
+              Customized for your stay
+            </span>
+          </div>
+
           <button
             type="button"
-            onClick={() => {
-              if (onClose) onClose();
-            }}
-            className="bg-[#ff6900] hover:bg-[#e05d00] text-white text-xs font-semibold px-4 py-2 rounded-xl cursor-pointer transition-all shadow-xs"
+            onClick={handleAction}
+            className="bg-[#ff6900] hover:bg-[#e05d00] active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all shadow-md shadow-orange-500/20 shrink-0"
           >
-            Done
+            {onSearch && <Search className="w-3.5 h-3.5 stroke-[2.5]" />}
+            <span>{submitLabel || (onSearch ? "Apply & Search" : "Apply")}</span>
           </button>
         </div>
       )}

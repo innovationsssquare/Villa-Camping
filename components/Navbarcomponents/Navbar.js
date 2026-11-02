@@ -221,7 +221,7 @@ export default function AirbnbNavbar() {
     setActiveDropdown(activeDropdown === "guests" ? null : "guests");
   };
 
-  const handleSearch = async () => {
+  const handleSearch = async (guestsOverride) => {
     setIsSearching(true);
     setActiveDropdown(null);
     if (isScrolled) {
@@ -229,11 +229,12 @@ export default function AirbnbNavbar() {
     }
 
     try {
+      const guests = guestsOverride || selectedGuest;
       const params = new URLSearchParams();
       if (checkin) params.set("checkin", checkin);
       if (checkout) params.set("checkout", checkout);
-      if (selectedGuest?.adults) params.set("adults", selectedGuest.adults.toString());
-      if (selectedGuest?.childrenn) params.set("children", selectedGuest.childrenn.toString());
+      if (guests?.adults) params.set("adults", guests.adults.toString());
+      if (guests?.childrenn) params.set("children", guests.childrenn.toString());
       const queryStr = params.toString();
 
       const targetSlug =
@@ -769,6 +770,11 @@ export default function AirbnbNavbar() {
                             dispatch(setIsGuestSelected(true));
                             setActiveDropdown(null);
                           }}
+                          onSearch={(guests) => {
+                            dispatch(setIsGuestSelected(true));
+                            handleSearch(guests);
+                          }}
+                          submitLabel="Apply & Search"
                           isMobile={isMobile}
                         />
                       </div>

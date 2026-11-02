@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -48,15 +48,22 @@ function VideoCard({ video, onPlay }) {
       <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/90 pointer-events-none" />
 
       {/* Top Badges Row */}
-      <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10">
-        {/* Views Pill */}
-        <div className="bg-black/60 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/15 shadow-2xs">
-          <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#ff6900]" />
-          <span>{video.views || "1K Views"}</span>
-        </div>
+      <div className="absolute top-2 left-2 right-2 flex items-center justify-between z-10 gap-1">
+        {/* Dynamic Yield / Promotion Badge or Views Pill */}
+        {video.badge ? (
+          <div className="bg-gradient-to-r from-amber-500 to-[#ff6900] text-white text-[8px] sm:text-[9px] font-black px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/20 shadow-xs uppercase tracking-wider">
+            <Sparkles className="w-2.5 h-2.5 fill-white text-white" />
+            <span>{video.badge}</span>
+          </div>
+        ) : (
+          <div className="bg-black/60 backdrop-blur-md text-white text-[9px] sm:text-[10px] font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 border border-white/15 shadow-2xs">
+            <Eye className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#ff6900]" />
+            <span>{video.views || "1K Views"}</span>
+          </div>
+        )}
 
         {/* Property Type Badge */}
-        <span className="bg-[#ff6900] text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-2xs uppercase tracking-wider">
+        <span className="bg-[#ff6900] text-white text-[8px] sm:text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-2xs uppercase tracking-wider shrink-0">
           {propertyTypeLabel}
         </span>
       </div>
@@ -93,11 +100,30 @@ export default function TrendingVideos() {
   const { reelsvideo, reelloading, reelerror } = useSelector(
     (state) => state.properties
   );
+  const wishlistIds = useSelector((state) => state.wishlist?.ids || []);
 
   const [api, setApi] = useState();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [activeVideo, setActiveVideo] = useState(null);
+
+  // Airbnb & Booking.com style personalization: gently prioritize user's saved wishlist stays
+  const personalizedReels = useMemo(() => {
+    if (!reelsvideo || !Array.isArray(reelsvideo)) return [];
+    if (!wishlistIds || wishlistIds.length === 0) return reelsvideo;
+
+    const wishlistSet = new Set(
+      wishlistIds.map((item) => String(item?.propertyId || item).toLowerCase())
+    );
+
+    return [...reelsvideo].sort((a, b) => {
+      const aWish = wishlistSet.has(String(a.id || a._id).toLowerCase());
+      const bWish = wishlistSet.has(String(b.id || b._id).toLowerCase());
+      if (aWish && !bWish) return -1;
+      if (!aWish && bWish) return 1;
+      return (b.effectiveScore || 0) - (a.effectiveScore || 0);
+    });
+  }, [reelsvideo, wishlistIds]);
 
   useEffect(() => {
     dispatch(fetchTrendingReels());
@@ -119,7 +145,7 @@ export default function TrendingVideos() {
       api.off("select", updateSnapshot);
       api.off("reInit", updateSnapshot);
     };
-  }, [api, reelsvideo]);
+  }, [api, personalizedReels]);
 
   const handleDotClick = (index) => {
     api?.scrollTo(index);
@@ -196,7 +222,7 @@ export default function TrendingVideos() {
         )}
 
         {/* Trending Videos Carousel */}
-        {!reelloading && reelsvideo && reelsvideo.length > 0 && (
+        {!reelloading && personalizedReels && personalizedReels.length > 0 && (
           <div className="relative py-2">
             <Carousel
               setApi={(api) => setApi(api)}
@@ -207,7 +233,7 @@ export default function TrendingVideos() {
               className="w-full"
             >
               <CarouselContent className="-ml-2.5 sm:-ml-3.5">
-                {reelsvideo.map((video) => (
+                {personalizedReels.map((video) => (
                   <CarouselItem
                     key={video.id || video._id || video.videoUrl}
                     className="pl-2.5 sm:pl-3.5 basis-[42%] sm:basis-[28%] md:basis-[22%] lg:basis-[18%] xl:basis-[15.5%]"
