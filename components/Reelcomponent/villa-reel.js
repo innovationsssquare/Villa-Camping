@@ -17,7 +17,6 @@ import {
   Star,
   Users,
   Sparkles,
-  ExternalLink,
   Check,
   Compass,
   Flame,
@@ -666,7 +665,7 @@ export default function VillaReel({ villas: rawVillas = [] }) {
                 </p>
               </div>
 
-              {/* Price & Primary Book Button */}
+              {/* Price */}
               <div className="flex items-center justify-between gap-3 pt-1 pointer-events-auto">
                 <div className="flex flex-col">
                   <span className="text-xs text-white/70 font-medium">Starts from</span>
@@ -677,15 +676,6 @@ export default function VillaReel({ villas: rawVillas = [] }) {
                     <span className="text-xs text-white/80 font-normal">/ night</span>
                   </div>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={navigateToProperty}
-                  className="px-5 py-3 rounded-2xl bg-gradient-to-r from-[#ff6900] to-[#e05d00] hover:from-[#e05d00] hover:to-[#c84d00] text-white font-extrabold text-xs sm:text-sm shadow-lg hover:shadow-orange-500/25 transition-all active:scale-95 cursor-pointer flex items-center gap-1.5 shrink-0"
-                >
-                  <span>View Stay</span>
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </button>
               </div>
             </div>
           )}

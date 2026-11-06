@@ -157,7 +157,7 @@ function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
   };
 
   return (
-    <div className="flex items-center justify-between gap-1.5 sm:gap-2.5 py-1">
+    <div className="flex items-center justify-center sm:justify-between gap-2 sm:gap-2.5 py-1 w-full mx-auto">
       {Array.from({ length: 6 }).map((_, i) => (
         <input
           key={i}
@@ -173,7 +173,7 @@ function OtpInputGroup({ value = "", onChange, onComplete, disabled = false }) {
           onPaste={handlePaste}
           onFocus={(e) => e.target.select()}
           disabled={disabled}
-          className="w-10 sm:w-12 h-11 sm:h-12 text-center text-base sm:text-[17px] font-medium text-neutral-700 bg-white border border-neutral-300 hover:border-neutral-400 focus:border-neutral-700 focus:ring-2 focus:ring-neutral-200/60 rounded-xl outline-none transition-all shadow-2xs disabled:bg-neutral-100 disabled:text-neutral-400"
+          className="w-11 sm:w-12 h-12 text-center text-base sm:text-[17px] font-medium text-neutral-700 bg-white border border-neutral-300 hover:border-neutral-400 focus:border-neutral-700 focus:ring-2 focus:ring-neutral-200/60 rounded-xl outline-none transition-all shadow-2xs disabled:bg-neutral-100 disabled:text-neutral-400"
           autoFocus={i === 0}
         />
       ))}
