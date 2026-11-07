@@ -368,7 +368,7 @@ export default function BookingPreviewScreen() {
       customerDetails?.firstName?.trim() &&
       customerDetails?.lastName?.trim() &&
       customerDetails?.mobile?.trim() &&
-      customerDetails?.email?.trim()
+      customerDetails?.mobile?.length >= 10
     );
   };
 
@@ -1261,10 +1261,12 @@ export default function BookingPreviewScreen() {
               <p className="text-sm font-bold text-gray-900">
                 {customerDetails?.firstName} {customerDetails?.lastName}
               </p>
-              <div className="flex items-center gap-2 text-xs text-gray-600">
-                <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
-                <span className="truncate">{customerDetails?.email}</span>
-              </div>
+              {customerDetails?.email ? (
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Mail className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+                  <span className="truncate">{customerDetails?.email}</span>
+                </div>
+              ) : null}
               <div className="flex items-center gap-2 text-xs text-gray-600">
                 <Phone className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
                 <span>+91 {customerDetails?.mobile}</span>

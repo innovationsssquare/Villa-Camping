@@ -61,9 +61,10 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
       case "mobile":
         return Boolean(value && /^\d{10}$/.test(String(value).replace(/\D/g, "")));
       case "email":
-        return Boolean(value && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value));
+        if (!value || !value.trim()) return true;
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
       case "city":
-        return Boolean(value && value.trim().length >= 2);
+        return true;
       default:
         return true;
     }
@@ -78,8 +79,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
       validateField("firstName", customerDetails?.firstName) &&
       validateField("lastName", customerDetails?.lastName) &&
       validateField("mobile", customerDetails?.mobile) &&
-      validateField("email", customerDetails?.email) &&
-      validateField("city", customerDetails?.city)
+      validateField("email", customerDetails?.email)
     );
   };
 
@@ -232,7 +232,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
           {/* Email */}
           <div>
             <Label className="text-xs font-semibold text-neutral-700 block mb-1">
-              Email ID <span className="text-red-500">*</span>
+              Email ID <span className="text-neutral-400 font-normal">(Optional)</span>
             </Label>
             <div className="relative">
               <Input
@@ -242,7 +242,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 placeholder="e.g. name@example.com"
                 type="email"
               />
-              {validateField("email", customerDetails?.email) && (
+              {Boolean(customerDetails?.email?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerDetails.email.trim())) && (
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
                   <Check className="w-2.5 h-2.5 text-white" />
                 </div>
@@ -253,7 +253,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
           {/* City */}
           <div>
             <Label className="text-xs font-semibold text-neutral-700 block mb-1">
-              Residential City <span className="text-red-500">*</span>
+              Residential City <span className="text-neutral-400 font-normal">(Optional)</span>
             </Label>
             <div className="relative">
               <Input
@@ -262,7 +262,7 @@ export default function BookingDetailsDrawer({ isOpen, onClose, onPayNow }) {
                 className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200/90 rounded-xl text-neutral-900 text-sm focus:bg-white focus:ring-2 focus:ring-[#ff6900]/20 focus:border-[#ff6900] pr-8"
                 placeholder="e.g. Mumbai, Pune, Delhi"
               />
-              {validateField("city", customerDetails?.city) && (
+              {Boolean(customerDetails?.city?.trim() && customerDetails.city.trim().length >= 2) && (
                 <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
                   <Check className="w-2.5 h-2.5 text-white" />
                 </div>

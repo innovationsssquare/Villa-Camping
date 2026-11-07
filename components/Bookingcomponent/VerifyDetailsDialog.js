@@ -58,9 +58,9 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
   };
 
   const validateEmail = (email) => {
-    if (!email) return false;
+    if (!email || !email.trim()) return true;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
+    return emailRegex.test(email.trim());
   };
 
   const validateMobile = (mobile) => {
@@ -86,9 +86,9 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
       case "lastName":
         return validateName(value);
       case "city":
-        return value.trim().length >= 2;
+        return true;
       default:
-        return value.length > 0;
+        return true;
     }
   };
 
@@ -97,8 +97,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
       isFieldValid("firstName") &&
       isFieldValid("lastName") &&
       isFieldValid("mobile") &&
-      isFieldValid("email") &&
-      isFieldValid("city")
+      isFieldValid("email")
     );
   };
 
@@ -268,7 +267,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
                   htmlFor="email"
                   className="text-xs font-semibold text-neutral-700 block mb-1"
                 >
-                  Email ID <span className="text-red-500">*</span>
+                  Email ID <span className="text-neutral-400 font-normal">(Optional)</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -279,7 +278,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     className="w-full px-3.5 py-2 bg-neutral-50 border border-neutral-200/80 rounded-xl text-neutral-900 font-medium focus:bg-white focus:ring-2 focus:ring-[#ff6900]/20 focus:border-[#ff6900] text-sm pr-9 transition-all"
                   />
-                  {isFieldValid("email") && (
+                  {Boolean(customerDetails?.email?.trim() && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerDetails.email.trim())) && (
                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>
@@ -295,7 +294,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
                   htmlFor="city"
                   className="text-xs font-semibold text-neutral-700 block mb-1"
                 >
-                  Residential City <span className="text-red-500">*</span>
+                  Residential City <span className="text-neutral-400 font-normal">(Optional)</span>
                 </Label>
                 <div className="relative">
                   <Input
@@ -305,7 +304,7 @@ const VerifyDetailsDialog = ({ open, onOpenChange, onPayNow }) => {
                     onChange={(e) => handleInputChange("city", e.target.value)}
                     className="w-full px-3.5 py-2 bg-neutral-50 border border-neutral-200/80 rounded-xl text-neutral-900 font-medium focus:bg-white focus:ring-2 focus:ring-[#ff6900]/20 focus:border-[#ff6900] text-sm pr-9 transition-all"
                   />
-                  {isFieldValid("city") && (
+                  {Boolean(customerDetails?.city?.trim() && customerDetails.city.trim().length >= 2) && (
                     <div className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 bg-emerald-500 rounded-full flex items-center justify-center">
                       <Check className="w-2.5 h-2.5 text-white" />
                     </div>

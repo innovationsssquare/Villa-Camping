@@ -351,8 +351,7 @@ const PropertyBooking = () => {
       customerDetails?.firstName?.trim() &&
       customerDetails?.lastName?.trim() &&
       customerDetails?.mobile?.trim() &&
-      customerDetails?.email?.trim() &&
-      customerDetails?.city?.trim()
+      customerDetails?.mobile?.length >= 10
     );
   };
 
@@ -1116,18 +1115,22 @@ const PropertyBooking = () => {
                       +91 {customerDetails.mobile}
                     </span>
                   </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">Email</span>
-                    <span className="font-bold text-neutral-900 mt-0.5 block truncate">
-                      {customerDetails.email}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">City</span>
-                    <span className="font-bold text-neutral-900 mt-0.5 block truncate">
-                      {customerDetails.city}
-                    </span>
-                  </div>
+                  {customerDetails.email ? (
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">Email</span>
+                      <span className="font-bold text-neutral-900 mt-0.5 block truncate">
+                        {customerDetails.email}
+                      </span>
+                    </div>
+                  ) : null}
+                  {customerDetails.city ? (
+                    <div>
+                      <span className="text-[10px] uppercase font-bold text-neutral-400 block tracking-wider">City</span>
+                      <span className="font-bold text-neutral-900 mt-0.5 block truncate">
+                        {customerDetails.city}
+                      </span>
+                    </div>
+                  ) : null}
                 </div>
               ) : (
                 <div
