@@ -1,7 +1,7 @@
 import { BaseUrl } from "@/lib/API/Baseurl";
 
 export default async function sitemap() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
 
   // Static core routes
   const staticRoutes = [
@@ -91,6 +91,12 @@ export default async function sitemap() {
     },
     {
       url: `${siteUrl}/terms-of-service`,
+      lastModified: new Date(),
+      changeFrequency: "monthly",
+      priority: 0.5,
+    },
+    {
+      url: `${siteUrl}/delete-account`,
       lastModified: new Date(),
       changeFrequency: "monthly",
       priority: 0.5,

@@ -15,38 +15,66 @@ const geist = Inter({
 });
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
+
 export const metadata = {
-  metadataBase: new URL("https://thevillacamp.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: "Thevillacamp - your one-stop destination for booking the best villas in lonavala!",
+    default: "ThevillaCamp | Luxury Pool Villas, Pawna Lake Camping & Cottages in Lonavala",
     template: "%s | ThevillaCamp",
   },
   description:
-    "Discover the perfect escape with ThevillaCamp, your one-stop destination for booking the best villas, campsites, cottages, and hotels across Lonavala, Malavli, Kamshet, and Pawna Lake.",
+    "Book handpicked luxury private pool villas, waterfront Pawna Lake camping, and serene mountain cottages in Lonavala, Malavli, and Karjat. 100% verified stays, private pools, 24/7 concierge, and guaranteed direct host rates.",
+  keywords: [
+    "luxury villas in lonavala",
+    "private pool villas lonavala",
+    "pawna lake camping",
+    "lakeside camping pawna",
+    "villas in malavli",
+    "cottages in lonavala",
+    "glamping pawna lake",
+    "weekend getaways from mumbai",
+    "weekend getaways from pune",
+    "family villas lonavala",
+    "pet friendly villas lonavala",
+    "kamshet stays",
+    "karjat pool villas",
+    "thevillacamp",
+    "lonavala staycation",
+  ],
+  authors: [{ name: "ThevillaCamp", url: SITE_URL }],
+  creator: "ThevillaCamp",
+  publisher: "ThevillaCamp",
+  category: "travel",
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
   openGraph: {
-    title: "ThevillaCamp — Book cottages, hotels & villas",
+    title: "ThevillaCamp | Handpicked Luxury Villas & Lakeside Camping in Lonavala",
     description:
-      "Find and book curated stays — cottages, villas, hotels and camping experiences near Lonavala and Pawna.",
-    url: "https://thevillacamp.com",
+      "Find and book 150+ verified private pool villas, Pawna Lake camping tents, and mountain chalets across Maharashtra. Direct booking with 24/7 concierge support.",
+    url: SITE_URL,
     siteName: "ThevillaCamp",
     images: [
       {
         url: "/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "ThevillaCamp",
+        alt: "ThevillaCamp Luxury Stays and Camping",
       },
     ],
     type: "website",
-    locale: "en_US",
+    locale: "en_IN",
   },
   twitter: {
     card: "summary_large_image",
     site: "@Thevillacamp",
     creator: "@Thevillacamp",
-    title: "ThevillaCamp — stays",
+    title: "ThevillaCamp | Luxury Pool Villas & Lakeside Camping",
     description:
-      "Find and book curated stays — cottages, villas, hotels and camping experiences near Lonavala and Pawna.",
+      "Find and book verified private pool villas, Pawna Lake camping tents, and mountain chalets across Maharashtra.",
     images: ["/og-default.jpg"],
   },
   icons: {
@@ -55,12 +83,22 @@ export const metadata = {
     apple: "/apple-touch-icon.png",
   },
   alternates: {
-    canonical: "https://thevillacamp.com",
+    canonical: "./",
+    languages: {
+      "en-IN": "/",
+      "en-US": "/",
+    },
   },
   robots: {
     index: true,
     follow: true,
-    nocache: false,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
   },
 };
 
@@ -125,10 +163,10 @@ export default function RootLayout({ children }) {
               "@graph": [
                 {
                   "@type": "Organization",
-                  "@id": "https://thevillacamp.com/#organization",
+                  "@id": `${SITE_URL}/#organization`,
                   "name": "ThevillaCamp",
-                  "url": "https://thevillacamp.com",
-                  "logo": "https://thevillacamp.com/og-default.jpg",
+                  "url": SITE_URL,
+                  "logo": `${SITE_URL}/og-default.jpg`,
                   "sameAs": [
                     "https://www.instagram.com/thevillacamp/",
                     "https://www.youtube.com/@Thevillacamp",
@@ -153,18 +191,18 @@ export default function RootLayout({ children }) {
                 },
                 {
                   "@type": "WebSite",
-                  "@id": "https://thevillacamp.com/#website",
-                  "url": "https://thevillacamp.com",
+                  "@id": `${SITE_URL}/#website`,
+                  "url": SITE_URL,
                   "name": "ThevillaCamp",
                   "description":
                     "Maharashtra's premier luxury villa and campsite booking platform",
                   "publisher": {
-                    "@id": "https://thevillacamp.com/#organization",
+                    "@id": `${SITE_URL}/#organization`,
                   },
                   "potentialAction": {
                     "@type": "SearchAction",
                     "target":
-                      "https://thevillacamp.com/category/all?search={search_term_string}",
+                      `${SITE_URL}/category/all?search={search_term_string}`,
                     "query-input": "required name=search_term_string",
                   },
                 },

@@ -340,7 +340,7 @@ export default function PrivacyPolicyPage() {
                 If you have any questions, concerns, or requests regarding this Privacy Policy or your personal records, please reach out directly:
               </p>
               <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-1 text-xs text-neutral-200">
-                <p><strong>Entity:</strong> ThevillaCamp Hospitality Pvt. Ltd.</p>
+                <p><strong>Entity:</strong> Thevillacamp (Govt. of India MSME Registered Enterprise)</p>
                 <p><strong>Email:</strong> privacy@thevillacamp.com / support@thevillacamp.com</p>
                 <p><strong>Address:</strong> Lonavala & Mumbai Operations Office, Maharashtra, India</p>
               </div>

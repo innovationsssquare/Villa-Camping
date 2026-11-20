@@ -209,6 +209,13 @@ export default function Footer() {
             >
               Cancellations
             </Link>
+            <span className="text-neutral-300">•</span>
+            <Link
+              href="/delete-account"
+              className="hover:text-neutral-900 transition-colors"
+            >
+              Delete Account
+            </Link>
           </div>
 
           {/* Domain Button & Copyright */}
@@ -628,6 +635,14 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link
+                  href="/delete-account"
+                  className="text-neutral-400 hover:text-white hover:translate-x-1 transition-all inline-block"
+                >
+                  Delete Account
+                </Link>
+              </li>
+              <li>
                 <span className="inline-flex items-center gap-1 text-emerald-400 text-[10px] font-semibold pt-1">
                   <CheckCircle2 className="w-3 h-3" />
                   <span>100% Verified Inspection</span>
@@ -690,6 +705,13 @@ export default function Footer() {
               className="text-neutral-400 hover:text-white transition-colors"
             >
               Cancellations
+            </Link>
+            <span className="text-neutral-700">•</span>
+            <Link
+              href="/delete-account"
+              className="text-neutral-400 hover:text-white transition-colors"
+            >
+              Delete Account
             </Link>
           </div>
         </div>

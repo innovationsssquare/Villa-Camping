@@ -60,7 +60,7 @@ export default function TermsOfServicePage() {
             <span>•</span>
             <span>Applicable to all Reservations</span>
             <span>•</span>
-            <span>ThevillaCamp Hospitality Pvt. Ltd.</span>
+            <span>Thevillacamp (Govt. of India MSME Registered)</span>
           </div>
         </div>
       </section>

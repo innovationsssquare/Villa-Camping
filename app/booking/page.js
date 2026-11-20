@@ -189,6 +189,22 @@ export default function BookingScreen() {
     return "Checked In";
   };
 
+  // Helper to determine if a reservation hold has expired (20 min window or check-in passed)
+  const isReservationHoldExpired = (booking) => {
+    if (!booking) return false;
+    const now = Date.now();
+    if (booking.holdExpiresAt && new Date(booking.holdExpiresAt).getTime() < now) {
+      return true;
+    }
+    if (booking.createdAt && now - new Date(booking.createdAt).getTime() > 20 * 60 * 1000) {
+      return true;
+    }
+    if (booking.checkIn && new Date(booking.checkIn).getTime() < now) {
+      return true;
+    }
+    return false;
+  };
+
   // Categorize Real Bookings (Matching Thevillacamp App)
   const allList = useMemo(() => bookings || [], [bookings]);
 
@@ -196,7 +212,9 @@ export default function BookingScreen() {
     return allList.filter((b) => {
       const s = (b.status || b.bookingStatus || "").toLowerCase();
       const p = (b.paymentStatus || "").toLowerCase();
-      return (s === "pending" || p === "unpaid") && s !== "cancelled";
+      const isCancelled = s === "cancelled" || Boolean(b?.cancellation?.cancelled) || p === "failed";
+      const isExpired = isReservationHoldExpired(b);
+      return !isCancelled && !isExpired && (s === "pending" || p === "unpaid");
     });
   }, [allList]);
 
@@ -204,8 +222,8 @@ export default function BookingScreen() {
     return allList.filter((b) => {
       const s = (b.status || b.bookingStatus || "").toLowerCase();
       const p = (b.paymentStatus || "").toLowerCase();
-      const isPending = s === "pending" || p === "unpaid";
-      const isCancelled = s === "cancelled";
+      const isCancelled = s === "cancelled" || Boolean(b?.cancellation?.cancelled) || p === "failed";
+      const isPending = !isCancelled && !isReservationHoldExpired(b) && (s === "pending" || p === "unpaid");
       return !isCancelled && !isPending && !isCheckoutInPast(b.checkOut);
     });
   }, [allList]);
@@ -213,7 +231,7 @@ export default function BookingScreen() {
   const completedBookings = useMemo(() => {
     return allList.filter((b) => {
       const s = (b.status || b.bookingStatus || "").toLowerCase();
-      const isCancelled = s === "cancelled";
+      const isCancelled = s === "cancelled" || Boolean(b?.cancellation?.cancelled);
       return !isCancelled && (s === "completed" || isCheckoutInPast(b.checkOut));
     });
   }, [allList]);
@@ -222,11 +240,16 @@ export default function BookingScreen() {
     return allList.filter((b) => {
       const s = (b.status || "").toLowerCase();
       const bs = (b.bookingStatus || "").toLowerCase();
+      const p = (b.paymentStatus || "").toLowerCase();
+      const isHoldExpired = isReservationHoldExpired(b) && (s === "pending" || p === "unpaid");
       return (
         s === "cancelled" ||
         bs === "cancelled" ||
+        p === "failed" ||
+        isHoldExpired ||
         s === "cancellation_requested" ||
-        Boolean(b?.cancellation?.requested)
+        Boolean(b?.cancellation?.requested) ||
+        Boolean(b?.cancellation?.cancelled)
       );
     });
   }, [allList]);
@@ -540,11 +563,25 @@ export default function BookingScreen() {
       "Verified Destination";
 
     const statusStr = (booking.status || booking.bookingStatus || "confirmed").toLowerCase();
-    const isPending =
-      statusStr === "pending" || (booking.paymentStatus || "").toLowerCase() === "unpaid";
-    const isCancelled = statusStr === "cancelled" || Boolean(booking?.cancellation?.cancelled);
+    const isExplicitlyCancelled =
+      statusStr === "cancelled" ||
+      Boolean(booking?.cancellation?.cancelled) ||
+      (booking.paymentStatus || "").toLowerCase() === "failed";
+
+    const isHoldExpired =
+      (statusStr === "pending" || (booking.paymentStatus || "").toLowerCase() === "unpaid") &&
+      isReservationHoldExpired(booking);
+
+    const isCancelled = isExplicitlyCancelled || isHoldExpired;
+
     const isCancellationRequested =
       statusStr === "cancellation_requested" || Boolean(booking?.cancellation?.requested);
+
+    const isPending =
+      !isCancelled &&
+      !isCancellationRequested &&
+      (statusStr === "pending" || (booking.paymentStatus || "").toLowerCase() === "unpaid");
+
     const isCompleted =
       activeTab === "completed" ||
       statusStr === "completed" ||
@@ -895,7 +932,10 @@ export default function BookingScreen() {
       let refundStatusLabel = "Refund Under Review";
       let refundColorClass = "text-amber-600";
 
-      if (refundStatus === "processed") {
+      if (isHoldExpired) {
+        refundStatusLabel = "Hold Expired • Dates Released";
+        refundColorClass = "text-neutral-500";
+      } else if (refundStatus === "processed") {
         refundStatusLabel = refundAmount > 0
           ? `Refund Processed (₹${Number(refundAmount).toLocaleString("en-IN")})`
           : "Refund Processed";
