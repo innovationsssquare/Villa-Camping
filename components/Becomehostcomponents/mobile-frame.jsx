@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Home, Plus, User, Settings } from 'lucide-react';
-import logo from "../../public/Productasset/Logoicon.png";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 
 export function MobileFrame() {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -31,20 +31,14 @@ export function MobileFrame() {
           <div className="h-[calc(100%-32px)] flex flex-col items-center justify-center px-6 py-8">
             {/* Animated Logo */}
             <div
-              className="mb-8"
+              className="mb-8 flex items-center justify-center"
               style={{
                 opacity: isLoaded ? 1 : 0,
                 transform: isLoaded ? 'scale(1)' : 'scale(0.5)',
                 transition: 'all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)',
               }}
             >
-              <Image
-                src={logo}
-                alt="Thevillacamp"
-                width={80}
-                height={80}
-                className="rounded-2xl"
-              />
+              <VillaCampLoader size={76} />
             </div>
 
             {/* Animated Text */}

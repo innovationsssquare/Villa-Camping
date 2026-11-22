@@ -32,7 +32,7 @@ import { useParams, useRouter } from "next/navigation";
 import { fetchVillaById } from "@/Redux/Slices/villaSlice";
 import { useDispatch, useSelector } from "react-redux";
 import VillaScreenSkeleton from "./villa-screen-skeleton";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 import VillaDetailHeader from "./villa-detail-header";
 import { VillaProvider } from "@/lib/context/VillaContext";
 
@@ -63,10 +63,8 @@ export default function PropertyDetails() {
 
   if (!villa) {
     return (
-      <div className="flex justify-center items-center h-screen bg-black/10">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
+      <div className="flex justify-center items-center h-screen bg-white">
+        <VillaCampLoader size={96} />
       </div>
     );
   }

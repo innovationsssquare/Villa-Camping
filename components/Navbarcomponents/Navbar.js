@@ -302,7 +302,7 @@ export default function AirbnbNavbar() {
                 height={6}
                 priority
                 className={cn(
-                  "h-8 sm:h-10 md:h-8 object-cover w-auto transition-all duration-300",
+                  "h-8 sm:h-9 md:h-8 object-contain w-auto transition-all duration-300",
                   isTransparent ? "brightness-0 invert" : ""
                 )}
               />

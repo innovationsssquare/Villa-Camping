@@ -1,11 +1,9 @@
-import ButtonLoader from "@/components/Loadercomponents/button-loader";
+import VillaCampLoader from "@/components/Loadercomponents/VillaCampLoader";
 
 export default function Loading() {
   return (
-    <div className="h-screen w-full flex justify-center items-center bg-white">
-      <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
-        <ButtonLoader />
-      </div>
+    <div className="fixed inset-0 min-h-screen w-full flex items-center justify-center bg-white z-50">
+      <VillaCampLoader size={120} logoColor="#111827" accentColor="#ff6900" />
     </div>
   );
 }

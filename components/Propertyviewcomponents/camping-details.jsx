@@ -10,7 +10,7 @@ import StickyBookingWidget from "./sticky-booking-widget";
 import { useParams, useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import VillaScreenSkeleton from "./villa-screen-skeleton";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 import { fetchCampingById } from "@/Redux/Slices/campingSlice";
 import { CampingProvider } from "@/lib/context/CampingContext";
 import { VillaProvider } from "@/lib/context/VillaContext";
@@ -44,10 +44,8 @@ export default function CampingDetails() {
 
   if (!camping) {
     return (
-      <div className="flex justify-center items-center h-screen bg-black/10">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
+      <div className="flex justify-center items-center h-screen bg-white">
+        <VillaCampLoader size={96} />
       </div>
     );
   }

@@ -44,7 +44,7 @@ import { Createbooking, Verifybooking } from "@/lib/API/Booking/Booking";
 import { Getcampingavability } from "@/lib/API/category/Camping/Camping";
 import { useToast } from "@/components/ui/toast-provider";
 import Successmodal from "./Successmodal";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 import Overlay from "./Overlay";
 import {
   Modal,
@@ -538,9 +538,7 @@ export default function CampingBookingPreviewScreen({ isOpen, onClose }) {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen bg-white">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
+        <VillaCampLoader size={96} />
       </div>
     );
   }

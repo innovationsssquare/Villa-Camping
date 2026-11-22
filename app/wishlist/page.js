@@ -20,7 +20,7 @@ import { fetchmyWishlists } from "@/Redux/Slices/wishlistSlice";
 import { PropertyCard } from "@/components/Availableweekend/Weekendcard";
 import { UserSidebar } from "@/components/Navbarcomponents/Sidebar";
 import { NotificationSheet } from "@/components/Navbarcomponents/Notificationsheet";
-import ButtonLoader from "@/components/Loadercomponents/button-loader";
+import VillaCampLoader from "@/components/Loadercomponents/VillaCampLoader";
 import { Button } from "@/components/ui/button";
 import { addToast } from "@heroui/react";
 import { useAuthModal } from "@/context/AuthModalContext";
@@ -231,9 +231,8 @@ export default function WishlistPage() {
             </div>
           </div>
         ) : wishloading ? (
-          <div className="flex flex-col items-center justify-center min-h-[45vh] space-y-3">
-            <ButtonLoader />
-            <p className="text-xs text-neutral-400 font-medium">Fetching your saved luxury stays...</p>
+          <div className="flex items-center justify-center min-h-[45vh]">
+            <VillaCampLoader size={72} />
           </div>
         ) : filteredItems.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3.5 md:gap-4">

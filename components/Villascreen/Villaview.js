@@ -8,7 +8,7 @@ import StickyTabs from "./StickyTabs";
 import AllTabsContent from "./AllTabsContent";
 import FixedBookingBar from "./FixedBookingBar";
 import { VillaProvider } from "@/lib/context/VillaContext";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
 import { XCircle } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -143,10 +143,8 @@ const Villaview = () => {
 
   if (!villa) {
     return (
-      <div className="flex justify-center items-center h-screen bg-black/10">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
+      <div className="flex justify-center items-center h-screen bg-white">
+        <VillaCampLoader size={96} />
       </div>
     );
   }

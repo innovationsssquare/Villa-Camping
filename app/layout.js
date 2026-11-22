@@ -5,7 +5,7 @@ import Script from "next/script";
 import ConsentGTM from "@/components/Seo/ConsentGTM";
 import { ToastProvider } from "@/components/ui/toast-provider";
 import { Suspense } from "react";
-import ButtonLoader from "@/components/Loadercomponents/button-loader";
+import VillaCampLoader from "@/components/Loadercomponents/VillaCampLoader";
 import WebPermissionsPrompt from "@/components/Permissions/web-permissions-prompt";
 import { Inter } from "next/font/google";
 
@@ -119,10 +119,8 @@ export default function RootLayout({ children }) {
       />
       <Suspense
         fallback={
-          <div className="h-screen bg-white w-full flex justify-center items-center">
-            <div className="bg-black h-14 w-14 rounded-full flex justify-center items-center">
-              <ButtonLoader />
-            </div>
+          <div className="min-h-screen bg-white w-full flex items-center justify-center">
+            <VillaCampLoader size={120} logoColor="#111827" accentColor="#ff6900" />
           </div>
         }
       >

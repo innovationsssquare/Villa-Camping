@@ -1,19 +1,18 @@
 "use client";
 import React from "react";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 
-const Overlay = ({ isLoading }) => {
+const Overlay = ({ isLoading, message = "Please wait, do not close this window..." }) => {
   if (!isLoading) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/70 bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-5 rounded-lg shadow-lg flex flex-col items-center">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
-        <p className="mt-4 text-xs font-semibold text-gray-700">
-          Please wait Do not close this Window ....
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+      <div className="bg-white px-8 py-7 rounded-2xl shadow-2xl flex flex-col items-center border border-gray-100 max-w-sm w-full text-center">
+        <VillaCampLoader size={88} />
+        <p className="mt-4 text-sm font-semibold text-gray-800">
+          {message}
         </p>
+        <p className="mt-1 text-xs text-gray-400">Processing your request securely</p>
       </div>
     </div>
   );

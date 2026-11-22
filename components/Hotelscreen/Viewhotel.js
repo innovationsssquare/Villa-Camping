@@ -12,7 +12,7 @@ import { useParams, useRouter } from "next/navigation";
 import { fetchHotelById } from "@/Redux/Slices/hotelSlice";
 import VillaScreenSkeleton from "../Propertyviewcomponents/villa-screen-skeleton";
 import { XCircle } from "lucide-react";
-import ButtonLoader from "../Loadercomponents/button-loader";
+import VillaCampLoader from "../Loadercomponents/VillaCampLoader";
 import { BaseUrl } from "@/lib/API/Baseurl";
 
 const tabs = [
@@ -150,10 +150,8 @@ const Viewhotel = () => {
 
   if (!hotel) {
     return (
-      <div className="flex justify-center items-center h-screen bg-black/10">
-        <div className="bg-black rounded-full flex justify-center items-center">
-          <ButtonLoader />
-        </div>
+      <div className="flex justify-center items-center h-screen bg-white">
+        <VillaCampLoader size={96} />
       </div>
     );
   }
