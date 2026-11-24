@@ -5,10 +5,10 @@ import VillaCampLoader from "@/components/Loadercomponents/VillaCampLoader";
 
 const SplashScreen = ({ onComplete }) => {
   useEffect(() => {
-    // Complete splash screen after animation cycle
+    // Complete splash screen after animation cycle (loop is 3.024s)
     const completeTimer = setTimeout(() => {
       onComplete?.();
-    }, 2800);
+    }, 3100);
 
     return () => {
       clearTimeout(completeTimer);
@@ -20,12 +20,7 @@ const SplashScreen = ({ onComplete }) => {
       className="fixed inset-0 z-[9999] flex items-center justify-center bg-white select-none cursor-pointer"
       onClick={() => onComplete?.()}
     >
-      <VillaCampLoader
-        size={140}
-        logoColor="#111827"
-        accentColor="#ff6900"
-        skeletonColor="#E5E7EB"
-      />
+      <VillaCampLoader size={150} />
     </div>
   );
 };
