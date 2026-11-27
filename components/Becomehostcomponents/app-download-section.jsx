@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Download, Apple } from 'lucide-react';
+import { HOST_APP_PLAY_STORE_URL } from '@/lib/socialLinks';
 
 export function AppDownloadSection() {
   return (
@@ -64,15 +65,19 @@ export function AppDownloadSection() {
                     Download for iOS
                   </Button>
                 </Link>
-                <Link href="/onboarding">
+                <a
+                  href={HOST_APP_PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button 
                     size="lg"
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 h-12 font-semibold w-full sm:w-auto"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-full px-8 h-12 font-semibold w-full sm:w-auto cursor-pointer"
                   >
                     <Download className="w-5 h-5 mr-2" />
                     Download for Android
                   </Button>
-                </Link>
+                </a>
               </div>
             </div>
           </div>

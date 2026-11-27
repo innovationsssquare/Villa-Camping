@@ -2,6 +2,7 @@ import { MobileFrame } from './mobile-frame';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { HOST_APP_PLAY_STORE_URL } from '@/lib/socialLinks';
 
 export function AvailableNowSection() {
   return (
@@ -66,15 +67,19 @@ export function AvailableNowSection() {
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/onboarding">
+              <a
+                href={HOST_APP_PLAY_STORE_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <Button 
                   size="lg" 
-                  className="bg-black hover:bg-black/90 text-primary-foreground rounded-full font-semibold group w-full sm:w-auto"
+                  className="bg-black hover:bg-black/90 text-primary-foreground rounded-full font-semibold group w-full sm:w-auto cursor-pointer"
                 >
                   Download for Android
                   <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
-              </Link>
+              </a>
             </div>
           </div>
 

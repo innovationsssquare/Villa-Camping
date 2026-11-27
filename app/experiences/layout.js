@@ -1,17 +1,24 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
+import { getSiteUrl } from "@/lib/lonavalaSeo";
+
+const SITE_URL = getSiteUrl();
 
 export const metadata = {
-  title: "Curated Experiences in Lonavala & Pawna Lake | Trekking, Kayaking & Sightseeing",
+  title: "Things to Do in Lonavala & Pawna Lake | Trekking, Kayaking & Waterfall Sightseeing",
   description:
-    "Explore unforgettable Western Ghat experiences: Pawna Lake kayaking, Tiger Point sunrise, Lohagad & Rajmachi fort trekking, Karla caves, and acoustic bonfire evenings.",
+    "Explore top Western Ghat experiences near your villa stay: Pawna Lake kayaking, Tiger Point sunset, Bhushi Dam monsoon views, Wet 'n' Joy Water Park, Lohagad fort trek, Karla Caves & live BBQ bonfire nights.",
   keywords: [
+    "things to do in lonavala",
     "lonavala experiences",
     "pawna lake kayaking",
+    "pawna lake camping bonfire bbq",
     "tiger point lonavala",
+    "bhushi dam lonavala",
+    "wet n joy water park lonavala",
     "lohagad fort trek",
     "rajmachi trekking",
-    "things to do in lonavala",
+    "karla caves lonavala",
     "lonavala tourist spots",
+    "weekend activities near mumbai pune",
     "thevillacamp experiences",
   ],
   openGraph: {

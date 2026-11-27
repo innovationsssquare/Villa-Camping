@@ -28,6 +28,7 @@ import {
   setSortBy,
 } from "@/Redux/Slices/propertyFilterSlice";
 import { normalizeCategoryStem } from "@/lib/categoryUtils";
+import { LONAVALA_PRICE_PRESETS } from "@/lib/lonavalaSeo";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -43,13 +44,15 @@ const SORT_OPTIONS = [
   { value: "rating", label: "Highest Rated", desc: "Top guest rated properties" },
 ];
 
-const QUICK_PRICES = [
-  { label: "All", min: null, max: null },
-  { label: "< ₹10k", min: 0, max: 10000 },
-  { label: "₹10k–20k", min: 10000, max: 20000 },
-  { label: "₹20k–35k", min: 20000, max: 35000 },
-  { label: "₹35k+", min: 35000, max: null },
-];
+const QUICK_PRICES = LONAVALA_PRICE_PRESETS.filter((preset) =>
+  ["all", "under-5k", "under-10k", "under-15k", "10k-20k", "above-40k"].includes(
+    preset.id
+  )
+).map((preset) => ({
+  label: preset.shortLabel,
+  min: preset.min,
+  max: preset.max,
+}));
 
 export function SortDrawer({ trigger }) {
   const dispatch = useDispatch();
@@ -251,19 +254,28 @@ export function SortDrawer({ trigger }) {
             </div>
 
             <div className="flex flex-wrap gap-1.5 mb-3">
-              {QUICK_PRICES.map((qp, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => {
-                    dispatch(setPriceMin(qp.min));
-                    dispatch(setPriceMax(qp.max));
-                  }}
-                  className="px-2.5 py-1 rounded-lg bg-neutral-100 hover:bg-neutral-200 text-neutral-700 text-[11px] font-medium border border-neutral-200 cursor-pointer"
-                >
-                  {qp.label}
-                </button>
-              ))}
+              {QUICK_PRICES.map((qp, i) => {
+                const isActive =
+                  (qp.min ?? null) === (priceMin ?? null) &&
+                  (qp.max ?? null) === (priceMax ?? null);
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => {
+                      dispatch(setPriceMin(qp.min));
+                      dispatch(setPriceMax(qp.max));
+                    }}
+                    className={`px-2.5 py-1 rounded-lg text-[11px] font-medium border cursor-pointer transition-colors ${
+                      isActive
+                        ? "bg-orange-50 border-[#ff6900] text-[#ff6900] font-bold"
+                        : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200"
+                    }`}
+                  >
+                    {qp.label}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="px-1 py-2">

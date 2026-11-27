@@ -115,8 +115,9 @@ export function AppHeader() {
 
   return (
     <header
+      style={{ paddingTop: "max(0.5rem, env(safe-area-inset-top))" }}
       className={cn(
-        "fixed top-0 left-0 right-0 w-full px-3 pt-2 pb-2 z-50 transition-all duration-300 ease-out md:hidden",
+        "fixed top-0 left-0 right-0 w-full px-3 pb-2 z-50 transition-all duration-300 ease-out md:hidden",
         isVisible ? "translate-y-0" : "-translate-y-full",
         isTransparent
           ? "bg-transparent shadow-none border-b border-transparent text-white"

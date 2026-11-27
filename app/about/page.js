@@ -19,9 +19,18 @@ import {
 } from "lucide-react";
 
 export const metadata = {
-  title: "About Us | ThevillaCamp - Luxury Villas & Lakeside Stays",
+  title: "About ThevillaCamp | Verified Holiday Homes, Villas in Lonavala & Pawna Stays",
   description:
-    "Discover the story of ThevillaCamp. Handpicked private pool villas, lakeside camping, rustic cottages, and boutique stays across Lonavala, Pawna Lake, and Maharashtra.",
+    "Discover ThevillaCamp — Maharashtra's curated direct-booking staycation platform for verified private pool villas, holiday homes, bungalows on rent in Lonavala (under ₹5K, ₹10K & ₹15K), Pawna Lake camping, and mountain cottages.",
+  keywords: [
+    "about thevillacamp",
+    "holiday homes in lonavala",
+    "villas in lonavala",
+    "bungalow on rent lonavala",
+    "pawna lake camping",
+    "verified homestays maharashtra",
+    "weekend getaways from mumbai pune",
+  ],
 };
 
 const STATS = [

@@ -1,7 +1,8 @@
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { LONAVALA_STATIC_PATHS, getSiteUrl } from "@/lib/lonavalaSeo";
 
 export default async function sitemap() {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
+  const siteUrl = getSiteUrl();
 
   // Static core routes
   const staticRoutes = [
@@ -11,6 +12,12 @@ export default async function sitemap() {
       changeFrequency: "daily",
       priority: 1.0,
     },
+    ...LONAVALA_STATIC_PATHS.map((routePath) => ({
+      url: `${siteUrl}${routePath}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: routePath === "/villas-in-lonavala" ? 0.95 : 0.9,
+    })),
     {
       url: `${siteUrl}/category/all`,
       lastModified: new Date(),
@@ -117,12 +124,20 @@ export default async function sitemap() {
         if (!Array.isArray(items)) return [];
         return items
           .filter((item) => item.isapproved === "approved" && item.isLive !== false)
-          .map((item) => ({
-            url: `${siteUrl}/${routePrefix}/${item._id}`,
-            lastModified: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-            changeFrequency: "daily",
-            priority: 0.8,
-          }));
+          .map((item) => {
+            const validImages = Array.isArray(item.images)
+              ? item.images
+                  .filter((img) => typeof img === "string" && /^https?:\/\//i.test(img))
+                  .slice(0, 5)
+              : [];
+            return {
+              url: `${siteUrl}/${routePrefix}/${item._id}`,
+              lastModified: item.updatedAt ? new Date(item.updatedAt) : new Date(),
+              changeFrequency: "daily",
+              priority: 0.8,
+              ...(validImages.length > 0 ? { images: validImages } : {}),
+            };
+          });
       } catch (err) {
         console.warn(`Sitemap fetch error for ${endpoint}:`, err.message);
         return [];

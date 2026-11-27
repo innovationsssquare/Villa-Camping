@@ -1,15 +1,20 @@
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
+import { getSiteUrl } from "@/lib/lonavalaSeo";
+
+const SITE_URL = getSiteUrl();
 
 export const metadata = {
-  title: "Stay Concierge & Guest Services | Private Chef, Barbeque & Cab Transfers",
+  title: "Villa Concierge, BBQ, Private Chef & Group Event Services in Lonavala",
   description:
-    "Elevate your villa stay with curated on-demand services: personal live barbecue chefs, poolside decoration, private cab transfers, bonfire setups, and 24/7 concierge assistance.",
+    "Upgrade your Lonavala holiday home or private pool villa stay with live barbecue chefs, caretaker home-cooked meals, birthday & pool party decor, bonfire setups, cab transfers, and corporate offsite support.",
   keywords: [
-    "villa concierge services",
-    "private chef lonavala",
-    "villa barbecue setup",
-    "lonavala cab transfers",
+    "villa concierge services lonavala",
+    "private chef lonavala villa",
+    "home cooked meals villa lonavala",
+    "villa barbecue and bonfire setup",
+    "birthday party decor villa lonavala",
     "pool party setup lonavala",
+    "corporate offsite planning lonavala",
+    "lonavala cab transfers",
     "thevillacamp services",
   ],
   openGraph: {

@@ -23,19 +23,19 @@ import {
   Download,
   Building2,
   Compass,
-  ArrowUpRight,
+  ArrowRight,
   Lock,
   Clock,
   Shield,
   BadgeCheck,
   Check,
-  QrCode,
   Smartphone,
   MapPin,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { HOST_APP_PLAY_STORE_URL } from "@/lib/socialLinks";
 import { cn } from "@/lib/utils";
 import {
   Drawer,
@@ -391,7 +391,7 @@ export default function BecomeHostPage() {
       {/* =====================================================================
           1. 💻 DESKTOP VIEW ONLY (hidden md:flex): Matches Homepage Hero
           ===================================================================== */}
-      <section className="hidden md:flex relative w-full min-h-[600px] lg:min-h-[660px] flex-col justify-between overflow-hidden shadow-xl mb-12 sm:mb-16">
+      <section className="hidden md:flex relative w-full min-h-[600px] lg:min-h-[660px] flex-col justify-between overflow-hidden shadow-xl">
         {/* Authentic Background Image */}
         <div className="absolute inset-0 w-full h-full">
           <Image
@@ -400,18 +400,18 @@ export default function BecomeHostPage() {
             fill
             priority
             sizes="100vw"
-            className="object-cover object-center brightness-[0.88] contrast-[1.03]"
+            className="object-cover object-center brightness-[0.92] contrast-[1.03]"
           />
-          {/* Dual Vignette & Dark Gradient Overlay for Maximum Readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/25 to-black/75 pointer-events-none z-[1]" />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent pointer-events-none z-[1]" />
+          {/* Subtle Vignette & Gradient Overlays matching Homepage Hero */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/20 to-black/65 pointer-events-none z-[1]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/25 to-transparent pointer-events-none z-[1]" />
           <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-[#ff6900]/15 rounded-full blur-3xl pointer-events-none z-[1]" />
         </div>
 
-        {/* Hero Content Container (pt-28 md:pt-32 accounts for transparent header) */}
-        <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 md:pt-32 pb-10 flex flex-col justify-between flex-1">
+        {/* Hero Content Overlay (pt-32 accounts for transparent header, matches Hero.js) */}
+        <div className="relative z-10 w-full max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-14 flex flex-col justify-between flex-1">
           <div className="max-w-3xl flex flex-col">
-            {/* Transparent Blur Badge */}
+            {/* Eyebrow Badge */}
             <div className="inline-flex items-center self-start gap-2 px-4 py-1.5 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-white text-xs font-semibold mb-4 shadow-sm">
               <Sparkles className="w-3.5 h-3.5 text-[#ff6900] animate-pulse shrink-0" />
               <span>The Villa Camp Host Partnership</span>
@@ -419,25 +419,25 @@ export default function BecomeHostPage() {
               <span className="text-white/80 font-normal">Western India&apos;s Luxury Network</span>
             </div>
 
-            {/* Main Headline: Bold White Text with Editorial Proportions */}
-            <h1 className="text-2xl md:text-4xl lg:text-[44px] font-black text-white tracking-tight leading-[1.18] drop-shadow-lg">
+            {/* Main Headline (matches Hero.js typography scale) */}
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tight leading-[1.14] drop-shadow-lg">
               Turn Your Luxury Villa Into a High-Yield Asset
             </h1>
 
-            {/* Shortened Subtitle */}
-            <p className="text-white/90 text-sm md:text-base max-w-2xl mt-3.5 font-normal leading-relaxed drop-shadow-md">
+            {/* Subtitle */}
+            <p className="text-white/90 text-sm md:text-base max-w-xl mt-4 font-normal leading-relaxed drop-shadow-md">
               Join Western India&apos;s premier luxury hospitality network with zero upfront fees, verified guests, and automated 24-hour payouts.
             </p>
 
-            {/* Hero CTAs */}
-            <div className="flex flex-wrap items-center gap-3.5 mt-7">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-4 mt-7">
               <button
                 type="button"
                 onClick={() => scrollToSection("inquiry-form-section")}
                 className="group inline-flex items-center justify-center gap-2 px-7 py-3 rounded-full bg-gradient-to-r from-[#ff6900] to-[#ea580c] hover:from-[#f97316] hover:to-[#c2410c] text-white font-semibold text-sm shadow-[0_6px_20px_rgba(255,105,0,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
                 <span>List Your Property</span>
-                <ArrowUpRight className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
               </button>
 
               <button
@@ -445,41 +445,106 @@ export default function BecomeHostPage() {
                 onClick={() => scrollToSection("yield-estimator")}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur-md border border-white/30 text-white font-medium text-sm shadow-sm hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
               >
-                <TrendingUp className="w-4 h-4 text-[#ff6900]" />
+                <TrendingUp className="w-3.5 h-3.5 text-[#ff6900]" />
                 <span>Estimate Your Earnings</span>
               </button>
             </div>
+
+            {/* Quick Interactive Host Destination Chips matching Homepage Hero */}
+            <div className="flex flex-wrap items-center gap-2 mt-7 py-0.5">
+              <span className="text-white/70 text-xs font-semibold uppercase tracking-wider mr-0.5 flex items-center gap-1 shrink-0">
+                <Compass className="w-3 h-3 text-[#ff6900]" />
+                Top:
+              </span>
+              {[
+                { name: "Lonavala", emoji: "📍" },
+                { name: "Pawna Lake", emoji: "🌊" },
+                { name: "Alibaug", emoji: "🏖️" },
+                { name: "Khandala", emoji: "⛰️" },
+                { name: "Karjat", emoji: "🌿" },
+                { name: "Mahabaleshwar", emoji: "🍓" },
+              ].map((hub) => {
+                const isSelected = selectedLocation === hub.name;
+                return (
+                  <button
+                    key={hub.name}
+                    type="button"
+                    onClick={() => {
+                      setSelectedLocation(hub.name);
+                      setFormData((prev) => ({ ...prev, location: hub.name }));
+                      scrollToSection("yield-estimator");
+                    }}
+                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full backdrop-blur-md border text-xs font-medium transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs ${
+                      isSelected
+                        ? "bg-white/25 border-white/50 text-white"
+                        : "bg-white/10 hover:bg-white/25 border-white/20 text-white"
+                    }`}
+                  >
+                    <span className="text-xs leading-none">{hub.emoji}</span>
+                    <span>{hub.name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Proof Strip / Metric Pills (Frosted Glass on Hero) */}
-          <div className="mt-10 pt-5 border-t border-white/15 flex items-center justify-between gap-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
-              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
-                <span className="block text-lg sm:text-2xl font-black text-white">₹4.5L - ₹8.5L</span>
-                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
-                  Avg. Monthly Gross Yield
-                </span>
+          {/* Bottom Area: Clean Horizontal Trust Strip matching Homepage Hero */}
+          <div className="mt-8 pt-5 border-t border-white/15 flex items-center justify-between gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-[#ff6900]/20 border border-[#ff6900]/40 flex items-center justify-center text-[#ff6900] shrink-0">
+                  <Banknote className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-white text-xs font-bold leading-tight">
+                    ₹4.5L – ₹8.5L Yield
+                  </div>
+                  <div className="text-white/60 text-[10px]">
+                    Avg. monthly gross yield
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
-                <span className="block text-lg sm:text-2xl font-black text-emerald-400">100%</span>
-                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
-                  Govt ID Verified Guests
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center text-emerald-400 shrink-0">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-white text-xs font-bold leading-tight">
+                    100% Verified Guests
+                  </div>
+                  <div className="text-white/60 text-[10px]">
+                    Govt ID vetted check-ins
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
-                <span className="block text-lg sm:text-2xl font-black text-white">₹0</span>
-                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
-                  Zero Upfront Listing Fee
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-400 shrink-0">
+                  <TrendingUp className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-white text-xs font-bold leading-tight">
+                    ₹0 Listing Fee
+                  </div>
+                  <div className="text-white/60 text-[10px]">
+                    Automated 24h payouts
+                  </div>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-center shadow-xs">
-                <span className="block text-lg sm:text-2xl font-black text-[#ff6900]">48 Hours</span>
-                <span className="text-[11px] text-white/70 mt-0.5 block font-medium">
-                  Inspection to Live Booking
-                </span>
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-full bg-sky-400/20 border border-sky-400/40 flex items-center justify-center text-sky-400 shrink-0">
+                  <Clock className="w-3.5 h-3.5" />
+                </div>
+                <div>
+                  <div className="text-white text-xs font-bold leading-tight">
+                    48 Hours Live
+                  </div>
+                  <div className="text-white/60 text-[10px]">
+                    Free shoot &amp; onboarding
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -842,7 +907,13 @@ export default function BecomeHostPage() {
                 </div>
 
                 {/* Google Play Badge */}
-                <div className="px-4 py-2.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center gap-3 transition-colors cursor-pointer shadow-md">
+                <a
+                  href={HOST_APP_PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Download Villacamp Hosts on Google Play Store"
+                  className="px-4 py-2.5 rounded-2xl bg-neutral-900 hover:bg-neutral-800 text-white flex items-center gap-3 transition-colors cursor-pointer shadow-md"
+                >
                   <svg className="w-6 h-6 fill-white" viewBox="0 0 24 24">
                     <path d="M3.609 1.814L13.793 12 3.61 22.186c-.28-.27-.44-.657-.44-1.096V2.91c0-.44.16-.827.439-1.096zm11.238 11.239l2.096-2.096-10.45-6.033 8.354 8.129zm2.096-4.108l2.25 1.3c.75.433.75 1.134 0 1.567l-2.25 1.3-2.096-2.096 2.096-2.071zm-4.192-2.071L4.397 21.314l10.45-6.033-2.096-2.096z" />
                   </svg>
@@ -852,13 +923,18 @@ export default function BecomeHostPage() {
                     </span>
                     <span className="text-xs font-bold text-white block">Google Play Store</span>
                   </div>
-                </div>
+                </a>
 
-                {/* Direct APK / Host Login */}
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-neutral-100 border border-neutral-200 text-xs text-neutral-700">
-                  <QrCode className="w-4 h-4 text-[#ff6900]" />
-                  <span>Scan QR code for instant install</span>
-                </div>
+                {/* Direct Play Store Download Link */}
+                <a
+                  href={HOST_APP_PLAY_STORE_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-orange-50 hover:bg-orange-100 border border-orange-200 text-xs font-semibold text-[#ff6900] transition-colors cursor-pointer"
+                >
+                  <Download className="w-4 h-4 text-[#ff6900]" />
+                  <span>Download Host App</span>
+                </a>
               </div>
             </div>
 

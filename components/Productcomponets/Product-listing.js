@@ -62,6 +62,7 @@ import {
   matchCategory,
   normalizeCategoryStem,
 } from "@/lib/categoryUtils";
+import { LONAVALA_PRICE_PRESETS } from "@/lib/lonavalaSeo";
 
 export const PROPERTY_TYPES_BY_SLUG = {
   villa: ["2BHK", "3BHK", "4BHK", "5BHK", "6BHK"],
@@ -70,14 +71,7 @@ export const PROPERTY_TYPES_BY_SLUG = {
   hotel: ["Standard Room", "Deluxe Room", "Suite", "Presidential Suite"],
 };
 
-const PRICE_RANGE_OPTIONS = [
-  { id: "all", label: "All Prices", min: null, max: null },
-  { id: "under-10k", label: "Under ₹10,000", min: 0, max: 10000 },
-  { id: "10k-20k", label: "₹10,000 – ₹20,000", min: 10000, max: 20000 },
-  { id: "20k-30k", label: "₹20,000 – ₹30,000", min: 20000, max: 30000 },
-  { id: "30k-40k", label: "₹30,000 – ₹40,000", min: 30000, max: 40000 },
-  { id: "above-40k", label: "Above ₹40,000", min: 40000, max: null },
-];
+const PRICE_RANGE_OPTIONS = LONAVALA_PRICE_PRESETS;
 
 const SORT_OPTIONS = [
   { id: "popular", label: "Most Popular" },
@@ -86,7 +80,17 @@ const SORT_OPTIONS = [
   { id: "rating", label: "Top Rated" },
 ];
 
-export default function PropertyFilterListing({ categorySlug }) {
+export default function PropertyFilterListing({
+  categorySlug,
+  initialSearch,
+  initialPriceMin,
+  initialPriceMax,
+  initialPriceRangeId,
+  headingTitle,
+  headingSubtitle,
+  seoBadge,
+  resetFiltersOnPreset = true,
+}) {
   const [showFilterSidebar, setShowFilterSidebar] = useState(true);
   const [showFloatingBar, setShowFloatingBar] = useState(false);
   const dispatch = useDispatch();
@@ -131,6 +135,94 @@ export default function PropertyFilterListing({ categorySlug }) {
   const paramCheckout = searchParams?.get("checkout") || searchParams?.get("checkOut");
   const paramAdults = searchParams?.get("adults");
   const paramChildren = searchParams?.get("children");
+  const paramSearch = searchParams?.get("search");
+  const paramMinPrice = searchParams?.get("minPrice");
+  const paramMaxPrice = searchParams?.get("maxPrice");
+
+  const hasRouteDefaults =
+    initialSearch !== undefined ||
+    initialPriceMin !== undefined ||
+    initialPriceMax !== undefined ||
+    initialPriceRangeId !== undefined ||
+    paramSearch !== null ||
+    paramMinPrice !== null ||
+    paramMaxPrice !== null;
+
+  const routePresetKey = `${categorySlug || ""}|${initialSearch ?? ""}|${
+    initialPriceMin ?? ""
+  }|${initialPriceMax ?? ""}|${initialPriceRangeId ?? ""}|${paramSearch ?? ""}|${
+    paramMinPrice ?? ""
+  }|${paramMaxPrice ?? ""}`;
+  const [syncedRouteKey, setSyncedRouteKey] = useState(null);
+  const appliedPresetRef = useMemo(() => ({ key: null }), []);
+  const isRoutePresetReady = !hasRouteDefaults || syncedRouteKey === routePresetKey;
+
+  useEffect(() => {
+    if (!hasRouteDefaults) return;
+    if (appliedPresetRef.key === routePresetKey) return;
+
+    appliedPresetRef.key = routePresetKey;
+
+    if (resetFiltersOnPreset && initialSearch !== undefined) {
+      dispatch(clearAllFilters());
+      dispatch(clearPropertyType());
+    }
+
+    const resolvedSearch = paramSearch !== null ? paramSearch : initialSearch;
+    const resolvedMin =
+      paramMinPrice !== null &&
+      paramMinPrice !== "" &&
+      !Number.isNaN(Number(paramMinPrice))
+        ? Number(paramMinPrice)
+        : initialPriceMin;
+    const resolvedMax =
+      paramMaxPrice !== null &&
+      paramMaxPrice !== "" &&
+      !Number.isNaN(Number(paramMaxPrice))
+        ? Number(paramMaxPrice)
+        : initialPriceMax;
+
+    if (resolvedSearch !== undefined) {
+      dispatch(setSearchQuery(resolvedSearch || ""));
+    }
+    if (resolvedMin !== undefined) {
+      dispatch(setPriceMin(resolvedMin));
+    }
+    if (resolvedMax !== undefined) {
+      dispatch(setPriceMax(resolvedMax));
+    }
+    if (initialPriceRangeId && paramMinPrice === null && paramMaxPrice === null) {
+      const matchedPreset = PRICE_RANGE_OPTIONS.find(
+        (r) => r.id === initialPriceRangeId
+      );
+      if (matchedPreset && matchedPreset.id !== "all") {
+        dispatch(addPriceRange(matchedPreset.id));
+      }
+    }
+    dispatch(setCurrentPage(1));
+    setSyncedRouteKey(routePresetKey);
+
+    return () => {
+      appliedPresetRef.key = null;
+      if (resetFiltersOnPreset && initialSearch !== undefined) {
+        dispatch(clearAllFilters());
+        dispatch(clearPropertyType());
+      }
+    };
+  }, [
+    hasRouteDefaults,
+    routePresetKey,
+    appliedPresetRef,
+    resetFiltersOnPreset,
+    initialSearch,
+    initialPriceMin,
+    initialPriceMax,
+    initialPriceRangeId,
+    paramSearch,
+    paramMinPrice,
+    paramMaxPrice,
+    dispatch,
+  ]);
 
   const { categories, isLoaded: categoriesLoaded, loading: categoriesLoading } = useSelector((state) => state.category);
   const { selectedCategoryId, selectedCategoryName, checkin, checkout } =
@@ -188,6 +280,8 @@ export default function PropertyFilterListing({ categorySlug }) {
 
   // 4. Fetch properties from backend with pagination & filters
   useEffect(() => {
+    if (!isRoutePresetReady) return;
+
     // Resolve category ID with matchCategory
     let effectiveCategory = null;
     if (categorySlug) {
@@ -229,6 +323,7 @@ export default function PropertyFilterListing({ categorySlug }) {
     }
   }, [
     dispatch,
+    isRoutePresetReady,
     selectedCategoryId,
     categorySlug,
     checkin,
@@ -296,8 +391,17 @@ export default function PropertyFilterListing({ categorySlug }) {
 
   const activePriceRangeId = useMemo(() => {
     if (selectedPriceRanges.length > 0) return selectedPriceRanges[0];
+    if (priceMin != null || priceMax != null) {
+      const matched = PRICE_RANGE_OPTIONS.find(
+        (r) =>
+          r.id !== "all" &&
+          (r.min ?? 0) === (priceMin ?? 0) &&
+          (r.max ?? null) === (priceMax ?? null)
+      );
+      if (matched) return matched.id;
+    }
     return "all";
-  }, [selectedPriceRanges]);
+  }, [selectedPriceRanges, priceMin, priceMax]);
 
   // Pagination calculation
   const totalItems =
@@ -489,7 +593,7 @@ export default function PropertyFilterListing({ categorySlug }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="text-[10px] font-bold tracking-wider uppercase text-[#ff6900] bg-orange-50 border border-orange-200/80 px-2.5 py-0.5 rounded-full">
-                Handpicked Getaways
+                {seoBadge || "Handpicked Getaways"}
               </span>
               {checkin && checkout && (
                 <span className="text-[10px] font-semibold text-neutral-500 bg-white border border-neutral-200 px-2 py-0.5 rounded-full">
@@ -498,10 +602,11 @@ export default function PropertyFilterListing({ categorySlug }) {
               )}
             </div>
             <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-neutral-900 tracking-tight">
-              {selectedCategoryName || "Stays"}
+              {headingTitle || selectedCategoryName || "Stays"}
             </h1>
             <p className="text-xs sm:text-sm text-neutral-500 mt-0.5">
-              Verified premium stays with private pools, mountain views & instant confirmation
+              {headingSubtitle ||
+                "Verified premium stays with private pools, mountain views & instant confirmation"}
             </p>
           </div>
 

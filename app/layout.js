@@ -8,6 +8,7 @@ import { Suspense } from "react";
 import VillaCampLoader from "@/components/Loadercomponents/VillaCampLoader";
 import WebPermissionsPrompt from "@/components/Permissions/web-permissions-prompt";
 import { Inter } from "next/font/google";
+import { LONAVALA_CORE_KEYWORDS, getSiteUrl } from "@/lib/lonavalaSeo";
 
 const geist = Inter({
   subsets: ["latin"],
@@ -15,33 +16,17 @@ const geist = Inter({
 });
 const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.in";
+const SITE_URL = getSiteUrl();
 
 export const metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
-    default: "ThevillaCamp | Luxury Pool Villas, Pawna Lake Camping & Cottages in Lonavala",
+    default: "Villas in Lonavala | Holiday Homes, Bungalows & Pool Villas Under ₹5K–₹15K | ThevillaCamp",
     template: "%s | ThevillaCamp",
   },
   description:
-    "Book handpicked luxury private pool villas, waterfront Pawna Lake camping, and serene mountain cottages in Lonavala, Malavli, and Karjat. 100% verified stays, private pools, 24/7 concierge, and guaranteed direct host rates.",
-  keywords: [
-    "luxury villas in lonavala",
-    "private pool villas lonavala",
-    "pawna lake camping",
-    "lakeside camping pawna",
-    "villas in malavli",
-    "cottages in lonavala",
-    "glamping pawna lake",
-    "weekend getaways from mumbai",
-    "weekend getaways from pune",
-    "family villas lonavala",
-    "pet friendly villas lonavala",
-    "kamshet stays",
-    "karjat pool villas",
-    "thevillacamp",
-    "lonavala staycation",
-  ],
+    "Book verified holiday homes, private pool villas, homestays, and bungalows on rent in Lonavala, Khandala, Malavli, Karjat & Alibaug. Compare villas in Lonavala under ₹5K, ₹10K & ₹15K per night plus Pawna Lake camping with direct host rates.",
+  keywords: LONAVALA_CORE_KEYWORDS,
   authors: [{ name: "ThevillaCamp", url: SITE_URL }],
   creator: "ThevillaCamp",
   publisher: "ThevillaCamp",
@@ -52,9 +37,9 @@ export const metadata = {
     address: true,
   },
   openGraph: {
-    title: "ThevillaCamp | Handpicked Luxury Villas & Lakeside Camping in Lonavala",
+    title: "Villas in Lonavala | Holiday Homes & Pool Villas Under ₹5K–₹15K | ThevillaCamp",
     description:
-      "Find and book 150+ verified private pool villas, Pawna Lake camping tents, and mountain chalets across Maharashtra. Direct booking with 24/7 concierge support.",
+      "Find and book 150+ verified holiday homes, private pool villas & bungalows in Lonavala (under ₹5K, ₹10K & ₹15K), Pawna Lake camping tents, and mountain cottages across Maharashtra with direct host rates.",
     url: SITE_URL,
     siteName: "ThevillaCamp",
     images: [
@@ -62,7 +47,7 @@ export const metadata = {
         url: "/og-default.jpg",
         width: 1200,
         height: 630,
-        alt: "ThevillaCamp Luxury Stays and Camping",
+        alt: "ThevillaCamp Villas in Lonavala and Lakeside Camping",
       },
     ],
     type: "website",
@@ -72,9 +57,9 @@ export const metadata = {
     card: "summary_large_image",
     site: "@Thevillacamp",
     creator: "@Thevillacamp",
-    title: "ThevillaCamp | Luxury Pool Villas & Lakeside Camping",
+    title: "Villas in Lonavala | Holiday Homes & Pool Villas Under ₹5K–₹15K | ThevillaCamp",
     description:
-      "Find and book verified private pool villas, Pawna Lake camping tents, and mountain chalets across Maharashtra.",
+      "Book verified holiday homes & private pool villas in Lonavala starting under ₹5K, ₹10K & ₹15K, plus Pawna Lake camping and mountain cottages.",
     images: ["/og-default.jpg"],
   },
   icons: {
@@ -100,11 +85,21 @@ export const metadata = {
       "max-snippet": -1,
     },
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "ThevillaCamp",
+  },
 };
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
 };
 
 export default function RootLayout({ children }) {
@@ -193,7 +188,7 @@ export default function RootLayout({ children }) {
                   "url": SITE_URL,
                   "name": "ThevillaCamp",
                   "description":
-                    "Maharashtra's premier luxury villa and campsite booking platform",
+                    "Book verified holiday homes, private pool villas & bungalows on rent in Lonavala (under ₹5K, ₹10K & ₹15K), Pawna Lake camping, and luxury homestays across Maharashtra.",
                   "publisher": {
                     "@id": `${SITE_URL}/#organization`,
                   },

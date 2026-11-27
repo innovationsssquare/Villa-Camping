@@ -83,8 +83,9 @@ export function BottomNav() {
 
   return (
     <div
+      style={{ bottom: "max(0.5rem, env(safe-area-inset-bottom))" }}
       className={cn(
-        "fixed md:hidden bottom-2 left-0 right-0 mx-auto w-[94%] max-w-md z-50 transition-all duration-300 ease-out",
+        "fixed md:hidden left-0 right-0 mx-auto w-[94%] max-w-md z-50 transition-all duration-300 ease-out",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"
       )}
     >

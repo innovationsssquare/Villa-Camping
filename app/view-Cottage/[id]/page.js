@@ -1,11 +1,11 @@
 import Cottageview from "@/components/Cottagescreen/Cottageview";
 import CottageDetails from "@/components/Propertyviewcomponents/cottage-details";
 import JsonLd from "@/components/Propertyviewcomponents/JsonLd";
+import PropertySeoSummary from "@/components/Propertyviewcomponents/PropertySeoSummary";
 import TrackPropertyVisit from "@/components/Propertyviewcomponents/TrackPropertyVisit";
 import { BaseUrl } from "@/lib/API/Baseurl";
+import { buildPropertyRouteMetadata } from "@/lib/lonavalaSeo";
 import { notFound } from "next/navigation";
-
-const SITE_ORIGIN = process.env.NEXT_PUBLIC_SITE_URL || "https://thevillacamp.com";
 
 // Incremental Static Regeneration: revalidate background cache once every 60 seconds
 export const revalidate = 60;
@@ -13,36 +13,28 @@ export const revalidate = 60;
 export async function generateMetadata({ params }) {
   const { id } = await params;
   try {
-    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, { next: { revalidate: 120 } });
+    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, {
+      next: { revalidate: 120 },
+    });
     if (!res.ok) throw new Error("Failed to fetch");
     const result = await res.json();
-    const cottage = result?.data;
-    if (!cottage || cottage.isapproved !== "approved" || cottage.isLive === false) {
-      return {
-        title: "Cottage Not Available | ThevillaCamp",
-        description: "Find and book verified stays on ThevillaCamp.",
-      };
-    }
-    const title = cottage?.name || `Cottage ${id}`;
-    const description = cottage?.shortDescription || cottage?.description || "Book beautiful stays on ThevillaCamp.";
-    const ogImage = (cottage?.images && cottage.images[0]) || "/og-default.jpg";
-    return {
-      title,
-      description,
-      openGraph: {
-        title,
-        description,
-        url: `${SITE_ORIGIN}/view-Cottage/${id}`,
-        images: [ogImage],
-      },
-      alternates: { canonical: `${SITE_ORIGIN}/view-Cottage/${id}`, languages: { 'en-US': `${SITE_ORIGIN}/view-Cottage/${id}` } },
-    };
+    return buildPropertyRouteMetadata({
+      property: result?.data,
+      id,
+      routePrefix: "view-Cottage",
+      categoryLabel: "Cottage",
+      fallbackDescription:
+        "Book cozy cottages, chalets, and farm stays in Lonavala and Pawna Lake on ThevillaCamp.",
+      includeLanguages: true,
+    });
   } catch (err) {
-    return {
-      title: `Cottage ${id} | ThevillaCamp`,
-      description: "Find and book cottages, villas and hotels on ThevillaCamp.",
-      openGraph: { title: `Cottage ${id}`, description: "ThevillaCamp listing.", url: `${SITE_ORIGIN}/view-Cottage/${id}` },
-    };
+    return buildPropertyRouteMetadata({
+      property: { _id: id, name: `Cottage ${id}`, isapproved: "approved", isLive: true },
+      id,
+      routePrefix: "view-Cottage",
+      categoryLabel: "Cottage",
+      includeLanguages: true,
+    });
   }
 }
 
@@ -50,12 +42,14 @@ export default async function Home({ params }) {
   const { id } = await params;
   let cottage = null;
   try {
-    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, { next: { revalidate: 120 } });
+    const res = await fetch(`${BaseUrl}/Cottage/get/cottage/${id}`, {
+      next: { revalidate: 120 },
+    });
     if (res.ok) {
       const result = await res.json();
       cottage = result?.data;
     }
-  } catch (e) { }
+  } catch (e) {}
 
   // Do not publish or display unapproved or inactive stays on villa-web
   if (!cottage || cottage.isapproved !== "approved" || cottage.isLive === false) {
@@ -64,10 +58,11 @@ export default async function Home({ params }) {
 
   return (
     <div className="min-h-screen">
-      {cottage ? <JsonLd villa={cottage} /> : null}
-      {cottage ? <TrackPropertyVisit property={cottage} category="Cottage" /> : null}
+      <JsonLd villa={cottage} category="Cottage" />
+      <TrackPropertyVisit property={cottage} category="Cottage" />
       <Cottageview />
       <CottageDetails />
+      <PropertySeoSummary property={cottage} categoryLabel="Cottage" />
     </div>
   );
 }
